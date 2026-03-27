@@ -380,75 +380,101 @@ export default function CompanyPortfoliosPage() {
           </DialogHeader>
 
           {viewDialog && (
-            <div className="space-y-5">
-              {/* 회사 카드 — /portfolio 의 소개 카드와 동일한 레이아웃 */}
-              <div className="border rounded-lg p-5">
-                <div className="flex items-start justify-between mb-3">
+            <div>
+              {/* /portfolio 메인 영역과 동일한 레이아웃 */}
+              <h1 className="text-2xl font-bold mb-6">회사소개서 &amp; 포트폴리오</h1>
+
+              {/* 회사 소개 카드 */}
+              <div className="border rounded-lg p-6 mb-6">
+                <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h2 className="text-xl font-bold">{viewDialog.company.companyName}</h2>
-                    <p className="text-gray-500 text-sm mt-0.5">{viewDialog.company.description}</p>
+                    <h2 className="text-xl font-bold mb-1">{viewDialog.company.companyName}</h2>
+                    <p className="text-gray-600 mb-3">{viewDialog.company.description}</p>
                   </div>
-                  <CompanyTypeBadge type={viewDialog.company.companyType} />
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="btn-white-compact">
+                      문의하기
+                    </Button>
+                    <Button size="sm" className="btn-pink">
+                      1:1 의뢰하기
+                    </Button>
+                  </div>
                 </div>
 
-                {/* 대표 광고주 */}
-                {viewDialog.company.recentClients.length > 0 && (
-                  <div className="grid grid-cols-4 gap-2 mb-3">
-                    {viewDialog.company.recentClients.slice(0, 4).map((c) => (
-                      <div key={c} className="text-center text-sm font-medium text-gray-700 border rounded py-1.5">
-                        {c}
-                      </div>
+                <div className="space-y-3 text-sm">
+                  {viewDialog.company.recentClients.length > 0 && (
+                    <p className="text-gray-700">
+                      {viewDialog.company.recentClients.join(", ")}
+                    </p>
+                  )}
+                  <p className="text-gray-600">
+                    [최근 3년] {viewDialog.company.activityCount}작품
+                  </p>
+                </div>
+
+                <div className="mt-4 border-t pt-4">
+                  {viewDialog.company.recentClients.length > 0 && (
+                    <div className="grid grid-cols-4 gap-4 mb-4">
+                      {viewDialog.company.recentClients.slice(0, 4).map((c) => (
+                        <div key={c} className="text-center">
+                          <div className="text-sm font-medium text-gray-700">{c}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-2">
+                    {viewDialog.company.tags.map((t) => (
+                      <span key={t} className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700">
+                        {t}
+                      </span>
                     ))}
                   </div>
-                )}
 
-                {/* 태그 */}
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  {viewDialog.company.tags.map((t) => (
-                    <span key={t} className="px-2.5 py-1 bg-gray-100 rounded-full text-sm text-gray-700">
-                      {t}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="text-sm text-gray-500">
-                  ✓ Cotton Candy 활동 — {viewDialog.company.activityCount}작품
+                  <div className="mt-3 text-sm text-gray-600">
+                    ✓ Cotton Candy 활동 - {viewDialog.company.activityCount}작품
+                  </div>
                 </div>
               </div>
 
-              {/* 현재 보는 소개서 */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-gray-600">
-                ※ 현재 보는 소개서: <span className="font-medium text-gray-900">{viewDialog.portfolio.title}</span>
+              {/* 안내 박스 */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="text-sm text-gray-700">
+                  ※ 소개서 카드 - 다른 사용자에게 이렇게 보여집니다. ↑
+                </p>
+                <p className="text-sm text-gray-700 mt-1">
+                  ※ 소개서 상세 내용 예시 ⓘ
+                </p>
               </div>
 
-              {/* 전체 소개서 목록 */}
-              <div className="space-y-2">
+              {/* 소개서 목록 */}
+              <div className="space-y-3">
                 {viewDialog.company.portfolios.map((p) => (
                   <div
                     key={p.id}
                     className={cn(
-                      "border rounded-lg p-3 flex items-center justify-between",
-                      p.id === viewDialog.portfolio.id && "border-pink-300 bg-pink-50/30"
+                      "border rounded-lg p-4 flex items-center justify-between",
+                      p.id === viewDialog.portfolio.id && "border-pink-300 bg-pink-50/20"
                     )}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       <VisibleBadge visible={p.visible} />
-                      <span className="text-sm font-medium text-gray-800">{p.title}</span>
+                      <span className="text-gray-900 font-medium">{p.title}</span>
                       {p.isAutoGenerated && (
-                        <span className="text-[10px] text-gray-400 border border-gray-200 rounded px-1 py-0.5">
-                          자동생성
+                        <span className="text-xs text-gray-500 border border-gray-200 rounded px-1.5 py-0.5">
+                          자동생성됨
                         </span>
                       )}
-                      <span className="text-xs text-gray-400">{p.createdAt}</span>
+                      <span className="text-gray-500 text-sm">{p.createdAt}</span>
                     </div>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-gray-500">
-                        <Eye className="h-3.5 w-3.5 mr-1" />
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" className="text-gray-600">
+                        <Eye className="w-4 h-4 mr-1" />
                         보기
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-gray-500">
-                        <Copy className="h-3.5 w-3.5 mr-1" />
-                        복사
+                      <Button variant="ghost" size="sm" className="text-gray-600">
+                        <Copy className="w-4 h-4 mr-1" />
+                        복사하기
                       </Button>
                     </div>
                   </div>
