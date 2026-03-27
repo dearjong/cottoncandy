@@ -98,17 +98,30 @@ export default function PortfolioPreview() {
             </aside>
 
             {/* ── 메인 ── */}
-            <main className="flex-1 min-w-0 pb-28">
+            <main className="flex-1 min-w-0 pb-4">
+
+              {/* 상단 내비게이션 */}
+              <div className="flex items-center justify-between mb-5">
+                <button
+                  className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg px-3 py-1.5"
+                  onClick={() => setLocation("/portfolio")}
+                >
+                  <ChevronLeft className="w-4 h-4" /> 목록으로 돌아가기
+                </button>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <button className="px-2 py-1 border border-gray-200 rounded hover:bg-gray-50"><ChevronLeft className="w-4 h-4" /></button>
+                  <span>이전 / 다음 소개서</span>
+                  <button className="px-2 py-1 border border-gray-200 rounded hover:bg-gray-50"><ChevronRight className="w-4 h-4" /></button>
+                </div>
+              </div>
 
               {/* 제목 */}
-              <h1 className="text-2xl font-bold text-center mb-6">회사소개서 &amp; 포트폴리오</h1>
+              <h1 className="text-2xl font-bold text-center mb-5">회사소개서 &amp; 포트폴리오</h1>
 
               {/* 소개서 breadcrumb */}
               <div className="flex items-center justify-between mb-4 border-b pb-3">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <button className="text-gray-400 hover:text-gray-700"><ChevronLeft className="w-4 h-4" /></button>
                   <span className="font-medium text-gray-800">▶ Campaign creators 솜사탕애드 입니다.</span>
-                  <button className="text-gray-400 hover:text-gray-700"><ChevronRight className="w-4 h-4" /></button>
                 </div>
                 <button className="text-gray-400 hover:text-gray-700" onClick={() => setLocation("/portfolio")}>
                   <X className="w-5 h-5" />
@@ -384,18 +397,23 @@ export default function PortfolioPreview() {
       </div>
 
       {/* 하단 고정 바 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between py-4">
-          <button className="text-sm text-gray-400 hover:text-gray-700" onClick={() => setLocation("/portfolio")}>
-            ← 소개서 목록으로
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200" style={{ zIndex: 9999 }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between py-3">
+          <button
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900"
+            onClick={() => setLocation("/portfolio")}
+          >
+            <ChevronLeft className="w-4 h-4" /> 목록으로 돌아가기
           </button>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" className="btn-white">문의하기</Button>
-            <Button variant="outline" className="btn-white">포트폴리오 보기</Button>
-            <Button className="btn-pink">1:1 의뢰하기</Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="btn-white h-9">문의하기</Button>
+            <Button variant="outline" className="btn-white h-9">포트폴리오 보기</Button>
+            <Button className="btn-pink h-9">1:1 의뢰하기</Button>
           </div>
         </div>
       </div>
+      {/* 하단 여백 (fixed bar 높이만큼) */}
+      <div className="h-16" />
     </Layout>
   );
 }
