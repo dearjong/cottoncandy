@@ -327,6 +327,7 @@ export function ConsultingInquiryAdminView({
   ])
 
   const linkableProjects = allProjects.filter((p) => p.type !== "컨설팅")
+  const selectedLinkedProject = linkableProjects.find((p) => p.id === linkedProjectIdDraft)
 
   const showLinkedIdField = outcomeKindDraft === "MATCHING_PUBLIC" || outcomeKindDraft === "MATCHING_1TO1"
   const showMatchingInfoField = outcomeKindDraft === "DIRECT_INTRO"
@@ -998,7 +999,7 @@ export function ConsultingInquiryAdminView({
             </div>
           )}
 
-          {isAdmin && serviceTierDraft !== "SIMPLE_MATCH" && (
+          {isAdmin && (
             <div>
               <span className={lbl}>결과 유형 (직접)</span>
               <div className="flex flex-wrap items-center gap-2">
@@ -1016,10 +1017,28 @@ export function ConsultingInquiryAdminView({
                 </Select>
                 {showLinkedIdField && (
                   <>
+                    <Select value={linkedProjectIdDraft || "__NONE__"} onValueChange={(v) => setLinkedProjectIdDraft(v === "__NONE__" ? "" : v)}>
+                      <SelectTrigger className="h-9 min-w-[320px] max-w-[460px] rounded-md border-slate-300 bg-white text-sm">
+                        <SelectValue placeholder="연계할 프로젝트 선택">
+                          {selectedLinkedProject
+                            ? `${selectedLinkedProject.title} (${selectedLinkedProject.id})`
+                            : undefined}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__NONE__">연계 프로젝트 선택</SelectItem>
+                        {linkableProjects.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.title} ({p.id})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <ProjectButton
                       type="button"
                       variant="white"
                       className="!w-auto !rounded-md !px-3 !py-2 !text-sm !font-medium"
+                      disabled={!linkedProjectIdDraft}
                       onClick={() => linkedProjectIdDraft && onOpenLinkedProject(linkedProjectIdDraft)}
                     >
                       열기

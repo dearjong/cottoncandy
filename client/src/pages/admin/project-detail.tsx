@@ -21,7 +21,7 @@ interface Project {
 }
 
 export default function AdminProjectDetail() {
-  const [, params] = useRoute("/admin/projects/:id")
+  const [, params] = useRoute("/admin/project-detail/:id")
   const projectId = params?.id || "PN-20250721-0001"
   
   const [isApproveOpen, setIsApproveOpen] = useState(false)

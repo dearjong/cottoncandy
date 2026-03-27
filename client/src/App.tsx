@@ -395,6 +395,9 @@ function Router() {
           <AdminLayout><AdminProjects initialProjectId={params.id} /></AdminLayout>
         )}
       </Route>
+      <Route path="/admin/project-detail/:id">
+        <AdminLayout><AdminProjectDetail /></AdminLayout>
+      </Route>
       <Route path="/admin/bidding">
         <AdminLayout><AdminBiddingProjects /></AdminLayout>
       </Route>

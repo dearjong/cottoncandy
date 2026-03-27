@@ -142,6 +142,8 @@ interface ProjectManagementProps {
   onDetailModeChange?: (isDetail: boolean) => void
   /** true면 컨설팅 문의에 연결된 공고/1:1 프로젝트만 표시 (관련 프로젝트 메뉴 전용) */
   filterConsultingLinked?: boolean
+  /** true면 프로젝트를 인라인 상세 대신 새 창 상세 페이지로 엽니다. */
+  openProjectDetailInNewWindow?: boolean
 }
 
 export interface ProjectManagementRef {
@@ -434,6 +436,7 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
   onActiveViewChange,
   onDetailModeChange,
   filterConsultingLinked = false,
+  openProjectDetailInNewWindow = false,
 }, ref) {
   const [, setLocation] = useLocation()
   const [searchTerm, setSearchTerm] = useState("")
@@ -590,7 +593,16 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
     return allProjects.find((p) => p.id === initialProjectId) ?? null
   })
 
+  const openProjectDetailPageInNewWindow = (projectId: string) => {
+    const url = `/admin/project-detail/${encodeURIComponent(projectId)}`
+    window.open(url, "_blank", "noopener,noreferrer")
+  }
+
   const openConsultingFromList = (project: Project) => {
+    if (openProjectDetailInNewWindow && project.type !== "컨설팅") {
+      openProjectDetailPageInNewWindow(project.id)
+      return
+    }
     if (consultingOpenDetailAsRoute && project.type === "컨설팅") {
       setLocation(`/admin/consulting/${encodeURIComponent(project.id)}`)
       return
@@ -602,7 +614,7 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
   // 연계 프로젝트 버튼(목록 `결과` 열)을 눌렀을 때
   // SPA 내부 화면 전환이 아니라 새 창(탭)으로 띄웁니다.
   const openLinkedProjectInNewWindow = (projectId: string) => {
-    const url = `/admin/projects/${encodeURIComponent(projectId)}`
+    const url = `/admin/project-detail/${encodeURIComponent(projectId)}`
     window.open(url, "_blank", "noopener,noreferrer")
   }
 

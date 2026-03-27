@@ -153,6 +153,19 @@ export default function AdminConsultingProjectDetailPage({ projectId }: AdminCon
     client: "—",
     phone: "—",
   }
+  const linkedProjectId = useMemo(() => {
+    const inMock = MOCK_ADMIN_PROJECTS_V1.find((p) => p.id === projectId)
+    const mockLinked =
+      inMock && "consultingLinkedProjectId" in inMock && typeof inMock.consultingLinkedProjectId === "string"
+        ? inMock.consultingLinkedProjectId.trim()
+        : ""
+
+    if (mockLinked) return mockLinked
+    if (typeof window === "undefined") return ""
+
+    const inStorage = loadAllStoredWorkProjects().find((p) => p.id === projectId)
+    return inStorage?.consultingLinkedProjectId?.trim() || ""
+  }, [projectId])
 
   const handleForceStatus = () => {
     setCurrentStep(2)
@@ -184,6 +197,20 @@ export default function AdminConsultingProjectDetailPage({ projectId }: AdminCon
         onClick={() => setIsReassignOpen(true)}
       >
         컨설턴트 변경
+      </Button>
+      <Button
+        size="sm"
+        variant="outline"
+        className="h-9 text-xs border-slate-300 text-slate-700 hover:bg-slate-50"
+        onClick={() => {
+          if (linkedProjectId) {
+            window.open(`/admin/project-detail/${encodeURIComponent(linkedProjectId)}`, "_blank", "noopener,noreferrer")
+            return
+          }
+          setLocation(`/admin/consulting/related-projects?selectedProjectId=${encodeURIComponent(projectId)}`)
+        }}
+      >
+        관련 프로젝트
       </Button>
       <div className="w-px h-5 bg-border" />
       <Button

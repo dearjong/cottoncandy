@@ -29,6 +29,7 @@ export default function ConsultingRelatedProjectsPage() {
         ref={projectRef}
         filterConsultingLinked
         excludeConsultingInAll
+        openProjectDetailInNewWindow
         onActiveViewChange={setActiveViewLabel}
         onDetailModeChange={setShowBackButton}
       />
