@@ -43,6 +43,7 @@ interface Member {
   id: string
   name: string
   email: string
+  phone?: string
   company: string
   /** 기업 상세 팝업용 (있으면 클릭 시 회사 팝업 오픈) */
   companyId?: string | null
@@ -67,6 +68,7 @@ export function MemberManagement() {
       id: "MEM-001",
       name: "김철수",
       email: "kim@techstartup.co.kr",
+      phone: "010-1234-5678",
       company: "(주)테크스타트업",
       companyId: "COM-004",
       type: "광고주",
@@ -79,6 +81,7 @@ export function MemberManagement() {
       id: "MEM-002",
       name: "이영희",
       email: "lee@creative.co.kr",
+      phone: "010-2345-6789",
       company: "크리에이티브 에이전시",
       companyId: "COM-002",
       type: "대행사",
@@ -91,6 +94,7 @@ export function MemberManagement() {
       id: "MEM-003",
       name: "박애드",
       email: "park@videoworks.com",
+      phone: "010-3456-7890",
       company: "비디오웍스",
       companyId: "COM-003",
       type: "제작사",
@@ -373,6 +377,12 @@ export function MemberManagement() {
                   <label className="text-sm font-medium">이메일</label>
                   <p className="text-sm text-muted-foreground">{selectedMember.email}</p>
                 </div>
+                <div>
+                  <label className="text-sm font-medium">휴대폰</label>
+                  <p className="text-sm text-muted-foreground">{selectedMember.phone ?? '-'}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">회원 타입</label>
                   <p className="text-sm text-muted-foreground">{selectedMember.type}</p>

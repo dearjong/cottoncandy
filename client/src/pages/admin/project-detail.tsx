@@ -321,6 +321,8 @@ export default function AdminProjectDetail() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">나해피</span>
+                    <span className="text-sm text-gray-500">전략기획팀</span>
+                    <span className="text-sm text-gray-400">·</span>
                     <span className="text-sm text-gray-500">선임</span>
                   </div>
                   <div className="space-y-1 text-sm">

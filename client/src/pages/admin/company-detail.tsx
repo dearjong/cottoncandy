@@ -296,8 +296,8 @@ export default function AdminCompanyDetail() {
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
           <TabsList className="mb-4">
             <TabsTrigger value="info">회사 정보</TabsTrigger>
-            <TabsTrigger value="projects">프로젝트</TabsTrigger>
             <TabsTrigger value="participation">참여현황</TabsTrigger>
+            <TabsTrigger value="projects">진행프로젝트</TabsTrigger>
             <TabsTrigger value="portfolio">포트폴리오</TabsTrigger>
             <TabsTrigger value="members">구성원</TabsTrigger>
           </TabsList>
@@ -613,6 +613,7 @@ export default function AdminCompanyDetail() {
                           <TableHead>직위</TableHead>
                           <TableHead>권한</TableHead>
                           <TableHead>이메일</TableHead>
+                          <TableHead>전화번호</TableHead>
                           <TableHead>상태</TableHead>
                           <TableHead>가입일</TableHead>
                         </TableRow>
@@ -632,6 +633,7 @@ export default function AdminCompanyDetail() {
                                 </Badge>
                               </TableCell>
                               <TableCell className="text-sm">{member.email}</TableCell>
+                              <TableCell className="text-sm text-muted-foreground">{member.phone ?? '-'}</TableCell>
                               <TableCell>
                                 <Badge className={`${statusInfo.color} text-white`}>
                                   {statusInfo.label}
