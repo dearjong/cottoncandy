@@ -8,7 +8,6 @@ import {
   Mail, 
   FolderOpen, 
   Folder,
-  Eye,
   Copy,
   Edit,
   Trash2,
@@ -277,19 +276,15 @@ export default function Portfolio() {
                       <span className={`px-3 py-1 text-sm rounded ${item.visible === "공개" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
                         {item.visible}
                       </span>
-                      <span className="text-gray-900 font-medium">{item.title}</span>
+                      <button
+                        className="text-gray-900 font-medium hover:text-pink-600 hover:underline text-left"
+                        onClick={() => setLocation("/portfolio/preview")}
+                      >
+                        {item.title}
+                      </button>
                       <span className="text-gray-500 text-sm">{item.date}</span>
                     </div>
                     <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-600"
-                        onClick={() => setLocation("/portfolio/preview")}
-                      >
-                        <Eye className="w-4 h-4 mr-1" />
-                        보기
-                      </Button>
                       <Button variant="ghost" size="sm" className="text-gray-600">
                         <Copy className="w-4 h-4 mr-1" />
                         복사하기
