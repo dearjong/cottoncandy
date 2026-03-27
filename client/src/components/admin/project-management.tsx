@@ -683,6 +683,8 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
   const [rejectError, setRejectError] = useState("")
   const [approveDialogOpen, setApproveDialogOpen] = useState(false)
   const [confirmRejectOpen, setConfirmRejectOpen] = useState(false)
+  const [stopCancelApproveOpen, setStopCancelApproveOpen] = useState(false)
+  const [stopCancelApproveType, setStopCancelApproveType] = useState<"중단 승인" | "취소 승인" | "요청 거절">("중단 승인")
 
   useImperativeHandle(ref, () => ({
     clearSelection: () => setSelectedProject(null),
@@ -1381,6 +1383,58 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
                   >
                     <Check className="h-4 w-4 mr-1" />
                     승인
+                  </Button>
+                </>
+              )}
+              {selectedProject.status === "STOPPED" && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="default"
+                    onClick={() => {
+                      setStopCancelApproveType("요청 거절")
+                      setStopCancelApproveOpen(true)
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    요청 거절
+                  </Button>
+                  <Button
+                    size="default"
+                    className="bg-pink-600 hover:bg-pink-700"
+                    onClick={() => {
+                      setStopCancelApproveType("중단 승인")
+                      setStopCancelApproveOpen(true)
+                    }}
+                  >
+                    <Check className="h-4 w-4 mr-1" />
+                    중단 승인
+                  </Button>
+                </>
+              )}
+              {selectedProject.status === "CANCELLED" && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="default"
+                    onClick={() => {
+                      setStopCancelApproveType("요청 거절")
+                      setStopCancelApproveOpen(true)
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    요청 거절
+                  </Button>
+                  <Button
+                    size="default"
+                    className="bg-pink-600 hover:bg-pink-700"
+                    onClick={() => {
+                      setStopCancelApproveType("취소 승인")
+                      setStopCancelApproveOpen(true)
+                    }}
+                  >
+                    <Check className="h-4 w-4 mr-1" />
+                    취소 승인
                   </Button>
                 </>
               )}
@@ -2376,6 +2430,60 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
               }}
             >
               승인하기
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 중단/취소 요청 승인·거절 확인 팝업 */}
+      <Dialog open={stopCancelApproveOpen} onOpenChange={setStopCancelApproveOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {stopCancelApproveType === "중단 승인" && "중단 요청을 승인할까요?"}
+              {stopCancelApproveType === "취소 승인" && "취소 요청을 승인할까요?"}
+              {stopCancelApproveType === "요청 거절" && "요청을 거절할까요?"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-1">
+            {selectedProject && (
+              <div className="text-sm text-muted-foreground">
+                <div className="font-medium text-foreground mb-1">
+                  [{selectedProject.client}] {selectedProject.title}
+                </div>
+                {stopCancelApproveType === "중단 승인" && (
+                  <p>승인 시 프로젝트가 중단 처리됩니다.</p>
+                )}
+                {stopCancelApproveType === "취소 승인" && (
+                  <p>승인 시 프로젝트가 취소 처리됩니다.</p>
+                )}
+                {stopCancelApproveType === "요청 거절" && (
+                  <p>거절 시 요청이 반려되고 기존 상태가 유지됩니다.</p>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setStopCancelApproveOpen(false)}
+            >
+              닫기
+            </Button>
+            <Button
+              type="button"
+              className={
+                stopCancelApproveType === "요청 거절"
+                  ? "bg-gray-600 hover:bg-gray-700 text-white"
+                  : "bg-pink-600 hover:bg-pink-700 text-white"
+              }
+              onClick={() => {
+                // TODO: 실제 API 연동 시 상태 업데이트 및 이력 저장
+                setStopCancelApproveOpen(false)
+              }}
+            >
+              {stopCancelApproveType === "요청 거절" ? "거절하기" : "승인하기"}
             </Button>
           </div>
         </DialogContent>
