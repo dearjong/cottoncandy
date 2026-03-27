@@ -1,0 +1,65 @@
+@layer utilities {
+  /* ========== POPUP/DIALOG ========== */
+  
+  /* 팝업 타이틀 */
+  .popup-title {
+    @apply text-center text-lg font-bold;
+  }
+  
+  /* 팝업 설명 */
+  .popup-description {
+    @apply text-center text-sm text-gray-600 mt-2;
+  }
+  
+  /* 팝업 버튼 컨테이너 */
+  .popup-buttons {
+    @apply flex gap-3 mt-6;
+  }
+
+  /* ========== MODAL & OVERLAY ========== */
+  
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 z-50 flex items-center justify-center;
+  }
+
+  .modal-content {
+    @apply bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4;
+  }
+
+  .modal-header {
+    @apply p-6 border-b border-gray-200;
+  }
+
+  .modal-body {
+    @apply p-6;
+  }
+
+  .modal-footer {
+    @apply p-6 border-t border-gray-200 flex justify-end gap-3;
+  }
+
+  /* ========== DIALOG CLOSE BUTTON FIX ========== */
+  
+  /* Dialog 닫기 버튼의 검은색 번쩍임 제거 */
+  [data-radix-dialog-close-button] {
+    background-color: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  
+  [data-radix-dialog-close-button]:hover {
+    background-color: rgb(243 244 246) !important;
+  }
+  
+  [data-radix-dialog-close-button]:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  
+  [data-radix-dialog-close-button][data-state="open"] {
+    background-color: transparent !important;
+    border: none !important;
+  }
+}

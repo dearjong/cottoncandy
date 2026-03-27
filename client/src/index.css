@@ -1,0 +1,18 @@
+/* ============================================
+   COTTON CANDY - CSS 모듈 시스템
+   ============================================ */
+
+/* Base styles - Tailwind, variables, fonts */
+@import './styles/base.css';
+
+/* Utilities - Colors, typography, layout, animations */
+@import './styles/utilities.css';
+
+/* Components */
+@import './styles/gnb.css';
+@import './styles/footer.css';
+@import './styles/cards.css';
+@import './styles/buttons.css';
+@import './styles/popup.css';
+@import './styles/forms.css';
+@import './styles/admin.css';

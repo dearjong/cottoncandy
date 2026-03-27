@@ -1,0 +1,80 @@
+@layer utilities {
+  /* ========== FORMS & INPUTS ========== */
+  
+  /* Project Form Styles */
+  .project-section {
+    @apply mb-8 sm:mb-10;
+  }
+  
+  /* 좌우 정렬 레이아웃 (원하면 이 클래스로 전체 변경 가능) */
+  .project-section-horizontal {
+    @apply flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-6;
+  }
+  
+  .project-section-horizontal .project-section-title {
+    margin-bottom: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+    width: 140px;
+    min-width: 140px;
+  }
+  
+  .project-section-title {
+    @apply text-sm font-medium;
+    color: rgba(0, 0, 0, 0.5);
+    margin-bottom: 4px;
+  }
+  
+  .project-option-label {
+    @apply text-sm cursor-pointer;
+    color: #363D49;
+  }
+  
+  .project-description {
+    @apply text-left;
+    color: rgba(0, 0, 0, 0.5);
+    font-size: 13px;
+    font-weight: 400;
+  }
+
+  /* Form Control Groups */
+  .form-control-group {
+    @apply flex items-center space-x-2;
+  }
+
+  .form-controls-row {
+    @apply flex flex-col sm:flex-row gap-3 sm:gap-4;
+  }
+
+  .form-controls-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4;
+  }
+
+  /* Privacy Checkbox Group */
+  .privacy-checkbox-group {
+    @apply flex items-center gap-2 px-3 py-2 rounded cursor-pointer;
+    transition: background-color 0.2s;
+  }
+
+  .privacy-checkbox-group:hover {
+    @apply bg-gray-50;
+  }
+
+  .privacy-checkbox-group label {
+    @apply cursor-pointer select-none;
+    margin: 0;
+  }
+
+  /* Input Fields */
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cotton-candy-pink focus:border-transparent;
+  }
+
+  .input-field-sm {
+    @apply px-3 py-1.5 text-sm;
+  }
+
+  .input-field-lg {
+    @apply px-5 py-3 text-base;
+  }
+}

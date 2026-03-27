@@ -1,0 +1,126 @@
+/* ============================================
+   ADMIN PANEL - CSS Variables
+   원본 Admin 프로젝트 스타일 그대로 적용
+   ============================================ */
+
+/* Admin scope: /admin 페이지에서만 적용 */
+.admin-root {
+  --button-outline: rgba(0,0,0, .10);
+  --badge-outline: rgba(0,0,0, .05);
+  --opaque-button-border-intensity: -8;
+  --elevate-1: rgba(0,0,0, .03);
+  --elevate-2: rgba(0,0,0, .08);
+
+  --background: hsl(0, 0%, 98%);
+  --foreground: hsl(220, 20%, 20%);
+  --border: hsl(0, 0%, 88%);
+  --card: hsl(0, 0%, 96%);
+  --card-foreground: hsl(220, 20%, 20%);
+  --card-border: hsl(0, 0%, 90%);
+  --sidebar: hsl(0, 0%, 94%);
+  --sidebar-background: hsl(0, 0%, 94%);
+  --sidebar-foreground: hsl(220, 20%, 20%);
+  --sidebar-border: hsl(0, 0%, 88%);
+  --sidebar-primary: hsl(220, 90%, 50%);
+  --sidebar-primary-foreground: hsl(0, 0%, 98%);
+  --sidebar-accent: hsl(220, 15%, 90%);
+  --sidebar-accent-foreground: hsl(220, 20%, 20%);
+  --sidebar-ring: hsl(220, 90%, 50%);
+  --popover: hsl(0, 0%, 92%);
+  --popover-foreground: hsl(220, 20%, 20%);
+  --popover-border: hsl(0, 0%, 86%);
+  --primary: hsl(220, 90%, 50%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(0, 0%, 89%);
+  --secondary-foreground: hsl(220, 20%, 20%);
+  --muted: hsl(220, 5%, 91%);
+  --muted-foreground: hsl(220, 20%, 35%);
+  --accent: hsl(220, 10%, 93%);
+  --accent-foreground: hsl(220, 20%, 20%);
+  --destructive: hsl(0, 70%, 50%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --input: hsl(220, 20%, 75%);
+  --ring: hsl(220, 90%, 50%);
+  --chart-1: hsl(220, 80%, 45%);
+  --chart-2: hsl(120, 60%, 45%);
+  --chart-3: hsl(45, 85%, 55%);
+  --chart-4: hsl(200, 80%, 50%);
+  --chart-5: hsl(280, 70%, 55%);
+
+  --radius: .5rem;
+  --shadow-2xs: 0px 2px 0px 0px hsl(220, 20%, 85%, 0.20);
+  --shadow-xs: 0px 2px 0px 0px hsl(220, 20%, 85%, 0.25);
+  --shadow-sm: 0px 2px 0px 0px hsl(220, 20%, 85%, 0.30), 0px 1px 2px -1px hsl(220, 20%, 80%, 0.15);
+  --shadow: 0px 2px 0px 0px hsl(220, 20%, 85%, 0.35), 0px 1px 2px -1px hsl(220, 20%, 80%, 0.20);
+  --shadow-md: 0px 2px 0px 0px hsl(220, 20%, 85%, 0.40), 0px 2px 4px -1px hsl(220, 20%, 80%, 0.25);
+  --shadow-lg: 0px 2px 0px 0px hsl(220, 20%, 85%, 0.45), 0px 4px 6px -1px hsl(220, 20%, 80%, 0.30);
+  --shadow-xl: 0px 2px 0px 0px hsl(220, 20%, 85%, 0.50), 0px 8px 10px -1px hsl(220, 20%, 80%, 0.35);
+  --shadow-2xl: 0px 2px 0px 0px hsl(220, 20%, 85%, 0.55);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+}
+
+.admin-root,
+.admin-root * {
+  font-family: Inter, system-ui, -apple-system, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.admin-root {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Dark mode for admin */
+.admin-root.dark {
+  --button-outline: rgba(255,255,255, .10);
+  --badge-outline: rgba(255,255,255, .05);
+  --opaque-button-border-intensity: 9;
+  --elevate-1: rgba(255,255,255, .04);
+  --elevate-2: rgba(255,255,255, .09);
+
+  --background: hsl(220, 15%, 12%);
+  --foreground: hsl(0, 0%, 95%);
+  --border: hsl(220, 15%, 20%);
+  --card: hsl(220, 15%, 15%);
+  --card-foreground: hsl(0, 0%, 95%);
+  --card-border: hsl(220, 15%, 22%);
+  --sidebar: hsl(220, 15%, 13%);
+  --sidebar-background: hsl(220, 15%, 13%);
+  --sidebar-foreground: hsl(0, 0%, 95%);
+  --sidebar-border: hsl(220, 15%, 18%);
+  --sidebar-primary: hsl(220, 80%, 60%);
+  --sidebar-primary-foreground: hsl(0, 0%, 98%);
+  --sidebar-accent: hsl(220, 15%, 18%);
+  --sidebar-accent-foreground: hsl(0, 0%, 95%);
+  --sidebar-ring: hsl(220, 80%, 60%);
+  --popover: hsl(220, 15%, 17%);
+  --popover-foreground: hsl(0, 0%, 95%);
+  --popover-border: hsl(220, 15%, 25%);
+  --primary: hsl(220, 80%, 60%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(220, 15%, 22%);
+  --secondary-foreground: hsl(0, 0%, 95%);
+  --muted: hsl(220, 10%, 18%);
+  --muted-foreground: hsl(0, 0%, 70%);
+  --accent: hsl(220, 12%, 19%);
+  --accent-foreground: hsl(0, 0%, 95%);
+  --destructive: hsl(0, 70%, 50%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --input: hsl(220, 15%, 30%);
+  --ring: hsl(220, 80%, 60%);
+  --chart-1: hsl(220, 80%, 65%);
+  --chart-2: hsl(120, 60%, 65%);
+  --chart-3: hsl(45, 85%, 65%);
+  --chart-4: hsl(200, 80%, 65%);
+  --chart-5: hsl(280, 70%, 70%);
+  --shadow-2xs: 0px 2px 0px 0px hsl(220, 50%, 5%, 0.30);
+  --shadow-xs: 0px 2px 0px 0px hsl(220, 50%, 5%, 0.35);
+  --shadow-sm: 0px 2px 0px 0px hsl(220, 50%, 5%, 0.40), 0px 1px 2px -1px hsl(220, 50%, 3%, 0.25);
+  --shadow: 0px 2px 0px 0px hsl(220, 50%, 5%, 0.45), 0px 1px 2px -1px hsl(220, 50%, 3%, 0.30);
+  --shadow-md: 0px 2px 0px 0px hsl(220, 50%, 5%, 0.50), 0px 2px 4px -1px hsl(220, 50%, 3%, 0.35);
+  --shadow-lg: 0px 2px 0px 0px hsl(220, 50%, 5%, 0.55), 0px 4px 6px -1px hsl(220, 50%, 3%, 0.40);
+  --shadow-xl: 0px 2px 0px 0px hsl(220, 50%, 5%, 0.60), 0px 8px 10px -1px hsl(220, 50%, 3%, 0.45);
+  --shadow-2xl: 0px 2px 0px 0px hsl(220, 50%, 5%, 0.65);
+}

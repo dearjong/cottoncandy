@@ -1,0 +1,116 @@
+@layer utilities {
+  /* ========== CARDS ========== */
+  
+  /* Selection Card (재사용 가능한 카드 스타일) */
+  .selection-card {
+    @apply relative p-3 sm:p-4 rounded-xl cursor-pointer transition-all duration-300;
+    border: 0.5px solid #d1d5db;
+  }
+
+  .selection-card:hover {
+    @apply shadow-lg transform scale-[1.02];
+  }
+
+  .selection-card-selected {
+    @apply ring-2 ring-offset-2;
+    border-color: var(--cotton-candy-pink);
+    background-color: var(--cotton-light-pink);
+    box-shadow: 0 4px 20px rgba(234, 76, 137, 0.2);
+  }
+
+  .selection-card-icon {
+    @apply w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-3 sm:mb-4;
+  }
+
+  .selection-card-content {
+    @apply text-center;
+  }
+
+  /* ========== 카드 통합 스타일 시스템 (step1, step2 완전 동일) ========== */
+  
+  /* 카드 컨테이너 - 크기, 간격, 테두리 */
+  .unified-card {
+    @apply relative cursor-pointer rounded-2xl shadow-lg transition-all duration-300;
+    padding: 2rem 2rem 1.25rem 2rem; /* 상: 2rem, 좌우: 2rem, 하: 1.25rem */
+    border: 1px solid #e5e7eb;
+  }
+  
+  .unified-card:hover {
+    @apply shadow-xl;
+    border: 3px solid #EA4C89;
+    padding: calc(2rem - 2px) calc(2rem - 2px) calc(1.25rem - 2px) calc(2rem - 2px);
+  }
+
+  /* 카드 아이콘 */
+  .unified-card-icon {
+    @apply mx-auto mb-4 transition-transform duration-300;
+    width: 5rem;  /* 80px */
+    height: 5rem; /* 80px */
+  }
+
+  /* 카드 제목 */
+  .unified-card-title {
+    @apply font-bold mb-2 text-center;
+    font-size: 17px;
+    color: #363D49;
+  }
+
+  /* 카드 부제목 */
+  .unified-card-subtitle {
+    @apply text-sm font-medium mb-4 text-center;
+  }
+
+  /* 카드 설명 */
+  .unified-card-description {
+    @apply leading-relaxed mb-2 text-center;
+    font-size: 14px;
+    color: #818898;
+    font-weight: 300;
+  }
+
+  /* 카드 체크 아이콘 영역 */
+  .unified-card-check {
+    @apply flex justify-center mt-2;
+  }
+
+  /* 선택된 카드 스타일 */
+  .unified-card-selected {
+    background-color: #EE70A1 !important;
+    border-color: #EE70A1 !important;
+  }
+
+  .unified-card-selected .unified-card-title {
+    color: #FFFFFF !important;
+  }
+
+  .unified-card-selected .unified-card-description {
+    color: #FFFFFF !important;
+  }
+
+  /* 카드 그리드 레이아웃 */
+  .card-grid-3cols {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6;
+  }
+
+  .card-grid-2cols {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6;
+  }
+
+  /* Card Headers */
+  .card-title {
+    @apply text-base sm:text-lg font-bold text-gray-800;
+  }
+
+  .card-subtitle {
+    @apply text-xs sm:text-sm text-gray-500 font-normal;
+  }
+
+  /* Card Grid */
+  .card-grid {
+    @apply max-w-[760px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .card-grid-gap {
+    @apply gap-4 sm:gap-5 md:gap-6;
+  }
+}

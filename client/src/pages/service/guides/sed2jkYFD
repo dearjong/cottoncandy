@@ -1,0 +1,83 @@
+import GuideLayout from "@/components/guide/guide-layout";
+import { Shield, Star, Award } from "lucide-react";
+
+export default function HowToUse() {
+  return (
+    <GuideLayout>
+      <div>
+        <h1 className="page-title mb-8">"이용방법"</h1>
+        
+        <div className="space-y-6">
+          <div className="p-6 border border-gray-200 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">회원가입 및 인증방법 안내</h3>
+            <p className="text-gray-600">
+              Cotton Candy는 간편한 이메일 또는 소셜 로그인으로 가입하실 수 있습니다.
+            </p>
+          </div>
+
+          <div className="p-6 border border-gray-200 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">프로젝트 등록 안내</h3>
+            <p className="text-gray-600 mb-4">
+              광고 의뢰 등록 시 프로젝트 상세 정보를 입력하고 원하는 파트너 선정 방식을 선택하세요.
+            </p>
+          </div>
+
+          <div className="p-6 border border-gray-200 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">등급안내</h3>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Award className="w-6 h-6 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Gold</p>
+                  <p className="text-sm text-gray-600">TVCF.co.kr 포트폴리오 100건 이상, 리뷰 평균 4.7점 이상</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Shield className="w-6 h-6 text-gray-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Silver</p>
+                  <p className="text-sm text-gray-600">TVCF.co.kr 포트폴리오 50건 이상, 리뷰 평균 4.5점 이상</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Star className="w-6 h-6 text-orange-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Bronze</p>
+                  <p className="text-sm text-gray-600">TVCF.co.kr 포트폴리오 30건 이상, 리뷰 평균 4.0점 이상</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-blue-600 font-bold">신규</span>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">신규</p>
+                  <p className="text-sm text-gray-600">활동 이력 없음</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-4 space-y-2 text-sm text-gray-500">
+              <p>※ 현재는 TVCF에 등록된 포트폴리오 기준으로 등급이 부여됩니다.</p>
+              <p>※ 추후 Cotton Candy 내 실제 계약 건수 및 리뷰를 기준으로 등급이 조정될 예정입니다.</p>
+            </div>
+          </div>
+
+          <div className="p-6 border border-gray-200 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">참여방법 안내</h3>
+            <p className="text-gray-600">
+              등록된 프로젝트에 제안서를 제출하여 참여하실 수 있습니다.
+            </p>
+          </div>
+
+          <div className="p-6 border border-gray-200 rounded-lg">
+           

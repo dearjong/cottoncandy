@@ -1,0 +1,51 @@
+@layer utilities {
+  /* ========== HEADER & NAVIGATION ========== */
+  
+  /* Header */
+  .site-header {
+    @apply fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-gray-100;
+  }
+
+  .site-header-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .site-header-content {
+    @apply flex justify-between items-center h-[70px];
+  }
+
+  /* Navigation */
+  .nav-menu {
+    @apply hidden lg:flex space-x-3 xl:space-x-4 text-[15px] text-gray-600;
+  }
+
+  .nav-menu-tablet {
+    @apply hidden md:flex lg:hidden space-x-2.5 text-[15px] text-gray-600;
+  }
+
+  .nav-menu-mobile {
+    @apply md:hidden border-t border-gray-100 py-4;
+  }
+
+  .nav-link {
+    @apply hover:text-pink-600 transition-colors whitespace-nowrap px-2.5 pt-[3px] pb-[1px] rounded-md;
+  }
+
+  .nav-link-active {
+    @apply text-pink-600 bg-gray-100;
+  }
+
+  /* Header Icons */
+  .header-icon {
+    @apply relative;
+  }
+
+  .header-icon-badge {
+    @apply absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center;
+  }
+
+  /* User Profile */
+  .header-user-profile {
+    @apply flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-700;
+  }
+}

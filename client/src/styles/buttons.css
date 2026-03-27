@@ -1,0 +1,122 @@
+@layer utilities {
+  /* ========== BUTTONS ========== */
+  
+  /* 핑크 버튼 (다음 버튼) */
+  .btn-pink {
+    @apply w-full py-3 rounded-full text-sm text-white;
+    background-color: #EA4C89;
+    border: 0.5px solid #EA4C89;
+    transition: background 0.3s;
+    font-weight: 400;
+  }
+  
+  .btn-pink:hover:not(:disabled) {
+    background: linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0.3)), #EA4C89;
+    border: 0.5px solid rgba(255,255,255,0.3);
+  }
+  
+  .btn-pink:disabled {
+    @apply cursor-not-allowed;
+    background-color: #e8eaed !important;
+    color: #9aa0a6 !important;
+    border: none !important;
+    opacity: 1 !important;
+  }
+  
+  /* 흰색 버튼 (이전 버튼) */
+  .btn-white {
+    @apply w-full py-3 rounded-full text-sm text-gray-700;
+    background-color: #fff;
+    border: 0.5px solid #e5e7eb;
+    transition: background 0.3s;
+    font-weight: 400;
+  }
+  
+  .btn-white:hover {
+    background-color: #f5f5f5;
+  }
+  
+  /* 흰색 작은 버튼 (인증번호 발송 등) */
+  .btn-white-compact {
+    @apply py-2 px-4 rounded-full font-medium text-sm text-gray-700;
+    background-color: #fff;
+    border: 0.5px solid #e5e7eb;
+    transition: background 0.3s;
+    white-space: nowrap;
+  }
+  
+  .btn-white-compact:hover {
+    background-color: #f5f5f5;
+  }
+
+  /* 핑크 작은 버튼 (초대하기 등) */
+  .btn-pink-compact {
+    @apply py-2 px-4 rounded-full font-medium text-sm text-white;
+    background-color: #EA4C89;
+    border: 0.5px solid #EA4C89;
+    transition: background 0.3s;
+    white-space: nowrap;
+  }
+  
+  .btn-pink-compact:hover {
+    background: linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0.3)), #EA4C89;
+  }
+
+  /* Primary Button */
+  .btn-primary {
+    @apply w-full py-4 rounded-full font-medium text-sm text-white transition-all duration-300;
+    background-color: #EA4C89;
+  }
+
+  .btn-primary:hover {
+    background-color: #d6417a;
+  }
+
+  .btn-primary:disabled {
+    @apply cursor-not-allowed;
+    background-color: #e8eaed !important;
+    color: #9aa0a6 !important;
+    opacity: 1 !important;
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply w-full py-4 rounded-full font-medium text-sm bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all duration-300;
+  }
+
+  /* Small Button */
+  .btn-small {
+    @apply px-4 py-1.5 bg-gray-800 text-white rounded-full text-xs hover:bg-gray-700 transition-colors whitespace-nowrap;
+  }
+
+  /* Icon Button */
+  .btn-icon {
+    @apply p-2 rounded-full hover:bg-gray-100 transition-colors;
+  }
+
+  /* Button Group */
+  .btn-group {
+    @apply flex gap-3;
+  }
+
+  /* ========== FLOATING ELEMENTS ========== */
+  
+  /* Floating Action Buttons Container */
+  .floating-buttons {
+    @apply fixed bottom-6 right-6 flex flex-col gap-3 z-40;
+  }
+
+  /* Floating Button */
+  .floating-btn {
+    @apply w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-colors;
+  }
+
+  .floating-btn-primary {
+    @apply bg-cotton-candy-pink hover:bg-[#d6417a];
+    background-color: #EA4C89;
+  }
+
+  .floating-btn-secondary {
+    @apply bg-gray-800 hover:bg-gray-700;
+  }
+}

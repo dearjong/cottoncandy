@@ -1,0 +1,405 @@
+@layer utilities {
+  /* ========== COLOR UTILITIES ========== */
+  .text-primary {
+    color: var(--color-primary);
+  }
+
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+
+  .border-primary {
+    border-color: var(--color-primary);
+  }
+
+  .hover\:text-primary:hover {
+    color: var(--color-primary);
+  }
+
+  .text-secondary {
+    color: var(--color-secondary);
+  }
+
+  .bg-secondary {
+    background-color: var(--color-secondary);
+  }
+
+  .border-secondary {
+    border-color: var(--color-secondary);
+  }
+
+  .hover\:text-secondary:hover {
+    color: var(--color-secondary);
+  }
+
+  .text-neutral {
+    @apply text-gray-600;
+  }
+
+  .cotton-pink {
+    color: var(--cotton-pink);
+  }
+  
+  .bg-cotton-pink {
+    background-color: var(--cotton-pink);
+  }
+  
+  .border-cotton-pink {
+    border-color: var(--cotton-pink);
+  }
+  
+  .cotton-blue {
+    color: var(--cotton-blue);
+  }
+  
+  .bg-cotton-blue {
+    background-color: var(--cotton-blue);
+  }
+  
+  .cotton-pastel-cobalt {
+    color: var(--cotton-pastel-cobalt);
+  }
+  
+  .bg-cotton-pastel-cobalt {
+    background-color: var(--cotton-pastel-cobalt);
+  }
+  
+  .cotton-candy-pink {
+    color: var(--cotton-candy-pink);
+  }
+  
+  .bg-cotton-candy-pink {
+    background-color: var(--cotton-candy-pink);
+  }
+  
+  .bg-cotton-light-pink {
+    background-color: var(--cotton-light-pink);
+  }
+  
+  .bg-cotton-light-blue {
+    background-color: var(--cotton-light-blue);
+  }
+  
+  .bg-cotton-gray {
+    background-color: var(--cotton-gray);
+  }
+  
+  .hover\:bg-cotton-pink-hover:hover {
+    background-color: hsl(340, 82%, 48%);
+  }
+  
+  .ring-cotton-pink {
+    --tw-ring-color: var(--cotton-pink);
+  }
+
+  /* ========== TYPOGRAPHY ========== */
+  
+  /* Page Headers */
+  .page-title {
+    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 sm:mb-4 px-2;
+    line-height: 1.2;
+  }
+  
+  .page-subtitle {
+    @apply text-gray-500 text-sm sm:text-base font-light px-2;
+  }
+
+  /* Section Headers */
+  .section-title {
+    @apply text-lg sm:text-xl font-bold text-gray-800 mb-3;
+  }
+
+  .section-subtitle {
+    @apply text-sm sm:text-base text-gray-600 mb-6;
+  }
+
+  /* Work Page Headers (프로젝트 의뢰 화면과 동일한 타이틀 크기) */
+  .work-title {
+    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 sm:mb-4 px-2;
+    line-height: 1.2;
+  }
+
+  .work-subtitle {
+    @apply text-gray-500 text-sm sm:text-base font-light px-2;
+  }
+
+  /* ========== LAYOUT & SPACING ========== */
+  
+  /* Page Container - 프로젝트 의뢰 포맷 동일 적용 */
+  .page-container {
+    @apply py-8 sm:py-12 md:py-20 bg-white;
+  }
+
+  /* Work Section Container - Work 페이지용 (프로젝트 의뢰 포맷 동일) */
+  .work-container {
+    @apply min-h-screen bg-white py-8;
+  }
+
+  /* Work Content - Work 페이지 컨텐츠 영역 (프로젝트 의뢰 포맷 동일) */
+  .work-content {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* 공통 컨테이너 규칙:
+   * - 모든 페이지는 bg-white 사용
+   * - Work 페이지는 work-container + work-content 사용
+   * - 프로젝트 의뢰 페이지는 page-container + page-content 사용
+   * - 별도 말씀이 없는 한 항상 동일한 CSS 적용 */
+
+  /* Content Width Containers (한 곳에서 전체 페이지 넓이 조정 가능) */
+  /* 메인 컨테이너 - 이 넓이만 조정하면 모든 내부 요소가 자동으로 fill됨 */
+  .page-content {
+    @apply max-w-4xl mx-auto px-4 sm:px-6 md:px-8 lg:px-16;
+    /* max-w-4xl = 896px, 이 값만 바꾸면 전체 페이지 넓이 조정 */
+  }
+  
+  /* 카드 그리드 영역 - 컨테이너 대비 상대 크기 */
+  .cards-container {
+    @apply w-full mx-auto;
+    max-width: 58%; /* 컨테이너의 58% (896px 기준 ~520px) */
+  }
+  
+  /* 옵션 영역 - 컨테이너 대비 상대 크기 */
+  .options-container {
+    @apply w-full mx-auto;
+    max-width: 85%; /* 컨테이너의 85% (896px 기준 ~760px) */
+  }
+  
+  /* 레거시 클래스들 (호환성 유지) */
+  .content-narrow {
+    @apply max-w-[520px] mx-auto;
+  }
+  
+  .content-medium {
+    @apply max-w-[760px] mx-auto;
+  }
+
+  .content-wide {
+    @apply max-w-4xl mx-auto;
+  }
+
+  /* Header Spacing */
+  .header-section {
+    @apply text-center mb-8 sm:mb-10 md:mb-12;
+  }
+
+  /* Section Spacing */
+  .section-spacing {
+    @apply mb-8 sm:mb-12 md:mb-16;
+  }
+
+  /* ========== STEP INDICATOR ========== */
+  
+  /* Step Indicator Container */
+  .step-indicator-container {
+    @apply flex justify-center items-center gap-1.5 mt-6;
+  }
+  
+  /* Step Button - 작고 귀여운 원형 버튼 */
+  .step-button {
+    @apply w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-200 text-center;
+  }
+  
+  /* Step Button - Active (현재 페이지) */
+  .step-button-active {
+    @apply bg-cotton-pink text-white;
+  }
+  
+  /* Step Button - Inactive */
+  .step-button-inactive {
+    @apply bg-gray-200 text-gray-500 hover:bg-gray-300;
+  }
+  
+  /* Step Button - Disabled (아직 방문하지 않은 단계) */
+  .step-button-disabled {
+    @apply bg-gray-100 text-transparent border border-gray-200 cursor-not-allowed;
+  }
+  
+  /* Step Tooltip */
+  .step-tooltip {
+    @apply absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none;
+  }
+  
+  .step-tooltip-arrow {
+    @apply absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900;
+  }
+
+  /* ========== CHATBOT / AI CONSULT ========== */
+  
+  /* Chat Window */
+  .chat-window {
+    @apply fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] bg-white rounded-2xl shadow-2xl z-50 flex flex-col;
+  }
+
+  .chat-header {
+    @apply text-white p-4 rounded-t-2xl flex justify-between items-center;
+    background-color: #EA4C89;
+  }
+
+  .chat-messages {
+    @apply flex-1 overflow-y-auto p-4 space-y-4;
+  }
+
+  .chat-message {
+    @apply max-w-[75%] px-4 py-2 rounded-2xl;
+  }
+
+  .chat-message-user {
+    @apply text-white rounded-br-sm;
+    background-color: #EA4C89;
+  }
+
+  .chat-message-bot {
+    @apply bg-gray-100 text-gray-800 rounded-bl-sm;
+  }
+
+  .chat-input-container {
+    @apply p-4 border-t border-gray-200;
+  }
+
+  .chat-input {
+    @apply flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none text-sm;
+    focus: ring-2 ring-cotton-candy-pink border-transparent;
+  }
+
+  .chat-send-btn {
+    @apply text-white p-2 rounded-full transition-colors;
+    background-color: #EA4C89;
+  }
+
+  .chat-send-btn:hover {
+    background-color: #d6417a;
+  }
+
+  /* ========== ANIMATIONS ========== */
+  
+  .fade-in {
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  .slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+
+  .scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* ========== TOAST NOTIFICATIONS ========== */
+  
+  .toast-container {
+    @apply rounded-lg border p-3 shadow-lg;
+    background-color: rgb(243, 244, 246);
+  }
+
+  .toast-destructive {
+    @apply rounded-lg border p-3 shadow-lg;
+    background-color: rgb(239, 68, 68);
+  }
+
+  /* ========== RESPONSIVE UTILITIES ========== */
+  
+  .mobile-only {
+    @apply block sm:hidden;
+  }
+
+  .tablet-up {
+    @apply hidden sm:block;
+  }
+
+  .desktop-only {
+    @apply hidden lg:block;
+  }
+
+  /* ========== CUSTOM COMPONENTS ========== */
+  
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply text-white;
+    background-color: #EA4C89;
+  }
+
+  .badge-secondary {
+    @apply bg-gray-100 text-gray-800;
+  }
+
+  .badge-success {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+
+  .badge-danger {
+    @apply bg-red-100 text-red-800;
+  }
+
+  /* Divider */
+  .divider {
+    @apply w-full h-px bg-gray-200 my-6;
+  }
+
+  .divider-vertical {
+    @apply h-full w-px bg-gray-200 mx-4;
+  }
+
+  /* Loading Spinner */
+  .spinner {
+    @apply animate-spin rounded-full border-2 border-gray-300;
+    border-top-color: #EA4C89;
+  }
+
+  .spinner-sm {
+    @apply w-4 h-4;
+  }
+
+  .spinner-md {
+    @apply w-8 h-8;
+  }
+
+  .spinner-lg {
+    @apply w-12 h-12;
+  }
+
+  /* ========== SOCIAL LOGIN ICONS ========== */
+  
+  .icon-naver {
+    color: var(--naver-green);
+  }
+  
+  .icon-google {
+    color: var(--google-blue);
+  }
+}

@@ -1,0 +1,926 @@
+<mcp_external_output>
+
+### Content Block 1 (Text)
+const imgShape = "https://www.figma.com/api/mcp/asset/f21ae048-9a6e-479c-ad9f-2173faf0e700";
+const img3 = "https://www.figma.com/api/mcp/asset/cd3a3bce-e11c-47c2-84dd-8798c106cc83";
+const img4 = "https://www.figma.com/api/mcp/asset/3647f94f-57a2-437a-987a-4864c8f05b76";
+const imgLine5 = "https://www.figma.com/api/mcp/asset/bd7038b3-4770-4f9b-a5fc-7e3fb411efe4";
+const img = "https://www.figma.com/api/mcp/asset/562ec9e2-b53a-4609-86f2-43b8745c6c77";
+const img1 = "https://www.figma.com/api/mcp/asset/9d9eefec-9dea-40f0-9d87-9dfaff7315f4";
+const img2 = "https://www.figma.com/api/mcp/asset/904d68b8-1301-4e6b-9fe4-4ace32179851";
+
+function Divider({ className }: { className?: string }) {
+  return (
+    <div className={className} data-name="Divider" data-node-id="108:14306">
+      <div className="h-0 relative shrink-0 w-full" data-node-id="113:34280">
+        <div className="absolute inset-[-1px_0_0_0]">
+          <img alt="" className="block max-w-none size-full" src={imgLine5} />
+        </div>
+      </div>
+    </div>
+  );
+}
+type SwitchProps = {
+  className?: string;
+  selected?: boolean;
+  state?: "enabled" | "hovered" | "pressed" | "disabled";
+  icon?: "false";
+};
+
+function Switch({ className, selected = true, state = "enabled", icon = "false" }: SwitchProps) {
+  const isTrueAndNotStateAndFalse = selected && state === "disabled" && icon === "false";
+  const isTrueAndStateAndFalse = selected && state === "enabled" && icon === "false";
+  return (
+    <div id={isTrueAndStateAndFalse ? "node-58052_38647" : isTrueAndNotStateAndFalse ? "node-58052_38671" : ""} className={className}>
+      <div id={isTrueAndStateAndFalse ? "node-58052_38648" : isTrueAndNotStateAndFalse ? "node-58052_38672" : ""} className="flex-[1_0_0] h-full min-h-px min-w-px relative" data-name="Handle">
+        {isTrueAndStateAndFalse && (
+          <button data-node-id="58052:38649" className="absolute content-stretch cursor-pointer flex items-center justify-center p-[4px] right-[-12px] top-1/2 translate-y-[-50%]" data-name="Target">
+            <div data-node-id="58052:38650" className="content-stretch flex flex-col items-center justify-center p-[8px] relative rounded-[100px] shrink-0" data-name="State-layer">
+              <div data-node-id="58052:38651" className="bg-white content-stretch flex items-center justify-center overflow-clip p-[11px] relative rounded-[24px] shrink-0" data-name="Handle shape">
+                <div data-node-id="58052:38652" className="rounded-[23px] shrink-0 size-[2px]" data-name="Container" />
+              </div>
+            </div>
+          </button>
+        )}
+        {isTrueAndNotStateAndFalse && (
+          <div data-node-id="58052:38673" className="absolute content-stretch flex items-center justify-center p-[4px] right-[-12px] top-1/2 translate-y-[-50%]" data-name="Target">
+            <div data-node-id="58052:38674" className="content-stretch flex flex-col items-center justify-center p-[8px] relative rounded-[100px] shrink-0" data-name="State-layer">
+              <div data-node-id="58052:38675" className="bg-[#fef7ff] content-stretch flex items-center justify-center overflow-clip p-[11px] relative rounded-[24px] shrink-0" data-name="Handle shape">
+                <div data-node-id="58052:38676" className="rounded-[23px] shrink-0 size-[2px]" data-name="Container" />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Avatar({ className }: { className?: string }) {
+  return (
+    <div className={className} data-name="Avatar" data-node-id="60591:96692">
+      <div className="absolute h-[87px] left-[calc(50%-1px)] top-[calc(50%+23.5px)] translate-x-[-50%] translate-y-[-50%] w-[74px]" data-name="Shape" data-node-id="60591:96691">
+        <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgShape} />
+      </div>
+    </div>
+  );
+}
+
+export default function Table() {
+  return (
+    <div className="bg-white content-stretch flex flex-col items-start overflow-clip relative rounded-[4px] size-full" data-name="Table" data-node-id="60591:96725">
+      <div className="content-stretch flex items-center relative shrink-0 w-full" data-name="TabGroup" data-node-id="60932:98235">
+        <div className="bg-[var(--lightgray,#f5f5f5)] border border-[var(--border\/default,rgba(0,0,0,0.1))] border-solid content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px overflow-clip p-[16px] relative rounded-tl-[6px] rounded-tr-[6px]" data-name="Tab" data-node-id="60932:98237">
+          <p className="font-['NanumSquareRound:Bold',sans-serif] leading-[0] not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--sds-typography-body-size-medium,16px)]" data-node-id="I60932:98237;290:16285">
+            <span className="leading-none">전체</span>
+            <span className="font-['NanumSquareRound:Regular',sans-serif] leading-none text-[rgba(0,0,0,0.5)]">{` (7)`}</span>
+          </p>
+        </div>
+        <div className="bg-[var(--bg,white)] border border-[var(--border\/default,rgba(0,0,0,0.1))] border-solid content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px overflow-clip p-[16px] relative rounded-tl-[6px] rounded-tr-[6px]" data-name="Tab" data-node-id="60932:98236">
+          <p className="font-['NanumSquareRound:Bold',sans-serif] leading-[0] not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--sds-typography-body-size-medium,16px)]" data-node-id="I60932:98236;290:16285">
+            <span className="leading-none">{`활동승인 `}</span>
+            <span className="font-['NanumSquareRound:Regular',sans-serif] leading-none text-[rgba(0,0,0,0.5)]">(5)</span>
+          </p>
+        </div>
+        <div className="bg-[var(--bg,white)] border border-[var(--border\/default,rgba(0,0,0,0.1))] border-solid content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px overflow-clip p-[16px] relative rounded-tl-[6px] rounded-tr-[6px]" data-name="Tab" data-node-id="61766:85294">
+          <p className="font-['NanumSquareRound:Bold',sans-serif] leading-[0] not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--sds-typography-body-size-medium,16px)]" data-node-id="I61766:85294;290:16285">
+            <span className="leading-none">{`활동중지 `}</span>
+            <span className="font-['NanumSquareRound:Regular',sans-serif] leading-none text-[rgba(0,0,0,0.5)]">(0)</span>
+          </p>
+        </div>
+        <div className="bg-[var(--bg,white)] border border-[var(--border\/default,rgba(0,0,0,0.1))] border-solid content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px overflow-clip p-[16px] relative rounded-tl-[6px] rounded-tr-[6px]" data-name="Tab" data-node-id="60932:98238">
+          <p className="font-['NanumSquareRound:Bold',sans-serif] leading-[0] not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--sds-typography-body-size-medium,16px)]" data-node-id="I60932:98238;290:16285">
+            <span className="leading-none">{`구성원 승인대기 `}</span>
+            <span className="font-['NanumSquareRound:Regular',sans-serif] leading-none text-[rgba(0,0,0,0.5)]">(2)</span>
+          </p>
+        </div>
+      </div>
+      <div className="content-stretch flex gap-[24px] items-center pb-[10px] pt-[24px] relative shrink-0 w-full" data-name="Option" data-node-id="60932:98278">
+        <div className="content-stretch flex flex-col items-start relative shrink-0 w-[61px]" data-name="Filter" data-node-id="60932:98338">
+          <div className="bg-[var(--sds-color-background-default-default,white)] content-stretch flex flex-col gap-[var(--sds-size-space-200,8px)] items-start relative rounded-[var(--sds-size-radius-200,8px)] shrink-0 w-full" data-name="Accordion Item" data-node-id="60932:98339">
+            <div className="content-stretch flex gap-[var(--sds-size-space-200,8px)] items-center relative shrink-0" data-name="Accordion Title" data-node-id="I60932:98339;101:13572">
+              <p className="font-['NanumSquareRound:Regular',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[12px] text-[color:var(--black-90,#1e1e1e)]" data-node-id="I60932:98339;101:13573">
+                부서별
+              </p>
+              <div className="flex items-center justify-center relative shrink-0">
+                <div className="flex-none rotate-[180deg]">
+                  <div className="overflow-clip relative size-[20px]" data-name="Chevron up" data-node-id="I60932:98339;101:13574">
+                    <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I60932:98339;101:13574;7758:11236">
+                      <div className="absolute inset-[-20%_-10%]" style={{ "--stroke-0": "rgba(30, 30, 30, 1)" } as React.CSSProperties}>
+                        <img alt="" className="block max-w-none size-full" src={img} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="content-stretch flex gap-[var(--gap\/option,4px)] items-start relative shrink-0" data-name="List" data-node-id="60932:98323">
+          <div className="bg-[var(--point1,#ea4c89)] border-0 border-[var(--point1,#ea4c89)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60932:98304">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[length:var(--form\/body,14px)] text-center text-white" data-node-id="I60932:98304;224:11982">
+              전체
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60932:98324">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60932:98324;224:11986">
+              경영지원
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60932:98328">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60932:98328;224:11986">
+              기획
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60932:98332">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60932:98332;224:11986">
+              마케팅
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60932:98345">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60932:98345;224:11986">
+              디자인
+            </p>
+          </div>
+        </div>
+        <div className="content-stretch flex flex-[1_0_0] flex-col items-end justify-center min-h-px min-w-px relative" data-name="Filter" data-node-id="60932:98337">
+          <div className="bg-[var(--sds-color-background-default-default,white)] content-stretch flex flex-col gap-[var(--sds-size-space-200,8px)] items-start relative rounded-[var(--sds-size-radius-200,8px)] shrink-0" data-name="Accordion Item" data-node-id="60932:98279">
+            <div className="content-stretch flex gap-[var(--sds-size-space-200,8px)] items-center relative shrink-0" data-name="Accordion Title" data-node-id="I60932:98279;101:13572">
+              <p className="font-['NanumSquareRound:Regular',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[12px] text-[color:var(--black-90,#1e1e1e)]" data-node-id="I60932:98279;101:13573">
+                전체 권한
+              </p>
+              <div className="flex items-center justify-center relative shrink-0">
+                <div className="flex-none rotate-[180deg]">
+                  <div className="overflow-clip relative size-[20px]" data-name="Chevron up" data-node-id="I60932:98279;101:13574">
+                    <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I60932:98279;101:13574;7758:11236">
+                      <div className="absolute inset-[-20%_-10%]" style={{ "--stroke-0": "rgba(30, 30, 30, 1)" } as React.CSSProperties}>
+                        <img alt="" className="block max-w-none size-full" src={img} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex gap-[24px] items-center pb-[10px] pt-[24px] relative shrink-0 w-full" data-name="Option" data-node-id="60952:105138">
+        <div className="content-stretch flex flex-col items-start relative shrink-0 w-[61px]" data-name="Filter" data-node-id="60952:105139">
+          <div className="bg-[var(--sds-color-background-default-default,white)] content-stretch flex flex-col gap-[var(--sds-size-space-200,8px)] items-start relative rounded-[var(--sds-size-radius-200,8px)] shrink-0 w-full" data-name="Accordion Item" data-node-id="60952:105140">
+            <div className="content-stretch flex gap-[var(--sds-size-space-200,8px)] items-center relative shrink-0" data-name="Accordion Title" data-node-id="I60952:105140;101:13572">
+              <p className="font-['NanumSquareRound:Regular',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[12px] text-[color:var(--black-90,#1e1e1e)]" data-node-id="I60952:105140;101:13573">
+                가나다
+              </p>
+              <div className="flex items-center justify-center relative shrink-0">
+                <div className="flex-none rotate-[180deg]">
+                  <div className="overflow-clip relative size-[20px]" data-name="Chevron up" data-node-id="I60952:105140;101:13574">
+                    <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I60952:105140;101:13574;7758:11236">
+                      <div className="absolute inset-[-20%_-10%]" style={{ "--stroke-0": "rgba(30, 30, 30, 1)" } as React.CSSProperties}>
+                        <img alt="" className="block max-w-none size-full" src={img} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="content-stretch flex gap-[var(--gap\/option,4px)] items-start relative shrink-0" data-name="List" data-node-id="60952:105141">
+          <div className="bg-[var(--point1,#ea4c89)] border-0 border-[var(--point1,#ea4c89)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105142">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[length:var(--form\/body,14px)] text-center text-white" data-node-id="I60952:105142;224:11982">
+              전체
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105143">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105143;224:11986">
+              ㄱ
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105144">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105144;224:11986">
+              ㄴ
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105145">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105145;224:11986">
+              ㄷ
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105146">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105146;224:11986">
+              ㄹ
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105174">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105174;224:11986">
+              ㅁ
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105178">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105178;224:11986">
+              ㅂ
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105182">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105182;224:11986">
+              ㅅ
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105186">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105186;224:11986">
+              ㅇ
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105190">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105190;224:11986">
+              ㅈ
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105194">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105194;224:11986">
+              ㅊ
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105198">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105198;224:11986">
+              ㅋ
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105202">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105202;224:11986">
+              ㅌ
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105206">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105206;224:11986">
+              ㅍ
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105210">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105210;224:11986">
+              ㅎ
+            </p>
+          </div>
+          <div className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch flex gap-[10px] items-center justify-center overflow-clip pb-[8px] pt-[9px] px-[10px] relative rounded-[6px] shrink-0" data-name="Option" data-node-id="60952:105214">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/body,14px)] text-center" data-node-id="I60952:105214;224:11986">
+              A-Z
+            </p>
+          </div>
+        </div>
+        <div className="content-stretch flex flex-[1_0_0] flex-col items-end justify-center min-h-px min-w-px relative" data-name="Filter" data-node-id="60952:105147">
+          <div className="bg-[var(--sds-color-background-default-default,white)] content-stretch flex flex-col gap-[var(--sds-size-space-200,8px)] items-start relative rounded-[var(--sds-size-radius-200,8px)] shrink-0" data-name="Accordion Item" data-node-id="60952:105148">
+            <div className="content-stretch flex gap-[var(--sds-size-space-200,8px)] items-center relative shrink-0" data-name="Accordion Title" data-node-id="I60952:105148;101:13572">
+              <p className="font-['NanumSquareRound:Regular',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[12px] text-[color:var(--black-90,#1e1e1e)]" data-node-id="I60952:105148;101:13573">
+                전체 권한
+              </p>
+              <div className="flex items-center justify-center relative shrink-0">
+                <div className="flex-none rotate-[180deg]">
+                  <div className="overflow-clip relative size-[20px]" data-name="Chevron up" data-node-id="I60952:105148;101:13574">
+                    <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I60952:105148;101:13574;7758:11236">
+                      <div className="absolute inset-[-20%_-10%]" style={{ "--stroke-0": "rgba(30, 30, 30, 1)" } as React.CSSProperties}>
+                        <img alt="" className="block max-w-none size-full" src={img} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex items-start overflow-clip relative shrink-0 w-full" data-name="Row" data-node-id="60932:98245">
+        <div className="border-0 border-[rgba(0,0,0,0.1)] border-solid content-stretch flex flex-col items-center justify-center min-h-[56px] relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="60932:98246">
+          <div className="content-stretch flex flex-col items-center justify-center overflow-clip px-[12px] py-[10px] relative shrink-0 w-full" data-name="Content" data-node-id="I60932:98246;88:14684">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-[1.3] not-italic relative shrink-0 text-[16px] text-[color:var(--title,#1e1e1e)] text-center w-full whitespace-pre-wrap" data-node-id="I60932:98246;88:14685">
+              이름
+            </p>
+          </div>
+        </div>
+        <div className="border-0 border-[rgba(0,0,0,0.1)] border-solid content-stretch flex flex-col items-center justify-center min-h-[56px] relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="60932:98247">
+          <div className="content-stretch flex flex-col items-center justify-center overflow-clip px-[12px] py-[10px] relative shrink-0 w-full" data-name="Content" data-node-id="I60932:98247;88:14684">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-[1.3] not-italic relative shrink-0 text-[16px] text-[color:var(--title,#1e1e1e)] text-center w-full whitespace-pre-wrap" data-node-id="I60932:98247;88:14685">
+              닉네임
+            </p>
+          </div>
+        </div>
+        <div className="border-0 border-[rgba(0,0,0,0.1)] border-solid content-stretch flex flex-col items-center justify-center min-h-[56px] relative self-stretch shrink-0 w-[110px]" data-name="Cell" data-node-id="60932:98248">
+          <div className="content-stretch flex flex-col items-center justify-center overflow-clip px-[12px] py-[10px] relative shrink-0 w-full" data-name="Content" data-node-id="I60932:98248;88:14684">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-[1.3] not-italic relative shrink-0 text-[16px] text-[color:var(--title,#1e1e1e)] w-full whitespace-pre-wrap" data-node-id="I60932:98248;88:14685">
+              부서
+            </p>
+          </div>
+        </div>
+        <div className="border-0 border-[rgba(0,0,0,0.1)] border-solid content-stretch flex flex-col items-center justify-center min-h-[56px] relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="60932:98249">
+          <div className="content-stretch flex flex-col items-center justify-center overflow-clip px-[12px] py-[10px] relative shrink-0 w-full" data-name="Content" data-node-id="I60932:98249;88:14684">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-[1.3] not-italic relative shrink-0 text-[16px] text-[color:var(--title,#1e1e1e)] w-full whitespace-pre-wrap" data-node-id="I60932:98249;88:14685">
+              직책
+            </p>
+          </div>
+        </div>
+        <div className="border-0 border-[rgba(0,0,0,0.1)] border-solid content-stretch flex flex-col items-center justify-center min-h-[56px] relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="60932:98250">
+          <div className="content-stretch flex flex-col items-center justify-center overflow-clip px-[12px] py-[10px] relative shrink-0 w-full" data-name="Content" data-node-id="I60932:98250;88:14684">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-[1.3] not-italic relative shrink-0 text-[16px] text-[color:var(--title,#1e1e1e)] w-full whitespace-pre-wrap" data-node-id="I60932:98250;88:14685">{`권한   `}</p>
+          </div>
+        </div>
+        <div className="border-0 border-[rgba(0,0,0,0.1)] border-solid content-stretch flex flex-[1_0_0] flex-col items-center justify-center min-h-[56px] min-w-px relative self-stretch" data-name="Cell" data-node-id="60932:98251">
+          <div className="content-stretch flex flex-col items-center justify-center overflow-clip px-[12px] py-[10px] relative shrink-0 w-full" data-name="Content" data-node-id="I60932:98251;88:14684">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-[1.3] not-italic relative shrink-0 text-[16px] text-[color:var(--title,#1e1e1e)] w-full whitespace-pre-wrap" data-node-id="I60932:98251;88:14685">
+              이메일
+            </p>
+          </div>
+        </div>
+        <div className="border-0 border-[rgba(0,0,0,0.1)] border-solid content-stretch flex flex-col h-[62px] items-center justify-center min-h-[56px] relative shrink-0 w-[76px]" data-name="Cell" data-node-id="60932:98252">
+          <div className="content-stretch flex flex-col items-center justify-center overflow-clip py-[10px] relative shrink-0 w-full" data-name="Content" data-node-id="I60932:98252;88:14684">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-[1.3] not-italic relative shrink-0 text-[16px] text-[color:var(--title,#1e1e1e)] text-center w-full whitespace-pre-wrap" data-node-id="I60932:98252;88:14685">
+              활동승인
+            </p>
+          </div>
+        </div>
+        <div className="border-0 border-[rgba(0,0,0,0.1)] border-solid content-stretch flex flex-col h-[62px] items-center justify-center min-h-[56px] relative shrink-0" data-name="Cell" data-node-id="60932:98253">
+          <div className="content-stretch flex flex-col items-center justify-center overflow-clip px-[12px] py-[10px] relative shrink-0 w-full" data-name="Content" data-node-id="I60932:98253;88:14684">
+            <p className="font-['NanumSquareRound:Bold',sans-serif] leading-[1.3] not-italic relative shrink-0 text-[16px] text-[color:var(--title,#1e1e1e)] text-center" data-node-id="I60932:98253;88:14685">
+              탈퇴
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex items-start overflow-clip relative shrink-0 w-full" data-name="Row" data-node-id="60591:96733">
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="60591:96734">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I60591:96734;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] text-center w-full" data-node-id="I60591:96734;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">이애드</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="60591:96735">
+          <div className="content-stretch flex flex-[1_0_0] gap-[6px] items-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="60591:96736">
+            <Avatar className="overflow-clip relative rounded-[var(--sds-size-radius-full,9999px)] shrink-0 size-[20px]" />
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] text-center whitespace-nowrap" data-node-id="60591:96738">
+              <p className="leading-[1.3]">왕솜사탕</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[110px]" data-name="Cell" data-node-id="60591:96741">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I60591:96741;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I60591:96741;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">경영지원</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="60932:98179">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I60932:98179;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I60932:98179;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">대표이사</p>
+            </div>
+          </div>
+        </div>
+        <button className="bg-[rgba(255,255,255,0)] content-stretch cursor-pointer flex flex-col items-center relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="61392:83970">
+          <div className="content-stretch flex flex-col gap-[6px] items-center justify-center overflow-clip py-[6px] relative shrink-0 w-full" data-name="Content" data-node-id="I61392:83970;58143:54537">
+            <div className="content-stretch flex gap-[var(--sds-size-space-200,8px)] items-center pl-[20px] pr-[18px] py-[14px] relative rounded-[var(--sds-size-radius-200,8px)] shrink-0" data-name="InputItem" data-node-id="I61392:83970;58143:54538">
+              <div className="content-stretch flex gap-[var(--sds-size-space-200,0px)] items-center relative shrink-0" data-name="Title" data-node-id="I61392:83970;58143:54538;58017:37999">
+                <p className="font-['NanumSquareRound:Regular',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[16px] text-[color:var(--point1,#ea4c89)] text-left" data-node-id="I61392:83970;58143:54538;58017:38000">
+                  대표관리자
+                </p>
+              </div>
+              <div className="flex items-center justify-center relative shrink-0">
+                <div className="flex-none rotate-[180deg]">
+                  <div className="overflow-clip relative size-[20px]" data-name="Chevron up" data-node-id="I61392:83970;58143:54538;58017:38001">
+                    <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I61392:83970;58143:54538;58017:38001;7758:11236">
+                      <div className="absolute inset-[-20%_-10%]" style={{ "--stroke-0": "rgba(0, 0, 0, 1)" } as React.CSSProperties}>
+                        <img alt="" className="block max-w-none size-full" src={img1} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </button>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-[120px] relative self-stretch" data-name="Cell" data-node-id="60591:96739">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I60591:96739;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I60591:96739;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">king@somsatang.com</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col h-[62px] items-start relative shrink-0" data-name="Cell" data-node-id="60633:96477">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="60633:96478">
+            <Switch className="bg-[rgba(29,27,32,0.12)] content-stretch flex h-[30px] items-center justify-end px-[4px] py-[2px] relative rounded-[100px] shrink-0 w-[52px]" state="disabled" />
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col h-[62px] items-center justify-center relative shrink-0 w-[54px]" data-name="Cell" data-node-id="60696:100112">
+          <button className="content-stretch cursor-pointer flex items-center justify-center overflow-clip p-[var(--sds-size-space-200,8px)] relative rounded-[var(--sds-typography-scale-06,32px)] shrink-0" data-name="Icon Button" data-node-id="60696:100113">
+            <div className="overflow-clip relative shrink-0 size-[16px]" data-name="Size=16" data-node-id="I60696:100113;34:12257">
+              <div className="absolute inset-1/4" data-name="Icon" data-node-id="I60696:100113;34:12257;68:16114">
+                <div className="absolute inset-[-8%]" style={{ "--stroke-0": "rgba(30, 30, 30, 1)" } as React.CSSProperties}>
+                  <img alt="" className="block max-w-none size-full" src={img2} />
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div className="content-stretch flex items-start overflow-clip relative shrink-0 w-full" data-name="Row" data-node-id="60591:96743">
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="60591:96744">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I60591:96744;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] text-center w-full" data-node-id="I60591:96744;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">김애드</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="60591:96745">
+          <div className="content-stretch flex flex-[1_0_0] gap-[6px] items-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="60591:96746">
+            <div className="overflow-clip relative rounded-[var(--sds-size-radius-full,9999px)] shrink-0 size-[20px]" data-name="Avatar" data-node-id="60591:96747">
+              <div className="absolute h-[87px] left-[calc(50%-1px)] top-[calc(50%+23.5px)] translate-x-[-50%] translate-y-[-50%] w-[74px]" data-name="Shape" data-node-id="I60591:96747;60591:96691">
+                <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img3} />
+              </div>
+            </div>
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] text-center whitespace-nowrap" data-node-id="60591:96748">
+              <p className="leading-[1.3]">중솜사탕</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[110px]" data-name="Cell" data-node-id="60591:96751">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I60591:96751;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I60591:96751;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">기획</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="60932:98183">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I60932:98183;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I60932:98183;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">부장</p>
+            </div>
+          </div>
+        </div>
+        <button className="bg-[rgba(255,255,255,0)] content-stretch cursor-pointer flex flex-col items-center relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="60932:98199">
+          <div className="content-stretch flex flex-col gap-[6px] items-center justify-center overflow-clip py-[6px] relative shrink-0 w-full" data-name="Content" data-node-id="I60932:98199;58143:54537">
+            <div className="content-stretch flex gap-[var(--sds-size-space-200,8px)] items-center pl-[20px] pr-[18px] py-[14px] relative rounded-[var(--sds-size-radius-200,8px)] shrink-0" data-name="InputItem" data-node-id="I60932:98199;58143:54538">
+              <div className="content-stretch flex gap-[var(--sds-size-space-200,0px)] items-center relative shrink-0" data-name="Title" data-node-id="I60932:98199;58143:54538;58017:37999">
+                <p className="font-['NanumSquareRound:Regular',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.5)] text-left" data-node-id="I60932:98199;58143:54538;58017:38000">
+                  부관리자
+                </p>
+              </div>
+              <div className="flex items-center justify-center relative shrink-0">
+                <div className="flex-none rotate-[180deg]">
+                  <div className="overflow-clip relative size-[20px]" data-name="Chevron up" data-node-id="I60932:98199;58143:54538;58017:38001">
+                    <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I60932:98199;58143:54538;58017:38001;7758:11236">
+                      <div className="absolute inset-[-20%_-10%]" style={{ "--stroke-0": "rgba(0, 0, 0, 1)" } as React.CSSProperties}>
+                        <img alt="" className="block max-w-none size-full" src={img1} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </button>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-[120px] relative self-stretch" data-name="Cell" data-node-id="60591:96749">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I60591:96749;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I60591:96749;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">middle@somsatang.com</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col h-[62px] items-start relative shrink-0" data-name="Cell" data-node-id="60633:96489">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="60633:96490">
+            <Switch className="bg-[rgba(29,27,32,0.12)] content-stretch flex h-[30px] items-center justify-end px-[4px] py-[2px] relative rounded-[100px] shrink-0 w-[52px]" state="disabled" />
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col h-[62px] items-center justify-center relative shrink-0 w-[54px]" data-name="Cell" data-node-id="60696:100126">
+          <div className="content-stretch flex items-center justify-center overflow-clip p-[var(--sds-size-space-200,8px)] relative rounded-[var(--sds-typography-scale-06,32px)] shrink-0" data-name="Icon Button" data-node-id="60696:100127">
+            <div className="overflow-clip relative shrink-0 size-[16px]" data-name="Size=16" data-node-id="I60696:100127;34:12257">
+              <div className="absolute inset-1/4" data-name="Icon" data-node-id="I60696:100127;34:12257;68:16114">
+                <div className="absolute inset-[-8%]" style={{ "--stroke-0": "rgba(30, 30, 30, 1)" } as React.CSSProperties}>
+                  <img alt="" className="block max-w-none size-full" src={img2} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex items-start overflow-clip relative shrink-0 w-full" data-name="Row" data-node-id="60784:97687">
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="60784:97688">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I60784:97688;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] text-center w-full" data-node-id="I60784:97688;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">나애드</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="60784:97689">
+          <div className="content-stretch flex flex-[1_0_0] gap-[6px] items-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="60784:97690">
+            <div className="overflow-clip relative rounded-[var(--sds-size-radius-full,9999px)] shrink-0 size-[20px]" data-name="Avatar" data-node-id="60784:97691">
+              <div className="absolute h-[87px] left-[calc(50%-1px)] top-[calc(50%+23.5px)] translate-x-[-50%] translate-y-[-50%] w-[74px]" data-name="Shape" data-node-id="I60784:97691;60591:96691">
+                <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img3} />
+              </div>
+            </div>
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] text-center whitespace-nowrap" data-node-id="60784:97692">
+              <p className="leading-[1.3]">솜사탕</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[110px]" data-name="Cell" data-node-id="60784:97695">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I60784:97695;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I60784:97695;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">마케팅</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="60932:98187">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I60932:98187;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I60932:98187;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">차장</p>
+            </div>
+          </div>
+        </div>
+        <button className="bg-[rgba(255,255,255,0)] content-stretch cursor-pointer flex flex-col items-center relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="60932:98208">
+          <div className="content-stretch flex flex-col gap-[6px] items-center justify-center overflow-clip py-[6px] relative shrink-0 w-full" data-name="Content" data-node-id="I60932:98208;58143:54537">
+            <div className="content-stretch flex gap-[var(--sds-size-space-200,8px)] items-center pl-[20px] pr-[18px] py-[14px] relative rounded-[var(--sds-size-radius-200,8px)] shrink-0" data-name="InputItem" data-node-id="I60932:98208;58143:54538">
+              <div className="content-stretch flex gap-[var(--sds-size-space-200,0px)] items-center relative shrink-0" data-name="Title" data-node-id="I60932:98208;58143:54538;58017:37999">
+                <p className="font-['NanumSquareRound:Regular',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.5)] text-left" data-node-id="I60932:98208;58143:54538;58017:38000">
+                  부관리자
+                </p>
+              </div>
+              <div className="flex items-center justify-center relative shrink-0">
+                <div className="flex-none rotate-[180deg]">
+                  <div className="overflow-clip relative size-[20px]" data-name="Chevron up" data-node-id="I60932:98208;58143:54538;58017:38001">
+                    <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I60932:98208;58143:54538;58017:38001;7758:11236">
+                      <div className="absolute inset-[-20%_-10%]" style={{ "--stroke-0": "rgba(0, 0, 0, 1)" } as React.CSSProperties}>
+                        <img alt="" className="block max-w-none size-full" src={img1} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </button>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-[120px] relative self-stretch" data-name="Cell" data-node-id="60784:97693">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I60784:97693;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I60784:97693;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">middle2@somsatang.com</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col h-[62px] items-start relative shrink-0" data-name="Cell" data-node-id="60784:97696">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="60784:97697">
+            <Switch className="bg-[rgba(29,27,32,0.12)] content-stretch flex h-[30px] items-center justify-end px-[4px] py-[2px] relative rounded-[100px] shrink-0 w-[52px]" state="disabled" />
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col h-[62px] items-center justify-center relative shrink-0 w-[54px]" data-name="Cell" data-node-id="60784:97700">
+          <button className="content-stretch cursor-pointer flex items-center justify-center overflow-clip p-[var(--sds-size-space-200,8px)] relative rounded-[var(--sds-typography-scale-06,32px)] shrink-0" data-name="Icon Button" data-node-id="60784:97701">
+            <div className="overflow-clip relative shrink-0 size-[16px]" data-name="Size=16" data-node-id="I60784:97701;34:12257">
+              <div className="absolute inset-1/4" data-name="Icon" data-node-id="I60784:97701;34:12257;68:16114">
+                <div className="absolute inset-[-8%]" style={{ "--stroke-0": "rgba(30, 30, 30, 1)" } as React.CSSProperties}>
+                  <img alt="" className="block max-w-none size-full" src={img2} />
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <Divider className="content-stretch flex flex-col items-center justify-center py-[24px] relative shrink-0 w-full" />
+      <div className="bg-[rgba(255,255,255,0)] content-stretch flex items-start overflow-clip relative shrink-0 w-full" data-name="Row" data-node-id="61395:84062">
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="61395:84063">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61395:84063;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] text-center w-full" data-node-id="I61395:84063;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">나애드</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="61395:84064">
+          <div className="content-stretch flex flex-[1_0_0] gap-[6px] items-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="61395:84065">
+            <div className="overflow-clip relative rounded-[var(--sds-size-radius-full,9999px)] shrink-0 size-[20px]" data-name="Avatar" data-node-id="61395:84066">
+              <div className="absolute h-[87px] left-[calc(50%-1px)] top-[calc(50%+23.5px)] translate-x-[-50%] translate-y-[-50%] w-[74px]" data-name="Shape" data-node-id="I61395:84066;60591:96691">
+                <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img3} />
+              </div>
+            </div>
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] text-center whitespace-nowrap" data-node-id="61395:84067">
+              <p className="leading-[1.3]">솜사탕</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[110px]" data-name="Cell" data-node-id="61395:84068">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61395:84068;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I61395:84068;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">마케팅</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="61395:84069">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61395:84069;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I61395:84069;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">차장</p>
+            </div>
+          </div>
+        </div>
+        <button className="bg-[rgba(255,255,255,0)] content-stretch cursor-pointer flex flex-col items-center relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="61395:84070">
+          <div className="content-stretch flex flex-col gap-[6px] items-center justify-center overflow-clip py-[6px] relative shrink-0 w-full" data-name="Content" data-node-id="I61395:84070;58143:54537">
+            <div className="content-stretch flex gap-[var(--sds-size-space-200,8px)] items-center pl-[20px] pr-[18px] py-[14px] relative rounded-[var(--sds-size-radius-200,8px)] shrink-0" data-name="InputItem" data-node-id="I61395:84070;58143:54538">
+              <div className="content-stretch flex gap-[var(--sds-size-space-200,0px)] items-center relative shrink-0" data-name="Title" data-node-id="I61395:84070;58143:54538;58017:37999">
+                <p className="font-['NanumSquareRound:Regular',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.5)] text-left" data-node-id="I61395:84070;58143:54538;58017:38000">
+                  일반직원
+                </p>
+              </div>
+              <div className="flex items-center justify-center relative shrink-0">
+                <div className="flex-none rotate-[180deg]">
+                  <div className="overflow-clip relative size-[20px]" data-name="Chevron up" data-node-id="I61395:84070;58143:54538;58017:38001">
+                    <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I61395:84070;58143:54538;58017:38001;7758:11236">
+                      <div className="absolute inset-[-20%_-10%]" style={{ "--stroke-0": "rgba(0, 0, 0, 1)" } as React.CSSProperties}>
+                        <img alt="" className="block max-w-none size-full" src={img1} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </button>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-[120px] relative self-stretch" data-name="Cell" data-node-id="61395:84071">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61395:84071;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I61395:84071;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">middle2@somsatang.com</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col h-[62px] items-start relative shrink-0" data-name="Cell" data-node-id="61395:84072">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="61395:84073">
+            <Switch className="bg-[var(--point1,#ea4c89)] content-stretch flex h-[30px] items-center justify-end px-[4px] py-[2px] relative rounded-[100px] shrink-0 w-[52px]" />
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col h-[62px] items-center justify-center relative shrink-0 w-[54px]" data-name="Cell" data-node-id="61395:84076">
+          <button className="content-stretch cursor-pointer flex items-center justify-center overflow-clip p-[var(--sds-size-space-200,8px)] relative rounded-[var(--sds-typography-scale-06,32px)] shrink-0" data-name="Icon Button" data-node-id="61395:84077">
+            <div className="overflow-clip relative shrink-0 size-[16px]" data-name="Size=16" data-node-id="I61395:84077;34:12257">
+              <div className="absolute inset-1/4" data-name="Icon" data-node-id="I61395:84077;34:12257;68:16114">
+                <div className="absolute inset-[-8%]" style={{ "--stroke-0": "rgba(30, 30, 30, 1)" } as React.CSSProperties}>
+                  <img alt="" className="block max-w-none size-full" src={img2} />
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div className="bg-[rgba(255,255,255,0)] content-stretch flex items-start overflow-clip relative shrink-0 w-full" data-name="Row" data-node-id="61395:84105">
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="61395:84106">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61395:84106;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] text-center w-full" data-node-id="I61395:84106;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">나애드</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="61395:84107">
+          <div className="content-stretch flex flex-[1_0_0] gap-[6px] items-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="61395:84108">
+            <div className="overflow-clip relative rounded-[var(--sds-size-radius-full,9999px)] shrink-0 size-[20px]" data-name="Avatar" data-node-id="61395:84109">
+              <div className="absolute h-[87px] left-[calc(50%-1px)] top-[calc(50%+23.5px)] translate-x-[-50%] translate-y-[-50%] w-[74px]" data-name="Shape" data-node-id="I61395:84109;60591:96691">
+                <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img3} />
+              </div>
+            </div>
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] text-center whitespace-nowrap" data-node-id="61395:84110">
+              <p className="leading-[1.3]">솜사탕</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[110px]" data-name="Cell" data-node-id="61395:84111">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61395:84111;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I61395:84111;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">마케팅</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="61395:84112">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61395:84112;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I61395:84112;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">차장</p>
+            </div>
+          </div>
+        </div>
+        <button className="bg-[rgba(255,255,255,0)] content-stretch cursor-pointer flex flex-col items-center relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="61395:84113">
+          <div className="content-stretch flex flex-col gap-[6px] items-center justify-center overflow-clip py-[6px] relative shrink-0 w-full" data-name="Content" data-node-id="I61395:84113;58143:54537">
+            <div className="content-stretch flex gap-[var(--sds-size-space-200,8px)] items-center pl-[20px] pr-[18px] py-[14px] relative rounded-[var(--sds-size-radius-200,8px)] shrink-0" data-name="InputItem" data-node-id="I61395:84113;58143:54538">
+              <div className="content-stretch flex gap-[var(--sds-size-space-200,0px)] items-center relative shrink-0" data-name="Title" data-node-id="I61395:84113;58143:54538;58017:37999">
+                <p className="font-['NanumSquareRound:Regular',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.5)] text-left" data-node-id="I61395:84113;58143:54538;58017:38000">
+                  일반직원
+                </p>
+              </div>
+              <div className="flex items-center justify-center relative shrink-0">
+                <div className="flex-none rotate-[180deg]">
+                  <div className="overflow-clip relative size-[20px]" data-name="Chevron up" data-node-id="I61395:84113;58143:54538;58017:38001">
+                    <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I61395:84113;58143:54538;58017:38001;7758:11236">
+                      <div className="absolute inset-[-20%_-10%]" style={{ "--stroke-0": "rgba(0, 0, 0, 1)" } as React.CSSProperties}>
+                        <img alt="" className="block max-w-none size-full" src={img1} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </button>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-[120px] relative self-stretch" data-name="Cell" data-node-id="61395:84114">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61395:84114;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I61395:84114;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">middle2@somsatang.com</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col h-[62px] items-start relative shrink-0" data-name="Cell" data-node-id="61395:84115">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="61395:84116">
+            <Switch className="bg-[var(--point1,#ea4c89)] content-stretch flex h-[30px] items-center justify-end px-[4px] py-[2px] relative rounded-[100px] shrink-0 w-[52px]" />
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col h-[62px] items-center justify-center relative shrink-0 w-[54px]" data-name="Cell" data-node-id="61395:84119">
+          <button className="content-stretch cursor-pointer flex items-center justify-center overflow-clip p-[var(--sds-size-space-200,8px)] relative rounded-[var(--sds-typography-scale-06,32px)] shrink-0" data-name="Icon Button" data-node-id="61395:84120">
+            <div className="overflow-clip relative shrink-0 size-[16px]" data-name="Size=16" data-node-id="I61395:84120;34:12257">
+              <div className="absolute inset-1/4" data-name="Icon" data-node-id="I61395:84120;34:12257;68:16114">
+                <div className="absolute inset-[-8%]" style={{ "--stroke-0": "rgba(30, 30, 30, 1)" } as React.CSSProperties}>
+                  <img alt="" className="block max-w-none size-full" src={img2} />
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <Divider className="content-stretch flex flex-col items-center justify-center py-[24px] relative shrink-0 w-full" />
+      <div className="bg-[var(--bg_bright,#f9fafb)] content-stretch flex items-start overflow-clip relative shrink-0 w-full" data-name="Row" data-node-id="61395:84023">
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="61395:84024">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61395:84024;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] text-center w-full" data-node-id="I61395:84024;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">박애드</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="61395:84025">
+          <div className="content-stretch flex flex-[1_0_0] gap-[6px] items-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="61395:84026">
+            <div className="overflow-clip relative rounded-[var(--sds-size-radius-full,9999px)] shrink-0 size-[20px]" data-name="Avatar" data-node-id="61395:84027">
+              <div className="absolute h-[87px] left-[calc(50%-1px)] top-[calc(50%+23.5px)] translate-x-[-50%] translate-y-[-50%] w-[74px]" data-name="Shape" data-node-id="I61395:84027;60591:96691">
+                <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img4} />
+              </div>
+            </div>
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] text-center whitespace-nowrap" data-node-id="61395:84028">
+              <p className="leading-[1.3]">미니사탕</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[110px]" data-name="Cell" data-node-id="61395:84029">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61395:84029;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I61395:84029;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">디자인</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="61395:84030">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61395:84030;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I61395:84030;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">과장</p>
+            </div>
+          </div>
+        </div>
+        <button className="bg-[rgba(255,255,255,0)] content-stretch cursor-pointer flex flex-col items-center relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="61395:84031">
+          <div className="content-stretch flex flex-col gap-[6px] h-[62px] items-center justify-center overflow-clip py-[6px] relative shrink-0 w-full" data-name="Content" data-node-id="I61395:84031;58143:54537">
+            <div className="content-stretch flex gap-[var(--sds-size-space-200,8px)] items-center pl-[20px] pr-[18px] py-[14px] relative rounded-[var(--sds-size-radius-200,8px)] shrink-0" data-name="InputItem" data-node-id="I61395:84031;58143:54538">
+              <div className="content-stretch flex gap-[var(--sds-size-space-200,0px)] items-center relative shrink-0" data-name="Title" data-node-id="I61395:84031;58143:54538;58017:37999">
+                <p className="font-['NanumSquareRound:Regular',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.5)] text-left" data-node-id="I61395:84031;58143:54538;58017:38000">
+                  일반직원
+                </p>
+              </div>
+              <div className="flex items-center justify-center relative shrink-0">
+                <div className="flex-none rotate-[180deg]">
+                  <div className="overflow-clip size-[20px]" data-name="Chevron up" data-node-id="I61395:84031;58143:54538;58017:38001" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </button>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-[120px] relative self-stretch" data-name="Cell" data-node-id="61395:84032">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61395:84032;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I61395:84032;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">mini@somsatang.com</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col h-[62px] items-start relative shrink-0" data-name="Cell" data-node-id="61522:103299">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="61522:103300">
+            <button className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch cursor-pointer flex gap-[10px] items-center justify-center overflow-clip px-[16px] py-[6px] relative rounded-[100px] shrink-0" data-name="Button_Mini" data-node-id="61766:85274">
+              <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/mini,12px)] text-center" data-node-id="I61766:85274;166:17169">
+                구성원승인
+              </p>
+            </button>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col h-[62px] items-center justify-center relative shrink-0 w-[54px]" data-name="Cell" data-node-id="61395:84034">
+          <button className="content-stretch cursor-pointer flex items-center justify-center overflow-clip p-[var(--sds-size-space-200,8px)] relative rounded-[var(--sds-typography-scale-06,32px)] shrink-0" data-name="Icon Button" data-node-id="61395:84035">
+            <div className="overflow-clip relative shrink-0 size-[16px]" data-name="Size=16" data-node-id="I61395:84035;34:12257">
+              <div className="absolute inset-1/4" data-name="Icon" data-node-id="I61395:84035;34:12257;68:16114">
+                <div className="absolute inset-[-8%]" style={{ "--stroke-0": "rgba(30, 30, 30, 1)" } as React.CSSProperties}>
+                  <img alt="" className="block max-w-none size-full" src={img2} />
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div className="bg-[var(--bg_bright,#f9fafb)] content-stretch flex items-start overflow-clip relative shrink-0 w-full" data-name="Row" data-node-id="61360:101728">
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="61360:101729">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61360:101729;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] text-center w-full" data-node-id="I61360:101729;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">차합류</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="61360:101730">
+          <div className="content-stretch flex flex-[1_0_0] gap-[6px] items-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="61360:101731">
+            <div className="overflow-clip relative rounded-[var(--sds-size-radius-full,9999px)] shrink-0 size-[20px]" data-name="Avatar" data-node-id="61360:101732">
+              <div className="absolute h-[87px] left-[calc(50%-1px)] top-[calc(50%+23.5px)] translate-x-[-50%] translate-y-[-50%] w-[74px]" data-name="Shape" data-node-id="I61360:101732;60591:96691">
+                <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={img4} />
+              </div>
+            </div>
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] text-center whitespace-nowrap" data-node-id="61360:101733">
+              <p className="leading-[1.3]">미니사탕</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[110px]" data-name="Cell" data-node-id="61360:101734">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61360:101734;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I61360:101734;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">-</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col items-start relative self-stretch shrink-0 w-[100px]" data-name="Cell" data-node-id="61360:101735">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61360:101735;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I61360:101735;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">-</p>
+            </div>
+          </div>
+        </div>
+        <button className="bg-[rgba(255,255,255,0)] content-stretch cursor-pointer flex flex-col items-center relative self-stretch shrink-0 w-[130px]" data-name="Cell" data-node-id="61360:101736">
+          <div className="content-stretch flex flex-col gap-[6px] items-center justify-center overflow-clip py-[6px] relative shrink-0 w-full" data-name="Content" data-node-id="I61360:101736;58143:54537">
+            <div className="content-stretch flex gap-[var(--sds-size-space-200,8px)] items-center pl-[20px] pr-[18px] py-[14px] relative rounded-[var(--sds-size-radius-200,8px)] shrink-0" data-name="InputItem" data-node-id="I61360:101736;58143:54538">
+              <div className="content-stretch flex gap-[var(--sds-size-space-200,0px)] items-center relative shrink-0" data-name="Title" data-node-id="I61360:101736;58143:54538;58017:37999">
+                <p className="font-['NanumSquareRound:Regular',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.5)] text-left" data-node-id="I61360:101736;58143:54538;58017:38000">
+                  일반직원
+                </p>
+              </div>
+              <div className="flex items-center justify-center relative shrink-0">
+                <div className="flex-none rotate-[180deg]">
+                  <div className="overflow-clip size-[20px]" data-name="Chevron up" data-node-id="I61360:101736;58143:54538;58017:38001" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </button>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-[120px] relative self-stretch" data-name="Cell" data-node-id="61360:101737">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="I61360:101737;88:14681">
+            <div className="flex flex-col font-['NanumSquareRound:Regular',sans-serif] justify-center leading-[0] min-h-[48px] not-italic relative shrink-0 text-[16px] text-[rgba(0,0,0,0.6)] w-full" data-node-id="I61360:101737;88:14682">
+              <p className="leading-[1.3] whitespace-pre-wrap">cha@somsatang.com</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col h-[62px] items-start relative shrink-0" data-name="Cell" data-node-id="61522:103314">
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[6px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[10px] relative w-full" data-name="Content" data-node-id="61522:103315">
+            <button className="bg-white border-[0.5px] border-[rgba(0,0,0,0.2)] border-solid content-stretch cursor-pointer flex gap-[10px] items-center justify-center overflow-clip px-[16px] py-[6px] relative rounded-[100px] shrink-0" data-name="Button_Mini" data-node-id="61766:85279">
+              <p className="font-['NanumSquareRound:Bold',sans-serif] leading-none not-italic relative shrink-0 text-[color:var(--black-90,#1e1e1e)] text-[length:var(--form\/mini,12px)] text-center" data-node-id="I61766:85279;166:17169">
+                구성원승인
+              </p>
+            </button>
+          </div>
+        </div>
+        <div className="bg-[rgba(255,255,255,0)] content-stretch flex flex-col h-[62px] items-center justify-center relative shrink-0 w-[54px]" data-name="Cell" data-node-id="61360:101739">
+          <button className="content-stretch cursor-pointer flex items-center justify-center overflow-clip p-[var(--sds-size-space-200,8px)] relative rounded-[var(--sds-typography-scale-06,32px)] shrink-0" data-name="Icon Button" data-node-id="61360:101740">
+            <div className="overflow-clip relative shrink-0 size-[16px]" data-name="Size=16" data-node-id="I61360:101740;34:12257">
+              <div className="absolute inset-1/4" data-name="Icon" data-node-id="I61360:101740;34:12257;68:16114">
+                <div className="absolute inset-[-8%]" style={{ "--stroke-0": "rgba(30, 30, 30, 1)" } as React.CSSProperties}>
+                  <img alt="" className="block max-w-none size-full" src={img2} />
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+### Content Block 2 (Text)
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+
+### Content Block 3 (Text)
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+
+### Content Block 4 (Text)
+These styles are contained in the design: M3/sys/light/surface: #FEF7FF, M3/state-layers/light/on-surface/opacity-0.12: #1D1B20, M3/sys/light/on-primary: #FFFFFF.
+
+### Content Block 5 (Text)
+Images and SVGs will be stored as constants, e.g. const image = 'https://www.figma.com/api/mcp/asset/550e8400-e29b-41d4-a716-446655440000'. These constants will be used in the code as the source for the image, ex: <img src={image} />. Image assets are stored on a remote server for 7 days and can be fetched using the provided URLs until they expire.
+
+### Content Block 6 (Text)
+IMPORTANT: After you call this tool, you MUST call get_screenshot to get a screenshot of the node for context.
+
+</mcp_external_output>
