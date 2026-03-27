@@ -95,7 +95,7 @@ export default function Portfolio() {
                   }`}
                   onClick={() => {
                     setSelectedMenu('portfolio');
-                    setLocation('/work/company-portfolio');
+                    setLocation('/portfolio');
                   }}
                   data-testid="menu-portfolio"
                 >

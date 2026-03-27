@@ -9,7 +9,7 @@ export default function WorkSidebar() {
   });
   const [messagesOpen, setMessagesOpen] = useState(() => location.startsWith('/work/message'));
   const [projectsOpen, setProjectsOpen] = useState(() => location.startsWith('/work/project'));
-  const [portfolioOpen, setPortfolioOpen] = useState(() => location.startsWith('/work/company-portfolio'));
+  const [portfolioOpen, setPortfolioOpen] = useState(() => location.startsWith('/work/company-portfolio') || location.startsWith('/portfolio'));
   const [isToggleAnimating, setIsToggleAnimating] = useState(false);
 
   const handleModeChange = (mode: 'request' | 'participate') => {
@@ -314,9 +314,9 @@ Cotton Candy 알림
         {/* 5. 회사소개서 & 포트폴리오 */}
         <div>
           <button
-            onClick={() => setPortfolioOpen(!portfolioOpen)}
+            onClick={() => { setLocation('/portfolio'); setPortfolioOpen(true); }}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium ${
-              location === '/work/company-portfolio' || location.startsWith('/work/company-portfolio/')
+              location === '/portfolio' || location.startsWith('/portfolio') || location === '/work/company-portfolio' || location.startsWith('/work/company-portfolio/')
                 ? 'bg-pink-50 text-pink-600' 
                 : 'hover:bg-gray-50 text-gray-700'
             }`}
