@@ -7,14 +7,10 @@ import {
   Star, Share2, Bookmark, Pencil, X, ChevronLeft, ChevronRight,
 } from "lucide-react";
 
-const T1 = "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=320&h=180&fit=crop&auto=format";
-const T2 = "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=320&h=180&fit=crop&auto=format";
-const T3 = "https://images.unsplash.com/photo-1536240478700-b869ad10a2eb?w=320&h=180&fit=crop&auto=format";
-const T4 = "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=320&h=180&fit=crop&auto=format";
-const P1 = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&auto=format";
-const P2 = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&auto=format";
-const P3 = "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=80&h=80&fit=crop&auto=format";
-const LOGO = "https://images.unsplash.com/photo-1560472355-536de3962603?w=72&h=72&fit=crop&auto=format";
+const GRAY = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect width='1' height='1' fill='%23e5e7eb'/%3E%3C/svg%3E";
+const T1 = GRAY, T2 = GRAY, T3 = GRAY, T4 = GRAY;
+const P1 = GRAY, P2 = GRAY, P3 = GRAY;
+const LOGO = GRAY;
 
 const infoRows = [
   "#전략기획 #크리에이티브 기획 영상 제작 #성과 측정 및 리포팅 #인플루언서/SNS 마케팅, #PR/언론보도 대응 #급행제작 대응 #이벤트/행사 대응",
