@@ -117,6 +117,7 @@ import AdminReportsManagement from "@/pages/admin/reports-management";
 import AdminActivityLogs from "@/pages/admin/activity-logs";
 import AdminCompanies from "@/pages/admin/companies";
 import AdminCompanyDetail from "@/pages/admin/company-detail";
+import AdminParticipation from "@/pages/admin/participation";
 import AdminWorkflowMatching from "@/pages/admin/workflow/matching";
 import AdminWorkflowProposal from "@/pages/admin/workflow/proposal";
 import AdminWorkflowProposalView from "@/pages/admin/workflow/proposal-view";
@@ -489,6 +490,9 @@ function Router() {
       </Route>
       <Route path="/admin/companies/:id">
         <AdminCompanyDetail />
+      </Route>
+      <Route path="/admin/participation">
+        <AdminParticipation />
       </Route>
       <Route path="/admin/reports-management">
         <AdminLayout><AdminReportsManagement /></AdminLayout>

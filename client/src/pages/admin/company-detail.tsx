@@ -38,7 +38,8 @@ import {
   Clock,
   Pencil,
   Save,
-  User
+  User,
+  BarChart3
 } from "lucide-react"
 import { useLocation, useParams, Link } from "wouter"
 import { MOCK_ADMIN_COMPANIES_V1, MOCK_ADMIN_PROJECTS_V1 } from "@/data/mockData"
@@ -219,15 +220,20 @@ export default function AdminCompanyDetail() {
   const inactiveMembers = members.filter((m) => m.status === "inactive").length
   const pendingMembers = members.filter((m) => m.status === "pending").length
 
+  const COMPLETED_STATUSES = ["COMPLETE", "ADMIN_CHECKING", "ADMIN_CONFIRMED", "CANCELLED", "STOPPED"]
+  const participationOngoing = projectsAll.filter((p) => !COMPLETED_STATUSES.includes(p.status))
+  const participationCompleted = projectsAll.filter((p) => COMPLETED_STATUSES.includes(p.status))
+
   const tabFromUrl = typeof window !== "undefined"
     ? new URLSearchParams(window.location.search).get("tab")
     : null
-  const initialTab: "info" | "projects" | "portfolio" | "members" =
+  const initialTab: "info" | "projects" | "participation" | "portfolio" | "members" =
     tabFromUrl === "members" ? "members"
     : tabFromUrl === "portfolio" ? "portfolio"
     : tabFromUrl === "projects" ? "projects"
+    : tabFromUrl === "participation" ? "participation"
     : "info"
-  const [activeTab, setActiveTab] = useState<"info" | "projects" | "portfolio" | "members">(initialTab)
+  const [activeTab, setActiveTab] = useState<"info" | "projects" | "participation" | "portfolio" | "members">(initialTab)
 
   return (
     <AdminLayout>
@@ -291,6 +297,7 @@ export default function AdminCompanyDetail() {
           <TabsList className="mb-4">
             <TabsTrigger value="info">회사 정보</TabsTrigger>
             <TabsTrigger value="projects">프로젝트</TabsTrigger>
+            <TabsTrigger value="participation">참여현황</TabsTrigger>
             <TabsTrigger value="portfolio">포트폴리오</TabsTrigger>
             <TabsTrigger value="members">구성원</TabsTrigger>
           </TabsList>
@@ -443,6 +450,105 @@ export default function AdminCompanyDetail() {
                                 </TableCell>
                               </TableRow>
                             ))
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="participation" className="mt-0">
+            <Card>
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    참여현황
+                  </CardTitle>
+                  <Link href="/admin/participation" className="text-sm text-muted-foreground hover:text-foreground">
+                    전체 참여현황 보기
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-4 mb-4">
+                  <div className="flex-1 rounded-lg border border-gray-200 bg-gray-50 p-4 text-center">
+                    <div className="text-2xl font-bold text-gray-900">{participationOngoing.length}</div>
+                    <div className="text-sm text-gray-500 mt-1">진행중</div>
+                  </div>
+                  <div className="flex-1 rounded-lg border border-gray-200 bg-gray-50 p-4 text-center">
+                    <div className="text-2xl font-bold text-gray-900">{participationCompleted.length}</div>
+                    <div className="text-sm text-gray-500 mt-1">완료</div>
+                  </div>
+                  <div className="flex-1 rounded-lg border border-gray-200 bg-gray-50 p-4 text-center">
+                    <div className="text-2xl font-bold text-gray-900">{projectsAll.length}</div>
+                    <div className="text-sm text-gray-500 mt-1">총 참여</div>
+                  </div>
+                </div>
+                <Tabs defaultValue="ongoing">
+                  <TabsList className="mb-4">
+                    <TabsTrigger value="ongoing">진행중 ({participationOngoing.length})</TabsTrigger>
+                    <TabsTrigger value="completed">완료 ({participationCompleted.length})</TabsTrigger>
+                  </TabsList>
+                  {([
+                    { key: "ongoing", list: participationOngoing },
+                    { key: "completed", list: participationCompleted },
+                  ] as const).map(({ key, list }) => (
+                    <TabsContent key={key} value={key}>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-28">ID</TableHead>
+                            <TableHead>프로젝트명</TableHead>
+                            <TableHead className="w-24 text-center">역할</TableHead>
+                            <TableHead className="w-24 text-center">유형</TableHead>
+                            <TableHead className="w-32 text-center">상태</TableHead>
+                            <TableHead className="w-36 text-center">진행 단계</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {list.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                                해당 프로젝트가 없습니다
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            list.map((p) => {
+                              const isOwner = p.ownerCompanyId === company?.id
+                              return (
+                                <TableRow key={p.id}>
+                                  <TableCell className="font-mono text-sm">{p.id}</TableCell>
+                                  <TableCell>
+                                    <Link href={`/admin/projects/${p.id}`} className="font-medium hover:text-pink-600">
+                                      {p.title}
+                                    </Link>
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isOwner ? "bg-blue-100 text-blue-700" : "bg-orange-100 text-orange-700"}`}>
+                                      {isOwner ? "의뢰사" : "수행사"}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="text-center text-sm text-muted-foreground">{p.type}</TableCell>
+                                  <TableCell className="text-center">
+                                    <span className="text-xs text-gray-700">{MainStatusLabels[p.status as keyof typeof MainStatusLabels] ?? p.status}</span>
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    <ProcessStepper
+                                      currentStepIndex={getActiveStepIndexFromMainStatus(
+                                        p.status,
+                                        getProjectSteps(p.type === "1:1" ? "1:1" : "PUBLIC")
+                                      )}
+                                      steps={getProjectSteps(p.type === "1:1" ? "1:1" : "PUBLIC")}
+                                      mode="MINI"
+                                    />
+                                  </TableCell>
+                                </TableRow>
+                              )
+                            })
                           )}
                         </TableBody>
                       </Table>
