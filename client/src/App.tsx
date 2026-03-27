@@ -30,6 +30,7 @@ import CompanyInfo from "@/pages/service/create-project/company-info";
 import AdditionalDescription from "@/pages/service/create-project/additional-description";
 import ProjectDetails from "@/pages/service/create-project/project-details";
 import Portfolio from "@/pages/service/partners/portfolio";
+import PortfolioPreview from "@/pages/service/partners/portfolio-preview";
 import AgencySearch from "@/pages/service/partners/agency-search";
 import GuideIndex from "@/pages/service/guides/main";
 import GuideFeatures from "@/pages/service/guides/features";
@@ -207,6 +208,9 @@ function Router() {
       </Route>
       <Route path="/create-project/step18">
         <ProtectedRoute component={ProjectDetails} />
+      </Route>
+      <Route path="/portfolio/preview">
+        <ProtectedRoute component={PortfolioPreview} />
       </Route>
       <Route path="/portfolio">
         <ProtectedRoute component={Portfolio} />

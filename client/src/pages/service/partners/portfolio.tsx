@@ -2,12 +2,6 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import Layout from "@/components/layout/layout";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { 
   FileText, 
   Home, 
@@ -18,9 +12,6 @@ import {
   Copy,
   Edit,
   Trash2,
-  Star,
-  Share2,
-  Bookmark,
 } from "lucide-react";
 
 type PortfolioItem = {
@@ -39,7 +30,6 @@ const PORTFOLIO_ITEMS: PortfolioItem[] = [
 export default function Portfolio() {
   const [selectedMenu, setSelectedMenu] = useState('portfolio');
   const [, setLocation] = useLocation();
-  const [previewItem, setPreviewItem] = useState<PortfolioItem | null>(null);
 
   return (
     <Layout>
@@ -295,7 +285,7 @@ export default function Portfolio() {
                         variant="ghost"
                         size="sm"
                         className="text-gray-600"
-                        onClick={() => setPreviewItem(item)}
+                        onClick={() => setLocation("/portfolio/preview")}
                       >
                         <Eye className="w-4 h-4 mr-1" />
                         보기
@@ -332,132 +322,6 @@ export default function Portfolio() {
         </div>
       </div>
 
-      {/* 소개서 미리보기 Dialog */}
-      <Dialog open={!!previewItem} onOpenChange={() => setPreviewItem(null)}>
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto p-0">
-          <DialogHeader className="px-8 pt-8 pb-0">
-            <DialogTitle className="sr-only">소개서 미리보기</DialogTitle>
-          </DialogHeader>
-
-          {previewItem && (
-            <div>
-              {/* 회사 헤더 */}
-              <div className="px-8 pt-6 pb-5 border-b">
-                <div className="flex items-start gap-5">
-                  {/* 로고 영역 */}
-                  <div className="w-18 h-18 flex-shrink-0">
-                    <div className="w-[72px] h-[72px] rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400 text-xs">
-                      LOGO
-                    </div>
-                  </div>
-
-                  {/* 회사 정보 */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h2 className="text-xl font-bold">솜사탕애드</h2>
-                          <span className="text-blue-500 text-sm">✓ 인증</span>
-                        </div>
-                        {/* 별점 */}
-                        <div className="flex items-center gap-1 mb-2">
-                          {[1,2,3,4,5].map((i) => (
-                            <Star key={i} className={`w-4 h-4 ${i <= 4 ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`} />
-                          ))}
-                          <span className="text-sm text-gray-500 ml-1">TVCF 평점</span>
-                        </div>
-                        {/* 서브 정보 */}
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <span className="px-2 py-0.5 border border-gray-300 rounded text-xs">대행사</span>
-                          <span>서울특별시</span>
-                          <span>Creative중심 대행사</span>
-                        </div>
-                      </div>
-                      {/* 액션 버튼 */}
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <button className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                          <Star className="w-4 h-4 text-gray-500" />
-                        </button>
-                        <button className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                          <Share2 className="w-4 h-4 text-gray-500" />
-                        </button>
-                        <button className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                          <Bookmark className="w-4 h-4 text-gray-500" />
-                        </button>
-                        <Button variant="outline" size="sm" className="btn-white-compact">
-                          포트폴리오 보기
-                        </Button>
-                        <Button size="sm" className="btn-pink">
-                          1:1 의뢰하기
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 담당자 정보 */}
-                <div className="mt-4 flex items-center gap-4 text-sm text-gray-600 bg-gray-50 rounded-lg px-4 py-2.5">
-                  <span className="text-gray-500">담당자</span>
-                  <span className="font-medium text-gray-800">나해피</span>
-                  <span>☎ 02-1234-5679</span>
-                  <span>nhappy@yesc.com</span>
-                </div>
-              </div>
-
-              {/* 탭 */}
-              <div className="flex border-b">
-                <button className="flex-1 py-4 text-sm font-medium text-gray-900 border-b-2 border-gray-900">
-                  소개
-                </button>
-                <button className="flex-1 py-4 text-sm font-medium text-gray-400 hover:text-gray-700 transition-colors">
-                  회사소개서 &amp; 포트폴리오
-                </button>
-              </div>
-
-              {/* 본문 */}
-              <div className="px-8 py-8 space-y-6">
-                {/* 기업 소개글 */}
-                <div>
-                  <h3 className="text-base font-bold text-gray-900 mb-3">
-                    Campaign creators 솜사탕애드 입니다.
-                  </h3>
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    솜사탕애드(AdPrime)은 브랜드가 직면한 과제에 최적의 해답을 제시하고, 전하고 싶은 메시지를 가장 효과적인 방식으로 세상과 연결하는 크리에이티브 파트너입니다. 우리는 브랜드의 순간을 가장 빛나게 만드는 프라임 타임을 설계하며, 단순한 광고를 넘어 긍정적 변화를 이끄는 캠페인을 만듭니다. 솜사탕애드은 "Better Ideas, Better Impact"라는 철학 아래, 더 나은 내일을 위한 브랜드 스토리를 만들고, 이를 통해 세상과 사람들의 마음을 움직이는 캠페인 크리에이터(Campaign Creators)입니다.
-                  </p>
-                </div>
-
-                <hr className="border-gray-100" />
-
-                {/* 상세 정보 */}
-                <div className="space-y-2 text-sm text-gray-700">
-                  <div className="flex gap-3">
-                    <span className="text-gray-500 w-20 flex-shrink-0">[대표광고주]</span>
-                    <span>골드백화점, 블루리조트, 달콤커피, 스마트전자</span>
-                  </div>
-                  <div className="flex gap-3">
-                    <span className="text-gray-500 w-20 flex-shrink-0">[최근6개월]</span>
-                    <span>아름건설, 하늘항공, 뷰티코스메틱, 마이패션</span>
-                  </div>
-                  <div className="flex gap-3">
-                    <span className="text-gray-500 w-20 flex-shrink-0"></span>
-                    <span>직원 20명 이상 | 최소 제작비 2억 | 평균 제작비 3억</span>
-                  </div>
-                  <div className="flex gap-3">
-                    <span className="text-gray-500 w-20 flex-shrink-0">[최근 3년]</span>
-                    <span>🏆 수상 35회 | 📂 포트폴리오 75작품</span>
-                  </div>
-                </div>
-
-                {/* 서비스 태그 */}
-                <div className="text-sm text-gray-700">
-                  <p>#전략기획 #크리에이티브 기획 영상 제작 #성과 측정 및 리포팅 #인플루언서/SNS 마케팅 #PR/언론보도 대응</p>
-                  <p className="mt-1">#급행제작 대응 #이벤트/행사 대응</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </Layout>
   );
 }
