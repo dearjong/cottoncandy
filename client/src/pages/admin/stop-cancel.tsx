@@ -28,6 +28,7 @@ export default function StopCancelPage() {
       <ProjectManagement
         ref={projectRef}
         defaultStatuses={["STOPPED", "CANCELLED", "COMPLETE", "ADMIN_CONFIRMED"]}
+        excludeConsultingInAll
         onActiveViewChange={setActiveViewLabel}
         onDetailModeChange={setShowBackButton}
       />
