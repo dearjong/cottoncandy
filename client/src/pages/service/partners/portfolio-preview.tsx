@@ -391,6 +391,21 @@ export default function PortfolioPreview() {
                 </div>
               )}
 
+              {/* 하단 내비게이션 */}
+              <div className="flex items-center justify-between mt-10 pt-6 border-t">
+                <button
+                  className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg px-3 py-1.5"
+                  onClick={() => setLocation("/portfolio")}
+                >
+                  <ChevronLeft className="w-4 h-4" /> 목록으로 돌아가기
+                </button>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <button className="px-2 py-1 border border-gray-200 rounded hover:bg-gray-50"><ChevronLeft className="w-4 h-4" /></button>
+                  <span>이전 / 다음 소개서</span>
+                  <button className="px-2 py-1 border border-gray-200 rounded hover:bg-gray-50"><ChevronRight className="w-4 h-4" /></button>
+                </div>
+              </div>
+
             </main>
           </div>
         </div>
