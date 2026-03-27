@@ -27,7 +27,7 @@ export default function StopCancelPage() {
       </div>
       <ProjectManagement
         ref={projectRef}
-        defaultStatuses={["STOPPED", "CANCELLED"]}
+        defaultStatuses={["STOPPED", "CANCELLED", "COMPLETE", "ADMIN_CONFIRMED"]}
         onActiveViewChange={setActiveViewLabel}
         onDetailModeChange={setShowBackButton}
       />

@@ -684,7 +684,9 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
   const [approveDialogOpen, setApproveDialogOpen] = useState(false)
   const [confirmRejectOpen, setConfirmRejectOpen] = useState(false)
   const [stopCancelApproveOpen, setStopCancelApproveOpen] = useState(false)
-  const [stopCancelApproveType, setStopCancelApproveType] = useState<"중단 승인" | "취소 승인" | "요청 거절">("중단 승인")
+  const [stopCancelApproveType, setStopCancelApproveType] = useState<"중단 승인" | "취소 승인" | "요청 거절" | "완료 취소">("중단 승인")
+  const [stopCancelRejectReason, setStopCancelRejectReason] = useState("")
+  const [stopCancelRejectError, setStopCancelRejectError] = useState("")
 
   useImperativeHandle(ref, () => ({
     clearSelection: () => setSelectedProject(null),
@@ -1393,6 +1395,8 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
                     size="default"
                     onClick={() => {
                       setStopCancelApproveType("요청 거절")
+                      setStopCancelRejectReason("")
+                      setStopCancelRejectError("")
                       setStopCancelApproveOpen(true)
                     }}
                   >
@@ -1419,6 +1423,8 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
                     size="default"
                     onClick={() => {
                       setStopCancelApproveType("요청 거절")
+                      setStopCancelRejectReason("")
+                      setStopCancelRejectError("")
                       setStopCancelApproveOpen(true)
                     }}
                   >
@@ -1437,6 +1443,18 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
                     취소 승인
                   </Button>
                 </>
+              )}
+              {(selectedProject.status === "COMPLETE" || selectedProject.status === "ADMIN_CONFIRMED") && (
+                <Button
+                  size="default"
+                  className="bg-orange-500 hover:bg-orange-600"
+                  onClick={() => {
+                    setStopCancelApproveType("완료 취소")
+                    setStopCancelApproveOpen(true)
+                  }}
+                >
+                  완료 취소처리
+                </Button>
               )}
               {!isWorkConsultInquiryDetail && (
                 <Button variant="outline" size="default" onClick={() => setMessageDialogOpen(true)}>
@@ -2436,13 +2454,23 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
       </Dialog>
 
       {/* 중단/취소 요청 승인·거절 확인 팝업 */}
-      <Dialog open={stopCancelApproveOpen} onOpenChange={setStopCancelApproveOpen}>
+      <Dialog
+        open={stopCancelApproveOpen}
+        onOpenChange={(open) => {
+          setStopCancelApproveOpen(open)
+          if (!open) {
+            setStopCancelRejectReason("")
+            setStopCancelRejectError("")
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
               {stopCancelApproveType === "중단 승인" && "중단 요청을 승인할까요?"}
               {stopCancelApproveType === "취소 승인" && "취소 요청을 승인할까요?"}
-              {stopCancelApproveType === "요청 거절" && "요청을 거절할까요?"}
+              {stopCancelApproveType === "요청 거절" && "요청 거절 — 사유 입력"}
+              {stopCancelApproveType === "완료 취소" && "완료 처리를 취소할까요?"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-1">
@@ -2457,8 +2485,28 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
                 {stopCancelApproveType === "취소 승인" && (
                   <p>승인 시 프로젝트가 취소 처리됩니다.</p>
                 )}
-                {stopCancelApproveType === "요청 거절" && (
-                  <p>거절 시 요청이 반려되고 기존 상태가 유지됩니다.</p>
+                {stopCancelApproveType === "완료 취소" && (
+                  <p>완료 처리를 취소하고 이전 단계로 되돌립니다.</p>
+                )}
+              </div>
+            )}
+            {stopCancelApproveType === "요청 거절" && (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">거절 사유 <span className="text-pink-600">*</span></span>
+                  <span className="text-xs text-gray-400">의뢰사에게 그대로 노출됩니다.</span>
+                </div>
+                <textarea
+                  className="w-full min-h-[96px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
+                  placeholder="거절 사유를 입력하세요."
+                  value={stopCancelRejectReason}
+                  onChange={(e) => {
+                    setStopCancelRejectReason(e.target.value)
+                    if (stopCancelRejectError) setStopCancelRejectError("")
+                  }}
+                />
+                {stopCancelRejectError && (
+                  <p className="text-xs text-red-500">{stopCancelRejectError}</p>
                 )}
               </div>
             )}
@@ -2476,14 +2524,22 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
               className={
                 stopCancelApproveType === "요청 거절"
                   ? "bg-gray-600 hover:bg-gray-700 text-white"
-                  : "bg-pink-600 hover:bg-pink-700 text-white"
+                  : stopCancelApproveType === "완료 취소"
+                    ? "bg-orange-500 hover:bg-orange-600 text-white"
+                    : "bg-pink-600 hover:bg-pink-700 text-white"
               }
               onClick={() => {
+                if (stopCancelApproveType === "요청 거절" && !stopCancelRejectReason.trim()) {
+                  setStopCancelRejectError("거절 사유를 입력해주세요.")
+                  return
+                }
                 // TODO: 실제 API 연동 시 상태 업데이트 및 이력 저장
                 setStopCancelApproveOpen(false)
+                setStopCancelRejectReason("")
+                setStopCancelRejectError("")
               }}
             >
-              {stopCancelApproveType === "요청 거절" ? "거절하기" : "승인하기"}
+              {stopCancelApproveType === "요청 거절" ? "거절하기" : stopCancelApproveType === "완료 취소" ? "취소처리" : "승인하기"}
             </Button>
           </div>
         </DialogContent>
