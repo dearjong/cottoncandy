@@ -31,7 +31,7 @@ interface ContractRow {
   type: "공고" | "1:1"
   client: string
   partner: string
-  contractStatus: "미서명" | "서명완료" | "진행중"
+  contractStatus: "미서명" | "확정완료" | "진행중"
   contractDate: string | null
   stages: SettlementStage[]
   settlementStatus: "미완료" | "일부완료" | "완료"
@@ -46,7 +46,7 @@ const MOCK_ROWS: ContractRow[] = [
     type: "공고",
     client: "베스트전자",
     partner: "예쓰커뮤니케이션",
-    contractStatus: "서명완료",
+    contractStatus: "확정완료",
     contractDate: "2025.10.12",
     stages: [
       { label: "선금", dueDate: "2025.10.15", paidDate: "2025.10.15", receiptUploaded: true },
@@ -62,7 +62,7 @@ const MOCK_ROWS: ContractRow[] = [
     type: "공고",
     client: "CJ제일제당",
     partner: "솜사탕애드",
-    contractStatus: "서명완료",
+    contractStatus: "확정완료",
     contractDate: "2025.09.05",
     stages: [
       { label: "선금", dueDate: "2025.09.10", paidDate: "2025.09.10", receiptUploaded: true },
@@ -108,7 +108,7 @@ const MOCK_ROWS: ContractRow[] = [
     type: "공고",
     client: "삼성전자",
     partner: "제일기획",
-    contractStatus: "서명완료",
+    contractStatus: "확정완료",
     contractDate: "2025.07.01",
     stages: [
       { label: "선금", dueDate: "2025.07.05", paidDate: "2025.07.05", receiptUploaded: true },
@@ -123,7 +123,7 @@ const MOCK_ROWS: ContractRow[] = [
 function ContractStatusBadge({ status }: { status: ContractRow["contractStatus"] }) {
   const map = {
     미서명: "border-gray-300 text-gray-500",
-    서명완료: "border-emerald-400 text-emerald-700 bg-emerald-50",
+    확정완료: "border-emerald-400 text-emerald-700 bg-emerald-50",
     진행중: "border-blue-400 text-blue-700 bg-blue-50",
   } as const
   return (
@@ -230,7 +230,7 @@ export default function ContractsPage() {
 
   const summary = {
     total: MOCK_ROWS.length,
-    signed: MOCK_ROWS.filter((r) => r.contractStatus === "서명완료").length,
+    signed: MOCK_ROWS.filter((r) => r.contractStatus === "확정완료").length,
     settledAll: MOCK_ROWS.filter((r) => r.settlementStatus === "완료").length,
     pending: MOCK_ROWS.filter((r) => r.settlementStatus === "미완료").length,
   }
@@ -247,7 +247,7 @@ export default function ContractsPage() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
           { label: "전체 계약", value: summary.total, color: "text-gray-800" },
-          { label: "계약 서명완료", value: summary.signed, color: "text-emerald-600" },
+          { label: "계약 확정완료", value: summary.signed, color: "text-emerald-600" },
           { label: "정산 완료", value: summary.settledAll, color: "text-blue-600" },
           { label: "정산 미완료", value: summary.pending, color: "text-amber-600" },
         ].map((s) => (
@@ -290,7 +290,7 @@ export default function ContractsPage() {
             <SelectItem value="전체">계약 전체</SelectItem>
             <SelectItem value="미서명">미서명</SelectItem>
             <SelectItem value="진행중">진행중</SelectItem>
-            <SelectItem value="서명완료">서명완료</SelectItem>
+            <SelectItem value="확정완료">확정완료</SelectItem>
           </SelectContent>
         </Select>
         <Select value={settlementFilter} onValueChange={setSettlementFilter}>

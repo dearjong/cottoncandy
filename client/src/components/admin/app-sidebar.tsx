@@ -152,7 +152,7 @@ export function AppSidebar() {
     [location]
   )
   const [projectsOpen, setProjectsOpen] = useState<boolean>(true)
-  const [consultingOpen, setConsultingOpen] = useState<boolean>(true)
+  const [consultingOpen, setConsultingOpen] = useState<boolean>(false)
   const isMainSectionActive = useMemo(
     () => mainMenuItems.some((item) => location === item.url),
     [location]
@@ -177,9 +177,9 @@ export function AppSidebar() {
     [location]
   )
   const [memberOpen, setMemberOpen] = useState<boolean>(true)
-  const [operationsOpen, setOperationsOpen] = useState<boolean>(true)
-  const [systemOpen, setSystemOpen] = useState<boolean>(true)
-  // 보안은 평소에 관심을 덜 끌도록 기본 접힘
+  // 컨설팅·시스템 설정은 기본 접힘(해당 하위 화면 진입 시 자동 펼침). 운영 센터·보안/감사는 수동 펼침만.
+  const [operationsOpen, setOperationsOpen] = useState<boolean>(false)
+  const [systemOpen, setSystemOpen] = useState<boolean>(false)
   const [securityOpen, setSecurityOpen] = useState<boolean>(false)
 
   // 하위 페이지로 이동했을 때는 자동으로 펼침 유지
@@ -193,14 +193,8 @@ export function AppSidebar() {
     if (isMemberSectionActive) setMemberOpen(true)
   }, [isMemberSectionActive])
   useEffect(() => {
-    if (isOperationsSectionActive) setOperationsOpen(true)
-  }, [isOperationsSectionActive])
-  useEffect(() => {
     if (isSystemSectionActive) setSystemOpen(true)
   }, [isSystemSectionActive])
-  useEffect(() => {
-    if (isSecuritySectionActive) setSecurityOpen(true)
-  }, [isSecuritySectionActive])
 
   return (
     <Sidebar>
