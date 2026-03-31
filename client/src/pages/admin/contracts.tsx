@@ -367,7 +367,7 @@ export default function ContractsPage() {
                       </td>
                       <td className="py-3 px-4 text-gray-700">{row.client}</td>
                       <td className="py-3 px-4 text-gray-700">{row.partner}</td>
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 text-center">
                         <ContractStatusBadge status={row.contractStatus} />
                         {row.contractDate && (
                           <div className="text-[10px] text-gray-400 mt-0.5">{row.contractDate}</div>
@@ -376,7 +376,7 @@ export default function ContractsPage() {
                       <td className="py-3 px-4">
                         <StageDots stages={row.stages} />
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 text-center">
                         <SettlementStatusBadge status={row.settlementStatus} />
                       </td>
                       <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
