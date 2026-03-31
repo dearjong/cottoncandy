@@ -1,7 +1,21 @@
 import "dotenv/config";
+import os from "node:os";
+import { isIPv4 } from "node:net";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+
+function getLanIPv4Addresses(): string[] {
+  const nets = os.networkInterfaces();
+  const out: string[] = [];
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name] ?? []) {
+      if (net.internal) continue;
+      if (isIPv4(net.address)) out.push(net.address);
+    }
+  }
+  return out;
+}
 
 // 예기치 않은 에러 시 로그만 남기고 프로세스가 바로 죽지 않도록 (원인 확인용)
 process.on("uncaughtException", (err) => {
@@ -12,6 +26,21 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 
 const app = express();
+
+// Vite 호스트 검사: 일부 클라이언트가 Host 헤더를 생략하면 403이 날 수 있음
+app.use((req, _res, next) => {
+  if (!req.headers.host) {
+    const local = req.socket?.localAddress;
+    const localPort = req.socket?.localPort;
+    if (local && localPort) {
+      req.headers.host = local.includes(":") && !local.includes(".")
+        ? `[${local}]:${localPort}`
+        : `${local}:${localPort}`;
+    }
+  }
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -71,7 +100,12 @@ app.use((req, res, next) => {
     server.listen(port, host, () => {
       log(`serving on port ${port}`);
       log(`  Local:   http://localhost:${port}/`);
-      log(`  Network: http://192.168.0.14:${port}/  (같은 Wi-Fi에서 접속)`);
+      const lan = getLanIPv4Addresses();
+      if (lan.length > 0) {
+        for (const ip of lan) {
+          log(`  Network: http://${ip}:${port}/  (같은 LAN/Wi-Fi)`);
+        }
+      }
     });
   } catch (e) {
     console.error("서버 시작 실패:", e);
