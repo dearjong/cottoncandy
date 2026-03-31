@@ -1,0 +1,13 @@
+.git
+.github
+.replit
+.vscode
+node_modules
+dist
+tmp
+docs
+*.log
+tsconfig.tsbuildinfo
+.env
+.env.*
+!.env.example
