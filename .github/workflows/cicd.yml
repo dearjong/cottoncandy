@@ -1,0 +1,41 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+
+jobs:
+  ci:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip tests for publishing repo
+        run: echo "Skipping automated tests/build checks for publishing-only deployment."
+
+  deploy-to-dev02:
+    needs: ci
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: dev02
+    steps:
+      - name: Deploy to dev02
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PROJECT_DIR="admarket_admin_FE"
+          REPO_DIR="/data1/tvcf-src/$PROJECT_DIR"
+          BRANCH_NAME="${GITHUB_REF_NAME}"
+
+          if [ ! -d "$REPO_DIR" ]; then
+            git clone git@github.com:adcream100/$PROJECT_DIR.git "$REPO_DIR"
+            echo "Repository cloned successfully. Add .env on dev02 and rerun the workflow."
+            exit 1
+          fi
+
+          cd "$REPO_DIR"
+          git fetch origin "$BRANCH_NAME"
+          git reset --hard "origin/$BRANCH_NAME"
+          docker compose up -d --build

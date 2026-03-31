@@ -3,7 +3,8 @@ import os from "node:os";
 import { isIPv4 } from "node:net";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { log } from "./log";
+import { serveStatic } from "./static";
 
 function getLanIPv4Addresses(): string[] {
   const nets = os.networkInterfaces();
@@ -90,6 +91,7 @@ app.use((req, res, next) => {
     });
 
     if (app.get("env") === "development") {
+      const { setupVite } = await import("./vite");
       await setupVite(app, server);
     } else {
       serveStatic(app);

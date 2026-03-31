@@ -1,38 +1,28 @@
-import express, { type Express } from "express";
+import { type Express } from "express";
 import fs from "fs";
 import path from "path";
 import {
   createServer as createViteServer,
   createLogger,
-  type UserConfig,
+  type InlineConfig,
 } from "vite";
 import { type Server } from "http";
 import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
+import { log } from "./log";
 
 const viteLogger = createLogger();
 
-export function log(message: string, source = "express") {
-  const formattedTime = new Date().toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-
-  console.log(`${formattedTime} [${source}] ${message}`);
-}
-
 export async function setupVite(app: Express, server: Server) {
-  const serverOptions: UserConfig["server"] = {
+  const serverOptions: NonNullable<InlineConfig["server"]> = {
     middlewareMode: true,
     hmr: { server },
     allowedHosts: true,
     ...(viteConfig.server?.fs ? { fs: viteConfig.server.fs } : {}),
   };
 
-  const vite = await createViteServer({
-    ...viteConfig,
+  const config: InlineConfig = {
+    ...(viteConfig as InlineConfig),
     configFile: false,
     customLogger: {
       ...viteLogger,
@@ -43,7 +33,9 @@ export async function setupVite(app: Express, server: Server) {
     },
     server: serverOptions,
     appType: "custom",
-  });
+  };
+
+  const vite = await createViteServer(config);
 
   app.use(vite.middlewares);
   app.use("*", async (req, res, next) => {
@@ -69,22 +61,5 @@ export async function setupVite(app: Express, server: Server) {
       vite.ssrFixStacktrace(e as Error);
       next(e);
     }
-  });
-}
-
-export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "public");
-
-  if (!fs.existsSync(distPath)) {
-    throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
-    );
-  }
-
-  app.use(express.static(distPath));
-
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
   });
 }

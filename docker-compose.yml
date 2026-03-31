@@ -1,0 +1,16 @@
+services:
+  admarket-admin-fe:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: admarket-admin-fe:latest
+    ports:
+      - "${APP_PORT:-3008}:${PORT:-3000}"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - HOST=${HOST:-0.0.0.0}
+      - PORT=${PORT:-3000}
+      - DATABASE_URL=${DATABASE_URL:-}
+    restart: unless-stopped
+    container_name: admarket-admin-fe
