@@ -1,7 +1,8 @@
 import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { log } from "./log";
+import { serveStatic } from "./static";
 
 // 예기치 않은 에러 시 로그만 남기고 프로세스가 바로 죽지 않도록 (원인 확인용)
 process.on("uncaughtException", (err) => {
@@ -61,6 +62,7 @@ app.use((req, res, next) => {
     });
 
     if (app.get("env") === "development") {
+      const { setupVite } = await import("./vite");
       await setupVite(app, server);
     } else {
       serveStatic(app);
