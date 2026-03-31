@@ -3,15 +3,7 @@
     "client/src/**/*",
     "shared/**/*",
     "server/**/*",
-    "vite.config.ts",
-    "app/**/*",
-    "components/**/*",
-    "lib/**/*",
-    "providers/**/*",
-    "styles/**/*",
-    "next-env.d.ts",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    "vite.config.ts"
   ],
   "exclude": [
     "node_modules",
@@ -37,6 +29,12 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "types": [
+      "node",
+      "react",
+      "react-dom",
+      "vite/client"
+    ],
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -49,10 +47,6 @@
         "./attached_assets/*"
       ]
     },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "plugins": []
   }
 }
