@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useMemo } from 'react';
 import { useLocation } from 'wouter';
 import Layout from '@/components/layout/layout';
 import WorkSidebar from '@/components/work/sidebar';
@@ -32,6 +31,133 @@ interface Project {
   badges?: string[];
 }
 
+const MOCK_PROJECT_LIST: Project[] = [
+  {
+    id: 'PJT-001',
+    projectNumber: 'PID-20250721-0001',
+    title: '[베스트전자] 신제품 판매촉진 프로모션 대행사 모집',
+    company: '베스트전자',
+    companyType: '전기전자',
+    companySize: '대기업',
+    status: 'in_progress',
+    statusLabel: '접수중',
+    deadline: '2026-04-15',
+    deliveryDate: '2026-06-30',
+    scope: ['전략기획', '크리에이티브', '영상제작', '미디어집행'],
+    budget: '10~20억',
+    budgetDetail: '(제작비 3억~6억)',
+    hashtags: ['#전자제품', '#프로모션', '#대행사모집'],
+    features: ['급행 제작 대응', '경쟁사 수행기업 제외', '리젝션 Fee'],
+    daysRemaining: 14,
+    progressStage: '제안서 접수중',
+    projectType: 'request',
+    badges: ['참여공고', '대행사 모집', '경쟁PT'],
+  },
+  {
+    id: 'PJT-002',
+    projectNumber: 'PID-20250610-0002',
+    title: '[코스메틱코리아] 신제품 런칭 바이럴 캠페인',
+    company: '코스메틱코리아',
+    companyType: '화장품',
+    companySize: '중견기업',
+    status: 'approved',
+    statusLabel: '승인완료',
+    deadline: '2026-03-30',
+    deliveryDate: '2026-05-15',
+    scope: ['SNS 마케팅', '인플루언서', '영상제작'],
+    budget: '3~5억',
+    budgetDetail: '(제작비 1억~2억)',
+    hashtags: ['#화장품', '#바이럴', '#SNS'],
+    features: ['인플루언서 200명 이상', '릴스/쇼츠 포함'],
+    daysRemaining: 0,
+    progressStage: 'OT 완료 · PT 준비중',
+    projectType: 'request',
+    badges: ['1:1 매칭'],
+  },
+  {
+    id: 'PJT-003',
+    projectNumber: 'PID-20250505-0003',
+    title: '[로컬푸드] 브랜드 리뉴얼 영상 캠페인',
+    company: '로컬푸드(주)',
+    companyType: '식품',
+    companySize: '중소기업',
+    status: 'draft',
+    statusLabel: '임시저장',
+    deadline: '2026-05-01',
+    deliveryDate: '2026-07-31',
+    scope: ['브랜딩', '영상제작', '옥외광고'],
+    budget: '1~3억',
+    budgetDetail: '(제작비 5천~1억)',
+    hashtags: ['#식품', '#브랜드리뉴얼'],
+    features: ['스토리보드 포함', '2D 애니메이션'],
+    daysRemaining: 30,
+    progressStage: '등록중 (임시저장)',
+    projectType: 'request',
+  },
+  {
+    id: 'PJT-004',
+    projectNumber: 'PID-20241201-0004',
+    title: '[패션브랜드] 시즌 컬렉션 디지털 캠페인',
+    company: '패션브랜드',
+    companyType: '패션/의류',
+    companySize: '대기업',
+    status: 'completed',
+    statusLabel: '완료',
+    deadline: '2024-12-15',
+    deliveryDate: '2025-02-28',
+    scope: ['크리에이티브', '영상', '디지털 광고'],
+    budget: '5~8억',
+    budgetDetail: '',
+    hashtags: ['#패션', '#디지털', '#시즌'],
+    features: ['4K 촬영', '글로벌 배포'],
+    daysRemaining: 0,
+    progressStage: '프로젝트 완료',
+    projectType: 'request',
+    badges: ['완료'],
+  },
+  {
+    id: 'PJT-005',
+    projectNumber: 'PID-20250801-0005',
+    title: '[스마트솔루션] 기업 IR 영상 제작',
+    company: '스마트솔루션(주)',
+    companyType: 'IT/SaaS',
+    companySize: '중소기업',
+    status: 'in_progress',
+    statusLabel: '제작중',
+    deadline: '2026-04-20',
+    deliveryDate: '2026-05-30',
+    scope: ['영상제작', '모션그래픽', '번역'],
+    budget: '5천~1억',
+    budgetDetail: '',
+    hashtags: ['#IT', '#IR영상', '#B2B'],
+    features: ['한/영 자막', '3D 그래픽'],
+    daysRemaining: 19,
+    progressStage: '제작 진행중',
+    projectType: 'participate',
+    badges: ['My담당'],
+  },
+  {
+    id: 'PJT-006',
+    projectNumber: 'PID-20250915-0006',
+    title: '[핀테크랩] 서비스 소개 영상 시리즈',
+    company: '핀테크랩',
+    companyType: '핀테크',
+    companySize: '스타트업',
+    status: 'approved',
+    statusLabel: '승인완료',
+    deadline: '2026-04-25',
+    deliveryDate: '2026-06-10',
+    scope: ['영상제작', '애니메이션'],
+    budget: '3천~5천',
+    budgetDetail: '(3편 패키지)',
+    hashtags: ['#핀테크', '#서비스소개', '#시리즈'],
+    features: ['모션그래픽 포함', '시리즈 3편'],
+    daysRemaining: 24,
+    progressStage: 'PT 준비중',
+    projectType: 'participate',
+  },
+];
+
 export default function WorkProjectList() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<ProjectType>('request');
@@ -42,14 +168,11 @@ export default function WorkProjectList() {
   const [showCompleted, setShowCompleted] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: projects = [], isLoading } = useQuery<Project[]>({
-    queryKey: ['/api/projects', activeTab],
-    queryFn: async () => {
-      const response = await fetch(`/api/projects?projectType=${activeTab}`);
-      if (!response.ok) throw new Error('Failed to fetch projects');
-      return response.json();
-    },
-  });
+  const projects = useMemo(
+    () => MOCK_PROJECT_LIST.filter((p) => p.projectType === activeTab),
+    [activeTab]
+  );
+  const isLoading = false;
 
   const filteredProjects = projects.filter(project => {
     if (!showDraft && project.status === 'draft') return false;
