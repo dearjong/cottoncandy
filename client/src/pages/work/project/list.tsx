@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import Layout from '@/components/layout/layout';
 import WorkSidebar from '@/components/work/sidebar';
@@ -168,11 +169,17 @@ export default function WorkProjectList() {
   const [showCompleted, setShowCompleted] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const { data: apiProjects, isLoading, isError } = useQuery<Project[]>({
+    queryKey: ['/api/work/projects'],
+    retry: false,
+  });
+
+  const allProjects = isError || !apiProjects ? MOCK_PROJECT_LIST : apiProjects;
+
   const projects = useMemo(
-    () => MOCK_PROJECT_LIST.filter((p) => p.projectType === activeTab),
-    [activeTab]
+    () => allProjects.filter((p) => p.projectType === activeTab),
+    [allProjects, activeTab]
   );
-  const isLoading = false;
 
   const filteredProjects = projects.filter(project => {
     if (!showDraft && project.status === 'draft') return false;
