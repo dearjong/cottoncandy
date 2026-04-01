@@ -13,28 +13,42 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
+type CtaMode = 'new_public' | 'edit_public' | 'edit_private';
+
 export default function Step18() {
   const stepNumber = 18;
   const [, setLocation] = useLocation();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isCompleteOpen, setIsCompleteOpen] = useState(false);
   const [isSaveCompleteOpen, setIsSaveCompleteOpen] = useState(false);
-
-  const handlePrevious = () => {
-    setLocation('/create-project/step17');
-  };
+  const [ctaMode, setCtaMode] = useState<CtaMode>('new_public');
 
   const handleTempSave = () => {
     console.log('임시저장');
   };
 
-  const handleSwitchMode = () => {
-    console.log('1:1 비공개 의뢰로 전환');
+  const handleSubmit = () => {
+    setIsConfirmOpen(true);
+  };
+
+  const handleSwitchToPrivate = () => {
     setIsSaveCompleteOpen(true);
   };
 
-  const handleSubmit = () => {
-    setIsConfirmOpen(true);
+  const handleSwitchToPublic = () => {
+    setCtaMode('edit_public');
+  };
+
+  const handleCopyProject = () => {
+    console.log('프로젝트 복사');
+  };
+
+  const handleCancelProject = () => {
+    console.log('프로젝트 취소');
+  };
+
+  const handleStopProject = () => {
+    console.log('프로젝트 중단');
   };
 
   const handleConfirm = () => {
@@ -548,13 +562,21 @@ export default function Step18() {
             transition={{ duration: 0.4, delay: 0.4 }}
             className="options-container"
           >
-            <div className="flex gap-3 mb-6">
+            {/* 메인 CTA 행 */}
+            <div className="flex gap-3 mb-3">
               <Button
-                onClick={handlePrevious}
+                onClick={() => setLocation('/work/project/list')}
                 className="btn-white flex-1"
-                data-testid="button-previous"
+                data-testid="button-list"
               >
-                이전
+                리스트
+              </Button>
+              <Button
+                onClick={() => {}}
+                className="btn-white flex-1"
+                data-testid="button-view-public"
+              >
+                공고보기
               </Button>
               <Button
                 onClick={handleTempSave}
@@ -563,19 +585,84 @@ export default function Step18() {
               >
                 임시저장
               </Button>
+              {ctaMode === 'new_public' && (
+                <>
+                  <Button
+                    onClick={handleSwitchToPrivate}
+                    className="btn-dark flex-1"
+                    data-testid="button-switch-private-new"
+                  >
+                    비공개 직접의뢰 등록
+                  </Button>
+                  <Button
+                    onClick={handleSubmit}
+                    className="btn-pink flex-1"
+                    data-testid="button-submit"
+                  >
+                    공고등록
+                  </Button>
+                </>
+              )}
+              {ctaMode === 'edit_public' && (
+                <>
+                  <Button
+                    onClick={handleSwitchToPrivate}
+                    className="btn-dark flex-1"
+                    data-testid="button-switch-private-edit"
+                  >
+                    비공개 직접의뢰로 전환
+                  </Button>
+                  <Button
+                    onClick={handleSubmit}
+                    className="btn-pink flex-1"
+                    data-testid="button-apply-public"
+                  >
+                    변경내용 적용
+                  </Button>
+                </>
+              )}
+              {ctaMode === 'edit_private' && (
+                <>
+                  <Button
+                    onClick={handleSwitchToPublic}
+                    className="btn-dark flex-1"
+                    data-testid="button-switch-public"
+                  >
+                    공고로 전환
+                  </Button>
+                  <Button
+                    onClick={handleSubmit}
+                    className="btn-pink flex-1"
+                    data-testid="button-apply-private"
+                  >
+                    변경내용 적용
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* 보조 CTA 행 */}
+            <div className="flex gap-3 mb-6">
               <Button
-                onClick={handleSwitchMode}
+                onClick={handleCopyProject}
                 className="btn-white flex-1"
-                data-testid="button-switch-mode"
+                data-testid="button-copy-project"
               >
-                1:1 비공개 의뢰로 전환
+                프로젝트 복사
               </Button>
               <Button
-                onClick={handleSubmit}
-                className="btn-pink flex-1"
-                data-testid="button-submit"
+                onClick={handleCancelProject}
+                className="btn-white flex-1"
+                data-testid="button-cancel-project"
               >
-                공고등록
+                프로젝트 취소
+              </Button>
+              <Button
+                onClick={handleStopProject}
+                className="btn-white flex-1"
+                data-testid="button-stop-project"
+              >
+                프로젝트 중단
               </Button>
             </div>
 

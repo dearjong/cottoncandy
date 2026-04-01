@@ -23,6 +23,19 @@
     opacity: 1 !important;
   }
   
+  /* 다크 버튼 (전환 옵션 버튼) */
+  .btn-dark {
+    @apply w-full py-3 rounded-full text-sm text-white;
+    background-color: #1a1a1a;
+    border: 0.5px solid #1a1a1a;
+    transition: background 0.3s;
+    font-weight: 400;
+  }
+
+  .btn-dark:hover {
+    background-color: #333333;
+  }
+
   /* 흰색 버튼 (이전 버튼) */
   .btn-white {
     @apply w-full py-3 rounded-full text-sm text-gray-700;
