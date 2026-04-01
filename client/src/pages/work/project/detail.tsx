@@ -1,13 +1,18 @@
+import { useState } from 'react';
 import Layout from '@/components/layout/layout';
 import WorkSidebar from '@/components/work/sidebar';
 import { useLocation } from 'wouter';
 
+type CtaMode = 'new_public' | 'edit_public' | 'edit_private';
+
 export default function WorkProjectDetail() {
   const [, setLocation] = useLocation();
+  const [ctaMode, setCtaMode] = useState<CtaMode>('new_public');
 
-  const handleBackToList = () => {
-    setLocation('/work/project/list');
-  };
+  const handleTempSave = () => console.log('임시저장');
+  const handleCopyProject = () => console.log('프로젝트 복사');
+  const handleCancelProject = () => console.log('프로젝트 취소');
+  const handleStopProject = () => console.log('프로젝트 중단');
 
   return (
     <Layout>
@@ -213,13 +218,38 @@ export default function WorkProjectDetail() {
                       </label>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <button className="btn-white" onClick={handleBackToList} data-testid="button-back-1">
-                        리스트
-                      </button>
-                      <button className="btn-pink" data-testid="button-submit">
-                        접수하기
-                      </button>
+                    {/* CTA 행 1 — 공개 프로젝트 신규 등록 */}
+                    <div className="flex gap-3" data-testid="cta-row-new-public">
+                      <button className="btn-white flex-1" onClick={() => setLocation('/work/project/list')} data-testid="button-list-1">리스트</button>
+                      <button className="btn-white flex-1" onClick={() => {}} data-testid="button-view-1">공고보기</button>
+                      <button className="btn-white flex-1" onClick={handleTempSave} data-testid="button-temp-1">임시저장</button>
+                      <button className="btn-dark flex-1" onClick={() => setCtaMode('new_public')} data-testid="button-private-new">비공개 직접의뢰 등록</button>
+                      <button className="btn-pink flex-1" onClick={() => {}} data-testid="button-register">공고등록</button>
+                    </div>
+
+                    {/* CTA 행 2 — 공개 프로젝트 수정 */}
+                    <div className="flex gap-3" data-testid="cta-row-edit-public">
+                      <button className="btn-white flex-1" onClick={() => setLocation('/work/project/list')} data-testid="button-list-2">리스트</button>
+                      <button className="btn-white flex-1" onClick={() => {}} data-testid="button-view-2">공고보기</button>
+                      <button className="btn-white flex-1" onClick={handleTempSave} data-testid="button-temp-2">임시저장</button>
+                      <button className="btn-dark flex-1" onClick={() => setCtaMode('edit_public')} data-testid="button-switch-private">비공개 직접의뢰로 전환</button>
+                      <button className="btn-pink flex-1" onClick={() => {}} data-testid="button-apply-public">변경내용 적용</button>
+                    </div>
+
+                    {/* CTA 행 3 — 비공개 직접의뢰 수정 */}
+                    <div className="flex gap-3" data-testid="cta-row-edit-private">
+                      <button className="btn-white flex-1" onClick={() => setLocation('/work/project/list')} data-testid="button-list-3">리스트</button>
+                      <button className="btn-white flex-1" onClick={() => {}} data-testid="button-view-3">공고보기</button>
+                      <button className="btn-white flex-1" onClick={handleTempSave} data-testid="button-temp-3">임시저장</button>
+                      <button className="btn-dark flex-1" onClick={() => setCtaMode('edit_private')} data-testid="button-switch-public">공고로 전환</button>
+                      <button className="btn-pink flex-1" onClick={() => {}} data-testid="button-apply-private">변경내용 적용</button>
+                    </div>
+
+                    {/* CTA 행 4 — 공통 하단 액션 */}
+                    <div className="flex gap-3" data-testid="cta-row-actions">
+                      <button className="btn-white flex-1" onClick={handleCopyProject} data-testid="button-copy">프로젝트 복사</button>
+                      <button className="btn-white flex-1" onClick={handleCancelProject} data-testid="button-cancel">프로젝트 취소</button>
+                      <button className="btn-white flex-1" onClick={handleStopProject} data-testid="button-stop">프로젝트 중단</button>
                     </div>
                   </div>
                 </div>
