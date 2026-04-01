@@ -6,6 +6,7 @@
 
 | 문서 | 용도 |
 | --- | --- |
+| [dev-handoff-admin-flow.md](./dev-handoff-admin-flow.md) | **개발 인수인계** — Admin 플로우·라우트·페이지 맵(MVP 기준) |
 | [admin-requirements.md](./admin-requirements.md) | Admin 기능 요구사항(ADM 매핑, 구현·라우트 연계) |
 | [admin-workflow-v0.3-mvp.md](./admin-workflow-v0.3-mvp.md) | MVP 수준 운영 업무 흐름(구현/부분 구현만) |
 | [admin-workflow-v0.3.md](./admin-workflow-v0.3.md) | 운영 업무 흐름 v0.3(참고용 확장본) |
