@@ -177,7 +177,7 @@ export function AppSidebar() {
     [location]
   )
   const [memberOpen, setMemberOpen] = useState<boolean>(true)
-  // 컨설팅·시스템 설정은 기본 접힘(해당 하위 화면 진입 시 자동 펼침). 운영 센터·보안/감사는 수동 펼침만.
+  // 하위가 있는 그룹은 기본 접힘 가능. 부모 라벨 클릭 시 펼침 + 하위 화면 진입 시 일부 자동 펼침.
   const [operationsOpen, setOperationsOpen] = useState<boolean>(false)
   const [systemOpen, setSystemOpen] = useState<boolean>(false)
   const [securityOpen, setSecurityOpen] = useState<boolean>(false)
@@ -239,7 +239,7 @@ export function AppSidebar() {
                   isActive={isProjectSectionActive}
                   data-testid={`nav-${projectParentItem.title.toLowerCase().replace(/\s+/g, '-')}`}
                 >
-                  <Link href={projectParentItem.url}>
+                  <Link href={projectParentItem.url} onClick={() => setProjectsOpen(true)}>
                     <projectParentItem.icon />
                     <span>{projectParentItem.title}</span>
                   </Link>
@@ -327,7 +327,7 @@ export function AppSidebar() {
                   isActive={isConsultingSectionActive}
                   data-testid={`nav-${consultingParentItem.title}`}
                 >
-                  <Link href={consultingParentItem.url}>
+                  <Link href={consultingParentItem.url} onClick={() => setConsultingOpen(true)}>
                     <consultingParentItem.icon />
                     <span>{consultingParentItem.title}</span>
                   </Link>
@@ -375,7 +375,7 @@ export function AppSidebar() {
                   isActive={isMemberSectionActive}
                   data-testid={`nav-${memberParentItem.title}`}
                 >
-                  <Link href={memberParentItem.url}>
+                  <Link href={memberParentItem.url} onClick={() => setMemberOpen(true)}>
                     <memberParentItem.icon />
                     <span>{memberParentItem.title}</span>
                   </Link>
@@ -423,7 +423,7 @@ export function AppSidebar() {
                   isActive={isOperationsSectionActive}
                   data-testid={`nav-${operationsParentItem.title}`}
                 >
-                  <Link href={operationsParentItem.url}>
+                  <Link href={operationsParentItem.url} onClick={() => setOperationsOpen(true)}>
                     <operationsParentItem.icon />
                     <span>{operationsParentItem.title}</span>
                   </Link>
@@ -491,7 +491,7 @@ export function AppSidebar() {
                   isActive={isSystemSectionActive}
                   data-testid={`nav-${systemSettingsParentItem.title.toLowerCase().replace(/\s+/g, '-')}`}
                 >
-                  <Link href={systemSettingsParentItem.url}>
+                  <Link href={systemSettingsParentItem.url} onClick={() => setSystemOpen(true)}>
                     <systemSettingsParentItem.icon />
                     <span>{systemSettingsParentItem.title}</span>
                   </Link>
@@ -539,7 +539,7 @@ export function AppSidebar() {
                   isActive={isSecuritySectionActive}
                   data-testid={`nav-${securityAuditParentItem.title.toLowerCase().replace(/\s+/g, '-')}`}
                 >
-                  <Link href={securityAuditParentItem.url}>
+                  <Link href={securityAuditParentItem.url} onClick={() => setSecurityOpen(true)}>
                     <securityAuditParentItem.icon />
                     <span>{securityAuditParentItem.title}</span>
                   </Link>
