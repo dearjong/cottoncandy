@@ -4,11 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { addSupportTicket } from "@/lib/supportStore";
 
 export default function Inquiry() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [inquiryType, setInquiryType] = useState<"INQUIRY" | "REPORT">("INQUIRY");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
   const handleFileClick = () => {
     fileInputRef.current?.click();
@@ -71,6 +74,8 @@ export default function Inquiry() {
               <Input
                 type="text"
                 placeholder="ex) 아직 온에어 일자를 모르는데 어떻게 하죠?"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 data-testid="input-inquiry-title"
               />
             </div>
@@ -82,6 +87,8 @@ export default function Inquiry() {
               <Textarea
                 placeholder="상세 내용을 입력해주세요."
                 rows={12}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
                 data-testid="textarea-inquiry-content"
               />
             </div>
@@ -123,7 +130,14 @@ export default function Inquiry() {
                 className="btn-primary w-full"
                 data-testid="button-inquiry-submit"
                 onClick={() => {
+                  if (!title.trim() || !content.trim()) {
+                    alert("제목과 내용을 입력해주세요.");
+                    return;
+                  }
+                  addSupportTicket({ type: inquiryType, title: title.trim(), content: content.trim() });
                   alert(inquiryType === "REPORT" ? "신고가 접수되었습니다." : "문의가 접수되었습니다.");
+                  setTitle("");
+                  setContent("");
                 }}
               >
                 확인
