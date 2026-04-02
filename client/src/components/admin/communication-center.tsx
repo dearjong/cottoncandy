@@ -171,7 +171,7 @@ export function CommunicationCenter() {
         {/* CardTitle 제거: 상위 페이지에서 이미 헤더가 노출되도록 중복 UI를 없앰 */}
         <CardContent>
           <Tabs defaultValue="notifications" className="space-y-4">
-            <TabsList>
+            <TabsList className="grid w-full max-w-[420px] grid-cols-3">
               <TabsTrigger value="notifications">알림 발송</TabsTrigger>
               <TabsTrigger value="history">발송 내역</TabsTrigger>
               <TabsTrigger value="chat">AI 채팅 상담</TabsTrigger>
