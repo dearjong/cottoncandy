@@ -154,7 +154,7 @@ export default function AdminParticipationPage() {
           <TabsList className="grid w-full max-w-[420px] grid-cols-3">
             <TabsTrigger value="company">기업별</TabsTrigger>
             <TabsTrigger value="project">프로젝트별</TabsTrigger>
-            <TabsTrigger value="projectList">프로젝트 리스트별</TabsTrigger>
+            <TabsTrigger value="projectList">프로젝트 유형별</TabsTrigger>
           </TabsList>
         </Tabs>
 
