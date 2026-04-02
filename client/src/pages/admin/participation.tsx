@@ -103,27 +103,35 @@ export default function AdminParticipationPage() {
       return matchSearch && matchStatus
     })
   }, [rows, searchTerm, filterStatus])
-  const projectListRows = useMemo(() => {
-    const grouped = MOCK_ADMIN_PROJECTS_V1.reduce<Record<string, { total: number; ongoing: number; completed: number }>>(
-      (acc, project) => {
-        const key = project.type
-        if (!acc[key]) acc[key] = { total: 0, ongoing: 0, completed: 0 }
-        acc[key].total += 1
-        if (COMPLETED_STATUSES.includes(project.status)) {
-          acc[key].completed += 1
-        } else {
-          acc[key].ongoing += 1
-        }
-        return acc
-      },
-      {}
-    )
+  const PROJECT_TYPES = ["공고", "공고 (컨설팅)", "1:1", "1:1 (컨설팅)", "컨설팅 문의"] as const
 
-    return Object.entries(grouped)
-      .map(([type, stat]) => ({
-        type,
-        ...stat,
-      }))
+  const projectListRows = useMemo(() => {
+    const stat: Record<string, { total: number; ongoing: number; completed: number }> = {
+      "공고": { total: 0, ongoing: 0, completed: 0 },
+      "공고 (컨설팅)": { total: 0, ongoing: 0, completed: 0 },
+      "1:1": { total: 0, ongoing: 0, completed: 0 },
+      "1:1 (컨설팅)": { total: 0, ongoing: 0, completed: 0 },
+      "컨설팅 문의": { total: 0, ongoing: 0, completed: 0 },
+    }
+
+    MOCK_ADMIN_PROJECTS_V1.forEach((project) => {
+      let key: string
+      if (project.type === "컨설팅") key = "컨설팅 문의"
+      else if (project.type === "1:1") key = "1:1"
+      else key = "공고"
+
+      if (stat[key]) {
+        stat[key].total += 1
+        if (COMPLETED_STATUSES.includes(project.status)) {
+          stat[key].completed += 1
+        } else {
+          stat[key].ongoing += 1
+        }
+      }
+    })
+
+    return PROJECT_TYPES
+      .map((type) => ({ type, ...stat[type] }))
       .filter((item) => {
         const matchSearch = !searchTerm || item.type.includes(searchTerm)
         const matchStatus =
@@ -210,7 +218,7 @@ export default function AdminParticipationPage() {
                     ? "기업명, 사업자번호, 대표자명 검색"
                     : viewMode === "project"
                       ? "프로젝트명, 프로젝트ID, 의뢰사/수행사 검색"
-                      : "리스트 유형(공고, 1:1, 컨설팅) 검색"
+                      : "프로젝트 유형 검색"
                 }
                 className="pl-9"
                 value={searchTerm}
@@ -254,7 +262,7 @@ export default function AdminParticipationPage() {
                 ? `${filtered.length}개 기업`
                 : viewMode === "project"
                   ? `${projectRows.length}개 프로젝트`
-                  : `${projectListRows.length}개 리스트 유형`}
+                  : `${projectListRows.length}개 프로젝트 유형`}
             </span>
           </div>
         </div>
@@ -348,7 +356,7 @@ export default function AdminParticipationPage() {
                 <TableRow className="bg-gray-50">
                   <TableHead className="w-[160px]">프로젝트 ID</TableHead>
                   <TableHead>프로젝트명</TableHead>
-                  <TableHead className="w-[120px]">리스트 유형</TableHead>
+                  <TableHead className="w-[120px]">프로젝트 유형</TableHead>
                   <TableHead className="w-[140px]">의뢰사</TableHead>
                   <TableHead className="w-[140px]">수행사</TableHead>
                   <TableHead className="w-[140px]">상태</TableHead>
@@ -384,7 +392,7 @@ export default function AdminParticipationPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50">
-                  <TableHead>리스트 유형</TableHead>
+                  <TableHead>프로젝트 유형</TableHead>
                   <TableHead className="text-center">진행중</TableHead>
                   <TableHead className="text-center">완료</TableHead>
                   <TableHead className="text-center">합계</TableHead>
@@ -394,7 +402,7 @@ export default function AdminParticipationPage() {
                 {projectListRows.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
-                      조건에 해당하는 리스트 유형이 없습니다.
+                      조건에 해당하는 프로젝트 유형이 없습니다.
                     </TableCell>
                   </TableRow>
                 ) : (
