@@ -375,7 +375,19 @@ export default function AdminParticipationPage() {
                       <TableCell className="font-medium">{project.id}</TableCell>
                       <TableCell>{project.title}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{project.type}</Badge>
+                        {project.type === "컨설팅" ? (
+                          <div className="flex items-center gap-1">
+                            {project.consultingOutcomeKind === "MATCHING_PUBLIC" ? (
+                              <><Badge variant="outline">공고</Badge><Badge variant="outline" className="text-xs">컨설팅</Badge></>
+                            ) : project.consultingOutcomeKind === "MATCHING_1TO1" ? (
+                              <><Badge variant="outline">1:1</Badge><Badge variant="outline" className="text-xs">컨설팅</Badge></>
+                            ) : (
+                              <Badge variant="outline">컨설팅 문의</Badge>
+                            )}
+                          </div>
+                        ) : (
+                          <Badge variant="outline">{project.type}</Badge>
+                        )}
                       </TableCell>
                       <TableCell>{project.client ?? "-"}</TableCell>
                       <TableCell>{project.partner ?? "-"}</TableCell>
