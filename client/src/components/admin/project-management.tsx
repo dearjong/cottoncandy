@@ -207,15 +207,14 @@ const STATUSES_WITH_PARTNER = new Set<MainStatus>([
 
 type WorkflowTabKey = "overview" | "company" | "partner" | "matching" | "proposal" | "contract" | "production" | "settlement" | "review"
 
-/** 진행 상태에 따라 노출할 탭 목록. 순서: [의뢰사(·수행사)] → 프로젝트 상세 → 참여현황 → … (의뢰사는 항상, 수행사는 계약 이후만) */
+/** 진행 상태에 따라 노출할 탭 목록. 순서: 프로젝트 상세 → [의뢰사(·수행사)] → 참여현황 → … (의뢰사는 항상, 수행사는 계약 이후만) */
 function getVisibleWorkflowTabs(status: MainStatus, projectType: "공고" | "1:1"): WorkflowTabKey[] {
   const steps = getProjectSteps(projectType === "1:1" ? "1:1" : "PUBLIC")
   const stepIndex = getActiveStepIndexFromMainStatus(status, steps)
-  const visible: WorkflowTabKey[] = ["company"]
+  const visible: WorkflowTabKey[] = ["overview", "company"]
   if (STATUSES_WITH_PARTNER.has(status)) {
     visible.push("partner")
   }
-  visible.push("overview")
   if (stepIndex >= 0) {
     visible.push("matching", "proposal")
   }
