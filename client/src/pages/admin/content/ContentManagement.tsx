@@ -11,101 +11,101 @@ import { MOCK_NOTICES, MOCK_FAQS, MOCK_NOTIFICATION_LOGS } from '@/data/mockData
 // --- Notification Definitions ---
 const NOTIFICATION_DEFINITIONS = [
     // 1. 공지/시스템 안내
-    { category: '공지/시스템 안내', code: 'NTC-001', name: '공지사항 안내', sender: 'ADMIN', trigger: '공지 등록', target: '전체', template: '{공지 내용}', active: true },
-    { category: '공지/시스템 안내', code: 'NTC-002', name: '시스템 점검 안내', sender: 'ADMIN', trigger: '점검 일정 생성', target: '전체', template: '{일정 안내}', active: true },
-    { category: '공지/시스템 안내', code: 'NTC-003', name: '약관/정책 변경 안내', sender: 'ADMIN', trigger: '약관 업데이트', target: '전체', template: '약관/정책이 변경되었습니다. 변경 내용을 확인해 주세요.', active: true },
-    { category: '공지/시스템 안내', code: 'NTC-004', name: '긴급 공지', sender: 'ADMIN', trigger: '운영자 발송', target: '전체', template: '{공지 내용}', active: true },
+    { category: '공지/시스템 안내', code: 'NTC-001', name: '공지사항 안내', sender: 'ADMIN', trigger: '공지 등록', target: '전체', template: '{공지 내용}', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '공지/시스템 안내', code: 'NTC-002', name: '시스템 점검 안내', sender: 'ADMIN', trigger: '점검 일정 생성', target: '전체', template: '{일정 안내}', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+    { category: '공지/시스템 안내', code: 'NTC-003', name: '약관/정책 변경 안내', sender: 'ADMIN', trigger: '약관 업데이트', target: '전체', template: '약관/정책이 변경되었습니다. 변경 내용을 확인해 주세요.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '공지/시스템 안내', code: 'NTC-004', name: '긴급 공지', sender: 'ADMIN', trigger: '운영자 발송', target: '전체', template: '{공지 내용}', active: true, ch: { sms: true, email: true, kakao: true, web: true } },
 
     // 2. 운영자 알림
-    { category: '운영자 알림', code: 'OPS-001', name: '프로젝트 승인 필요', sender: 'SYSTEM', trigger: '상태 변경(REQUESTED)', target: '플랫폼 운영자', template: '프로젝트 승인 요청이 접수되었습니다.', active: true },
-    { category: '운영자 알림', code: 'OPS-002', name: '1:1 비공개 프로젝트 등록', sender: 'SYSTEM', trigger: '프로젝트 등록', target: '플랫폼 운영자', template: '1:1 비공개 프로젝트가 등록되었습니다.', active: true },
-    { category: '운영자 알림', code: 'OPS-003', name: '컨설팅 문의 등록', sender: 'SYSTEM', trigger: '프로젝트 등록', target: '플랫폼 운영자', template: '컨설팅 문의가 등록되었습니다.', active: true },
-    { category: '운영자 알림', code: 'OPS-004', name: '1:1 문의 등록', sender: 'SYSTEM', trigger: '문의 등록', target: '플랫폼 운영자', template: '1:1 문의가 등록되었습니다. 확인해 주세요.', active: true },
-    { category: '운영자 알림', code: 'OPS-005', name: '신고 접수', sender: 'SYSTEM', trigger: '신고 접수', target: '플랫폼 운영자', template: '신고가 접수되었습니다. 검토가 필요합니다.', active: true },
-    { category: '운영자 알림', code: 'OPS-006', name: '분쟁 접수', sender: 'SYSTEM', trigger: '분쟁 접수', target: '플랫폼 운영자', template: '분쟁이 접수되었습니다. 조치가 필요합니다.', active: true },
+    { category: '운영자 알림', code: 'OPS-001', name: '프로젝트 승인 필요', sender: 'SYSTEM', trigger: '상태 변경(REQUESTED)', target: '플랫폼 운영자', template: '프로젝트 승인 요청이 접수되었습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '운영자 알림', code: 'OPS-002', name: '1:1 비공개 프로젝트 등록', sender: 'SYSTEM', trigger: '프로젝트 등록', target: '플랫폼 운영자', template: '1:1 비공개 프로젝트가 등록되었습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '운영자 알림', code: 'OPS-003', name: '컨설팅 문의 등록', sender: 'SYSTEM', trigger: '프로젝트 등록', target: '플랫폼 운영자', template: '컨설팅 문의가 등록되었습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '운영자 알림', code: 'OPS-004', name: '1:1 문의 등록', sender: 'SYSTEM', trigger: '문의 등록', target: '플랫폼 운영자', template: '1:1 문의가 등록되었습니다. 확인해 주세요.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '운영자 알림', code: 'OPS-005', name: '신고 접수', sender: 'SYSTEM', trigger: '신고 접수', target: '플랫폼 운영자', template: '신고가 접수되었습니다. 검토가 필요합니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '운영자 알림', code: 'OPS-006', name: '분쟁 접수', sender: 'SYSTEM', trigger: '분쟁 접수', target: '플랫폼 운영자', template: '분쟁이 접수되었습니다. 조치가 필요합니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
 
     // 3. 회원/계정 안내
-    { category: '회원/계정 안내', code: 'MBR-001', name: '가입 완료', sender: 'SYSTEM', trigger: '회원가입 완료', target: '가입자', template: '가입이 완료되었습니다. 프로필을 등록해 시작해 보세요.', active: true },
-    { category: '회원/계정 안내', code: 'MBR-002', name: '소속 회사 선택 안내', sender: 'SYSTEM', trigger: '프로필 등록 진입', target: '가입자', template: '프로필에서 회사 이름을 선택하면 해당 회사의 구성원으로 등록 신청됩니다.', active: true },
-    { category: '회원/계정 안내', code: 'MBR-003', name: '회원 탈퇴 완료', sender: 'SYSTEM', trigger: '회원 탈퇴 완료', target: '탈퇴자', template: '회원 탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.', active: true },
-    { category: '회원/계정 안내', code: 'MBR-004', name: '1:1 문의 답변 도착', sender: 'SYSTEM', trigger: '답변 등록', target: '문의자', template: '1:1 문의에 답변이 등록되었습니다.', active: true },
+    { category: '회원/계정 안내', code: 'MBR-001', name: '가입 완료', sender: 'SYSTEM', trigger: '회원가입 완료', target: '가입자', template: '가입이 완료되었습니다. 프로필을 등록해 시작해 보세요.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '회원/계정 안내', code: 'MBR-002', name: '소속 회사 선택 안내', sender: 'SYSTEM', trigger: '프로필 등록 진입', target: '가입자', template: '프로필에서 회사 이름을 선택하면 해당 회사의 구성원으로 등록 신청됩니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '회원/계정 안내', code: 'MBR-003', name: '회원 탈퇴 완료', sender: 'SYSTEM', trigger: '회원 탈퇴 완료', target: '탈퇴자', template: '회원 탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.', active: true, ch: { sms: false, email: true, kakao: false, web: false } },
+    { category: '회원/계정 안내', code: 'MBR-004', name: '1:1 문의 답변 도착', sender: 'SYSTEM', trigger: '답변 등록', target: '문의자', template: '1:1 문의에 답변이 등록되었습니다.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
 
     // 4. 기업 관리 알림
-    { category: '기업 관리 알림', code: 'ORG-001', name: '직원 등록 신청 접수', sender: 'SYSTEM', trigger: '직원 등록 신청', target: '기업관리자', template: '{이름}님이 {회사명} 구성원 등록을 신청했습니다.', active: true },
-    { category: '기업 관리 알림', code: 'ORG-002', name: '직원 등록 승인 완료', sender: 'ADMIN', trigger: '기업관리자 승인', target: '신청자', template: '{회사명} 구성원 등록이 승인되었습니다.', active: true },
-    { category: '기업 관리 알림', code: 'ORG-003', name: '직원 등록 반려', sender: 'ADMIN', trigger: '기업관리자 반려', target: '신청자', template: '{회사명} 구성원 등록이 반려되었습니다. 사유: {사유}', active: true },
-    { category: '기업 관리 알림', code: 'ORG-008', name: '권한 변경 안내', sender: 'ADMIN', trigger: '권한 변경', target: '해당 사용자', template: '{회사명}에서 내 권한이 변경되었습니다.', active: true },
-    { category: '기업 관리 알림', code: 'ORG-009', name: '사업자등록 인증 신청 접수', sender: 'SYSTEM', trigger: '인증 신청', target: '플랫폼 운영자', template: '사업자등록 인증 신청이 접수되었습니다.', active: true },
-    { category: '기업 관리 알림', code: 'ORG-010', name: '사업자등록 인증 승인 완료', sender: 'ADMIN', trigger: '운영자 승인', target: '신청자', template: '사업자등록 인증이 승인되었습니다.', active: true },
+    { category: '기업 관리 알림', code: 'ORG-001', name: '직원 등록 신청 접수', sender: 'SYSTEM', trigger: '직원 등록 신청', target: '기업관리자', template: '{이름}님이 {회사명} 구성원 등록을 신청했습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '기업 관리 알림', code: 'ORG-002', name: '직원 등록 승인 완료', sender: 'ADMIN', trigger: '기업관리자 승인', target: '신청자', template: '{회사명} 구성원 등록이 승인되었습니다.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '기업 관리 알림', code: 'ORG-003', name: '직원 등록 반려', sender: 'ADMIN', trigger: '기업관리자 반려', target: '신청자', template: '{회사명} 구성원 등록이 반려되었습니다. 사유: {사유}', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '기업 관리 알림', code: 'ORG-008', name: '권한 변경 안내', sender: 'ADMIN', trigger: '권한 변경', target: '해당 사용자', template: '{회사명}에서 내 권한이 변경되었습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '기업 관리 알림', code: 'ORG-009', name: '사업자등록 인증 신청 접수', sender: 'SYSTEM', trigger: '인증 신청', target: '플랫폼 운영자', template: '사업자등록 인증 신청이 접수되었습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '기업 관리 알림', code: 'ORG-010', name: '사업자등록 인증 승인 완료', sender: 'ADMIN', trigger: '운영자 승인', target: '신청자', template: '사업자등록 인증이 승인되었습니다.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
 
     // 5. 프로젝트 상태 알림
-    { category: '프로젝트 상태 알림', code: 'PRJ-001', name: '승인 완료', sender: 'SYSTEM', trigger: '상태 변경(APPROVED)', target: 'Owner', template: '프로젝트가 승인되었습니다. 접수가 자동으로 시작되었습니다.', active: true },
-    { category: '프로젝트 상태 알림', code: 'PRJ-002', name: '반려', sender: 'SYSTEM', trigger: '상태 변경(REJECTED)', target: 'Owner', template: '요청하신 프로젝트가 반려되었습니다. 내용 보완 후 다시 신청해 주세요.', active: true },
-    { category: '프로젝트 상태 알림', code: 'PRJ-003', name: '접수 마감', sender: 'SYSTEM', trigger: '상태 변경(CLOSED)', target: 'Owner', template: '접수가 마감되었습니다. 결과를 확인해 주세요.', active: true },
-    { category: '프로젝트 상태 알림', code: 'PRJ-004', name: '선정 완료', sender: 'SYSTEM', trigger: '상태 변경(SELECTED)', target: 'Owner', template: '최종 파트너 선정이 완료되었습니다.', active: true },
-    { category: '프로젝트 상태 알림', code: 'PRJ-005', name: '계약 단계 진입', sender: 'SYSTEM', trigger: '상태 변경(CONTRACT)', target: '양측', template: '계약 단계로 전환되었습니다. 계약 서류를 확인해 주세요.', active: true },
-    { category: '프로젝트 상태 알림', code: 'PRJ-009', name: '종료(완료)', sender: 'SYSTEM', trigger: '상태 변경(COMPLETE)', target: '양측', template: '프로젝트가 완료 처리되었습니다.', active: true },
+    { category: '프로젝트 상태 알림', code: 'PRJ-001', name: '승인 완료', sender: 'SYSTEM', trigger: '상태 변경(APPROVED)', target: 'Owner', template: '프로젝트가 승인되었습니다. 접수가 자동으로 시작되었습니다.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+    { category: '프로젝트 상태 알림', code: 'PRJ-002', name: '반려', sender: 'SYSTEM', trigger: '상태 변경(REJECTED)', target: 'Owner', template: '요청하신 프로젝트가 반려되었습니다. 내용 보완 후 다시 신청해 주세요.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+    { category: '프로젝트 상태 알림', code: 'PRJ-003', name: '접수 마감', sender: 'SYSTEM', trigger: '상태 변경(CLOSED)', target: 'Owner', template: '접수가 마감되었습니다. 결과를 확인해 주세요.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '프로젝트 상태 알림', code: 'PRJ-004', name: '선정 완료', sender: 'SYSTEM', trigger: '상태 변경(SELECTED)', target: 'Owner', template: '최종 파트너 선정이 완료되었습니다.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+    { category: '프로젝트 상태 알림', code: 'PRJ-005', name: '계약 단계 진입', sender: 'SYSTEM', trigger: '상태 변경(CONTRACT)', target: '양측', template: '계약 단계로 전환되었습니다. 계약 서류를 확인해 주세요.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+    { category: '프로젝트 상태 알림', code: 'PRJ-009', name: '종료(완료)', sender: 'SYSTEM', trigger: '상태 변경(COMPLETE)', target: '양측', template: '프로젝트가 완료 처리되었습니다.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
 
     // 6. 파트너 참여 상태 알림
-    { category: '파트너 참여 상태 알림', code: 'PAR-001', name: '프로젝트 초대', sender: 'SYSTEM', trigger: 'INVITED', target: '해당 파트너', template: '프로젝트에 초대되었습니다. 참여 여부를 확인해 주세요.', active: true },
-    { category: '파트너 참여 상태 알림', code: 'PAR-002', name: '참여 신청 도착', sender: 'SYSTEM', trigger: 'APPLY', target: 'Owner', template: '참여 신청이 도착했습니다.', active: true },
-    { category: '파트너 참여 상태 알림', code: 'PAR-003', name: '제안서 제출 완료', sender: 'SYSTEM', trigger: 'PROPOSAL_SUBMITTED', target: 'Owner', template: '제안서가 제출되었습니다. 확인해 주세요.', active: true },
-    { category: '파트너 참여 상태 알림', code: 'PAR-008', name: '파트너 선정', sender: 'SYSTEM', trigger: 'SELECTED', target: '해당 파트너', template: '축하드립니다! {프로젝트명} 최종 파트너로 선정되셨습니다.', active: true },
+    { category: '파트너 참여 상태 알림', code: 'PAR-001', name: '프로젝트 초대', sender: 'SYSTEM', trigger: 'INVITED', target: '해당 파트너', template: '프로젝트에 초대되었습니다. 참여 여부를 확인해 주세요.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+    { category: '파트너 참여 상태 알림', code: 'PAR-002', name: '참여 신청 도착', sender: 'SYSTEM', trigger: 'APPLY', target: 'Owner', template: '참여 신청이 도착했습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '파트너 참여 상태 알림', code: 'PAR-003', name: '제안서 제출 완료', sender: 'SYSTEM', trigger: 'PROPOSAL_SUBMITTED', target: 'Owner', template: '제안서가 제출되었습니다. 확인해 주세요.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '파트너 참여 상태 알림', code: 'PAR-008', name: '파트너 선정', sender: 'SYSTEM', trigger: 'SELECTED', target: '해당 파트너', template: '축하드립니다! {프로젝트명} 최종 파트너로 선정되셨습니다.', active: true, ch: { sms: true, email: true, kakao: true, web: true } },
 
     // 7. 제안서/시안 업로드
-    { category: '제안서/시안 업로드', code: 'DOC-001', name: '제안서/시안 업로드', sender: 'SYSTEM', trigger: '파일 업로드', target: 'Owner', template: '제안서/시안이 업로드되었습니다. 확인해 주세요.', active: true },
+    { category: '제안서/시안 업로드', code: 'DOC-001', name: '제안서/시안 업로드', sender: 'SYSTEM', trigger: '파일 업로드', target: 'Owner', template: '제안서/시안이 업로드되었습니다. 확인해 주세요.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
 
     // 8. 계약/서류
-    { category: '계약/서류', code: 'CTR-001', name: '계약서류 업로드', sender: 'SYSTEM', trigger: '파일 업로드', target: '상대방', template: '계약 서류가 업로드되었습니다. 확인해 주세요.', active: true },
-    { category: '계약/서류', code: 'CTR-002', name: '계약 확정 요청', sender: 'SYSTEM', trigger: '확정 요청', target: '상대방', template: '계약 확정 요청이 도착했습니다.', active: true },
-    
+    { category: '계약/서류', code: 'CTR-001', name: '계약서류 업로드', sender: 'SYSTEM', trigger: '파일 업로드', target: '상대방', template: '계약 서류가 업로드되었습니다. 확인해 주세요.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+    { category: '계약/서류', code: 'CTR-002', name: '계약 확정 요청', sender: 'SYSTEM', trigger: '확정 요청', target: '상대방', template: '계약 확정 요청이 도착했습니다.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+
     // 9. 제작/산출물
-    { category: '제작/산출물', code: 'DLV-001', name: '산출물 업로드 완료', sender: 'SYSTEM', trigger: '파일 업로드', target: 'Owner', template: '산출물이 업로드되었습니다. 검수해 주세요.', active: true },
-    
+    { category: '제작/산출물', code: 'DLV-001', name: '산출물 업로드 완료', sender: 'SYSTEM', trigger: '파일 업로드', target: 'Owner', template: '산출물이 업로드되었습니다. 검수해 주세요.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+
     // 10. 정산
-    { category: '정산', code: 'PAY-001', name: '증빙/지급 정보 등록', sender: 'SYSTEM', trigger: '증빙 등록', target: '상대방', template: '증빙/지급 정보가 등록되었습니다. 확인해 주세요.', active: true },
-    { category: '정산', code: 'PAY-005', name: '정산 완료', sender: 'SYSTEM', trigger: 'COMPLETE', target: '양측', template: '정산이 완료 처리되었습니다.', active: true },
+    { category: '정산', code: 'PAY-001', name: '증빙/지급 정보 등록', sender: 'SYSTEM', trigger: '증빙 등록', target: '상대방', template: '증빙/지급 정보가 등록되었습니다. 확인해 주세요.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '정산', code: 'PAY-005', name: '정산 완료', sender: 'SYSTEM', trigger: 'COMPLETE', target: '양측', template: '정산이 완료 처리되었습니다.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
 
     // 11. 맞춤/관심기업
-    { category: '맞춤/관심기업', code: 'REC-001', name: '맞춤 프로젝트 등록 알림', sender: 'SYSTEM', trigger: '조건 매칭', target: '해당 사용자', template: '조건에 맞는 신규 프로젝트가 등록되었습니다.', active: true },
-    { category: '맞춤/관심기업', code: 'REC-002', name: '관심 기업 신규 프로젝트', sender: 'SYSTEM', trigger: '관심기업 이벤트', target: '해당 사용자', template: '관심 기업의 신규 프로젝트가 등록되었습니다.', active: true },
-    { category: '맞춤/관심기업', code: 'REC-003', name: '관심 기업 활동 업데이트', sender: 'SYSTEM', trigger: '관심기업 업데이트', target: '해당 사용자', template: '관심 기업의 활동이 업데이트되었습니다.', active: true },
+    { category: '맞춤/관심기업', code: 'REC-001', name: '맞춤 프로젝트 등록 알림', sender: 'SYSTEM', trigger: '조건 매칭', target: '해당 사용자', template: '조건에 맞는 신규 프로젝트가 등록되었습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '맞춤/관심기업', code: 'REC-002', name: '관심 기업 신규 프로젝트', sender: 'SYSTEM', trigger: '관심기업 이벤트', target: '해당 사용자', template: '관심 기업의 신규 프로젝트가 등록되었습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '맞춤/관심기업', code: 'REC-003', name: '관심 기업 활동 업데이트', sender: 'SYSTEM', trigger: '관심기업 업데이트', target: '해당 사용자', template: '관심 기업의 활동이 업데이트되었습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
 
     // 12. 메시지
-    { category: '메시지', code: 'MSG-001', name: '쪽지 수신', sender: 'SYSTEM', trigger: '메시지 수신', target: '수신자', template: '새 메시지가 도착했습니다.', active: true },
+    { category: '메시지', code: 'MSG-001', name: '쪽지 수신', sender: 'SYSTEM', trigger: '메시지 수신', target: '수신자', template: '새 메시지가 도착했습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
 
     // 13. 리마인더 알림 (D-3 / D-1 / 당일)
     // 13-1) OT / PT 일정 리마인더
-    { category: '리마인더 (OT/PT)', code: 'RMD-001', name: 'OT 3일 전', sender: 'SYSTEM', trigger: '일정 리마인더', target: 'OT 참석자', template: 'OT가 3일 남았습니다. 일정: {OT일시}', active: true },
-    { category: '리마인더 (OT/PT)', code: 'RMD-002', name: 'OT 1일 전', sender: 'SYSTEM', trigger: '일정 리마인더', target: 'OT 참석자', template: 'OT가 내일입니다. 일정: {OT일시}', active: true },
-    { category: '리마인더 (OT/PT)', code: 'RMD-003', name: 'OT 당일', sender: 'SYSTEM', trigger: '일정 리마인더', target: 'OT 참석자', template: '오늘 OT가 진행됩니다. 일정: {OT일시}', active: true },
-    { category: '리마인더 (OT/PT)', code: 'RMD-004', name: 'PT 3일 전', sender: 'SYSTEM', trigger: '일정 리마인더', target: 'PT 참석자', template: 'PT가 3일 남았습니다. 일정: {PT일시}', active: true },
-    { category: '리마인더 (OT/PT)', code: 'RMD-005', name: 'PT 1일 전', sender: 'SYSTEM', trigger: '일정 리마인더', target: 'PT 참석자', template: 'PT가 내일입니다. 일정: {PT일시}', active: true },
-    { category: '리마인더 (OT/PT)', code: 'RMD-006', name: 'PT 당일', sender: 'SYSTEM', trigger: '일정 리마인더', target: 'PT 참석자', template: '오늘 PT가 진행됩니다. 일정: {PT일시}', active: true },
+    { category: '리마인더 (OT/PT)', code: 'RMD-001', name: 'OT 3일 전', sender: 'SYSTEM', trigger: '일정 리마인더', target: 'OT 참석자', template: 'OT가 3일 남았습니다. 일정: {OT일시}', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+    { category: '리마인더 (OT/PT)', code: 'RMD-002', name: 'OT 1일 전', sender: 'SYSTEM', trigger: '일정 리마인더', target: 'OT 참석자', template: 'OT가 내일입니다. 일정: {OT일시}', active: true, ch: { sms: true, email: true, kakao: true, web: true } },
+    { category: '리마인더 (OT/PT)', code: 'RMD-003', name: 'OT 당일', sender: 'SYSTEM', trigger: '일정 리마인더', target: 'OT 참석자', template: '오늘 OT가 진행됩니다. 일정: {OT일시}', active: true, ch: { sms: true, email: false, kakao: true, web: true } },
+    { category: '리마인더 (OT/PT)', code: 'RMD-004', name: 'PT 3일 전', sender: 'SYSTEM', trigger: '일정 리마인더', target: 'PT 참석자', template: 'PT가 3일 남았습니다. 일정: {PT일시}', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+    { category: '리마인더 (OT/PT)', code: 'RMD-005', name: 'PT 1일 전', sender: 'SYSTEM', trigger: '일정 리마인더', target: 'PT 참석자', template: 'PT가 내일입니다. 일정: {PT일시}', active: true, ch: { sms: true, email: true, kakao: true, web: true } },
+    { category: '리마인더 (OT/PT)', code: 'RMD-006', name: 'PT 당일', sender: 'SYSTEM', trigger: '일정 리마인더', target: 'PT 참석자', template: '오늘 PT가 진행됩니다. 일정: {PT일시}', active: true, ch: { sms: true, email: false, kakao: true, web: true } },
 
     // 13-2) 산출물 마감 리마인더
-    { category: '리마인더 (산출물)', code: 'RMD-007', name: '산출물 제출 3일 전', sender: 'SYSTEM', trigger: '마감 리마인더', target: '제출 담당', template: '산출물 제출 마감이 3일 남았습니다. 마감: {마감일}', active: true },
-    { category: '리마인더 (산출물)', code: 'RMD-008', name: '산출물 제출 1일 전', sender: 'SYSTEM', trigger: '마감 리마인더', target: '제출 담당', template: '산출물 제출 마감이 내일입니다. 마감: {마감일}', active: true },
-    { category: '리마인더 (산출물)', code: 'RMD-009', name: '산출물 제출 당일', sender: 'SYSTEM', trigger: '마감 리마인더', target: '제출 담당', template: '오늘 산출물 제출 마감일입니다. 마감: {마감일}', active: true },
-    { category: '리마인더 (산출물)', code: 'RMD-010', name: '최종산출물 제출 3일 전', sender: 'SYSTEM', trigger: '마감 리마인더', target: '제출 담당', template: '최종산출물 제출 마감이 3일 남았습니다. 마감: {마감일}', active: true },
-    { category: '리마인더 (산출물)', code: 'RMD-011', name: '최종산출물 제출 1일 전', sender: 'SYSTEM', trigger: '마감 리마인더', target: '제출 담당', template: '최종산출물 제출 마감이 내일입니다. 마감: {마감일}', active: true },
-    { category: '리마인더 (산출물)', code: 'RMD-012', name: '최종산출물 제출 당일', sender: 'SYSTEM', trigger: '마감 리마인더', target: '제출 담당', template: '오늘 최종산출물 제출 마감일입니다. 마감: {마감일}', active: true },
+    { category: '리마인더 (산출물)', code: 'RMD-007', name: '산출물 제출 3일 전', sender: 'SYSTEM', trigger: '마감 리마인더', target: '제출 담당', template: '산출물 제출 마감이 3일 남았습니다. 마감: {마감일}', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '리마인더 (산출물)', code: 'RMD-008', name: '산출물 제출 1일 전', sender: 'SYSTEM', trigger: '마감 리마인더', target: '제출 담당', template: '산출물 제출 마감이 내일입니다. 마감: {마감일}', active: true, ch: { sms: true, email: true, kakao: true, web: true } },
+    { category: '리마인더 (산출물)', code: 'RMD-009', name: '산출물 제출 당일', sender: 'SYSTEM', trigger: '마감 리마인더', target: '제출 담당', template: '오늘 산출물 제출 마감일입니다. 마감: {마감일}', active: true, ch: { sms: true, email: false, kakao: true, web: true } },
+    { category: '리마인더 (산출물)', code: 'RMD-010', name: '최종산출물 제출 3일 전', sender: 'SYSTEM', trigger: '마감 리마인더', target: '제출 담당', template: '최종산출물 제출 마감이 3일 남았습니다. 마감: {마감일}', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '리마인더 (산출물)', code: 'RMD-011', name: '최종산출물 제출 1일 전', sender: 'SYSTEM', trigger: '마감 리마인더', target: '제출 담당', template: '최종산출물 제출 마감이 내일입니다. 마감: {마감일}', active: true, ch: { sms: true, email: true, kakao: true, web: true } },
+    { category: '리마인더 (산출물)', code: 'RMD-012', name: '최종산출물 제출 당일', sender: 'SYSTEM', trigger: '마감 리마인더', target: '제출 담당', template: '오늘 최종산출물 제출 마감일입니다. 마감: {마감일}', active: true, ch: { sms: true, email: false, kakao: true, web: true } },
 
     // 13-3) 정산 리마인더
-    { category: '리마인더 (정산)', code: 'RMD-013', name: '계약금 정산 3일 전', sender: 'SYSTEM', trigger: '정산 리마인더', target: '지급자', template: '계약금 지급 예정일이 3일 남았습니다. 예정일: {예정일}', active: true },
-    { category: '리마인더 (정산)', code: 'RMD-014', name: '중도금 정산 3일 전', sender: 'SYSTEM', trigger: '정산 리마인더', target: '지급자', template: '중도금 지급 예정일이 3일 남았습니다. 예정일: {예정일}', active: true },
-    { category: '리마인더 (정산)', code: 'RMD-015', name: '잔금 정산 3일 전', sender: 'SYSTEM', trigger: '정산 리마인더', target: '지급자', template: '잔금 지급 예정일이 3일 남았습니다. 예정일: {예정일}', active: true },
-    { category: '리마인더 (정산)', code: 'RMD-016', name: '정산 확인 3일 전', sender: 'SYSTEM', trigger: '정산 리마인더', target: '상대방', template: '정산 확인 마감이 3일 남았습니다. 마감: {마감일}', active: true },
+    { category: '리마인더 (정산)', code: 'RMD-013', name: '계약금 정산 3일 전', sender: 'SYSTEM', trigger: '정산 리마인더', target: '지급자', template: '계약금 지급 예정일이 3일 남았습니다. 예정일: {예정일}', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '리마인더 (정산)', code: 'RMD-014', name: '중도금 정산 3일 전', sender: 'SYSTEM', trigger: '정산 리마인더', target: '지급자', template: '중도금 지급 예정일이 3일 남았습니다. 예정일: {예정일}', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '리마인더 (정산)', code: 'RMD-015', name: '잔금 정산 3일 전', sender: 'SYSTEM', trigger: '정산 리마인더', target: '지급자', template: '잔금 지급 예정일이 3일 남았습니다. 예정일: {예정일}', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '리마인더 (정산)', code: 'RMD-016', name: '정산 확인 3일 전', sender: 'SYSTEM', trigger: '정산 리마인더', target: '상대방', template: '정산 확인 마감이 3일 남았습니다. 마감: {마감일}', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
 
     // 13-4) 관심공고(즐겨찾기) 마감 리마인더
-    { category: '리마인더 (관심공고)', code: 'RMD-017', name: '관심공고 마감 3일 전', sender: 'SYSTEM', trigger: '마감 리마인더', target: '관심등록한 사용자', template: '관심 등록한 공고의 접수 마감이 3일 남았습니다. ({프로젝트명})', active: true },
-    { category: '리마인더 (관심공고)', code: 'RMD-018', name: '관심공고 마감 1일 전', sender: 'SYSTEM', trigger: '마감 리마인더', target: '관심등록한 사용자', template: '관심 등록한 공고의 접수 마감이 내일입니다. ({프로젝트명})', active: true },
-    { category: '리마인더 (관심공고)', code: 'RMD-019', name: '관심공고 마감 당일', sender: 'SYSTEM', trigger: '마감 리마인더', target: '관심등록한 사용자', template: '오늘 관심 공고 접수 마감일입니다. 지금 확인해 주세요. ({프로젝트명})', active: true },
+    { category: '리마인더 (관심공고)', code: 'RMD-017', name: '관심공고 마감 3일 전', sender: 'SYSTEM', trigger: '마감 리마인더', target: '관심등록한 사용자', template: '관심 등록한 공고의 접수 마감이 3일 남았습니다. ({프로젝트명})', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '리마인더 (관심공고)', code: 'RMD-018', name: '관심공고 마감 1일 전', sender: 'SYSTEM', trigger: '마감 리마인더', target: '관심등록한 사용자', template: '관심 등록한 공고의 접수 마감이 내일입니다. ({프로젝트명})', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '리마인더 (관심공고)', code: 'RMD-019', name: '관심공고 마감 당일', sender: 'SYSTEM', trigger: '마감 리마인더', target: '관심등록한 사용자', template: '오늘 관심 공고 접수 마감일입니다. 지금 확인해 주세요. ({프로젝트명})', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
 
     // 13-5) 내 프로젝트 마감 리마인더
-    { category: '리마인더 (내 프로젝트)', code: 'RMD-020', name: '내 프로젝트 마감 3일 전', sender: 'SYSTEM', trigger: '내 할 일 마감', target: '담당자', template: '내 프로젝트 할 일 마감이 3일 남았습니다. ({할일명} / {프로젝트명})', active: true },
-    { category: '리마인더 (내 프로젝트)', code: 'RMD-021', name: '내 프로젝트 마감 1일 전', sender: 'SYSTEM', trigger: '내 할 일 마감', target: '담당자', template: '내 프로젝트 할 일 마감이 내일입니다. ({할일명} / {프로젝트명})', active: true },
-    { category: '리마인더 (내 프로젝트)', code: 'RMD-022', name: '내 프로젝트 마감 당일', sender: 'SYSTEM', trigger: '내 할 일 마감', target: '담당자', template: '오늘 내 프로젝트 할 일 마감일입니다. ({할일명} / {프로젝트명})', active: true },
+    { category: '리마인더 (내 프로젝트)', code: 'RMD-020', name: '내 프로젝트 마감 3일 전', sender: 'SYSTEM', trigger: '내 할 일 마감', target: '담당자', template: '내 프로젝트 할 일 마감이 3일 남았습니다. ({할일명} / {프로젝트명})', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '리마인더 (내 프로젝트)', code: 'RMD-021', name: '내 프로젝트 마감 1일 전', sender: 'SYSTEM', trigger: '내 할 일 마감', target: '담당자', template: '내 프로젝트 할 일 마감이 내일입니다. ({할일명} / {프로젝트명})', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '리마인더 (내 프로젝트)', code: 'RMD-022', name: '내 프로젝트 마감 당일', sender: 'SYSTEM', trigger: '내 할 일 마감', target: '담당자', template: '오늘 내 프로젝트 할 일 마감일입니다. ({할일명} / {프로젝트명})', active: true, ch: { sms: true, email: false, kakao: true, web: true } },
 ];
 
 interface ContentManagementProps {
@@ -355,7 +355,11 @@ const ContentManagement = ({ activeTab = 'content-notice' }: ContentManagementPr
                                 <th className="p-4 font-bold w-40">알림명 / 트리거</th>
                                 <th className="p-4 font-bold w-24">대상</th>
                                 <th className="p-4 font-bold">발송 내용 (Template)</th>
-                                <th className="p-4 font-bold w-24 text-center">상태</th>
+                                <th className="p-4 font-bold w-14 text-center">문자</th>
+                                <th className="p-4 font-bold w-14 text-center">이메일</th>
+                                <th className="p-4 font-bold w-14 text-center">카톡</th>
+                                <th className="p-4 font-bold w-14 text-center">웹</th>
+                                <th className="p-4 font-bold w-16 text-center">ON/OFF</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -409,6 +413,22 @@ const ContentManagement = ({ activeTab = 'content-notice' }: ContentManagementPr
                                             </div>
                                         )}
                                     </td>
+                                    {(['sms', 'email', 'kakao', 'web'] as const).map(ch => (
+                                        <td key={ch} className="p-4 text-center">
+                                            <button
+                                                onClick={() => setNotificationList(prev => prev.map(n =>
+                                                    n.code === notif.code ? { ...n, ch: { ...n.ch, [ch]: !n.ch[ch] } } : n
+                                                ))}
+                                                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
+                                                    notif.ch[ch] ? 'bg-emerald-500' : 'bg-slate-200'
+                                                }`}
+                                            >
+                                                <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                                                    notif.ch[ch] ? 'translate-x-5' : 'translate-x-1'
+                                                }`} />
+                                            </button>
+                                        </td>
+                                    ))}
                                     <td className="p-4 text-center">
                                         <button 
                                             onClick={() => toggleNotification(notif.code)}
