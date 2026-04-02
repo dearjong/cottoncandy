@@ -408,7 +408,14 @@ export default function AdminParticipationPage() {
                 ) : (
                   projectListRows.map((row) => (
                     <TableRow key={row.type}>
-                      <TableCell className="font-medium">{row.type}</TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-1.5">
+                          <span>{row.type.replace(" (컨설팅)", "")}</span>
+                          {row.type.includes("(컨설팅)") && (
+                            <Badge variant="outline" className="text-xs">컨설팅</Badge>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-center text-orange-700 font-semibold">{row.ongoing}</TableCell>
                       <TableCell className="text-center text-green-700 font-semibold">{row.completed}</TableCell>
                       <TableCell className="text-center font-semibold">{row.total}</TableCell>
