@@ -62,7 +62,7 @@ export default function AdminParticipationPage() {
     return rows.filter((row) => {
       const matchSearch =
         !searchTerm ||
-        row.company.name.includes(searchTerm) ||
+        row.company.companyName.includes(searchTerm) ||
         (row.company.businessNumber ?? "").includes(searchTerm) ||
         (row.company.representativeName ?? "").includes(searchTerm)
 
@@ -286,7 +286,7 @@ export default function AdminParticipationPage() {
                   filtered.map(({ company, ongoingCount, completedCount, totalCount, asOwnerCount, asPartnerCount, lastOngoingStatus }) => (
                     <TableRow key={company.id}>
                       <TableCell>
-                        <div className="font-medium text-gray-900">{company.name}</div>
+                        <div className="font-medium text-gray-900">{company.companyName}</div>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs">
@@ -419,7 +419,7 @@ export default function AdminParticipationPage() {
             {selectedCompanyRow ? (
               <div className="space-y-5">
                 <div className="rounded-lg border bg-muted/20 p-4">
-                  <div className="text-lg font-semibold">{selectedCompanyRow.company.name}</div>
+                  <div className="text-lg font-semibold">{selectedCompanyRow.company.companyName}</div>
                   <div className="mt-1 text-sm text-muted-foreground">
                     {selectedCompanyRow.company.companyType ?? "기업"} · 대표자 {selectedCompanyRow.company.representativeName ?? "-"}
                   </div>
