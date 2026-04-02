@@ -180,7 +180,7 @@ export function NoticeBannerManagement() {
   return (
     <div className="space-y-6">
       <Card data-testid="card-notice-banner-management">
-        <CardContent>
+        <CardContent className="pt-6">
           <Tabs defaultValue="notices" className="space-y-4">
             <TabsList className="grid w-full max-w-[280px] grid-cols-2">
               <TabsTrigger value="notices">공지사항</TabsTrigger>
