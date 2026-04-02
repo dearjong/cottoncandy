@@ -319,22 +319,23 @@ export default function CompanyVerificationPage() {
                 <TableCell>
                   <div className="flex justify-end gap-2">
                     <Button
-                      variant="default"
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700"
-                      onClick={() => handleApprove(request)}
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="destructive"
+                      variant="outline"
                       size="sm"
                       onClick={() => {
                         setSelectedVerification(request)
                         setRejectDialogOpen(true)
                       }}
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-4 w-4 mr-1" />
+                      반려
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-pink-600 hover:bg-pink-700"
+                      onClick={() => handleApprove(request)}
+                    >
+                      <Check className="h-4 w-4 mr-1" />
+                      승인
                     </Button>
                   </div>
                 </TableCell>
