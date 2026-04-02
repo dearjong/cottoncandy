@@ -85,6 +85,10 @@ export default function AdminParticipationPage() {
   const totalAll = rows.reduce((s, r) => s + r.totalCount, 0)
   const projectRows = useMemo(() => {
     return MOCK_ADMIN_PROJECTS_V1.filter((project) => {
+      if (project.type === "컨설팅" &&
+        project.consultingOutcomeKind !== "MATCHING_PUBLIC" &&
+        project.consultingOutcomeKind !== "MATCHING_1TO1") return false
+
       const relatedCompany = rows.find((row) => row.company.id === project.ownerCompanyId)?.company
       const matchSearch =
         !searchTerm ||
@@ -92,7 +96,7 @@ export default function AdminParticipationPage() {
         project.id.includes(searchTerm) ||
         (project.client ?? "").includes(searchTerm) ||
         (project.partner ?? "").includes(searchTerm) ||
-        (relatedCompany?.name ?? "").includes(searchTerm)
+        (relatedCompany?.companyName ?? "").includes(searchTerm)
 
       const isCompleted = COMPLETED_STATUSES.includes(project.status)
       const matchStatus =
@@ -103,7 +107,7 @@ export default function AdminParticipationPage() {
       return matchSearch && matchStatus
     })
   }, [rows, searchTerm, filterStatus])
-  const PROJECT_TYPES = ["공고", "공고 (컨설팅)", "1:1", "1:1 (컨설팅)", "컨설팅 문의"] as const
+  const PROJECT_TYPES = ["공고", "공고 (컨설팅)", "1:1", "1:1 (컨설팅)"] as const
 
   const projectListRows = useMemo(() => {
     const stat: Record<string, { total: number; ongoing: number; completed: number }> = {
@@ -111,14 +115,19 @@ export default function AdminParticipationPage() {
       "공고 (컨설팅)": { total: 0, ongoing: 0, completed: 0 },
       "1:1": { total: 0, ongoing: 0, completed: 0 },
       "1:1 (컨설팅)": { total: 0, ongoing: 0, completed: 0 },
-      "컨설팅 문의": { total: 0, ongoing: 0, completed: 0 },
     }
 
     MOCK_ADMIN_PROJECTS_V1.forEach((project) => {
       let key: string
-      if (project.type === "컨설팅") key = "컨설팅 문의"
-      else if (project.type === "1:1") key = "1:1"
-      else key = "공고"
+      if (project.type === "컨설팅") {
+        if (project.consultingOutcomeKind === "MATCHING_PUBLIC") key = "공고 (컨설팅)"
+        else if (project.consultingOutcomeKind === "MATCHING_1TO1") key = "1:1 (컨설팅)"
+        else return
+      } else if (project.type === "1:1") {
+        key = "1:1"
+      } else {
+        key = "공고"
+      }
 
       if (stat[key]) {
         stat[key].total += 1
@@ -377,13 +386,10 @@ export default function AdminParticipationPage() {
                       <TableCell>
                         {project.type === "컨설팅" ? (
                           <div className="flex items-center gap-1">
-                            {project.consultingOutcomeKind === "MATCHING_PUBLIC" ? (
-                              <><Badge variant="outline">공고</Badge><Badge variant="outline" className="text-xs">컨설팅</Badge></>
-                            ) : project.consultingOutcomeKind === "MATCHING_1TO1" ? (
-                              <><Badge variant="outline">1:1</Badge><Badge variant="outline" className="text-xs">컨설팅</Badge></>
-                            ) : (
-                              <Badge variant="outline">컨설팅 문의</Badge>
-                            )}
+                            <Badge variant="outline">
+                              {project.consultingOutcomeKind === "MATCHING_1TO1" ? "1:1" : "공고"}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">컨설팅</Badge>
                           </div>
                         ) : (
                           <Badge variant="outline">{project.type}</Badge>
