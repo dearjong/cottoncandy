@@ -1600,7 +1600,7 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
                     consultingWorkInquiryDetail && selectedProject.type === "컨설팅"
                       ? ["overview"]
                       : hideWorkflowTabs
-                        ? ["company", "overview"]
+                        ? ["overview", "company"]
                         : getVisibleWorkflowTabs(selectedProject.status, projectType)
                   const effectiveTab = visibleTabs.includes(workflowTab) ? workflowTab : visibleTabs[0]
                   const tabLabels: Record<WorkflowTabKey, string> = {
@@ -1627,6 +1627,15 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
                     <div className="p-4 border-b border-gray-100 bg-gray-50/50">
                       <Tabs value={effectiveTab} onValueChange={(v) => setWorkflowTab(v as WorkflowTabKey)}>
                         <TabsList className="inline-flex h-10 items-center gap-2 rounded-md bg-transparent p-0 text-muted-foreground w-full justify-start flex-wrap">
+                          {/* 프로젝트 상세 탭: 가장 왼쪽 */}
+                          <div className={groupBox} role="group" aria-label="프로젝트 상세">
+                            <TabsTrigger
+                              value="overview"
+                              className="h-8 shrink-0 data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:font-medium data-[state=active]:shadow-sm"
+                            >
+                              프로젝트 상세
+                            </TabsTrigger>
+                          </div>
                           {/* 기업 묶음: 의뢰사·수행사 (계약 이후만 노출) */}
                           {companyKeys.length > 0 && (
                             <div className={groupBox} role="group" aria-label="기업">
@@ -1641,15 +1650,6 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
                               ))}
                             </div>
                           )}
-                          {/* 프로젝트 상세 탭: 진행 스텝과 분리, 의뢰 정보 옆에 배치 */}
-                          <div className={groupBox} role="group" aria-label="프로젝트 상세">
-                            <TabsTrigger
-                              value="overview"
-                              className="h-8 shrink-0 data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:font-medium data-[state=active]:shadow-sm"
-                            >
-                              프로젝트 상세
-                            </TabsTrigger>
-                          </div>
                           {/* 진행 표시: 컨설팅은 활동·완료 처리에 따라 자동 반영(읽기 전용) + 우측 결과 */}
                           {isConsultingProject ? (
                             <div
@@ -1804,7 +1804,7 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
                       consultingWorkInquiryDetail && selectedProject.type === "컨설팅"
                         ? ["overview"]
                         : hideWorkflowTabs
-                          ? ["company", "overview"]
+                          ? ["overview", "company"]
                           : getVisibleWorkflowTabs(selectedProject.status, projectType)
                     const effectiveTab = visibleTabs.includes(workflowTab) ? workflowTab : visibleTabs[0]
                     return (
