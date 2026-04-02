@@ -182,7 +182,7 @@ export function NoticeBannerManagement() {
       <Card data-testid="card-notice-banner-management">
         <CardContent>
           <Tabs defaultValue="notices" className="space-y-4">
-            <TabsList>
+            <TabsList className="grid w-full max-w-[280px] grid-cols-2">
               <TabsTrigger value="notices">공지사항</TabsTrigger>
               <TabsTrigger value="banners">배너 관리</TabsTrigger>
             </TabsList>
