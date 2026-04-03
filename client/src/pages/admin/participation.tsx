@@ -17,13 +17,38 @@ const COMPLETED_STATUSES = ["COMPLETE", "ADMIN_CHECKING", "ADMIN_CONFIRMED", "CA
 
 type FilterType = "ALL" | "ADVERTISER" | "PRODUCTION"
 type ViewMode = "company" | "project" | "projectList"
+type FilterPeriod = "ALL" | "1Y" | "1M" | "CUSTOM"
 
 export default function AdminParticipationPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterType, setFilterType] = useState<FilterType>("ALL")
   const [filterStatus, setFilterStatus] = useState<"ALL" | "ongoing" | "completed">("ALL")
+  const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>("ALL")
+  const [customFrom, setCustomFrom] = useState("")
+  const [customTo, setCustomTo] = useState("")
   const [viewMode, setViewMode] = useState<ViewMode>("company")
   const [openCompanyDetailId, setOpenCompanyDetailId] = useState<string | null>(null)
+
+  const getPeriodRange = (): { from: Date | null; to: Date | null } => {
+    const now = new Date()
+    if (filterPeriod === "1Y") return { from: new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()), to: now }
+    if (filterPeriod === "1M") return { from: new Date(now.getFullYear(), now.getMonth(), 1), to: now }
+    if (filterPeriod === "CUSTOM") return {
+      from: customFrom ? new Date(customFrom) : null,
+      to: customTo ? new Date(customTo) : null,
+    }
+    return { from: null, to: null }
+  }
+
+  const isInPeriod = (dateStr: string | undefined) => {
+    if (filterPeriod === "ALL") return true
+    if (!dateStr) return false
+    const { from, to } = getPeriodRange()
+    const d = new Date(dateStr)
+    if (from && d < from) return false
+    if (to && d > to) return false
+    return true
+  }
 
   const rows = useMemo(() => {
     return MOCK_ADMIN_COMPANIES_V1.map((company) => {
@@ -85,9 +110,15 @@ export default function AdminParticipationPage() {
         (filterStatus === "ongoing" && row.ongoingCount > 0) ||
         (filterStatus === "completed" && row.completedCount > 0)
 
-      return matchSearch && matchType && matchStatus
+      const allProjects = MOCK_ADMIN_PROJECTS_V1.filter(
+        (p) => p.ownerCompanyId === row.company.id || (p.participantCompanyIds ?? []).includes(row.company.id)
+      )
+      const matchPeriod =
+        filterPeriod === "ALL" || allProjects.some((p) => isInPeriod(p.createdAt))
+
+      return matchSearch && matchType && matchStatus && matchPeriod
     })
-  }, [rows, searchTerm, filterType, filterStatus])
+  }, [rows, searchTerm, filterType, filterStatus, filterPeriod, customFrom, customTo])
 
   const totalOngoing = rows.reduce((s, r) => s + r.ongoingCount, 0)
   const totalCompleted = rows.reduce((s, r) => s + r.completedCount, 0)
@@ -255,12 +286,43 @@ export default function AdminParticipationPage() {
                 <SelectItem value="completed">완료 포함</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={filterPeriod} onValueChange={(v) => { setFilterPeriod(v as FilterPeriod); setCustomFrom(""); setCustomTo("") }}>
+              <SelectTrigger className="w-36">
+                <SelectValue placeholder="기간" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">총 기간</SelectItem>
+                <SelectItem value="1Y">최근 1년</SelectItem>
+                <SelectItem value="1M">이번 달</SelectItem>
+                <SelectItem value="CUSTOM">선택 기간</SelectItem>
+              </SelectContent>
+            </Select>
+            {filterPeriod === "CUSTOM" && (
+              <div className="flex items-center gap-2">
+                <Input
+                  type="date"
+                  className="w-36 h-9 text-sm"
+                  value={customFrom}
+                  onChange={(e) => setCustomFrom(e.target.value)}
+                />
+                <span className="text-muted-foreground text-sm">~</span>
+                <Input
+                  type="date"
+                  className="w-36 h-9 text-sm"
+                  value={customTo}
+                  onChange={(e) => setCustomTo(e.target.value)}
+                />
+              </div>
+            )}
             <Button
               variant="outline"
               onClick={() => {
                 setSearchTerm("")
                 setFilterType("ALL")
                 setFilterStatus("ALL")
+                setFilterPeriod("ALL")
+                setCustomFrom("")
+                setCustomTo("")
               }}
             >
               초기화
