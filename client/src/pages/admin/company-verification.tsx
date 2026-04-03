@@ -192,6 +192,8 @@ export default function CompanyVerificationPage() {
   const [selectedVerification, setSelectedVerification] = useState<CompanyVerification | null>(null)
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
   const [rejectReason, setRejectReason] = useState("")
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false)
+  const [approveTarget, setApproveTarget] = useState<CompanyVerification | null>(null)
   const [isEditMode, setIsEditMode] = useState(false)
   const [editedData, setEditedData] = useState<Partial<CompanyVerification>>({})
 
@@ -332,7 +334,10 @@ export default function CompanyVerificationPage() {
                     <Button
                       size="sm"
                       className="bg-pink-600 hover:bg-pink-700"
-                      onClick={() => handleApprove(request)}
+                      onClick={() => {
+                        setApproveTarget(request)
+                        setApproveDialogOpen(true)
+                      }}
                     >
                       <Check className="h-4 w-4 mr-1" />
                       승인
@@ -887,6 +892,42 @@ export default function CompanyVerificationPage() {
               disabled={!rejectReason.trim()}
             >
               반려 확정
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={approveDialogOpen} onOpenChange={(open) => { setApproveDialogOpen(open); if (!open) setApproveTarget(null) }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>인증 승인</DialogTitle>
+            <DialogDescription>
+              아래 인증 요청을 승인하시겠습니까?
+            </DialogDescription>
+          </DialogHeader>
+          {approveTarget && (
+            <div className="p-3 bg-muted rounded-lg">
+              <p className="font-medium">{approveTarget.companyName}</p>
+              <p className="text-sm text-muted-foreground">
+                {verificationTypeLabels[approveTarget.verificationType].label}
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setApproveDialogOpen(false); setApproveTarget(null) }}>
+              취소
+            </Button>
+            <Button
+              className="bg-pink-600 hover:bg-pink-700"
+              onClick={() => {
+                if (approveTarget) {
+                  handleApprove(approveTarget)
+                  setApproveDialogOpen(false)
+                  setApproveTarget(null)
+                }
+              }}
+            >
+              승인 확정
             </Button>
           </DialogFooter>
         </DialogContent>
