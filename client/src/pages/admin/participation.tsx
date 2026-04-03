@@ -240,8 +240,8 @@ export default function AdminParticipationPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">전체</SelectItem>
-                  <SelectItem value="ADVERTISER">의뢰 있음</SelectItem>
-                  <SelectItem value="PRODUCTION">참여 있음</SelectItem>
+                  <SelectItem value="ADVERTISER">의뢰</SelectItem>
+                  <SelectItem value="PRODUCTION">참여</SelectItem>
                 </SelectContent>
               </Select>
             )}
