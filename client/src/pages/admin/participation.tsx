@@ -35,6 +35,13 @@ export default function AdminParticipationPage() {
       const asOwner = all.filter((p) => p.ownerCompanyId === company.id).length
       const asPartner = all.filter((p) => (p.participantCompanyIds ?? []).includes(company.id)).length
 
+      const biddingCount = all.filter(
+        (p) => p.type === "공고" || (p.type === "컨설팅" && p.consultingOutcomeKind === "MATCHING_PUBLIC")
+      ).length
+      const oneToOneCount = all.filter(
+        (p) => p.type === "1:1" || (p.type === "컨설팅" && p.consultingOutcomeKind === "MATCHING_1TO1")
+      ).length
+
       const lastProject = all
         .filter((p) => p.createdAt)
         .sort((a, b) => new Date(b.createdAt ?? "").getTime() - new Date(a.createdAt ?? "").getTime())[0]
@@ -50,6 +57,8 @@ export default function AdminParticipationPage() {
         completedCount: completed.length,
         asOwnerCount: asOwner,
         asPartnerCount: asPartner,
+        biddingCount,
+        oneToOneCount,
         lastActivity: lastProject?.createdAt ?? "-",
         lastOngoingStatus,
         ongoing,
@@ -272,25 +281,27 @@ export default function AdminParticipationPage() {
               <TableHeader>
                 <TableRow className="bg-gray-50">
                   <TableHead className="w-[200px]">기업명</TableHead>
-                  <TableHead className="w-[100px]">유형</TableHead>
-                  <TableHead className="text-center w-[100px]">진행중</TableHead>
-                  <TableHead className="text-center w-[100px]">완료</TableHead>
-                  <TableHead className="text-center w-[100px]">총 참여</TableHead>
-                  <TableHead className="text-center w-[100px]">의뢰사</TableHead>
-                  <TableHead className="text-center w-[100px]">수행사</TableHead>
-                  <TableHead className="w-[160px]">최근 진행 상태</TableHead>
-                  <TableHead className="text-right w-[80px]">상세</TableHead>
+                  <TableHead className="w-[90px]">유형</TableHead>
+                  <TableHead className="text-center w-[80px]">진행중</TableHead>
+                  <TableHead className="text-center w-[80px]">완료</TableHead>
+                  <TableHead className="text-center w-[80px]">총 참여</TableHead>
+                  <TableHead className="text-center w-[80px]">의뢰사</TableHead>
+                  <TableHead className="text-center w-[80px]">수행사</TableHead>
+                  <TableHead className="text-center w-[80px]">공고</TableHead>
+                  <TableHead className="text-center w-[80px]">1:1</TableHead>
+                  <TableHead className="w-[140px]">최근 진행 상태</TableHead>
+                  <TableHead className="text-right w-[60px]">상세</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="py-10 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={11} className="py-10 text-center text-sm text-muted-foreground">
                       조건에 해당하는 기업이 없습니다.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filtered.map(({ company, ongoingCount, completedCount, totalCount, asOwnerCount, asPartnerCount, lastOngoingStatus }) => (
+                  filtered.map(({ company, ongoingCount, completedCount, totalCount, asOwnerCount, asPartnerCount, biddingCount, oneToOneCount, lastOngoingStatus }) => (
                     <TableRow key={company.id}>
                       <TableCell>
                         <div className="font-medium text-gray-900">{company.companyName}</div>
@@ -326,6 +337,12 @@ export default function AdminParticipationPage() {
                       </TableCell>
                       <TableCell className="text-center">
                         <span className="text-sm text-orange-700">{asPartnerCount > 0 ? asPartnerCount : "-"}</span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="text-sm text-purple-700">{biddingCount > 0 ? biddingCount : "-"}</span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="text-sm text-pink-700">{oneToOneCount > 0 ? oneToOneCount : "-"}</span>
                       </TableCell>
                       <TableCell>
                         {lastOngoingStatus ? (
