@@ -230,54 +230,60 @@ export default function AdminParticipationPage() {
         </Tabs>
 
         <div className="grid grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="px-5 py-4">
-              <p className="text-xs text-muted-foreground mb-3">의뢰 현황</p>
-              <div className="flex items-center justify-around">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground">{totalRequest}</div>
-                  <div className="text-xs text-muted-foreground mt-1">총 의뢰</div>
+          <div>
+            <p className="text-xs text-muted-foreground mb-2 px-1">의뢰 현황</p>
+            <Card>
+              <CardContent className="px-5 py-4">
+                <div className="flex items-center justify-around">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-foreground">{totalRequest}</div>
+                    <div className="text-xs text-muted-foreground mt-1">총 의뢰</div>
+                  </div>
+                  <div className="w-px h-10 bg-border" />
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">{totalParticipation}</div>
+                    <div className="text-xs text-muted-foreground mt-1">참여</div>
+                  </div>
                 </div>
-                <div className="w-px h-10 bg-border" />
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">{totalParticipation}</div>
-                  <div className="text-xs text-muted-foreground mt-1">참여</div>
+              </CardContent>
+            </Card>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground mb-2 px-1">진행 상태</p>
+            <Card>
+              <CardContent className="px-5 py-4">
+                <div className="flex items-center justify-around">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-orange-500">{totalOngoing}</div>
+                    <div className="text-xs text-muted-foreground mt-1">진행중</div>
+                  </div>
+                  <div className="w-px h-10 bg-border" />
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">{totalCompleted}</div>
+                    <div className="text-xs text-muted-foreground mt-1">완료</div>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="px-5 py-4">
-              <p className="text-xs text-muted-foreground mb-3">진행 상태</p>
-              <div className="flex items-center justify-around">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-500">{totalOngoing}</div>
-                  <div className="text-xs text-muted-foreground mt-1">진행중</div>
+              </CardContent>
+            </Card>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground mb-2 px-1">프로젝트 유형</p>
+            <Card>
+              <CardContent className="px-5 py-4">
+                <div className="flex items-center justify-around">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600">{totalBidding}</div>
+                    <div className="text-xs text-muted-foreground mt-1">공고</div>
+                  </div>
+                  <div className="w-px h-10 bg-border" />
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-pink-600">{total1to1}</div>
+                    <div className="text-xs text-muted-foreground mt-1">1:1</div>
+                  </div>
                 </div>
-                <div className="w-px h-10 bg-border" />
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">{totalCompleted}</div>
-                  <div className="text-xs text-muted-foreground mt-1">완료</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="px-5 py-4">
-              <p className="text-xs text-muted-foreground mb-3">프로젝트 유형</p>
-              <div className="flex items-center justify-around">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">{totalBidding}</div>
-                  <div className="text-xs text-muted-foreground mt-1">공고</div>
-                </div>
-                <div className="w-px h-10 bg-border" />
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-pink-600">{total1to1}</div>
-                  <div className="text-xs text-muted-foreground mt-1">1:1</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         <div className="bg-white border border-gray-200 rounded-lg p-4">
