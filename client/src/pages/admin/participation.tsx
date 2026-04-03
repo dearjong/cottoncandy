@@ -216,7 +216,6 @@ export default function AdminParticipationPage() {
         <PageHeader
           title={<span className="flex items-center gap-2"><BarChart3 className="h-6 w-6" />전체 참여현황</span>}
           description="기업별/프로젝트별/프로젝트 리스트별 참여 현황을 한눈에 확인합니다."
-          hidePeriodFilter
         />
         <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
           <TabsList className="grid w-full max-w-[420px] grid-cols-3">
