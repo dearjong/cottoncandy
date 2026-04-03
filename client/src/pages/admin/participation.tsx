@@ -288,13 +288,12 @@ export default function AdminParticipationPage() {
                   <TableHead className="text-center w-[80px]">완료</TableHead>
                   <TableHead className="text-center w-[80px]">공고</TableHead>
                   <TableHead className="text-center w-[80px]">1:1</TableHead>
-                  <TableHead className="text-right w-[60px]">상세</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="py-10 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
                       조건에 해당하는 기업이 없습니다.
                     </TableCell>
                   </TableRow>
@@ -338,15 +337,6 @@ export default function AdminParticipationPage() {
                       </TableCell>
                       <TableCell className="text-center">
                         <span className="text-sm text-pink-700">{oneToOneCount > 0 ? oneToOneCount : "-"}</span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <button
-                          type="button"
-                          className="text-sm text-pink-600 hover:underline"
-                          onClick={() => setOpenCompanyDetailId(company.id)}
-                        >
-                          보기
-                        </button>
                       </TableCell>
                     </TableRow>
                   ))
