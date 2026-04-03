@@ -2,9 +2,9 @@ import { useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { PageHeader } from "@/components/admin/page-header"
 import {
   Table,
   TableBody,
@@ -296,14 +296,10 @@ export default function AdminSecurityMessagesPage() {
   const projects = MOCK_ADMIN_PROJECTS_V1 as unknown as { id: string; title: string }[]
 
   const [dataTypeInput, setDataTypeInput] = useState<DataType>("MESSAGES")
-  const [dateFromInput, setDateFromInput] = useState("")
-  const [dateToInput, setDateToInput] = useState("")
   const [senderInput, setSenderInput] = useState("ALL")
 
   const [appliedFilters, setAppliedFilters] = useState({
     dataType: "MESSAGES" as DataType,
-    dateFrom: "",
-    dateTo: "",
     sender: "ALL",
   })
 
@@ -314,21 +310,8 @@ export default function AdminSecurityMessagesPage() {
   }, [])
 
   const filteredMessages = useMemo(() => {
-    const fromMs = appliedFilters.dateFrom
-      ? new Date(`${appliedFilters.dateFrom}T00:00:00`).getTime()
-      : null
-    const toMs = appliedFilters.dateTo
-      ? new Date(`${appliedFilters.dateTo}T23:59:59.999`).getTime()
-      : null
-
     return MOCK_PROJECT_MESSAGES.filter((m) => {
       if (appliedFilters.sender !== "ALL" && m.senderName !== appliedFilters.sender) return false
-
-      const msgMs = parseMessageTime(m.createdAt)
-      if (msgMs == null) return false
-
-      if (fromMs != null && msgMs < fromMs) return false
-      if (toMs != null && msgMs > toMs) return false
       return true
     })
   }, [appliedFilters])
@@ -400,15 +383,13 @@ export default function AdminSecurityMessagesPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">보안자료</h1>
-        <p className="text-muted-foreground">
-          대화·계약서·제안서·산출물·정산·세금계산서·영수증 등 분쟁 대비 증빙을 한곳에서 검색합니다. 원문 열람은 사유·로그가 남으며, 목록은 존재 여부 수준으로만 안내됩니다.
-        </p>
-      </div>
+      <PageHeader
+        title="보안자료"
+        description="대화·계약서·제안서·산출물·정산·세금계산서·영수증 등 분쟁 대비 증빙을 한곳에서 검색합니다. 원문 열람은 사유·로그가 남으며, 목록은 존재 여부 수준으로만 안내됩니다."
+      />
 
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>유형</Label>
             <Select value={dataTypeInput} onValueChange={(v) => setDataTypeInput(v as DataType)}>
@@ -425,14 +406,6 @@ export default function AdminSecurityMessagesPage() {
                 <SelectItem value="RECEIPT">영수증</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>시작일</Label>
-            <Input type="date" value={dateFromInput} onChange={(e) => setDateFromInput(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label>종료일</Label>
-            <Input type="date" value={dateToInput} onChange={(e) => setDateToInput(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label>담당자</Label>
@@ -458,10 +431,8 @@ export default function AdminSecurityMessagesPage() {
             variant="outline"
             onClick={() => {
               setDataTypeInput("MESSAGES")
-              setDateFromInput("")
-              setDateToInput("")
               setSenderInput("ALL")
-              setAppliedFilters({ dataType: "MESSAGES", dateFrom: "", dateTo: "", sender: "ALL" })
+              setAppliedFilters({ dataType: "MESSAGES", sender: "ALL" })
             }}
           >
             초기화
@@ -471,8 +442,6 @@ export default function AdminSecurityMessagesPage() {
             onClick={() => {
               setAppliedFilters({
                 dataType: dataTypeInput,
-                dateFrom: dateFromInput,
-                dateTo: dateToInput,
                 sender: senderInput,
               })
             }}
