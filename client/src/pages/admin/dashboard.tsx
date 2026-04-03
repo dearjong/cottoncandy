@@ -1,11 +1,9 @@
-import { useState } from "react"
 import { DashboardStats } from "@/components/admin/dashboard-stats"
 import { DashboardCharts } from "@/components/admin/dashboard-charts"
 import { AdminAlerts } from "@/components/admin/admin-alerts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { 
   FileText, 
   ArrowRight,
@@ -14,8 +12,6 @@ import {
 } from "lucide-react"
 import { Link } from "wouter"
 import { AdminMainTabs } from "@/components/admin/AdminMainTabs"
-
-type FilterPeriod = "ALL" | "1Y" | "1M" | "CUSTOM"
 
 const stageProgress = {
   draft: { label: "임시저장", count: 2, color: "bg-slate-400" },
@@ -42,42 +38,8 @@ const pendingItems = {
 }
 
 export default function Dashboard() {
-  const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>("ALL")
-  const [customFrom, setCustomFrom] = useState("")
-  const [customTo, setCustomTo] = useState("")
-
   return (
     <AdminMainTabs>
-      {/* 기간 필터 */}
-      <div className="flex items-center gap-2 justify-end">
-        <Select value={filterPeriod} onValueChange={(v) => setFilterPeriod(v as FilterPeriod)}>
-          <SelectTrigger className="w-32 h-8 text-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">전체 기간</SelectItem>
-            <SelectItem value="1Y">최근 1년</SelectItem>
-            <SelectItem value="1M">이번 달</SelectItem>
-            <SelectItem value="CUSTOM">직접 입력</SelectItem>
-          </SelectContent>
-        </Select>
-        <input
-          type="date"
-          value={customFrom}
-          onChange={(e) => setCustomFrom(e.target.value)}
-          disabled={filterPeriod !== "CUSTOM"}
-          className="h-8 rounded-md border border-input bg-background px-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
-        />
-        <span className="text-xs text-muted-foreground">~</span>
-        <input
-          type="date"
-          value={customTo}
-          onChange={(e) => setCustomTo(e.target.value)}
-          disabled={filterPeriod !== "CUSTOM"}
-          className="h-8 rounded-md border border-input bg-background px-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
-        />
-      </div>
-
       <DashboardStats />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-2 items-stretch">
