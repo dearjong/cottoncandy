@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Search, BarChart3 } from "lucide-react"
+import { Search, BarChart3, FileText, Activity, Layers } from "lucide-react"
 import { Link } from "wouter"
 import { MOCK_ADMIN_COMPANIES_V1, MOCK_ADMIN_PROJECTS_V1 } from "@/data/mockData"
 import { MainStatusLabels } from "@/types/project-status"
@@ -230,47 +230,67 @@ export default function AdminParticipationPage() {
         </Tabs>
 
         <div className="grid grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="pt-4 pb-4">
-              <div className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wide">의뢰 현황</div>
-              <div className="grid grid-cols-2 divide-x">
-                <div className="text-center pr-4">
-                  <div className="text-2xl font-bold text-slate-700">{totalRequest}</div>
-                  <div className="text-xs text-muted-foreground mt-1">총 의뢰</div>
+          {/* 의뢰 현황 */}
+          <Card className="border-t-4 border-t-blue-500 overflow-hidden">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-1.5 rounded-md bg-blue-50">
+                  <FileText className="h-4 w-4 text-blue-600" />
                 </div>
-                <div className="text-center pl-4">
-                  <div className="text-2xl font-bold text-blue-600">{totalParticipation}</div>
-                  <div className="text-xs text-muted-foreground mt-1">참여</div>
+                <span className="text-sm font-semibold text-gray-700">의뢰 현황</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg bg-slate-50 p-3 text-center">
+                  <div className="text-3xl font-bold text-slate-700">{totalRequest}</div>
+                  <div className="text-xs text-slate-500 mt-1.5 font-medium">총 의뢰</div>
+                </div>
+                <div className="rounded-lg bg-blue-50 p-3 text-center">
+                  <div className="text-3xl font-bold text-blue-600">{totalParticipation}</div>
+                  <div className="text-xs text-blue-500 mt-1.5 font-medium">참여</div>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-4 pb-4">
-              <div className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wide">진행 상태</div>
-              <div className="grid grid-cols-2 divide-x">
-                <div className="text-center pr-4">
-                  <div className="text-2xl font-bold text-orange-600">{totalOngoing}</div>
-                  <div className="text-xs text-muted-foreground mt-1">진행중</div>
+
+          {/* 진행 상태 */}
+          <Card className="border-t-4 border-t-orange-500 overflow-hidden">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-1.5 rounded-md bg-orange-50">
+                  <Activity className="h-4 w-4 text-orange-600" />
                 </div>
-                <div className="text-center pl-4">
-                  <div className="text-2xl font-bold text-green-600">{totalCompleted}</div>
-                  <div className="text-xs text-muted-foreground mt-1">완료</div>
+                <span className="text-sm font-semibold text-gray-700">진행 상태</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg bg-orange-50 p-3 text-center">
+                  <div className="text-3xl font-bold text-orange-600">{totalOngoing}</div>
+                  <div className="text-xs text-orange-500 mt-1.5 font-medium">진행중</div>
+                </div>
+                <div className="rounded-lg bg-green-50 p-3 text-center">
+                  <div className="text-3xl font-bold text-green-600">{totalCompleted}</div>
+                  <div className="text-xs text-green-500 mt-1.5 font-medium">완료</div>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-4 pb-4">
-              <div className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wide">프로젝트 유형</div>
-              <div className="grid grid-cols-2 divide-x">
-                <div className="text-center pr-4">
-                  <div className="text-2xl font-bold text-purple-600">{totalBidding}</div>
-                  <div className="text-xs text-muted-foreground mt-1">공고</div>
+
+          {/* 프로젝트 유형 */}
+          <Card className="border-t-4 border-t-pink-500 overflow-hidden">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-1.5 rounded-md bg-pink-50">
+                  <Layers className="h-4 w-4 text-pink-600" />
                 </div>
-                <div className="text-center pl-4">
-                  <div className="text-2xl font-bold text-pink-600">{total1to1}</div>
-                  <div className="text-xs text-muted-foreground mt-1">1:1</div>
+                <span className="text-sm font-semibold text-gray-700">프로젝트 유형</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg bg-purple-50 p-3 text-center">
+                  <div className="text-3xl font-bold text-purple-600">{totalBidding}</div>
+                  <div className="text-xs text-purple-500 mt-1.5 font-medium">공고</div>
+                </div>
+                <div className="rounded-lg bg-pink-50 p-3 text-center">
+                  <div className="text-3xl font-bold text-pink-600">{total1to1}</div>
+                  <div className="text-xs text-pink-500 mt-1.5 font-medium">1:1</div>
                 </div>
               </div>
             </CardContent>
