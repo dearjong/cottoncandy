@@ -61,7 +61,6 @@ export interface ConsultingActivityEntry {
 /** 상담 완료 시 선택하는 서비스 티어(목업 UI) */
 export type ConsultingServiceTier = "SIMPLE_MATCH" | "PROJECT_RUN" | "FULLCARE_PT" | "CUSTOM"
 
-type FilterPeriod = "ALL" | "1Y" | "1M" | "CUSTOM"
 
 interface Project {
   id: string
@@ -442,24 +441,6 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
   const [, setLocation] = useLocation()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStatus, setSelectedStatus] = useState<MainStatus | "ALL">(defaultStatus)
-  const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>("ALL")
-  const [customFrom, setCustomFrom] = useState("")
-  const [customTo, setCustomTo] = useState("")
-
-  const isInPeriod = (dateStr: string | undefined): boolean => {
-    if (filterPeriod === "ALL") return true
-    if (!dateStr) return false
-    const now = new Date()
-    const d = new Date(dateStr)
-    if (filterPeriod === "1Y") return d >= new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
-    if (filterPeriod === "1M") return d >= new Date(now.getFullYear(), now.getMonth(), 1)
-    if (filterPeriod === "CUSTOM") {
-      if (customFrom && d < new Date(customFrom)) return false
-      if (customTo && d > new Date(customTo)) return false
-      return true
-    }
-    return true
-  }
   const projects: Project[] = (() => {
     const base = MOCK_ADMIN_PROJECTS_V1 as unknown as Project[]
     if (typeof window === "undefined") return base
@@ -851,8 +832,7 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
         ? project.type === filterType
         : !(excludeConsultingInAll && project.type === "컨설팅")
     const matchesLinked = filterConsultingLinked ? consultingLinkedProjectIds.has(project.id) : true
-    const matchesPeriod = isInPeriod((project as any).createdAt)
-    return matchesSearch && matchesStatus && matchesType && matchesLinked && matchesPeriod
+    return matchesSearch && matchesStatus && matchesType && matchesLinked
   })
 
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage)
@@ -940,35 +920,6 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
             </SelectContent>
           </Select>
 
-          {/* 기간 필터 */}
-          <div className="flex items-center gap-2 ml-auto">
-            <Select value={filterPeriod} onValueChange={(v) => { setFilterPeriod(v as FilterPeriod); setCurrentPage(1) }}>
-              <SelectTrigger className="w-32 h-8 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">전체 기간</SelectItem>
-                <SelectItem value="1Y">최근 1년</SelectItem>
-                <SelectItem value="1M">이번 달</SelectItem>
-                <SelectItem value="CUSTOM">직접 입력</SelectItem>
-              </SelectContent>
-            </Select>
-            <input
-              type="date"
-              value={customFrom}
-              onChange={(e) => { setCustomFrom(e.target.value); setCurrentPage(1) }}
-              disabled={filterPeriod !== "CUSTOM"}
-              className="h-8 rounded-md border border-input bg-background px-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
-            />
-            <span className="text-xs text-muted-foreground">~</span>
-            <input
-              type="date"
-              value={customTo}
-              onChange={(e) => { setCustomTo(e.target.value); setCurrentPage(1) }}
-              disabled={filterPeriod !== "CUSTOM"}
-              className="h-8 rounded-md border border-input bg-background px-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
-            />
-          </div>
 
           {/* 프로젝트 수 */}
           <div className="text-sm text-gray-500">
