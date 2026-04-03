@@ -229,22 +229,52 @@ export default function AdminParticipationPage() {
           </TabsList>
         </Tabs>
 
-        <div className="grid grid-cols-6 gap-3">
-          {[
-            { label: "총 의뢰", value: totalRequest, textColor: "text-slate-600" },
-            { label: "참여", value: totalParticipation, textColor: "text-blue-600" },
-            { label: "진행", value: totalOngoing, textColor: "text-orange-600" },
-            { label: "완료", value: totalCompleted, textColor: "text-green-600" },
-            { label: "공고", value: totalBidding, textColor: "text-purple-600" },
-            { label: "1:1", value: total1to1, textColor: "text-pink-600" },
-          ].map(({ label, value, textColor }) => (
-            <Card key={label}>
-              <CardContent className="pt-5 pb-5 text-center">
-                <div className={`text-2xl font-bold ${textColor}`}>{value}</div>
-                <div className="text-xs text-muted-foreground mt-1">{label}</div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="grid grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="pt-4 pb-4">
+              <div className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wide">의뢰 현황</div>
+              <div className="grid grid-cols-2 divide-x">
+                <div className="text-center pr-4">
+                  <div className="text-2xl font-bold text-slate-700">{totalRequest}</div>
+                  <div className="text-xs text-muted-foreground mt-1">총 의뢰</div>
+                </div>
+                <div className="text-center pl-4">
+                  <div className="text-2xl font-bold text-blue-600">{totalParticipation}</div>
+                  <div className="text-xs text-muted-foreground mt-1">참여</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4 pb-4">
+              <div className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wide">진행 상태</div>
+              <div className="grid grid-cols-2 divide-x">
+                <div className="text-center pr-4">
+                  <div className="text-2xl font-bold text-orange-600">{totalOngoing}</div>
+                  <div className="text-xs text-muted-foreground mt-1">진행중</div>
+                </div>
+                <div className="text-center pl-4">
+                  <div className="text-2xl font-bold text-green-600">{totalCompleted}</div>
+                  <div className="text-xs text-muted-foreground mt-1">완료</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4 pb-4">
+              <div className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wide">프로젝트 유형</div>
+              <div className="grid grid-cols-2 divide-x">
+                <div className="text-center pr-4">
+                  <div className="text-2xl font-bold text-purple-600">{totalBidding}</div>
+                  <div className="text-xs text-muted-foreground mt-1">공고</div>
+                </div>
+                <div className="text-center pl-4">
+                  <div className="text-2xl font-bold text-pink-600">{total1to1}</div>
+                  <div className="text-xs text-muted-foreground mt-1">1:1</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="bg-white border border-gray-200 rounded-lg p-4">
