@@ -60,7 +60,12 @@ interface ChatHistory {
   status: 'active' | 'resolved'
 }
 
-export function CommunicationCenter() {
+interface CommunicationCenterProps {
+  onTabChange?: (tab: string) => void
+}
+
+export function CommunicationCenter({ onTabChange }: CommunicationCenterProps) {
+  const [activeTab, setActiveTab] = useState("notifications")
   const [newNotification, setNewNotification] = useState({
     type: 'email',
     recipients: '',
@@ -170,7 +175,7 @@ export function CommunicationCenter() {
       <Card data-testid="card-communication-center">
         {/* CardTitle 제거: 상위 페이지에서 이미 헤더가 노출되도록 중복 UI를 없앰 */}
         <CardContent className="pt-6">
-          <Tabs defaultValue="notifications" className="space-y-4">
+          <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); onTabChange?.(v) }} className="space-y-4">
             <TabsList className="grid w-full max-w-[420px] grid-cols-3">
               <TabsTrigger value="notifications">알림 발송</TabsTrigger>
               <TabsTrigger value="history">발송 내역</TabsTrigger>
