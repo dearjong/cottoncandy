@@ -229,30 +229,65 @@ export default function AdminParticipationPage() {
           </TabsList>
         </Tabs>
 
-        <Card>
-          <CardContent className="px-5 py-3">
-            <div className="flex items-center divide-x">
-              {[
-                { group: "의뢰 현황", items: [{ label: "총 의뢰", value: totalRequest }, { label: "참여", value: totalParticipation }] },
-                { group: "진행 상태",  items: [{ label: "진행중",  value: totalOngoing  }, { label: "완료",  value: totalCompleted  }] },
-                { group: "프로젝트 유형", items: [{ label: "공고", value: totalBidding }, { label: "1:1", value: total1to1 }] },
-              ].map(({ group, items }) => (
-                <div key={group} className="flex items-center gap-4 px-5 first:pl-0 last:pr-0">
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">{group}</span>
-                  {items.map(({ label, value }, i) => (
-                    <div key={label} className="flex items-center gap-3">
-                      {i > 0 && <div className="w-px h-6 bg-border" />}
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-base font-semibold text-foreground">{value}</span>
-                        <span className="text-xs text-muted-foreground">{label}</span>
-                      </div>
-                    </div>
-                  ))}
+        <div className="grid grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="px-5 py-4">
+              <div className="flex items-center gap-4">
+                <p className="text-xs font-medium text-muted-foreground w-14 shrink-0">의뢰 현황</p>
+                <div className="w-px h-10 bg-border shrink-0" />
+                <div className="flex items-center justify-around flex-1 gap-2">
+                  <div className="text-center">
+                    <div className="text-lg font-medium text-foreground">{totalRequest}</div>
+                    <div className="text-xs text-muted-foreground mt-1">총 의뢰</div>
+                  </div>
+                  <div className="w-px h-8 bg-border" />
+                  <div className="text-center">
+                    <div className="text-lg font-medium text-foreground">{totalParticipation}</div>
+                    <div className="text-xs text-muted-foreground mt-1">참여</div>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="px-5 py-4">
+              <div className="flex items-center gap-4">
+                <p className="text-xs font-medium text-muted-foreground w-14 shrink-0">진행 상태</p>
+                <div className="w-px h-10 bg-border shrink-0" />
+                <div className="flex items-center justify-around flex-1 gap-2">
+                  <div className="text-center">
+                    <div className="text-lg font-medium text-foreground">{totalOngoing}</div>
+                    <div className="text-xs text-muted-foreground mt-1">진행중</div>
+                  </div>
+                  <div className="w-px h-8 bg-border" />
+                  <div className="text-center">
+                    <div className="text-lg font-medium text-foreground">{totalCompleted}</div>
+                    <div className="text-xs text-muted-foreground mt-1">완료</div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="px-5 py-4">
+              <div className="flex items-center gap-4">
+                <p className="text-xs font-medium text-muted-foreground w-14 shrink-0">프로젝트 유형</p>
+                <div className="w-px h-10 bg-border shrink-0" />
+                <div className="flex items-center justify-around flex-1 gap-2">
+                  <div className="text-center">
+                    <div className="text-lg font-medium text-foreground">{totalBidding}</div>
+                    <div className="text-xs text-muted-foreground mt-1">공고</div>
+                  </div>
+                  <div className="w-px h-8 bg-border" />
+                  <div className="text-center">
+                    <div className="text-lg font-medium text-foreground">{total1to1}</div>
+                    <div className="text-xs text-muted-foreground mt-1">1:1</div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <div className="flex flex-wrap gap-3 items-center">
