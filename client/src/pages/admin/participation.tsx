@@ -236,12 +236,12 @@ export default function AdminParticipationPage() {
             {viewMode === "company" && (
               <Select value={filterType} onValueChange={(v) => setFilterType(v as FilterType)}>
                 <SelectTrigger className="w-36">
-                  <SelectValue placeholder="역할" />
+                  <SelectValue placeholder="의뢰/참여" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ALL">전체 역할</SelectItem>
-                  <SelectItem value="ADVERTISER">의뢰사 포함</SelectItem>
-                  <SelectItem value="PRODUCTION">수행사 포함</SelectItem>
+                  <SelectItem value="ALL">전체</SelectItem>
+                  <SelectItem value="ADVERTISER">의뢰 있음</SelectItem>
+                  <SelectItem value="PRODUCTION">참여 있음</SelectItem>
                 </SelectContent>
               </Select>
             )}
