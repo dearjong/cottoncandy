@@ -282,26 +282,24 @@ export default function AdminParticipationPage() {
                 <TableRow className="bg-gray-50">
                   <TableHead className="w-[200px]">기업명</TableHead>
                   <TableHead className="w-[90px]">유형</TableHead>
+                  <TableHead className="text-center w-[90px]">총 의뢰</TableHead>
+                  <TableHead className="text-center w-[90px]">총 참여</TableHead>
                   <TableHead className="text-center w-[80px]">진행중</TableHead>
                   <TableHead className="text-center w-[80px]">완료</TableHead>
-                  <TableHead className="text-center w-[80px]">총 참여</TableHead>
-                  <TableHead className="text-center w-[80px]">의뢰사</TableHead>
-                  <TableHead className="text-center w-[80px]">수행사</TableHead>
                   <TableHead className="text-center w-[80px]">공고</TableHead>
                   <TableHead className="text-center w-[80px]">1:1</TableHead>
-                  <TableHead className="w-[140px]">최근 진행 상태</TableHead>
                   <TableHead className="text-right w-[60px]">상세</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={11} className="py-10 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={9} className="py-10 text-center text-sm text-muted-foreground">
                       조건에 해당하는 기업이 없습니다.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filtered.map(({ company, ongoingCount, completedCount, totalCount, asOwnerCount, asPartnerCount, biddingCount, oneToOneCount, lastOngoingStatus }) => (
+                  filtered.map(({ company, ongoingCount, completedCount, asOwnerCount, asPartnerCount, biddingCount, oneToOneCount }) => (
                     <TableRow key={company.id}>
                       <TableCell>
                         <div className="font-medium text-gray-900">{company.companyName}</div>
@@ -310,6 +308,12 @@ export default function AdminParticipationPage() {
                         <Badge variant="outline" className="text-xs">
                           {company.companyType ?? "기업"}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="text-sm font-medium text-blue-700">{asOwnerCount > 0 ? asOwnerCount : "-"}</span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="text-sm font-medium text-orange-700">{asPartnerCount > 0 ? asPartnerCount : "-"}</span>
                       </TableCell>
                       <TableCell className="text-center">
                         {ongoingCount > 0 ? (
@@ -330,26 +334,10 @@ export default function AdminParticipationPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-center">
-                        <span className="text-sm font-medium text-gray-800">{totalCount}</span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="text-sm text-blue-700">{asOwnerCount > 0 ? asOwnerCount : "-"}</span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="text-sm text-orange-700">{asPartnerCount > 0 ? asPartnerCount : "-"}</span>
-                      </TableCell>
-                      <TableCell className="text-center">
                         <span className="text-sm text-purple-700">{biddingCount > 0 ? biddingCount : "-"}</span>
                       </TableCell>
                       <TableCell className="text-center">
                         <span className="text-sm text-pink-700">{oneToOneCount > 0 ? oneToOneCount : "-"}</span>
-                      </TableCell>
-                      <TableCell>
-                        {lastOngoingStatus ? (
-                          <span className="text-xs text-gray-600">{lastOngoingStatus}</span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">-</span>
-                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <button
