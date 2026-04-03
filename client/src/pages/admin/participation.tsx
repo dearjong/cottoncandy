@@ -297,23 +297,23 @@ export default function AdminParticipationPage() {
                 <SelectItem value="CUSTOM">선택 기간</SelectItem>
               </SelectContent>
             </Select>
-            {filterPeriod === "CUSTOM" && (
-              <div className="flex items-center gap-2">
-                <Input
-                  type="date"
-                  className="w-36 h-9 text-sm"
-                  value={customFrom}
-                  onChange={(e) => setCustomFrom(e.target.value)}
-                />
-                <span className="text-muted-foreground text-sm">~</span>
-                <Input
-                  type="date"
-                  className="w-36 h-9 text-sm"
-                  value={customTo}
-                  onChange={(e) => setCustomTo(e.target.value)}
-                />
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <Input
+                type="date"
+                className="w-36 h-9 text-sm"
+                value={customFrom}
+                disabled={filterPeriod !== "CUSTOM"}
+                onChange={(e) => setCustomFrom(e.target.value)}
+              />
+              <span className="text-muted-foreground text-sm">~</span>
+              <Input
+                type="date"
+                className="w-36 h-9 text-sm"
+                value={customTo}
+                disabled={filterPeriod !== "CUSTOM"}
+                onChange={(e) => setCustomTo(e.target.value)}
+              />
+            </div>
             <Button
               variant="outline"
               onClick={() => {
