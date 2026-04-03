@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Search, BarChart3, Building2, TrendingUp } from "lucide-react"
+import { Search, BarChart3 } from "lucide-react"
 import { Link } from "wouter"
 import { MOCK_ADMIN_COMPANIES_V1, MOCK_ADMIN_PROJECTS_V1 } from "@/data/mockData"
 import { MainStatusLabels } from "@/types/project-status"
@@ -83,6 +83,20 @@ export default function AdminParticipationPage() {
   const totalOngoing = rows.reduce((s, r) => s + r.ongoingCount, 0)
   const totalCompleted = rows.reduce((s, r) => s + r.completedCount, 0)
   const totalAll = rows.reduce((s, r) => s + r.totalCount, 0)
+
+  const validProjects = MOCK_ADMIN_PROJECTS_V1.filter((p) =>
+    !(p.type === "컨설팅" &&
+      p.consultingOutcomeKind !== "MATCHING_PUBLIC" &&
+      p.consultingOutcomeKind !== "MATCHING_1TO1")
+  )
+  const totalRequest = validProjects.length
+  const totalParticipation = rows.reduce((s, r) => s + r.asPartnerCount, 0)
+  const totalBidding = validProjects.filter(
+    (p) => p.type === "공고" || (p.type === "컨설팅" && p.consultingOutcomeKind === "MATCHING_PUBLIC")
+  ).length
+  const total1to1 = validProjects.filter(
+    (p) => p.type === "1:1" || (p.type === "컨설팅" && p.consultingOutcomeKind === "MATCHING_1TO1")
+  ).length
   const projectRows = useMemo(() => {
     return MOCK_ADMIN_PROJECTS_V1.filter((project) => {
       if (project.type === "컨설팅" &&
@@ -175,46 +189,22 @@ export default function AdminParticipationPage() {
           </TabsList>
         </Tabs>
 
-        <div className="grid grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-center gap-3">
-                <div className="rounded-full bg-blue-100 p-2">
-                  <Building2 className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{rows.length}</div>
-                  <div className="text-sm text-muted-foreground">전체 기업</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-center gap-3">
-                <div className="rounded-full bg-orange-100 p-2">
-                  <TrendingUp className="h-5 w-5 text-orange-600" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{totalOngoing}</div>
-                  <div className="text-sm text-muted-foreground">진행중 프로젝트</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-center gap-3">
-                <div className="rounded-full bg-green-100 p-2">
-                  <BarChart3 className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{totalAll}</div>
-                  <div className="text-sm text-muted-foreground">전체 참여 (완료 {totalCompleted})</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-6 gap-3">
+          {[
+            { label: "총 의뢰", value: totalRequest, textColor: "text-slate-600" },
+            { label: "참여", value: totalParticipation, textColor: "text-blue-600" },
+            { label: "진행", value: totalOngoing, textColor: "text-orange-600" },
+            { label: "완료", value: totalCompleted, textColor: "text-green-600" },
+            { label: "공고", value: totalBidding, textColor: "text-purple-600" },
+            { label: "1:1", value: total1to1, textColor: "text-pink-600" },
+          ].map(({ label, value, textColor }) => (
+            <Card key={label}>
+              <CardContent className="pt-5 pb-5 text-center">
+                <div className={`text-2xl font-bold ${textColor}`}>{value}</div>
+                <div className="text-xs text-muted-foreground mt-1">{label}</div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         <div className="bg-white border border-gray-200 rounded-lg p-4">
