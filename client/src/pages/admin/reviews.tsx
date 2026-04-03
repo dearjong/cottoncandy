@@ -3,6 +3,7 @@
  */
 import { useState, Fragment } from "react"
 import { Link } from "wouter"
+import { PageHeader } from "@/components/admin/page-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -249,11 +250,7 @@ export default function ReviewsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* 헤더 */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">리뷰 관리</h1>
-        <p className="text-muted-foreground">전체 프로젝트의 제작 리뷰를 확인하고 공개 여부를 관리합니다</p>
-      </div>
+      <PageHeader title="리뷰 관리" description="전체 프로젝트의 제작 리뷰를 확인하고 공개 여부를 관리합니다" />
 
       {/* 요약 카드 */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

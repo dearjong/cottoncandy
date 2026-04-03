@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import AdminLayout from "@/components/admin/admin-layout"
+import { PageHeader } from "@/components/admin/page-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -111,10 +112,7 @@ export default function AdminCompanies() {
   return (
     <AdminLayout>
       <div className="p-6 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">기업 관리</h1>
-          <p className="text-muted-foreground">등록된 기업 목록을 관리합니다</p>
-        </div>
+        <PageHeader title="기업 관리" description="등록된 기업 목록을 관리합니다" />
 
         <div className="grid grid-cols-4 gap-4">
           <Card>

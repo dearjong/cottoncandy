@@ -1,12 +1,10 @@
 import { CommunicationCenter } from "@/components/admin/communication-center"
+import { PageHeader } from "@/components/admin/page-header"
 
 export default function CommunicationPage() {
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">커뮤니케이션</h1>
-        <p className="text-muted-foreground">알림 발송 및 고객 상담 내역을 관리하세요</p>
-      </div>
+      <PageHeader title="커뮤니케이션" description="알림 발송 및 고객 상담 내역을 관리하세요" />
       
       <CommunicationCenter />
     </div>

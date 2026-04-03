@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { PageHeader } from "@/components/admin/page-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -278,10 +279,7 @@ export default function ActivityLogsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">활동 로그</h1>
-        <p className="text-muted-foreground">플랫폼 내 모든 주요 활동 이력을 확인하세요</p>
-      </div>
+      <PageHeader title="활동 로그" description="플랫폼 내 모든 주요 활동 이력을 확인하세요" />
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

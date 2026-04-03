@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { PageHeader } from "@/components/admin/page-header"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -162,13 +163,8 @@ export default function AdminConsultantsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">컨설턴트 관리</h1>
-          <p className="text-muted-foreground">
-            컨설턴트를 등록하고 컨설팅 문의 매칭에 활용합니다.
-          </p>
-        </div>
+      <PageHeader title="컨설턴트 관리" description="컨설턴트를 등록하고 컨설팅 문의 매칭에 활용합니다." />
+      <div className="flex justify-end">
         <Button onClick={() => setOpen(true)}>컨설턴트 추가</Button>
       </div>
 

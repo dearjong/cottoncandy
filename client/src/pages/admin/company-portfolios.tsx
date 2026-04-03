@@ -3,6 +3,7 @@
  * /portfolio 화면(사용자용)과 동일한 데이터를 관리자가 전체 기업 단위로 조회
  */
 import { useState } from "react"
+import { PageHeader } from "@/components/admin/page-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -203,11 +204,7 @@ export default function CompanyPortfoliosPage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* 헤더 */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">회사소개서 &amp; 포트폴리오</h1>
-        <p className="text-muted-foreground">기업별 등록된 소개서·포트폴리오 현황을 조회합니다</p>
-      </div>
+      <PageHeader title="회사소개서 & 포트폴리오" description="기업별 등록된 소개서·포트폴리오 현황을 조회합니다" />
 
       {/* 요약 카드 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

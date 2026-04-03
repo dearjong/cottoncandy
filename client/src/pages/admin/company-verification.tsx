@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { PageHeader } from "@/components/admin/page-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -354,10 +355,7 @@ export default function CompanyVerificationPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">기업 인증 관리</h1>
-        <p className="text-muted-foreground">TVCF Certified 인증 요청을 검토하고 처리하세요</p>
-      </div>
+      <PageHeader title="기업 인증 관리" description="TVCF Certified 인증 요청을 검토하고 처리하세요" />
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

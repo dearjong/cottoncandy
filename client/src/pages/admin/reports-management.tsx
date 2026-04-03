@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { PageHeader } from "@/components/admin/page-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -271,10 +272,7 @@ export default function ReportsManagementPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">신고 관리</h1>
-        <p className="text-muted-foreground">사용자 신고를 검토하고 적절한 조치를 취하세요</p>
-      </div>
+      <PageHeader title="신고 관리" description="사용자 신고를 검토하고 적절한 조치를 취하세요" />
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

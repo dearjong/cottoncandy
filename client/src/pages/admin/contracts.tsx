@@ -3,6 +3,7 @@
  */
 import { useState, Fragment } from "react"
 import { Link } from "wouter"
+import { PageHeader } from "@/components/admin/page-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -237,11 +238,7 @@ export default function ContractsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* 헤더 */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">계약 & 정산 관리</h1>
-        <p className="text-muted-foreground">전체 프로젝트의 계약 서명 및 정산 진행 현황을 관리합니다</p>
-      </div>
+      <PageHeader title="계약 & 정산 관리" description="전체 프로젝트의 계약 서명 및 정산 진행 현황을 관리합니다" />
 
       {/* 요약 카드 */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

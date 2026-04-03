@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
 import AdminLayout from "@/components/admin/admin-layout"
+import { PageHeader } from "@/components/admin/page-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -212,15 +213,11 @@ export default function AdminParticipationPage() {
   return (
     <AdminLayout>
       <div className="space-y-6 p-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <BarChart3 className="h-6 w-6" />
-            전체 참여현황
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            기업별/프로젝트별/프로젝트 리스트별 참여 현황을 한눈에 확인합니다.
-          </p>
-        </div>
+        <PageHeader
+          title={<span className="flex items-center gap-2"><BarChart3 className="h-6 w-6" />전체 참여현황</span>}
+          description="기업별/프로젝트별/프로젝트 리스트별 참여 현황을 한눈에 확인합니다."
+          hidePeriodFilter
+        />
         <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
           <TabsList className="grid w-full max-w-[420px] grid-cols-3">
             <TabsTrigger value="company">기업별</TabsTrigger>
