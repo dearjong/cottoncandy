@@ -251,8 +251,8 @@ export default function AdminParticipationPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">전체 상태</SelectItem>
-                <SelectItem value="ongoing">진행중 있음</SelectItem>
-                <SelectItem value="completed">완료 있음</SelectItem>
+                <SelectItem value="ongoing">진행중</SelectItem>
+                <SelectItem value="completed">완료 포함</SelectItem>
               </SelectContent>
             </Select>
             <Button
