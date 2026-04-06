@@ -43,7 +43,7 @@ export default function CsInquiryPage() {
                   <TableCell className="text-sm text-muted-foreground">{item.company}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{item.date}</TableCell>
                   <TableCell>
-                    <Badge variant={item.status === 'WAITING' ? 'destructive' : 'secondary'}>
+                    <Badge variant={item.status === 'WAITING' ? 'destructive' : 'outline'} className={item.status === 'ANSWERED' ? 'text-muted-foreground' : ''}>
                       {item.status === 'WAITING' ? '미답변' : '답변완료'}
                     </Badge>
                   </TableCell>
