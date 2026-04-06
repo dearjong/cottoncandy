@@ -43,7 +43,7 @@ export function AdminAlerts() {
       description: "신규 기업 인증 신청 3건이 검토 대기 중입니다",
       time: "4시간 전",
       actionLabel: "심사하기",
-      actionPath: "/admin/company-portfolios"
+      actionPath: "/admin/company-verification"
     },
     {
       id: "4",
@@ -52,7 +52,7 @@ export function AdminAlerts() {
       description: "답변을 기다리는 1:1 문의가 5건 있습니다",
       time: "6시간 전",
       actionLabel: "답변하기",
-      actionPath: "/admin/communication"
+      actionPath: "/admin/cs/inquiry"
     }
   ]
 
