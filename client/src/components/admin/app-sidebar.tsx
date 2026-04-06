@@ -101,10 +101,13 @@ const memberMenuItems = [
 ]
 
 // 운영/CS/알림 설정 메뉴
-const operationsParentItem = { title: "운영 센터", url: "/admin/communication", icon: Settings }
+const operationsParentItem = { title: "운영 센터", url: "/admin/cs/inquiry", icon: Settings }
 const operationsMenuItems = [
-  { title: "커뮤니케이션", url: "/admin/communication", icon: MessageSquare },
-  { title: "공지 & 배너 관리", url: "/admin/announcements", icon: Megaphone },
+  { title: "1:1 문의", url: "/admin/cs/inquiry", icon: MessageSquare },
+  { title: "신고 관리", url: "/admin/reports-management", icon: Flag },
+  { title: "알림 발송", url: "/admin/cs/notifications", icon: Bell },
+  { title: "AI 채팅", url: "/admin/cs/ai-chat", icon: MessageCircle },
+  { title: "공지 & 배너", url: "/admin/announcements", icon: Megaphone },
   { title: "알림 설정", url: "/admin/system/notifications", icon: Bell },
 ]
 
@@ -122,7 +125,6 @@ const systemSettingsMenuItems = [
 const securityAuditParentItem = { title: "보안/감사", url: "/admin/security/messages", icon: ShieldCheck }
 const securityAuditMenuItems = [
   { title: "보안자료", url: "/admin/security/messages", icon: ShieldCheck },
-  { title: "신고 관리", url: "/admin/reports-management", icon: Flag },
 ]
 
 /** 사이드바 하위 메뉴 라벨 앞 트리 접두(└) */

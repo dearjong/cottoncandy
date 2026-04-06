@@ -131,6 +131,9 @@ import AdminWorkflowTvcfReview from "@/pages/admin/workflow/tvcf-review";
 import AdminConsultants from "@/pages/admin/consultants";
 import AdminNotificationSettings from "@/pages/admin/system/NotificationSettings";
 import AdminCompanyGradeManagement from "@/pages/admin/system/CompanyGradeManagement";
+import CsInquiryPage from "@/pages/admin/cs/inquiry";
+import CsNotificationsPage from "@/pages/admin/cs/notifications";
+import CsAiChatPage from "@/pages/admin/cs/ai-chat";
 
 function ProtectedRoute({ component: Component }: { component: () => JSX.Element }) {
   useEffect(() => {
@@ -521,6 +524,15 @@ function Router() {
       </Route>
       <Route path="/admin/communication">
         <AdminLayout><AdminCommunication /></AdminLayout>
+      </Route>
+      <Route path="/admin/cs/inquiry">
+        <AdminLayout><CsInquiryPage /></AdminLayout>
+      </Route>
+      <Route path="/admin/cs/notifications">
+        <AdminLayout><CsNotificationsPage /></AdminLayout>
+      </Route>
+      <Route path="/admin/cs/ai-chat">
+        <AdminLayout><CsAiChatPage /></AdminLayout>
       </Route>
       <Route path="/admin/reports">
         <AdminLayout><AdminReports /></AdminLayout>
