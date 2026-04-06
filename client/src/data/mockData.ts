@@ -409,6 +409,13 @@ export const MOCK_ALL_INQUIRIES = [
   { id: 'INQ-001', category: '결제', title: '결제 수단 추가 문의', user: '홍길동', userType: 'CLIENT', company: '(주)테스트', date: '2024-11-06 14:00', status: 'WAITING' as const },
   { id: 'INQ-002', category: '기능', title: '프로젝트 삭제 방법', user: '김파트너', userType: 'PARTNER', company: '제작사A', date: '2024-11-06 12:30', status: 'ANSWERED' as const },
   { id: 'INQ-003', category: '기타', title: '영수증 발행 요청', user: '이의뢰', userType: 'CLIENT', company: '광고주B', date: '2024-11-06 11:00', status: 'WAITING' as const },
+  { id: 'INQ-004', category: '계약', title: '계약서 수정 가능한가요?', user: '박광고', userType: 'CLIENT', company: '(주)광고기획사', date: '2024-11-06 10:20', status: 'WAITING' as const },
+  { id: 'INQ-005', category: '정산', title: '정산 일정 확인 요청', user: '최제작', userType: 'PARTNER', company: '영상제작소', date: '2024-11-05 17:40', status: 'ANSWERED' as const },
+  { id: 'INQ-006', category: '회원', title: '회사 정보 수정 방법', user: '정브랜드', userType: 'CLIENT', company: '브랜드코리아', date: '2024-11-05 15:10', status: 'ANSWERED' as const },
+  { id: 'INQ-007', category: '프로젝트', title: '비공개 프로젝트 전환 문의', user: '강미디어', userType: 'CLIENT', company: '미디어그룹', date: '2024-11-05 13:50', status: 'WAITING' as const },
+  { id: 'INQ-008', category: '결제', title: '세금계산서 발행 요청', user: '윤크리에이티브', userType: 'PARTNER', company: '크리에이티브스튜디오', date: '2024-11-05 11:00', status: 'WAITING' as const },
+  { id: 'INQ-009', category: '기능', title: '포트폴리오 업로드 오류', user: '임디렉터', userType: 'PARTNER', company: '디렉팅랩', date: '2024-11-04 16:30', status: 'ANSWERED' as const },
+  { id: 'INQ-010', category: '기타', title: '서비스 이용 약관 문의', user: '오마케팅', userType: 'CLIENT', company: '(주)마케팅파트너스', date: '2024-11-04 14:00', status: 'WAITING' as const },
 ];
 
 // --- Support: Disputes ---
