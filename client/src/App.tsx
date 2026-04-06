@@ -134,6 +134,8 @@ import AdminCompanyGradeManagement from "@/pages/admin/system/CompanyGradeManage
 import CsInquiryPage from "@/pages/admin/cs/inquiry";
 import CsNotificationsPage from "@/pages/admin/cs/notifications";
 import CsAiChatPage from "@/pages/admin/cs/ai-chat";
+import CsNoticesPage from "@/pages/admin/cs/notices";
+import CsBannersPage from "@/pages/admin/cs/banners";
 
 function ProtectedRoute({ component: Component }: { component: () => JSX.Element }) {
   useEffect(() => {
@@ -533,6 +535,12 @@ function Router() {
       </Route>
       <Route path="/admin/cs/ai-chat">
         <AdminLayout><CsAiChatPage /></AdminLayout>
+      </Route>
+      <Route path="/admin/cs/notices">
+        <AdminLayout><CsNoticesPage /></AdminLayout>
+      </Route>
+      <Route path="/admin/cs/banners">
+        <AdminLayout><CsBannersPage /></AdminLayout>
       </Route>
       <Route path="/admin/reports">
         <AdminLayout><AdminReports /></AdminLayout>

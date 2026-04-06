@@ -107,7 +107,8 @@ const operationsMenuItems = [
   { title: "신고 관리", url: "/admin/reports-management", icon: Flag },
   { title: "알림 발송", url: "/admin/cs/notifications", icon: Bell },
   { title: "AI 채팅", url: "/admin/cs/ai-chat", icon: MessageCircle },
-  { title: "공지 & 배너", url: "/admin/announcements", icon: Megaphone },
+  { title: "공지사항", url: "/admin/cs/notices", icon: Megaphone },
+  { title: "배너 관리", url: "/admin/cs/banners", icon: Megaphone },
   { title: "알림 설정", url: "/admin/system/notifications", icon: Bell },
 ]
 
