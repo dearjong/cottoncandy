@@ -2,8 +2,8 @@ import { PageHeader } from "@/components/admin/page-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { AlertTriangle, HelpCircle } from "lucide-react"
-import { MOCK_ALL_INQUIRIES, MOCK_ALL_DISPUTES } from "@/data/mockData"
+import { HelpCircle } from "lucide-react"
+import { MOCK_ALL_INQUIRIES } from "@/data/mockData"
 
 export default function CsInquiryPage() {
   return (
@@ -59,57 +59,6 @@ export default function CsInquiryPage() {
         </div>
       </div>
 
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <AlertTriangle className="h-4 w-4 text-orange-500" />
-          <h3 className="text-sm font-semibold">분쟁 조정</h3>
-          <span className="text-xs text-muted-foreground">
-            ({MOCK_ALL_DISPUTES.filter(d => d.status !== 'RESOLVED').length}건 진행 중)
-          </span>
-        </div>
-        <div className="rounded-md border bg-white">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>유형</TableHead>
-                <TableHead>제목</TableHead>
-                <TableHead>프로젝트</TableHead>
-                <TableHead>신청자</TableHead>
-                <TableHead>상대방</TableHead>
-                <TableHead>진행상황</TableHead>
-                <TableHead>상태</TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {MOCK_ALL_DISPUTES.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell><Badge variant="outline">{item.type}</Badge></TableCell>
-                  <TableCell className="font-medium">{item.title}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{item.project}</TableCell>
-                  <TableCell className="text-sm">{item.claimant}</TableCell>
-                  <TableCell className="text-sm">{item.respondent}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{item.progress}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        item.status === 'URGENT' ? 'destructive' :
-                        item.status === 'PROCESS' ? 'default' : 'secondary'
-                      }
-                    >
-                      {item.status === 'URGENT' ? '긴급' :
-                       item.status === 'PROCESS' ? '처리중' : '해결완료'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button size="sm" variant="outline" className="h-7 text-xs">상세보기</Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
     </div>
   )
 }
