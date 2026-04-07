@@ -112,14 +112,14 @@ export default function AdminParticipationPage() {
         project.consultingOutcomeKind !== "MATCHING_PUBLIC" &&
         project.consultingOutcomeKind !== "MATCHING_1TO1") return false
 
-      const relatedCompany = rows.find((row) => row.company.id === project.ownerCompanyId)?.company
+      const participantNames = (project.participantCompanyIds ?? []).map(
+        (cid) => MOCK_ADMIN_COMPANIES_V1.find((c) => c.id === cid)?.companyName ?? ""
+      )
       const matchSearch =
         !searchTerm ||
         project.title.includes(searchTerm) ||
         project.id.includes(searchTerm) ||
-        (project.client ?? "").includes(searchTerm) ||
-        (project.partner ?? "").includes(searchTerm) ||
-        (relatedCompany?.companyName ?? "").includes(searchTerm)
+        participantNames.some((name) => name.includes(searchTerm))
 
       const isCompleted = COMPLETED_STATUSES.includes(project.status)
       const matchStatus =
@@ -263,7 +263,7 @@ export default function AdminParticipationPage() {
                   viewMode === "company"
                     ? "기업명, 사업자번호, 대표자명 검색"
                     : viewMode === "project"
-                      ? "프로젝트명, 프로젝트ID, 의뢰사/수행사 검색"
+                      ? "프로젝트명, 프로젝트ID, 지원 회사 검색"
                       : "프로젝트 유형 검색"
                 }
                 className="pl-9"
@@ -389,20 +389,25 @@ export default function AdminParticipationPage() {
                   <TableHead className="w-[160px]">프로젝트 ID</TableHead>
                   <TableHead>프로젝트명</TableHead>
                   <TableHead className="w-[120px]">프로젝트 유형</TableHead>
-                  <TableHead className="w-[140px]">의뢰사</TableHead>
-                  <TableHead className="w-[140px]">수행사</TableHead>
-                  <TableHead className="w-[140px]">상태</TableHead>
+                  <TableHead className="w-[80px] text-center">지원 수</TableHead>
+                  <TableHead>지원 회사</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {projectRows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
                       조건에 해당하는 프로젝트가 없습니다.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  projectRows.map((project) => (
+                  projectRows.map((project) => {
+                    const participantIds = project.participantCompanyIds ?? []
+                    const participantNames = participantIds.map((cid) => {
+                      const found = MOCK_ADMIN_COMPANIES_V1.find((c) => c.id === cid)
+                      return found?.companyName ?? cid
+                    })
+                    return (
                     <TableRow key={project.id}>
                       <TableCell className="font-medium">{project.id}</TableCell>
                       <TableCell>{project.title}</TableCell>
@@ -418,13 +423,27 @@ export default function AdminParticipationPage() {
                           <Badge variant="outline">{project.type}</Badge>
                         )}
                       </TableCell>
-                      <TableCell>{project.client ?? "-"}</TableCell>
-                      <TableCell>{project.partner ?? "-"}</TableCell>
-                      <TableCell className="text-xs">
-                        {MainStatusLabels[project.status as keyof typeof MainStatusLabels] ?? project.status}
+                      <TableCell className="text-center font-semibold">
+                        {participantIds.length > 0 ? (
+                          <span className="text-pink-600">{participantIds.length}</span>
+                        ) : (
+                          <span className="text-muted-foreground">0</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {participantNames.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {participantNames.map((name) => (
+                              <Badge key={name} variant="outline" className="text-xs font-normal">{name}</Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">-</span>
+                        )}
                       </TableCell>
                     </TableRow>
-                  ))
+                    )
+                  })
                 )}
               </TableBody>
             </Table>
