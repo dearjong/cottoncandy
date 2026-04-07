@@ -386,7 +386,7 @@ export default function AdminParticipationPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50">
-                  <TableHead className="w-[240px]">프로젝트명</TableHead>
+                  <TableHead className="w-[360px]">프로젝트명</TableHead>
                   <TableHead className="w-[140px]">의뢰 / 모집</TableHead>
                   <TableHead className="w-[130px]">등록~마감</TableHead>
                   <TableHead className="w-[80px] text-center">지원 수</TableHead>
