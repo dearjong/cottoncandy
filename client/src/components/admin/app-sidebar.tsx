@@ -42,6 +42,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 import { Link, useLocation } from "wouter"
+import { MOCK_ADMIN_PROJECTS_V1, MOCK_ADMIN_COMPANIES_V1 } from "@/data/mockData"
 
 // admin 폴더 전용 메뉴 (admin_v2와 분리)
 const mainParentItem = { title: "메인", url: "/admin", icon: Home }
@@ -169,6 +170,14 @@ export function AppSidebar() {
   )
   const isContractsActive = useMemo(() => location === contractsParentItem.url, [location])
   const isReviewsActive = useMemo(() => location === reviewsParentItem.url, [location])
+
+  const projectCounts = useMemo(() => ({
+    "/admin/bidding": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.type === "공고").length,
+    "/admin/one-on-one": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.type === "1:1").length,
+    "/admin/pending-approval": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.status === "REQUESTED").length,
+    "/admin/stop-cancel": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.status === "STOPPED" || p.status === "CANCELLED").length,
+    "/admin/participation": MOCK_ADMIN_COMPANIES_V1.length,
+  }), [])
   const isStatsSectionActive = useMemo(() => location === statsParentItem.url, [location])
   const isSystemSectionActive = useMemo(
     () => systemSettingsMenuItems.some((item) => location === item.url),
@@ -268,6 +277,11 @@ export function AppSidebar() {
                         >
                           <Link href={item.url}>
                             <SubNavLabel>{item.title}</SubNavLabel>
+                            {projectCounts[item.url as keyof typeof projectCounts] > 0 && (
+                              <span className="ml-auto text-[10px] font-medium bg-sidebar-foreground/10 text-sidebar-foreground/60 rounded px-1 py-0.5 leading-none">
+                                {projectCounts[item.url as keyof typeof projectCounts]}
+                              </span>
+                            )}
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -284,6 +298,11 @@ export function AppSidebar() {
                         >
                           <Link href={item.url}>
                             <SubNavLabelSub>{item.title}</SubNavLabelSub>
+                            {projectCounts[item.url as keyof typeof projectCounts] > 0 && (
+                              <span className="ml-auto text-[10px] font-medium bg-sidebar-foreground/10 text-sidebar-foreground/60 rounded px-1 py-0.5 leading-none">
+                                {projectCounts[item.url as keyof typeof projectCounts]}
+                              </span>
+                            )}
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
