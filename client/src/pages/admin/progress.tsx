@@ -98,7 +98,6 @@ const delayedProjects: Project[] = [
 ]
 
 export default function ProgressPage() {
-  const [selectedStage, setSelectedStage] = useState<string | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
   const [detailProjectId, setDetailProjectId] = useState<string | null>(null)
 
@@ -107,11 +106,7 @@ export default function ProgressPage() {
       <div className="space-y-4">
       <div className="grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
         {Object.entries(pipelineData).map(([key, stage]) => (
-          <Card 
-            key={key} 
-            className={`cursor-pointer transition-all hover:shadow-md ${selectedStage === key ? 'ring-2 ring-primary' : ''}`}
-            onClick={() => setSelectedStage(selectedStage === key ? null : key)}
-          >
+          <Card key={key}>
             <CardContent className="p-2.5">
               <div className="flex items-center justify-between mb-1">
                 <div className={`w-2.5 h-2.5 rounded-full ${stage.color}`} />
@@ -122,49 +117,6 @@ export default function ProgressPage() {
           </Card>
         ))}
       </div>
-
-      {selectedStage && pipelineData[selectedStage as keyof typeof pipelineData].projects.length > 0 && (
-        <Card>
-          <CardHeader className="py-2.5 px-3">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <div className={`w-2.5 h-2.5 rounded-full ${pipelineData[selectedStage as keyof typeof pipelineData].color}`} />
-              {pipelineData[selectedStage as keyof typeof pipelineData].label} 프로젝트
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0 px-3 pb-3">
-            <div className="space-y-2">
-              {pipelineData[selectedStage as keyof typeof pipelineData].projects.map((project) => (
-                <div key={project.id} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg text-sm">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground shrink-0">{project.id}</span>
-                      <span
-                        className="font-medium truncate cursor-pointer hover:underline hover:text-primary"
-                        onClick={() => { setDetailProjectId(project.id); setDetailOpen(true) }}
-                      >{project.title}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{project.client}</p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {'date' in project && project.date && (
-                      <div className="text-right text-xs">
-                        <p className="text-muted-foreground">{project.date}</p>
-                        {'time' in project && <p className="font-medium">{project.time}</p>}
-                      </div>
-                    )}
-                    {'participants' in project && project.participants && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Users className="h-3.5 w-3.5" />
-                        {project.participants}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
