@@ -775,9 +775,9 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
     const total = project.totalBudget ?? ""
     if (base && total) {
       return (
-        <span className="whitespace-nowrap">
-          <span className="text-gray-900">{base}</span>
-          <span className="text-gray-400 text-xs ml-1">(총 {total})</span>
+        <span className="flex flex-col leading-snug">
+          <span className="text-gray-900 whitespace-nowrap">{base}</span>
+          <span className="text-gray-400 text-xs whitespace-nowrap">(총 {total})</span>
         </span>
       )
     }
