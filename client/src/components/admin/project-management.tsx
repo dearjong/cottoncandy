@@ -28,7 +28,9 @@ import { BackToListButton } from "@/components/BackToListButton"
 import { Search, Check, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { 
   MainStatus, 
+  MainStatusCategory,
   MainStatusLabels, 
+  StatusByCategory,
   VisibilityStatus,
 } from "@/types/project-status"
 import { MOCK_ADMIN_PROJECTS_V1 } from "@/data/mockData"
@@ -442,7 +444,7 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
 }, ref) {
   const [, setLocation] = useLocation()
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState<MainStatus | "ALL">(defaultStatus)
+  const [selectedStatus, setSelectedStatus] = useState<MainStatus | MainStatusCategory | "ALL">(defaultStatus)
   const projects: Project[] = (() => {
     const base = MOCK_ADMIN_PROJECTS_V1 as unknown as Project[]
     if (typeof window === "undefined") return base
@@ -828,7 +830,11 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
                          project.client.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = defaultStatuses && defaultStatuses.length > 0
       ? defaultStatuses.includes(project.status)
-      : (selectedStatus === "ALL" || project.status === selectedStatus)
+      : selectedStatus === "ALL"
+        ? true
+        : selectedStatus in StatusByCategory
+          ? (StatusByCategory[selectedStatus as MainStatusCategory] as MainStatus[]).includes(project.status)
+          : project.status === selectedStatus
     const matchesType =
       filterType !== null
         ? project.type === filterType
@@ -907,48 +913,23 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
             ))}
           </div>
 
-          {/* 전체 상태 드롭다운 */}
+          {/* 전체 상태 드롭다운 — 8단계 */}
           <Select value={selectedStatus} onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-40 h-8 text-sm">
-              <SelectValue placeholder="상태 선택" />
+            <SelectTrigger className="w-36 h-8 text-sm">
+              <SelectValue placeholder="단계 선택" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">전체 상태</SelectItem>
-              <SelectGroup>
-                <SelectLabel className="text-xs text-muted-foreground">준비</SelectLabel>
-                <SelectItem value="DRAFT">임시저장</SelectItem>
-                <SelectItem value="REQUESTED">승인요청</SelectItem>
-              </SelectGroup>
-              <SelectGroup>
-                <SelectLabel className="text-xs text-muted-foreground">접수 단계</SelectLabel>
-                <SelectItem value="PROPOSAL_OPEN">접수중</SelectItem>
-                <SelectItem value="PROPOSAL_CLOSED">접수마감</SelectItem>
-                <SelectItem value="OT_SCHEDULED">OT 예정</SelectItem>
-                <SelectItem value="OT_COMPLETED">OT 완료</SelectItem>
-                <SelectItem value="PROPOSAL_SUBMIT">제안서 제출 대기</SelectItem>
-                <SelectItem value="PROPOSAL_SUBMITTED">제안서 제출 완료</SelectItem>
-                <SelectItem value="PT_SCHEDULED">PT 예정</SelectItem>
-                <SelectItem value="PT_COMPLETED">PT 완료</SelectItem>
-                <SelectItem value="NO_SELECTION">미선정</SelectItem>
-                <SelectItem value="SELECTED">선정완료</SelectItem>
-              </SelectGroup>
-              <SelectGroup>
-                <SelectLabel className="text-xs text-muted-foreground">진행 단계</SelectLabel>
-                <SelectItem value="CONTRACT">계약완료</SelectItem>
-                <SelectItem value="SHOOTING">촬영 중</SelectItem>
-                <SelectItem value="EDITING">후반 작업</SelectItem>
-                <SelectItem value="DRAFT_SUBMITTED">시안 제출</SelectItem>
-                <SelectItem value="FINAL_APPROVED">최종본 컨펌 완료</SelectItem>
-                <SelectItem value="PRODUCTION_COMPLETE">제작완료</SelectItem>
-                <SelectItem value="ONAIR_STARTED">온에어 시작</SelectItem>
-                <SelectItem value="AFTER_SERVICE">사후관리</SelectItem>
-              </SelectGroup>
-              <SelectGroup>
-                <SelectLabel className="text-xs text-muted-foreground">종료</SelectLabel>
-                <SelectItem value="COMPLETE">완료됨</SelectItem>
-                <SelectItem value="STOPPED">중단됨</SelectItem>
-                <SelectItem value="CANCELLED">취소됨</SelectItem>
-              </SelectGroup>
+              <SelectItem value="ALL">전체 단계</SelectItem>
+              <SelectItem value="등록">등록</SelectItem>
+              <SelectItem value="접수단계">접수단계</SelectItem>
+              <SelectItem value="계약">계약</SelectItem>
+              <SelectItem value="제작">제작</SelectItem>
+              <SelectItem value="제작완료">제작완료</SelectItem>
+              <SelectItem value="온에어">온에어</SelectItem>
+              <SelectItem value="사후관리">사후관리</SelectItem>
+              <SelectItem value="완료">완료</SelectItem>
+              <SelectItem value="중단">중단</SelectItem>
+              <SelectItem value="취소">취소</SelectItem>
             </SelectContent>
           </Select>
 

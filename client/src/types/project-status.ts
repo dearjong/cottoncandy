@@ -159,8 +159,8 @@ export const StatusByCategory: Record<MainStatusCategory, MainStatus[]> = {
   '온에어': ['ONAIR_STARTED'],
   '사후관리': ['AFTER_SERVICE'],
   '완료': ['COMPLETE'],
-  '중단': ['ADMIN_CHECKING', 'ADMIN_CONFIRMED'],
-  '취소': ['ADMIN_CHECKING', 'ADMIN_CONFIRMED']
+  '중단': ['STOPPED'],
+  '취소': ['CANCELLED']
 }
 
 export const VisibilityLabels: Record<VisibilityStatus, string> = {
