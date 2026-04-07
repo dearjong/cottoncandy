@@ -10,11 +10,19 @@ import {
   Users,
   FileText,
   Video,
-  CheckCircle2
+  CheckCircle2,
+  ArrowRight
 } from "lucide-react"
 import { Link } from "wouter"
 import { Project_detailPopup } from "@/components/admin/Project_detailPopup"
 import { AdminMainTabs } from "@/components/admin/AdminMainTabs"
+
+const pendingItems = {
+  approval: 4,
+  stopCancel: 2,
+  verification: 3,
+  reports: 2
+}
 
 interface Project {
   id: string
@@ -104,6 +112,54 @@ export default function ProgressPage() {
   return (
     <AdminMainTabs>
       <div className="space-y-4">
+      <Card>
+        <CardHeader className="py-2.5 px-3">
+          <CardTitle className="text-sm font-semibold">운영자 처리 대기</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0 px-3 pb-3 grid grid-cols-2 gap-2 lg:grid-cols-4">
+          <Link href="/admin/pending-approval">
+            <div className="flex items-center justify-between gap-2 p-2.5 rounded-md border border-yellow-200 bg-yellow-50">
+              <Clock className="h-4 w-4 shrink-0 text-yellow-600" />
+              <div className="flex-1 text-left">
+                <p className="text-xs text-muted-foreground">승인 대기</p>
+                <p className="text-lg font-bold leading-tight">{pendingItems.approval}</p>
+              </div>
+              <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+            </div>
+          </Link>
+          <Link href="/admin/stop-cancel">
+            <div className="flex items-center justify-between gap-2 p-2.5 rounded-md border border-orange-200 bg-orange-50">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-orange-600" />
+              <div className="flex-1 text-left">
+                <p className="text-xs text-muted-foreground">중단/취소</p>
+                <p className="text-lg font-bold leading-tight">{pendingItems.stopCancel}</p>
+              </div>
+              <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+            </div>
+          </Link>
+          <Link href="/admin/company-verification">
+            <div className="flex items-center justify-between gap-2 p-2.5 rounded-md border border-blue-200 bg-blue-50">
+              <FileText className="h-4 w-4 shrink-0 text-blue-600" />
+              <div className="flex-1 text-left">
+                <p className="text-xs text-muted-foreground">인증 대기</p>
+                <p className="text-lg font-bold leading-tight">{pendingItems.verification}</p>
+              </div>
+              <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+            </div>
+          </Link>
+          <Link href="/admin/reports-management">
+            <div className="flex items-center justify-between gap-2 p-2.5 rounded-md border border-red-200 bg-red-50">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-red-600" />
+              <div className="flex-1 text-left">
+                <p className="text-xs text-muted-foreground">신고 처리</p>
+                <p className="text-lg font-bold leading-tight">{pendingItems.reports}</p>
+              </div>
+              <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+            </div>
+          </Link>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
         {Object.entries(pipelineData).map(([key, stage]) => (
           <Card
