@@ -1047,11 +1047,8 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
                           )}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-xs text-gray-400">
-                          <span>-</span>
-                          {(project as any).partnerType && (
-                            <span>({(project as any).partnerType})</span>
-                          )}
+                        <span className="text-xs text-gray-400">
+                          {(project as any).partnerType ? `${(project as any).partnerType}사 모집` : "모집중"}
                         </span>
                       )}
                     </div>
