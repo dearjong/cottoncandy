@@ -13,7 +13,7 @@ import { Search, BarChart3 } from "lucide-react"
 import { Link } from "wouter"
 import { MOCK_ADMIN_COMPANIES_V1, MOCK_ADMIN_PROJECTS_V1 } from "@/data/mockData"
 import { MainStatusLabels } from "@/types/project-status"
-import { ProjectManagement } from "@/components/admin/project-management"
+
 
 const COMPLETED_STATUSES = ["COMPLETE", "ADMIN_CHECKING", "ADMIN_CONFIRMED", "CANCELLED", "STOPPED"]
 
@@ -25,7 +25,6 @@ export default function AdminParticipationPage() {
   const [filterStatus, setFilterStatus] = useState<"ALL" | "ongoing" | "completed">("ALL")
   const [viewMode, setViewMode] = useState<ViewMode>("project")
   const [openCompanyDetailId, setOpenCompanyDetailId] = useState<string | null>(null)
-  const [openProjectDetailId, setOpenProjectDetailId] = useState<string | null>(null)
 
   const rows = useMemo(() => {
     return MOCK_ADMIN_COMPANIES_V1.map((company) => {
@@ -413,10 +412,10 @@ export default function AdminParticipationPage() {
                     <TableRow key={project.id}>
                       <TableCell>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <button
-                            className="text-sm font-medium text-gray-900 hover:text-pink-600 hover:underline text-left"
-                            onClick={() => setOpenProjectDetailId(project.id)}
-                          >{project.title}</button>
+                          <Link
+                            href={`/admin/projects/${project.id}`}
+                            className="text-sm font-medium text-gray-900 hover:text-pink-600 hover:underline"
+                          >{project.title}</Link>
                           <div className="flex items-center gap-1">
                             {project.type === "컨설팅" ? (
                               <>
@@ -508,25 +507,6 @@ export default function AdminParticipationPage() {
             </Table>
           )}
         </div>
-        {/* 프로젝트 상세 다이얼로그 */}
-        <Dialog open={!!openProjectDetailId} onOpenChange={(open) => !open && setOpenProjectDetailId(null)}>
-          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-0" aria-describedby={undefined}>
-            <DialogHeader className="sr-only">
-              <DialogTitle>프로젝트 상세</DialogTitle>
-            </DialogHeader>
-            {openProjectDetailId && (
-              <div className="p-6">
-                <ProjectManagement
-                  initialProjectId={openProjectDetailId}
-                  showCloseButton={true}
-                  onClose={() => setOpenProjectDetailId(null)}
-                  hideBackToListButton={true}
-                />
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-
         <Dialog open={!!openCompanyDetailId} onOpenChange={(open) => !open && setOpenCompanyDetailId(null)}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
