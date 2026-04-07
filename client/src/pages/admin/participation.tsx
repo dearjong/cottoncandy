@@ -389,6 +389,7 @@ export default function AdminParticipationPage() {
                   <TableHead className="w-[160px]">프로젝트 ID</TableHead>
                   <TableHead>프로젝트명</TableHead>
                   <TableHead className="w-[120px]">프로젝트 유형</TableHead>
+                  <TableHead className="w-[140px]">의뢰사</TableHead>
                   <TableHead className="w-[80px] text-center">지원 수</TableHead>
                   <TableHead>지원 회사</TableHead>
                 </TableRow>
@@ -396,7 +397,7 @@ export default function AdminParticipationPage() {
               <TableBody>
                 {projectRows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
                       조건에 해당하는 프로젝트가 없습니다.
                     </TableCell>
                   </TableRow>
@@ -423,6 +424,7 @@ export default function AdminParticipationPage() {
                           <Badge variant="outline">{project.type}</Badge>
                         )}
                       </TableCell>
+                      <TableCell className="text-sm">{project.client ?? "-"}</TableCell>
                       <TableCell className="text-center font-semibold">
                         {participantIds.length > 0 ? (
                           <span className="text-pink-600">{participantIds.length}</span>
