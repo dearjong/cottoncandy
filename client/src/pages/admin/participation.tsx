@@ -438,10 +438,34 @@ export default function AdminParticipationPage() {
                       </TableCell>
                       <TableCell className="text-sm">
                         <div className="flex flex-col gap-1">
-                          <span>{project.client ?? "-"}</span>
+                          {(() => {
+                            const clientCo = MOCK_ADMIN_COMPANIES_V1.find(c => c.companyName === project.client)
+                            return clientCo ? (
+                              <button
+                                type="button"
+                                className="text-left hover:text-pink-600 hover:underline cursor-pointer"
+                                onClick={() => setOpenCompanyDetailId(clientCo.id)}
+                              >{project.client}</button>
+                            ) : (
+                              <span>{project.client ?? "-"}</span>
+                            )
+                          })()}
                           {STATUSES_WITH_PARTNER.has(project.status) && project.partner ? (
                             <span className="inline-flex items-center gap-1 text-xs text-gray-500">
-                              {project.partner}
+                              {(() => {
+                                const partnerCo = (project.participantCompanyIds ?? [])
+                                  .map(cid => MOCK_ADMIN_COMPANIES_V1.find(c => c.id === cid))
+                                  .find(c => c?.companyName === project.partner)
+                                return partnerCo ? (
+                                  <button
+                                    type="button"
+                                    className="text-left hover:text-pink-600 hover:underline cursor-pointer"
+                                    onClick={() => setOpenCompanyDetailId(partnerCo.id)}
+                                  >{project.partner}</button>
+                                ) : (
+                                  <span>{project.partner}</span>
+                                )
+                              })()}
                               {(project as any).partnerType && (
                                 <Badge variant="outline" className="h-4 px-1 text-[10px] text-gray-500">{(project as any).partnerType}사</Badge>
                               )}
