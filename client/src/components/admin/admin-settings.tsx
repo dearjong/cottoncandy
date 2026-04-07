@@ -113,7 +113,7 @@ export function AdminSettings({ section = "admins" }: { section?: "admins" | "pl
       id: "LOG-001",
       user: "김관리자",
       action: "프로젝트 승인",
-      target: "PRJ-001",
+      target: "PID-20240615-0001",
       timestamp: "2024-06-15 14:30",
       ipAddress: "192.168.1.100",
       status: "success"

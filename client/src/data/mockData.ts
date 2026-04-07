@@ -301,7 +301,7 @@ export const MOCK_ADMIN_COMPANIES_V1 = [
 
 export const MOCK_ADMIN_PROJECTS_V1 = [
   {
-    id: "PRJ-001",
+    id: "PID-20240615-0001",
     title: "브랜드 홍보 영상 제작",
     client: "베스트전자",
     partner: "스튜디오 블랙",
@@ -318,7 +318,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     description: "신제품 런칭을 위한 브랜드 홍보 영상 제작 프로젝트입니다.",
   },
   {
-    id: "PRJ-002",
+    id: "PID-20240614-0001",
     projectNo: "PN-20240614-0001",
     title: "기업 IR 영상 제작",
     client: "스마트솔루션(주)",
@@ -336,7 +336,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     description: "투자 유치를 위한 IR 프레젠테이션 영상 제작",
   },
   {
-    id: "PRJ-003",
+    id: "PID-20240613-0001",
     title: "마케팅 전략 컨설팅",
     client: "핀테크랩",
     partner: "컨설팅랩",
@@ -354,7 +354,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     consultingOutcomeKind: "SIMPLE_CONSULT" as const,
   },
   {
-    id: "PRJ-004",
+    id: "PID-20240612-0002",
     projectNo: "PN-20240612-0002",
     title: "제품 소개 영상",
     client: "전자산업(주)",
@@ -372,7 +372,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     description: "AI 제품 소개를 위한 영상 콘텐츠 제작",
   },
   {
-    id: "PRJ-005",
+    id: "PID-20240611-0003",
     projectNo: "PN-20240611-0003",
     title: "SNS 광고 캠페인",
     client: "뷰티브랜드",
@@ -390,7 +390,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     description: "인스타그램/틱톡 인플루언서 협업 광고 캠페인",
   },
   {
-    id: "PRJ-006",
+    id: "PID-20240610-0004",
     projectNo: "PN-20240610-0004",
     title: "기업 홍보 다큐멘터리",
     client: "IT솔루션",
@@ -408,7 +408,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     description: "친환경 에너지 기업 소개 다큐멘터리 제작",
   },
   {
-    id: "PRJ-007",
+    id: "PID-20240609-0005",
     projectNo: "PN-20240609-0005",
     title: "브랜딩 전략 수립",
     client: "(주)테크브랜드",
@@ -425,7 +425,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     description: "신규 브랜드 런칭을 위한 브랜딩 전략 컨설팅",
     phone: "010-3456-7890",
     consultingOutcomeKind: "MATCHING_1TO1" as const,
-    consultingLinkedProjectId: "PRJ-009",
+    consultingLinkedProjectId: "PID-20240607-0006",
     consultingActivityLog: [
       {
         id: "act-prj007-1",
@@ -442,7 +442,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     ],
   },
   {
-    id: "PRJ-008",
+    id: "PID-20240608-0001",
     title: "유튜브 채널 운영 대행",
     client: "제조업체",
     partner: "디지털 마케팅 스튜디오",
@@ -459,7 +459,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     description: "기업 유튜브 채널 콘텐츠 기획 및 제작 운영",
   },
   {
-    id: "PRJ-009",
+    id: "PID-20240607-0006",
     projectNo: "PN-20240607-0006",
     title: "TV CF 제작",
     client: "헬스케어",
@@ -477,7 +477,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     description: "신규 모바일 앱 런칭 TV 광고 제작",
   },
   {
-    id: "PRJ-010",
+    id: "PID-20240606-0007",
     projectNo: "PN-20240606-0007",
     title: "디지털 마케팅 컨설팅",
     client: "에코에너지",
@@ -494,7 +494,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     description: "B2B 헬스케어 서비스 디지털 마케팅 전략 수립",
     phone: "010-4567-8901",
     consultingOutcomeKind: "MATCHING_PUBLIC" as const,
-    consultingLinkedProjectId: "PRJ-011",
+    consultingLinkedProjectId: "PID-20240520-0009",
     consultingActivityLog: [
       {
         id: "act-prj010-1",
@@ -505,7 +505,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     ],
   },
   {
-    id: "PRJ-013",
+    id: "PID-20240605-0008",
     projectNo: "PN-20240605-0008",
     title: "영상 제작 방향 컨설팅 (직접 소개)",
     client: "스타트업허브",
@@ -539,7 +539,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     ],
   },
   {
-    id: "PRJ-011",
+    id: "PID-20240520-0009",
     projectNo: "PN-20240520-0009",
     title: "TV 신제품 판매촉진 프로모션",
     client: "베스트전자",
@@ -557,7 +557,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     description: "신제품 런칭 TVCF 및 디지털 프로모션 캠페인. 제작·온에어·정산·리뷰 완료.",
   },
   {
-    id: "PRJ-012",
+    id: "PID-20240510-0010",
     projectNo: "PN-20240510-0010",
     title: "봄 시즌 브랜드 캠페인",
     client: "골드백화점",
@@ -575,7 +575,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     description: "봄 시즌 옥외·디지털 통합 캠페인. 제작부터 리뷰 등록까지 완료.",
   },
   {
-    id: "PRJ-050",
+    id: "PID-20240601-0011",
     projectNo: "PN-20240601-0011",
     title: "브랜드 리뉴얼 영상 제작",
     client: "(주)패션브랜드",
@@ -593,7 +593,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     description: "내부 사정으로 일시 중단. 예산 재조정 후 재개 예정.",
   },
   {
-    id: "PRJ-045",
+    id: "PID-20240528-0012",
     projectNo: "PN-20240528-0012",
     title: "신제품 런칭 광고",
     client: "스마트전자(주)",
@@ -614,8 +614,8 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
 
 // --- Notification Logs ---
 export const MOCK_NOTIFICATION_LOGS = [
-  { id: 'NL-001', type: 'PRJ-001', status: 'SENT', title: '프로젝트 승인 완료', target: '의뢰사 A', count: 1, sentDate: '2024-11-06 14:30', successRate: '100%' },
-  { id: 'NL-002', type: 'PRJ-005', status: 'SENT', title: '계약 단계 안내', target: '파트너 B', count: 1, sentDate: '2024-11-06 13:00', successRate: '100%' },
+  { id: 'NL-001', type: 'PID-20240615-0001', status: 'SENT', title: '프로젝트 승인 완료', target: '의뢰사 A', count: 1, sentDate: '2024-11-06 14:30', successRate: '100%' },
+  { id: 'NL-002', type: 'PID-20240611-0003', status: 'SENT', title: '계약 단계 안내', target: '파트너 B', count: 1, sentDate: '2024-11-06 13:00', successRate: '100%' },
   { id: 'NL-003', type: 'OPS-001', status: 'SENT', title: '승인 필요', target: '운영자', count: 2, sentDate: '2024-11-06 12:00', successRate: '99.8%' },
   { id: 'NL-004', type: 'MBR-001', status: 'SENT', title: '가입 완료', target: '신규회원', count: 5, sentDate: '2024-11-06 11:00', successRate: '100%' },
   { id: 'NL-005', type: 'NTC-001', status: 'SENT', title: '시스템 점검 안내', target: '전체', count: 120, sentDate: '2024-11-05 18:00', successRate: '99.2%' },

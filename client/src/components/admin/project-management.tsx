@@ -499,7 +499,7 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
           const attachmentFileNames =
             i % 3 === 0 ? [`샘플_첨부_${i + 1}.pdf`, `참고_자료_${i + 1}.png`] : []
 
-          const linkedProjectId = kind === "MATCHING_PUBLIC" ? "PRJ-011" : kind === "MATCHING_1TO1" ? "PRJ-009" : undefined
+          const linkedProjectId = kind === "MATCHING_PUBLIC" ? "PID-20240520-0009" : kind === "MATCHING_1TO1" ? "PID-20240607-0006" : undefined
           const matchingInfo =
             kind === "DIRECT_INTRO" ? `TVCF 전문 제작사 ${i + 1}차 매칭 (솜사탕애드)` : undefined
 
@@ -1910,7 +1910,7 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
 
                         <div className="flex justify-between items-start mb-6 pb-6 border-b border-gray-200">
                   <div>
-                    <div className="text-sm text-gray-600 mb-3">{selectedProject.id} {MainStatusLabels[selectedProject.status]}</div>
+                    <div className="text-sm text-gray-600 mb-3">{(selectedProject as any).projectNo ?? selectedProject.id} {MainStatusLabels[selectedProject.status]}</div>
                   </div>
                   <div className="text-sm text-gray-600">참여공고 대행사 경쟁PT My담당</div>
                 </div>

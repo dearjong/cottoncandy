@@ -115,10 +115,10 @@ interface ProjectMessage {
 
 // 목업: 분쟁/신고 처리 목적의 메시지 열람을 시뮬레이션
 const MOCK_PROJECT_MESSAGES: ProjectMessage[] = [
-  // PRJ-001: OT 일정 조율 관련 대화
+  // PID-20240615-0001: OT 일정 조율 관련 대화
   {
     id: "MSG-001",
-    projectId: "PRJ-001",
+    projectId: "PID-20240615-0001",
     senderType: "CLIENT",
     senderName: "의뢰사 담당자",
     createdAt: "2025-02-10 10:12",
@@ -126,7 +126,7 @@ const MOCK_PROJECT_MESSAGES: ProjectMessage[] = [
   },
   {
     id: "MSG-002",
-    projectId: "PRJ-001",
+    projectId: "PID-20240615-0001",
     senderType: "PARTNER",
     senderName: "수행사 PM",
     createdAt: "2025-02-10 10:25",
@@ -134,17 +134,17 @@ const MOCK_PROJECT_MESSAGES: ProjectMessage[] = [
   },
   {
     id: "MSG-003",
-    projectId: "PRJ-001",
+    projectId: "PID-20240615-0001",
     senderType: "ADMIN",
     senderName: "운영자",
     createdAt: "2025-02-10 10:32",
     content: "OT 링크는 일정 확정 후 하루 전에 자동 발송됩니다.",
   },
 
-  // PRJ-002: 견적 범위 및 일정 관련 논의
+  // PID-20240614-0001: 견적 범위 및 일정 관련 논의
   {
     id: "MSG-010",
-    projectId: "PRJ-002",
+    projectId: "PID-20240614-0001",
     senderType: "CLIENT",
     senderName: "마케팅팀 과장",
     createdAt: "2025-02-05 09:01",
@@ -152,7 +152,7 @@ const MOCK_PROJECT_MESSAGES: ProjectMessage[] = [
   },
   {
     id: "MSG-011",
-    projectId: "PRJ-002",
+    projectId: "PID-20240614-0001",
     senderType: "PARTNER",
     senderName: "제작사 PD",
     createdAt: "2025-02-05 09:19",
@@ -160,17 +160,17 @@ const MOCK_PROJECT_MESSAGES: ProjectMessage[] = [
   },
   {
     id: "MSG-012",
-    projectId: "PRJ-002",
+    projectId: "PID-20240614-0001",
     senderType: "ADMIN",
     senderName: "운영자",
     createdAt: "2025-02-05 09:27",
     content: "최종 견적 확정 전까지는 의뢰 내용 수정 가능하니, 변경사항 있으면 이 스레드에 남겨 주세요.",
   },
 
-  // PRJ-003: 피드백 표현 수위 관련 CS 상황 가정
+  // PID-20240613-0001: 피드백 표현 수위 관련 CS 상황 가정
   {
     id: "MSG-020",
-    projectId: "PRJ-003",
+    projectId: "PID-20240613-0001",
     senderType: "CLIENT",
     senderName: "브랜드 매니저",
     createdAt: "2025-02-12 14:03",
@@ -178,7 +178,7 @@ const MOCK_PROJECT_MESSAGES: ProjectMessage[] = [
   },
   {
     id: "MSG-021",
-    projectId: "PRJ-003",
+    projectId: "PID-20240613-0001",
     senderType: "PARTNER",
     senderName: "크리에이티브 디렉터",
     createdAt: "2025-02-12 14:18",
@@ -186,17 +186,17 @@ const MOCK_PROJECT_MESSAGES: ProjectMessage[] = [
   },
   {
     id: "MSG-022",
-    projectId: "PRJ-003",
+    projectId: "PID-20240613-0001",
     senderType: "ADMIN",
     senderName: "운영자",
     createdAt: "2025-02-12 14:25",
     content: "양측 모두 2차 시안까지는 메이저 방향성을 맞추는 데 집중 부탁드립니다. 세부 표현은 이후 라운드에서 조율 가능합니다.",
   },
 
-  // PRJ-006: 제작 완료·납품 후 AS 관련 대화
+  // PID-20240610-0004: 제작 완료·납품 후 AS 관련 대화
   {
     id: "MSG-030",
-    projectId: "PRJ-006",
+    projectId: "PID-20240610-0004",
     senderType: "CLIENT",
     senderName: "홍보팀장",
     createdAt: "2025-03-02 11:10",
@@ -204,7 +204,7 @@ const MOCK_PROJECT_MESSAGES: ProjectMessage[] = [
   },
   {
     id: "MSG-031",
-    projectId: "PRJ-006",
+    projectId: "PID-20240610-0004",
     senderType: "PARTNER",
     senderName: "제작사 PM",
     createdAt: "2025-03-02 11:24",
@@ -212,17 +212,17 @@ const MOCK_PROJECT_MESSAGES: ProjectMessage[] = [
   },
   {
     id: "MSG-032",
-    projectId: "PRJ-006",
+    projectId: "PID-20240610-0004",
     senderType: "ADMIN",
     senderName: "운영자",
     createdAt: "2025-03-02 11:35",
     content: "본 수정은 계약서 내 무상 수정 범위 안에 포함되어 처리됩니다. 추가 비용 청구는 없습니다.",
   },
 
-  // PRJ-011: 온에어 후 효과 공유 및 리뷰 요청
+  // PID-20240520-0009: 온에어 후 효과 공유 및 리뷰 요청
   {
     id: "MSG-040",
-    projectId: "PRJ-011",
+    projectId: "PID-20240520-0009",
     senderType: "CLIENT",
     senderName: "마케팅실장",
     createdAt: "2025-03-05 09:05",
@@ -230,7 +230,7 @@ const MOCK_PROJECT_MESSAGES: ProjectMessage[] = [
   },
   {
     id: "MSG-041",
-    projectId: "PRJ-011",
+    projectId: "PID-20240520-0009",
     senderType: "PARTNER",
     senderName: "크리에이티브 디렉터",
     createdAt: "2025-03-05 09:18",
@@ -238,17 +238,17 @@ const MOCK_PROJECT_MESSAGES: ProjectMessage[] = [
   },
   {
     id: "MSG-042",
-    projectId: "PRJ-011",
+    projectId: "PID-20240520-0009",
     senderType: "ADMIN",
     senderName: "운영자",
     createdAt: "2025-03-05 09:25",
     content: "캠페인 리뷰 등록 메뉴에서 이번 프로젝트에 대한 평가를 남겨주시면, 향후 매칭 추천에 반영됩니다.",
   },
 
-  // PRJ-012: 시즌 캠페인 종료 후 정산·리포트 관련
+  // PID-20240510-0010: 시즌 캠페인 종료 후 정산·리포트 관련
   {
     id: "MSG-050",
-    projectId: "PRJ-012",
+    projectId: "PID-20240510-0010",
     senderType: "CLIENT",
     senderName: "브랜드매니저",
     createdAt: "2025-04-01 15:02",
@@ -256,7 +256,7 @@ const MOCK_PROJECT_MESSAGES: ProjectMessage[] = [
   },
   {
     id: "MSG-051",
-    projectId: "PRJ-012",
+    projectId: "PID-20240510-0010",
     senderType: "PARTNER",
     senderName: "미디어 플래너",
     createdAt: "2025-04-01 15:16",
@@ -264,7 +264,7 @@ const MOCK_PROJECT_MESSAGES: ProjectMessage[] = [
   },
   {
     id: "MSG-052",
-    projectId: "PRJ-012",
+    projectId: "PID-20240510-0010",
     senderType: "ADMIN",
     senderName: "운영자",
     createdAt: "2025-04-01 15:25",

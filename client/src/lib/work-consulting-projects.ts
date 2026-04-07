@@ -133,7 +133,7 @@ export function loadWorkConsultingProjects(): WorkConsultingProject[] {
       const phoneLast = String(10 + i).padStart(2, "0")
       const phone = `010-1234-${phoneLast}`
       const attachmentFileNames = i % 3 === 0 ? [`샘플_첨부_${i + 1}.pdf`, `참고_자료_${i + 1}.png`] : []
-      const linkedProjectId = kind === "MATCHING_PUBLIC" ? "PRJ-011" : kind === "MATCHING_1TO1" ? "PRJ-009" : undefined
+      const linkedProjectId = kind === "MATCHING_PUBLIC" ? "PID-20240520-0009" : kind === "MATCHING_1TO1" ? "PID-20240607-0006" : undefined
       const matchingInfo = kind === "DIRECT_INTRO" ? `TVCF 전문 제작사 ${i + 1}차 매칭 (솜사탕애드)` : undefined
       const isDone = isConsultingCompleteStatus(status)
       const isReceiptOnly = status === "PROPOSAL_OPEN"

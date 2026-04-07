@@ -38,8 +38,8 @@ interface Participant {
 }
 
 const MOCK_PROJECTS = [
-  { id: "PRJ-001", clientName: "베스트전자", title: "TV 신제품 판매촉진 프로모션" },
-  { id: "PRJ-002", clientName: "(주)테크브랜드", title: "브랜드 홍보 영상 제작" },
+  { id: "PID-20240615-0001", clientName: "베스트전자", title: "TV 신제품 판매촉진 프로모션" },
+  { id: "PID-20240614-0001", clientName: "(주)테크브랜드", title: "브랜드 홍보 영상 제작" },
 ]
 
 const MOCK_PARTICIPANTS: Participant[] = [

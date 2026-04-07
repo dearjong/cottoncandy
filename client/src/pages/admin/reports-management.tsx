@@ -76,7 +76,7 @@ const reports: Report[] = [
   {
     id: "RPT-002",
     reportType: "PROJECT",
-    targetId: "PRJ-456",
+    targetId: "PID-20240401-0456",
     targetTitle: "허위 프로젝트 등록 의심",
     reporterName: "박제작사",
     reporterCompany: "비주얼프로덕션",

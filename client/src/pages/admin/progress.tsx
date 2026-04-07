@@ -33,9 +33,9 @@ const pipelineData = {
     color: "bg-blue-500",
     count: 5,
     projects: [
-      { id: "PRJ-001", title: "브랜드 홍보영상 제작", client: "(주)테크스타트업", status: "PROPOSAL_OPEN", statusLabel: "접수중", participants: 8 },
-      { id: "PRJ-007", title: "신제품 런칭 영상", client: "코스메틱코리아", status: "PROPOSAL_OPEN", statusLabel: "접수중", participants: 12 },
-      { id: "PRJ-011", title: "기업 소개 영상", client: "푸드테크", status: "PROPOSAL_OPEN", statusLabel: "접수중", participants: 5 },
+      { id: "PID-20240615-0001", title: "브랜드 홍보영상 제작", client: "(주)테크스타트업", status: "PROPOSAL_OPEN", statusLabel: "접수중", participants: 8 },
+      { id: "PID-20240609-0005", title: "신제품 런칭 영상", client: "코스메틱코리아", status: "PROPOSAL_OPEN", statusLabel: "접수중", participants: 12 },
+      { id: "PID-20240520-0009", title: "기업 소개 영상", client: "푸드테크", status: "PROPOSAL_OPEN", statusLabel: "접수중", participants: 5 },
     ]
   },
   ot_scheduled: {
@@ -43,8 +43,8 @@ const pipelineData = {
     color: "bg-purple-500",
     count: 3,
     projects: [
-      { id: "PRJ-002", title: "기업 IR 영상 제작", client: "스마트솔루션(주)", status: "OT_SCHEDULED", statusLabel: "OT 예정", date: "2026-01-21", time: "14:00" },
-      { id: "PRJ-008", title: "서비스 소개 영상", client: "핀테크랩", status: "OT_SCHEDULED", statusLabel: "OT 예정", date: "2026-01-22", time: "10:00" },
+      { id: "PID-20240614-0001", title: "기업 IR 영상 제작", client: "스마트솔루션(주)", status: "OT_SCHEDULED", statusLabel: "OT 예정", date: "2026-01-21", time: "14:00" },
+      { id: "PID-20240608-0001", title: "서비스 소개 영상", client: "핀테크랩", status: "OT_SCHEDULED", statusLabel: "OT 예정", date: "2026-01-22", time: "10:00" },
     ]
   },
   pt_scheduled: {
@@ -52,8 +52,8 @@ const pipelineData = {
     color: "bg-orange-500",
     count: 2,
     projects: [
-      { id: "PRJ-003", title: "마케팅 전략 영상", client: "로컬푸드(주)", status: "PT_SCHEDULED", statusLabel: "PT 예정", date: "2026-01-20", time: "16:00" },
-      { id: "PRJ-009", title: "브랜드 리뉴얼 영상", client: "패션브랜드", status: "PT_SCHEDULED", statusLabel: "PT 예정", date: "2026-01-23", time: "15:00" },
+      { id: "PID-20240613-0001", title: "마케팅 전략 영상", client: "로컬푸드(주)", status: "PT_SCHEDULED", statusLabel: "PT 예정", date: "2026-01-20", time: "16:00" },
+      { id: "PID-20240607-0006", title: "브랜드 리뉴얼 영상", client: "패션브랜드", status: "PT_SCHEDULED", statusLabel: "PT 예정", date: "2026-01-23", time: "15:00" },
     ]
   },
   selected: {
@@ -61,8 +61,8 @@ const pipelineData = {
     color: "bg-green-500",
     count: 4,
     projects: [
-      { id: "PRJ-004", title: "제품 광고 영상", client: "전자산업(주)", status: "SELECTED", statusLabel: "선정완료" },
-      { id: "PRJ-010", title: "브랜드 캠페인", client: "뷰티브랜드", status: "SELECTED", statusLabel: "선정완료" },
+      { id: "PID-20240612-0002", title: "제품 광고 영상", client: "전자산업(주)", status: "SELECTED", statusLabel: "선정완료" },
+      { id: "PID-20240606-0007", title: "브랜드 캠페인", client: "뷰티브랜드", status: "SELECTED", statusLabel: "선정완료" },
     ]
   },
   production: {
@@ -70,9 +70,9 @@ const pipelineData = {
     color: "bg-cyan-500",
     count: 6,
     projects: [
-      { id: "PRJ-005", title: "홍보 영상 제작", client: "IT솔루션", status: "SHOOTING", statusLabel: "촬영중" },
-      { id: "PRJ-006", title: "디지털 광고", client: "이커머스코리아", status: "EDITING", statusLabel: "후반작업" },
-      { id: "PRJ-012", title: "TV 광고", client: "식품회사", status: "DRAFT_SUBMITTED", statusLabel: "시안제출" },
+      { id: "PID-20240611-0003", title: "홍보 영상 제작", client: "IT솔루션", status: "SHOOTING", statusLabel: "촬영중" },
+      { id: "PID-20240610-0004", title: "디지털 광고", client: "이커머스코리아", status: "EDITING", statusLabel: "후반작업" },
+      { id: "PID-20240510-0010", title: "TV 광고", client: "식품회사", status: "DRAFT_SUBMITTED", statusLabel: "시안제출" },
     ]
   },
   complete: {
@@ -84,15 +84,15 @@ const pipelineData = {
 }
 
 const todaySchedule: Project[] = [
-  { id: "PRJ-003", title: "마케팅 전략 컨설팅", client: "핀테크랩", status: "PT_SCHEDULED", statusLabel: "PT", date: "2026-01-20", time: "16:00" },
-  { id: "PRJ-009", title: "TV CF 제작", client: "헬스케어", status: "OT_SCHEDULED", statusLabel: "OT", date: "2026-01-20", time: "10:00" },
-  { id: "PRJ-005", title: "SNS 광고 캠페인", client: "뷰티브랜드", status: "PROPOSAL_CLOSED", statusLabel: "마감", date: "2026-01-20", time: "18:00" },
+  { id: "PID-20240613-0001", title: "마케팅 전략 컨설팅", client: "핀테크랩", status: "PT_SCHEDULED", statusLabel: "PT", date: "2026-01-20", time: "16:00" },
+  { id: "PID-20240607-0006", title: "TV CF 제작", client: "헬스케어", status: "OT_SCHEDULED", statusLabel: "OT", date: "2026-01-20", time: "10:00" },
+  { id: "PID-20240611-0003", title: "SNS 광고 캠페인", client: "뷰티브랜드", status: "PROPOSAL_CLOSED", statusLabel: "마감", date: "2026-01-20", time: "18:00" },
 ]
 
 const delayedProjects: Project[] = [
-  { id: "PRJ-008", title: "유튜브 채널 운영 대행", client: "제조업체", status: "OT_SCHEDULED", statusLabel: "OT 일정 초과", daysOverdue: 3 },
-  { id: "PRJ-001", title: "브랜드 홍보 영상 제작", client: "베스트전자", status: "PROPOSAL_SUBMIT", statusLabel: "제안서 미제출", daysOverdue: 5 },
-  { id: "PRJ-050", title: "브랜드 리뉴얼 영상 제작", client: "(주)패션브랜드", status: "EDITING", statusLabel: "후반작업 지연", daysOverdue: 2 },
+  { id: "PID-20240608-0001", title: "유튜브 채널 운영 대행", client: "제조업체", status: "OT_SCHEDULED", statusLabel: "OT 일정 초과", daysOverdue: 3 },
+  { id: "PID-20240615-0001", title: "브랜드 홍보 영상 제작", client: "베스트전자", status: "PROPOSAL_SUBMIT", statusLabel: "제안서 미제출", daysOverdue: 5 },
+  { id: "PID-20240601-0011", title: "브랜드 리뉴얼 영상 제작", client: "(주)패션브랜드", status: "EDITING", statusLabel: "후반작업 지연", daysOverdue: 2 },
 ]
 
 export default function ProgressPage() {
