@@ -913,21 +913,20 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
             ))}
           </div>
 
-          {/* 전체 상태 드롭다운 — 8단계 */}
-          <Select value={selectedStatus} onValueChange={handleStatusChange}>
+          {/* 상세 단계 드롭다운 — 버튼에 없는 세부 단계 */}
+          <Select
+            value={["계약","제작","제작완료","온에어","사후관리","중단","취소"].includes(selectedStatus as string) ? selectedStatus : ""}
+            onValueChange={(v) => handleStatusChange(v || "ALL")}
+          >
             <SelectTrigger className="w-36 h-8 text-sm">
-              <SelectValue placeholder="단계 선택" />
+              <SelectValue placeholder="세부 단계" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">전체 단계</SelectItem>
-              <SelectItem value="등록">등록</SelectItem>
-              <SelectItem value="접수단계">접수단계</SelectItem>
               <SelectItem value="계약">계약</SelectItem>
               <SelectItem value="제작">제작</SelectItem>
               <SelectItem value="제작완료">제작완료</SelectItem>
               <SelectItem value="온에어">온에어</SelectItem>
               <SelectItem value="사후관리">사후관리</SelectItem>
-              <SelectItem value="완료">완료</SelectItem>
               <SelectItem value="중단">중단</SelectItem>
               <SelectItem value="취소">취소</SelectItem>
             </SelectContent>
