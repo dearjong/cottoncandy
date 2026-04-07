@@ -127,14 +127,14 @@ function SubNavLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
-/** 부가 필터 메뉴 라벨 — 대시(–) 접두로 핵심 메뉴와 시각적 구분 */
+/** 부가 필터 메뉴 라벨 — 들여쓰기 + 흐린 소형 텍스트로 핵심 메뉴와 시각적 구분 */
 function SubNavLabelSub({ children }: { children: React.ReactNode }) {
   return (
-    <span className="flex min-w-0 items-center gap-1">
-      <span className="shrink-0 text-sidebar-foreground/40 text-[10px]" aria-hidden>
-        –
+    <span className="flex min-w-0 items-center gap-1 pl-2">
+      <span className="shrink-0 text-sidebar-foreground/35 text-[9px]" aria-hidden>
+        ●
       </span>
-      <span className="truncate text-sidebar-foreground/70">{children}</span>
+      <span className="truncate text-[11px] text-sidebar-foreground/50 font-normal">{children}</span>
     </span>
   )
 }
