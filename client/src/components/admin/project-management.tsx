@@ -174,8 +174,7 @@ const quickFilterStatuses: { value: MainStatus | "ALL"; label: string }[] = [
   { value: "PROPOSAL_OPEN", label: "접수" },
   { value: "SHOOTING", label: "진행중" },
   { value: "COMPLETE", label: "완료" },
-  { value: "STOPPED", label: "중단" },
-  { value: "CANCELLED", label: "취소" },
+  { value: "중단취소" as any, label: "중단/취소" },
 ]
 
 const allStatuses: { value: MainStatus; label: string }[] = [
@@ -834,9 +833,11 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
       ? defaultStatuses.includes(project.status)
       : selectedStatus === "ALL"
         ? true
-        : selectedStatus in StatusByCategory
-          ? (StatusByCategory[selectedStatus as MainStatusCategory] as MainStatus[]).includes(project.status)
-          : project.status === selectedStatus
+        : (selectedStatus as string) === "중단취소"
+          ? project.status === "STOPPED" || project.status === "CANCELLED"
+          : selectedStatus in StatusByCategory
+            ? (StatusByCategory[selectedStatus as MainStatusCategory] as MainStatus[]).includes(project.status)
+            : project.status === selectedStatus
     const matchesType =
       filterType !== null
         ? project.type === filterType
