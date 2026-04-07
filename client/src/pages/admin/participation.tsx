@@ -2,206 +2,105 @@ import { useMemo, useState } from "react"
 import AdminLayout from "@/components/admin/admin-layout"
 import { PageHeader } from "@/components/admin/page-header"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Search, BarChart3 } from "lucide-react"
-import { Link } from "wouter"
-import { MOCK_ADMIN_COMPANIES_V1, MOCK_ADMIN_PROJECTS_V1 } from "@/data/mockData"
-import { MainStatusLabels } from "@/types/project-status"
+import { Button } from "@/components/ui/button"
+import { Search, BarChart3, RotateCcw } from "lucide-react"
+import { MOCK_ADMIN_PROJECTS_V1 } from "@/data/mockData"
+import { MainStatusLabels, MainStatusColors, MainStatus } from "@/types/project-status"
 
-const COMPLETED_STATUSES = ["COMPLETE", "ADMIN_CHECKING", "ADMIN_CONFIRMED", "CANCELLED", "STOPPED"]
+type ViewMode = "project" | "projectType" | "company"
 
-type FilterType = "ALL" | "ADVERTISER" | "PRODUCTION"
-type ViewMode = "company" | "project" | "projectList"
+const COMPLETED = ["COMPLETE", "ADMIN_CHECKING", "ADMIN_CONFIRMED", "CANCELLED", "STOPPED"]
+
+const TYPE_LABEL: Record<string, string> = { "공고": "공고", "1:1": "1:1", "컨설팅": "컨설팅" }
+
 export default function AdminParticipationPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filterType, setFilterType] = useState<FilterType>("ALL")
-  const [filterStatus, setFilterStatus] = useState<"ALL" | "ongoing" | "completed">("ALL")
   const [viewMode, setViewMode] = useState<ViewMode>("project")
-  const [openCompanyDetailId, setOpenCompanyDetailId] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterType, setFilterType] = useState("ALL")
+  const [filterStatus, setFilterStatus] = useState("ALL")
 
-  const rows = useMemo(() => {
-    return MOCK_ADMIN_COMPANIES_V1.map((company) => {
-      const all = MOCK_ADMIN_PROJECTS_V1.filter(
-        (p) => p.ownerCompanyId === company.id || (p.participantCompanyIds ?? []).includes(company.id)
-      )
-      const ongoing = all.filter((p) => !COMPLETED_STATUSES.includes(p.status))
-      const completed = all.filter((p) => COMPLETED_STATUSES.includes(p.status))
-      const asOwner = all.filter((p) => p.ownerCompanyId === company.id).length
-      const asPartner = all.filter((p) => (p.participantCompanyIds ?? []).includes(company.id)).length
-
-      const biddingCount = all.filter(
-        (p) => p.type === "공고" || (p.type === "컨설팅" && p.consultingOutcomeKind === "MATCHING_PUBLIC")
-      ).length
-      const oneToOneCount = all.filter(
-        (p) => p.type === "1:1" || (p.type === "컨설팅" && p.consultingOutcomeKind === "MATCHING_1TO1")
-      ).length
-
-      const lastProject = all
-        .filter((p) => p.createdAt)
-        .sort((a, b) => new Date(b.createdAt ?? "").getTime() - new Date(a.createdAt ?? "").getTime())[0]
-
-      const lastOngoingStatus = ongoing.length > 0
-        ? (MainStatusLabels[ongoing[0].status as keyof typeof MainStatusLabels] ?? ongoing[0].status)
-        : null
-
-      return {
-        company,
-        totalCount: all.length,
-        ongoingCount: ongoing.length,
-        completedCount: completed.length,
-        asOwnerCount: asOwner,
-        asPartnerCount: asPartner,
-        biddingCount,
-        oneToOneCount,
-        lastActivity: lastProject?.createdAt ?? "-",
-        lastOngoingStatus,
-        ongoing,
-        completed,
-      }
-    })
-  }, [])
+  const records = useMemo(() =>
+    MOCK_ADMIN_PROJECTS_V1.map((p) => ({
+      id: p.id,
+      title: p.title,
+      client: p.client,
+      partner: p.partner,
+      type: p.type,
+      status: p.status,
+      createdAt: p.createdAt ?? "",
+    })),
+    []
+  )
 
   const filtered = useMemo(() => {
-    return rows.filter((row) => {
-      const matchSearch =
-        !searchTerm ||
-        row.company.companyName.includes(searchTerm) ||
-        (row.company.businessNumber ?? "").includes(searchTerm) ||
-        (row.company.representativeName ?? "").includes(searchTerm)
-
-      const matchType =
-        filterType === "ALL" ||
-        (filterType === "ADVERTISER" && row.asOwnerCount > 0) ||
-        (filterType === "PRODUCTION" && row.asPartnerCount > 0)
-
+    return records.filter((r) => {
+      const matchSearch = !searchTerm ||
+        r.title.includes(searchTerm) ||
+        r.client.includes(searchTerm) ||
+        r.partner.includes(searchTerm) ||
+        r.id.includes(searchTerm)
+      const matchType = filterType === "ALL" || r.type === filterType
       const matchStatus =
         filterStatus === "ALL" ||
-        (filterStatus === "ongoing" && row.ongoingCount > 0) ||
-        (filterStatus === "completed" && row.completedCount > 0)
-
+        (filterStatus === "ongoing" && !COMPLETED.includes(r.status)) ||
+        (filterStatus === "completed" && COMPLETED.includes(r.status))
       return matchSearch && matchType && matchStatus
     })
-  }, [rows, searchTerm, filterType, filterStatus])
+  }, [records, searchTerm, filterType, filterStatus])
 
-  const totalOngoing = rows.reduce((s, r) => s + r.ongoingCount, 0)
-  const totalCompleted = rows.reduce((s, r) => s + r.completedCount, 0)
-  const totalAll = rows.reduce((s, r) => s + r.totalCount, 0)
+  const totalCount = filtered.length
+  const ongoingCount = filtered.filter((r) => !COMPLETED.includes(r.status)).length
+  const completedCount = filtered.filter((r) => COMPLETED.includes(r.status)).length
 
-  const validProjects = MOCK_ADMIN_PROJECTS_V1.filter((p) =>
-    !(p.type === "컨설팅" &&
-      p.consultingOutcomeKind !== "MATCHING_PUBLIC" &&
-      p.consultingOutcomeKind !== "MATCHING_1TO1")
-  )
-  const totalRequest = validProjects.length
-  const totalParticipation = rows.reduce((s, r) => s + r.asPartnerCount, 0)
-  const totalBidding = validProjects.filter(
-    (p) => p.type === "공고" || (p.type === "컨설팅" && p.consultingOutcomeKind === "MATCHING_PUBLIC")
-  ).length
-  const total1to1 = validProjects.filter(
-    (p) => p.type === "1:1" || (p.type === "컨설팅" && p.consultingOutcomeKind === "MATCHING_1TO1")
-  ).length
-  const projectRows = useMemo(() => {
-    return MOCK_ADMIN_PROJECTS_V1.filter((project) => {
-      if (project.type === "컨설팅" &&
-        project.consultingOutcomeKind !== "MATCHING_PUBLIC" &&
-        project.consultingOutcomeKind !== "MATCHING_1TO1") return false
-
-      const relatedCompany = rows.find((row) => row.company.id === project.ownerCompanyId)?.company
-      const matchSearch =
-        !searchTerm ||
-        project.title.includes(searchTerm) ||
-        project.id.includes(searchTerm) ||
-        (project.client ?? "").includes(searchTerm) ||
-        (project.partner ?? "").includes(searchTerm) ||
-        (relatedCompany?.companyName ?? "").includes(searchTerm)
-
-      const isCompleted = COMPLETED_STATUSES.includes(project.status)
-      const matchStatus =
-        filterStatus === "ALL" ||
-        (filterStatus === "ongoing" && !isCompleted) ||
-        (filterStatus === "completed" && isCompleted)
-
-      return matchSearch && matchStatus
+  const byType = useMemo(() => {
+    const map: Record<string, typeof filtered> = {}
+    filtered.forEach((r) => {
+      if (!map[r.type]) map[r.type] = []
+      map[r.type].push(r)
     })
-  }, [rows, searchTerm, filterStatus])
-  const PROJECT_TYPES = ["공고", "공고 (컨설팅)", "1:1", "1:1 (컨설팅)"] as const
+    return map
+  }, [filtered])
 
-  const projectListRows = useMemo(() => {
-    const stat: Record<string, { total: number; ongoing: number; completed: number }> = {
-      "공고": { total: 0, ongoing: 0, completed: 0 },
-      "공고 (컨설팅)": { total: 0, ongoing: 0, completed: 0 },
-      "1:1": { total: 0, ongoing: 0, completed: 0 },
-      "1:1 (컨설팅)": { total: 0, ongoing: 0, completed: 0 },
-    }
-
-    MOCK_ADMIN_PROJECTS_V1.forEach((project) => {
-      let key: string
-      if (project.type === "컨설팅") {
-        if (project.consultingOutcomeKind === "MATCHING_PUBLIC") key = "공고 (컨설팅)"
-        else if (project.consultingOutcomeKind === "MATCHING_1TO1") key = "1:1 (컨설팅)"
-        else return
-      } else if (project.type === "1:1") {
-        key = "1:1"
-      } else {
-        key = "공고"
-      }
-
-      if (stat[key]) {
-        stat[key].total += 1
-        if (COMPLETED_STATUSES.includes(project.status)) {
-          stat[key].completed += 1
-        } else {
-          stat[key].ongoing += 1
-        }
-      }
+  const byCompany = useMemo(() => {
+    const map: Record<string, typeof filtered> = {}
+    filtered.forEach((r) => {
+      if (!map[r.client]) map[r.client] = []
+      map[r.client].push(r)
     })
+    return map
+  }, [filtered])
 
-    return PROJECT_TYPES
-      .map((type) => ({ type, ...stat[type] }))
-      .filter((item) => {
-        const matchSearch = !searchTerm || item.type.includes(searchTerm)
-        const matchStatus =
-          filterStatus === "ALL" ||
-          (filterStatus === "ongoing" && item.ongoing > 0) ||
-          (filterStatus === "completed" && item.completed > 0)
-        return matchSearch && matchStatus
-      })
-  }, [searchTerm, filterStatus])
-  const selectedCompanyRow = useMemo(
-    () => rows.find((row) => row.company.id === openCompanyDetailId) ?? null,
-    [rows, openCompanyDetailId]
-  )
+  const statusLabel = (status: string) =>
+    MainStatusLabels[status as MainStatus] ?? status
+
+  const statusColor = (status: string) =>
+    MainStatusColors[status as MainStatus] ?? "bg-gray-100 text-gray-700"
+
+  const reset = () => { setSearchTerm(""); setFilterType("ALL"); setFilterStatus("ALL") }
 
   return (
     <AdminLayout>
       <div className="space-y-6 p-6">
         <PageHeader
           title={<span className="flex items-center gap-2"><BarChart3 className="h-6 w-6" />전체 참여현황</span>}
-          description="기업별/프로젝트별/프로젝트 리스트별 참여 현황을 한눈에 확인합니다."
+          description="프로젝트별 의뢰사-수행사 참여 현황을 한눈에 확인합니다."
         />
 
+        {/* 통계 카드 */}
         <div className="grid grid-cols-3 gap-4">
           <Card>
             <CardContent className="px-5 py-4">
               <div className="flex items-center gap-4">
-                <p className="text-xs font-medium text-muted-foreground w-14 shrink-0">의뢰 현황</p>
+                <p className="text-xs font-medium text-muted-foreground w-16 shrink-0">총 참여</p>
                 <div className="w-px h-10 bg-border shrink-0" />
-                <div className="flex items-center justify-around flex-1 gap-2">
-                  <div className="text-center">
-                    <div className="text-lg font-medium text-foreground">{totalRequest}</div>
-                    <div className="text-xs text-muted-foreground mt-1">총 의뢰</div>
-                  </div>
-                  <div className="w-px h-8 bg-border" />
-                  <div className="text-center">
-                    <div className="text-lg font-medium text-foreground">{totalParticipation}</div>
-                    <div className="text-xs text-muted-foreground mt-1">참여</div>
-                  </div>
+                <div className="text-center">
+                  <div className="text-lg font-medium">{totalCount}</div>
+                  <div className="text-xs text-muted-foreground mt-1">건</div>
                 </div>
               </div>
             </CardContent>
@@ -209,18 +108,11 @@ export default function AdminParticipationPage() {
           <Card>
             <CardContent className="px-5 py-4">
               <div className="flex items-center gap-4">
-                <p className="text-xs font-medium text-muted-foreground w-14 shrink-0">진행 상태</p>
+                <p className="text-xs font-medium text-muted-foreground w-16 shrink-0">진행중</p>
                 <div className="w-px h-10 bg-border shrink-0" />
-                <div className="flex items-center justify-around flex-1 gap-2">
-                  <div className="text-center">
-                    <div className="text-lg font-medium text-foreground">{totalOngoing}</div>
-                    <div className="text-xs text-muted-foreground mt-1">진행중</div>
-                  </div>
-                  <div className="w-px h-8 bg-border" />
-                  <div className="text-center">
-                    <div className="text-lg font-medium text-foreground">{totalCompleted}</div>
-                    <div className="text-xs text-muted-foreground mt-1">완료</div>
-                  </div>
+                <div className="text-center">
+                  <div className="text-lg font-medium text-blue-600">{ongoingCount}</div>
+                  <div className="text-xs text-muted-foreground mt-1">건</div>
                 </div>
               </div>
             </CardContent>
@@ -228,294 +120,185 @@ export default function AdminParticipationPage() {
           <Card>
             <CardContent className="px-5 py-4">
               <div className="flex items-center gap-4">
-                <p className="text-xs font-medium text-muted-foreground w-14 shrink-0">프로젝트 유형</p>
+                <p className="text-xs font-medium text-muted-foreground w-16 shrink-0">완료</p>
                 <div className="w-px h-10 bg-border shrink-0" />
-                <div className="flex items-center justify-around flex-1 gap-2">
-                  <div className="text-center">
-                    <div className="text-lg font-medium text-foreground">{totalBidding}</div>
-                    <div className="text-xs text-muted-foreground mt-1">공고</div>
-                  </div>
-                  <div className="w-px h-8 bg-border" />
-                  <div className="text-center">
-                    <div className="text-lg font-medium text-foreground">{total1to1}</div>
-                    <div className="text-xs text-muted-foreground mt-1">1:1</div>
-                  </div>
+                <div className="text-center">
+                  <div className="text-lg font-medium text-green-600">{completedCount}</div>
+                  <div className="text-xs text-muted-foreground mt-1">건</div>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* 탭 */}
         <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
           <TabsList className="grid w-full max-w-[420px] grid-cols-3">
             <TabsTrigger value="project">프로젝트별</TabsTrigger>
-            <TabsTrigger value="projectList">프로젝트 유형별</TabsTrigger>
+            <TabsTrigger value="projectType">프로젝트 유형별</TabsTrigger>
             <TabsTrigger value="company">기업별</TabsTrigger>
           </TabsList>
         </Tabs>
 
+        {/* 검색 / 필터 */}
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <div className="flex flex-wrap gap-3 items-center">
             <div className="relative flex-1 min-w-[220px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={
-                  viewMode === "company"
-                    ? "기업명, 사업자번호, 대표자명 검색"
-                    : viewMode === "project"
-                      ? "프로젝트명, 프로젝트ID, 의뢰사/수행사 검색"
-                      : "프로젝트 유형 검색"
-                }
+                placeholder="프로젝트명, 의뢰사, 수행사 검색"
                 className="pl-9"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            {viewMode === "company" && (
-              <Select value={filterType} onValueChange={(v) => setFilterType(v as FilterType)}>
-                <SelectTrigger className="w-36">
-                  <SelectValue placeholder="의뢰/참여" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">전체</SelectItem>
-                  <SelectItem value="ADVERTISER">의뢰</SelectItem>
-                  <SelectItem value="PRODUCTION">참여</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-            <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as typeof filterStatus)}>
-              <SelectTrigger className="w-36">
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="유형" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">전체 유형</SelectItem>
+                <SelectItem value="공고">공고</SelectItem>
+                <SelectItem value="1:1">1:1</SelectItem>
+                <SelectItem value="컨설팅">컨설팅</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-32">
                 <SelectValue placeholder="상태" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">전체 상태</SelectItem>
                 <SelectItem value="ongoing">진행중</SelectItem>
-                <SelectItem value="completed">완료 포함</SelectItem>
+                <SelectItem value="completed">완료/중단</SelectItem>
               </SelectContent>
             </Select>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSearchTerm("")
-                setFilterType("ALL")
-                setFilterStatus("ALL")
-              }}
-            >
-              초기화
+            <Button variant="outline" size="sm" onClick={reset} className="flex items-center gap-1">
+              <RotateCcw className="h-3.5 w-3.5" />초기화
             </Button>
-            <span className="text-sm text-muted-foreground ml-auto">
-              {viewMode === "company"
-                ? `${filtered.length}개 기업`
-                : viewMode === "project"
-                  ? `${projectRows.length}개 프로젝트`
-                  : `${projectListRows.length}개 프로젝트 유형`}
-            </span>
+            <span className="text-sm text-muted-foreground ml-auto">{filtered.length}건</span>
           </div>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-          {viewMode === "company" && (
+        {/* 프로젝트별 뷰 */}
+        {viewMode === "project" && (
+          <Card>
             <Table>
               <TableHeader>
-                <TableRow className="bg-gray-50">
-                  <TableHead className="w-[200px]">기업명</TableHead>
-                  <TableHead className="w-[90px]">유형</TableHead>
-                  <TableHead className="text-center w-[90px]">총 의뢰</TableHead>
-                  <TableHead className="text-center w-[90px]">총 참여</TableHead>
-                  <TableHead className="text-center w-[80px]">진행중</TableHead>
-                  <TableHead className="text-center w-[80px]">완료</TableHead>
-                  <TableHead className="text-center w-[80px]">공고</TableHead>
-                  <TableHead className="text-center w-[80px]">1:1</TableHead>
+                <TableRow>
+                  <TableHead className="w-24">프로젝트ID</TableHead>
+                  <TableHead>프로젝트명</TableHead>
+                  <TableHead>의뢰사</TableHead>
+                  <TableHead>수행사</TableHead>
+                  <TableHead className="w-20">유형</TableHead>
+                  <TableHead className="w-28">상태</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
-                      조건에 해당하는 기업이 없습니다.
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                      검색 결과가 없습니다.
                     </TableCell>
                   </TableRow>
-                ) : (
-                  filtered.map(({ company, ongoingCount, completedCount, asOwnerCount, asPartnerCount, biddingCount, oneToOneCount }) => (
-                    <TableRow key={company.id}>
-                      <TableCell>
-                        <div className="font-medium text-gray-900">{company.companyName}</div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs">
-                          {company.companyType ?? "기업"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="text-sm font-medium text-blue-700">{asOwnerCount > 0 ? asOwnerCount : "-"}</span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="text-sm font-medium text-orange-700">{asPartnerCount > 0 ? asPartnerCount : "-"}</span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {ongoingCount > 0 ? (
-                          <span className="inline-block min-w-[28px] text-center text-sm font-semibold text-orange-600 bg-orange-50 rounded px-2 py-0.5">
-                            {ongoingCount}
-                          </span>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {completedCount > 0 ? (
-                          <span className="inline-block min-w-[28px] text-center text-sm font-semibold text-green-700 bg-green-50 rounded px-2 py-0.5">
-                            {completedCount}
-                          </span>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="text-sm text-purple-700">{biddingCount > 0 ? biddingCount : "-"}</span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="text-sm text-pink-700">{oneToOneCount > 0 ? oneToOneCount : "-"}</span>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          )}
-          {viewMode === "project" && (
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-50">
-                  <TableHead className="w-[160px]">프로젝트 ID</TableHead>
-                  <TableHead>프로젝트명</TableHead>
-                  <TableHead className="w-[120px]">프로젝트 유형</TableHead>
-                  <TableHead className="w-[140px]">의뢰사</TableHead>
-                  <TableHead className="w-[140px]">수행사</TableHead>
-                  <TableHead className="w-[140px]">상태</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {projectRows.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
-                      조건에 해당하는 프로젝트가 없습니다.
+                ) : filtered.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="text-xs text-muted-foreground font-mono">{r.id}</TableCell>
+                    <TableCell className="font-medium">{r.title}</TableCell>
+                    <TableCell>{r.client}</TableCell>
+                    <TableCell>{r.partner}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs">{TYPE_LABEL[r.type] ?? r.type}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusColor(r.status)}`}>
+                        {statusLabel(r.status)}
+                      </span>
                     </TableCell>
                   </TableRow>
-                ) : (
-                  projectRows.map((project) => (
-                    <TableRow key={project.id}>
-                      <TableCell className="font-medium">{project.id}</TableCell>
-                      <TableCell>{project.title}</TableCell>
-                      <TableCell>
-                        {project.type === "컨설팅" ? (
-                          <div className="flex items-center gap-1">
-                            <Badge variant="outline">
-                              {project.consultingOutcomeKind === "MATCHING_1TO1" ? "1:1" : "공고"}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">컨설팅</Badge>
-                          </div>
-                        ) : (
-                          <Badge variant="outline">{project.type}</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{project.client ?? "-"}</TableCell>
-                      <TableCell>{project.partner ?? "-"}</TableCell>
-                      <TableCell className="text-xs">
-                        {MainStatusLabels[project.status as keyof typeof MainStatusLabels] ?? project.status}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                ))}
               </TableBody>
             </Table>
-          )}
-          {viewMode === "projectList" && (
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-50">
-                  <TableHead>프로젝트 유형</TableHead>
-                  <TableHead className="text-center">진행중</TableHead>
-                  <TableHead className="text-center">완료</TableHead>
-                  <TableHead className="text-center">합계</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {projectListRows.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
-                      조건에 해당하는 프로젝트 유형이 없습니다.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  projectListRows.map((row) => (
-                    <TableRow key={row.type}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-1.5">
-                          <span>{row.type.replace(" (컨설팅)", "")}</span>
-                          {row.type.includes("(컨설팅)") && (
-                            <Badge variant="outline" className="text-xs">컨설팅</Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center text-orange-700 font-semibold">{row.ongoing}</TableCell>
-                      <TableCell className="text-center text-green-700 font-semibold">{row.completed}</TableCell>
-                      <TableCell className="text-center font-semibold">{row.total}</TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </div>
-        <Dialog open={!!openCompanyDetailId} onOpenChange={(open) => !open && setOpenCompanyDetailId(null)}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>기업 참여 상세</DialogTitle>
-            </DialogHeader>
-            {selectedCompanyRow ? (
-              <div className="space-y-5">
-                <div className="rounded-lg border bg-muted/20 p-4">
-                  <div className="text-lg font-semibold">{selectedCompanyRow.company.companyName}</div>
-                  <div className="mt-1 text-sm text-muted-foreground">
-                    {selectedCompanyRow.company.companyType ?? "기업"} · 대표자 {selectedCompanyRow.company.representativeName ?? "-"}
-                  </div>
+          </Card>
+        )}
+
+        {/* 프로젝트 유형별 뷰 */}
+        {viewMode === "projectType" && (
+          <div className="space-y-4">
+            {Object.entries(byType).map(([type, rows]) => (
+              <Card key={type}>
+                <div className="px-4 py-3 border-b flex items-center gap-2">
+                  <Badge variant="outline">{TYPE_LABEL[type] ?? type}</Badge>
+                  <span className="text-sm text-muted-foreground">{rows.length}건</span>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <Card><CardContent className="py-4 text-center"><div className="text-xs text-muted-foreground">총 참여</div><div className="text-xl font-bold">{selectedCompanyRow.totalCount}</div></CardContent></Card>
-                  <Card><CardContent className="py-4 text-center"><div className="text-xs text-muted-foreground">진행중</div><div className="text-xl font-bold text-orange-600">{selectedCompanyRow.ongoingCount}</div></CardContent></Card>
-                  <Card><CardContent className="py-4 text-center"><div className="text-xs text-muted-foreground">완료</div><div className="text-xl font-bold text-green-700">{selectedCompanyRow.completedCount}</div></CardContent></Card>
-                </div>
-                <div>
-                  <div className="mb-2 text-sm font-semibold">최근 진행중 프로젝트</div>
-                  <div className="space-y-2">
-                    {selectedCompanyRow.ongoing.slice(0, 5).map((project) => (
-                      <div key={project.id} className="flex items-center justify-between rounded border px-3 py-2">
-                        <div>
-                          <div className="text-sm font-medium">{project.title}</div>
-                          <div className="text-xs text-muted-foreground">{project.id} · {project.type}</div>
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          {MainStatusLabels[project.status as keyof typeof MainStatusLabels] ?? project.status}
-                        </Badge>
-                      </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>프로젝트명</TableHead>
+                      <TableHead>의뢰사</TableHead>
+                      <TableHead>수행사</TableHead>
+                      <TableHead className="w-28">상태</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rows.map((r) => (
+                      <TableRow key={r.id}>
+                        <TableCell className="font-medium">{r.title}</TableCell>
+                        <TableCell>{r.client}</TableCell>
+                        <TableCell>{r.partner}</TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusColor(r.status)}`}>
+                            {statusLabel(r.status)}
+                          </span>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                    {selectedCompanyRow.ongoing.length === 0 && (
-                      <div className="rounded border px-3 py-2 text-sm text-muted-foreground">진행중인 프로젝트가 없습니다.</div>
-                    )}
-                  </div>
+                  </TableBody>
+                </Table>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* 기업별 뷰 */}
+        {viewMode === "company" && (
+          <div className="space-y-4">
+            {Object.entries(byCompany).map(([company, rows]) => (
+              <Card key={company}>
+                <div className="px-4 py-3 border-b flex items-center gap-2">
+                  <span className="font-medium text-sm">{company}</span>
+                  <span className="text-sm text-muted-foreground">({rows.length}건 의뢰)</span>
                 </div>
-                <div className="flex justify-end">
-                  <Link
-                    href={`/admin/companies/${selectedCompanyRow.company.id}?tab=participation`}
-                    className="text-sm text-pink-600 hover:underline"
-                  >
-                    기업 상세 페이지로 이동
-                  </Link>
-                </div>
-              </div>
-            ) : null}
-          </DialogContent>
-        </Dialog>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>프로젝트명</TableHead>
+                      <TableHead>수행사</TableHead>
+                      <TableHead className="w-20">유형</TableHead>
+                      <TableHead className="w-28">상태</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rows.map((r) => (
+                      <TableRow key={r.id}>
+                        <TableCell className="font-medium">{r.title}</TableCell>
+                        <TableCell>{r.partner}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs">{TYPE_LABEL[r.type] ?? r.type}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusColor(r.status)}`}>
+                            {statusLabel(r.status)}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </AdminLayout>
   )
