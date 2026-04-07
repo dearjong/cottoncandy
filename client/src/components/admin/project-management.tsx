@@ -977,7 +977,7 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
               return (
                 <TableRow 
                   key={project.id} 
-                  className="border-b border-gray-100 hover:bg-gray-50 [&>td]:!py-5"
+                  className="border-b border-gray-100 hover:bg-gray-50"
                   data-testid={`row-project-${project.id}`}
                 >
                   <TableCell className="text-center">
@@ -991,7 +991,7 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
                     {(currentPage - 1) * itemsPerPage + index + 1}
                   </TableCell>
                   <TableCell className="text-sm text-gray-900 whitespace-nowrap">
-                    <div className="flex flex-col">
+                    <div className="flex flex-col gap-1.5">
                       {project.ownerCompanyId ? (
                         <button
                           type="button"
