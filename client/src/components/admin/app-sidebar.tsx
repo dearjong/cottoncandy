@@ -42,7 +42,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 import { Link, useLocation } from "wouter"
-import { MOCK_ADMIN_PROJECTS_V1, MOCK_ADMIN_COMPANIES_V1 } from "@/data/mockData"
+import { MOCK_ADMIN_PROJECTS_V1 } from "@/data/mockData"
 
 // admin 폴더 전용 메뉴 (admin_v2와 분리)
 const mainParentItem = { title: "메인", url: "/admin", icon: Home }
@@ -172,7 +172,7 @@ export function AppSidebar() {
     "/admin/one-on-one": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.type === "1:1").length,
     "/admin/pending-approval": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.status === "REQUESTED").length,
     "/admin/stop-cancel": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.status === "STOPPED" || p.status === "CANCELLED").length,
-    "/admin/participation": MOCK_ADMIN_COMPANIES_V1.length,
+    "/admin/participation": 0,
   }), [])
   const isStatsSectionActive = useMemo(() => location === statsParentItem.url, [location])
   const isSystemSectionActive = useMemo(
