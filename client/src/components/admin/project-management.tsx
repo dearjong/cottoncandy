@@ -80,6 +80,7 @@ interface Project {
   productionBudget?: string
   totalBudget?: string
   createdAt: string
+  deadline?: string
   description: string
   /** 계약 시작일 (API 연동 시 사용) */
   contractStartDate?: string

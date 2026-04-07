@@ -313,6 +313,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     budget: "5천만 ~ 1억",
     totalBudget: "1억 ~ 5억",
     createdAt: "2024-06-15",
+    deadline: "2024-07-31",
     description: "신제품 런칭을 위한 브랜드 홍보 영상 제작 프로젝트입니다.",
   },
   {
@@ -329,6 +330,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     budget: "7,500만원",
     totalBudget: "9,500만원",
     createdAt: "2024-06-14",
+    deadline: "2024-07-30",
     description: "투자 유치를 위한 IR 프레젠테이션 영상 제작",
   },
   {
@@ -343,6 +345,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     visibility: "PUBLIC" as const,
     budget: "1,500만원",
     createdAt: "2024-06-13",
+    deadline: "2024-07-28",
     description: "온라인 마케팅 전략 수립 및 실행 계획 컨설팅",
     phone: "010-2345-6789",
     consultingOutcomeKind: "SIMPLE_CONSULT" as const,
@@ -361,6 +364,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     budget: "6,500만원",
     totalBudget: "8,500만원",
     createdAt: "2024-06-12",
+    deadline: "2024-08-15",
     description: "AI 제품 소개를 위한 영상 콘텐츠 제작",
   },
   {
@@ -377,6 +381,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     budget: "5천만 ~ 1억",
     totalBudget: "5억 ~ 10억",
     createdAt: "2024-06-11",
+    deadline: "2024-07-25",
     description: "인스타그램/틱톡 인플루언서 협업 광고 캠페인",
   },
   {
@@ -393,6 +398,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     budget: "6,500만원",
     totalBudget: "8,500만원",
     createdAt: "2024-06-10",
+    deadline: "2024-07-20",
     description: "친환경 에너지 기업 소개 다큐멘터리 제작",
   },
   {
@@ -408,6 +414,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     visibility: "INVITE_ONLY" as const,
     budget: "2,000만원",
     createdAt: "2024-06-09",
+    deadline: "2024-07-15",
     description: "신규 브랜드 런칭을 위한 브랜딩 전략 컨설팅",
     phone: "010-3456-7890",
     consultingOutcomeKind: "MATCHING_1TO1" as const,
@@ -440,6 +447,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     budget: "1억 ~ 3억",
     totalBudget: "10억 ~ 30억",
     createdAt: "2024-06-08",
+    deadline: "2024-08-31",
     description: "기업 유튜브 채널 콘텐츠 기획 및 제작 운영",
   },
   {
@@ -456,6 +464,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     budget: "5,000만원",
     totalBudget: "6,500만원",
     createdAt: "2024-06-07",
+    deadline: "2024-07-10",
     description: "신규 모바일 앱 런칭 TV 광고 제작",
   },
   {
@@ -471,6 +480,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     visibility: "PRIVATE" as const,
     budget: "2,500만원",
     createdAt: "2024-06-06",
+    deadline: "2024-07-06",
     description: "B2B 헬스케어 서비스 디지털 마케팅 전략 수립",
     phone: "010-4567-8901",
     consultingOutcomeKind: "MATCHING_PUBLIC" as const,
@@ -497,6 +507,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     visibility: "PUBLIC" as const,
     budget: "1,000만원",
     createdAt: "2024-06-05",
+    deadline: "2024-06-30",
     description: "초기 브랜드 영상 제작 방향 및 제작사 소개 요청",
     phone: "010-5678-1234",
     consultingOutcomeKind: "DIRECT_INTRO" as const,
@@ -530,6 +541,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     budget: "1억 ~ 3억",
     totalBudget: "10억 ~ 30억",
     createdAt: "2024-05-20",
+    deadline: "2024-07-20",
     description: "신제품 런칭 TVCF 및 디지털 프로모션 캠페인. 제작·온에어·정산·리뷰 완료.",
   },
   {
@@ -546,6 +558,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     budget: "1억 ~ 3억",
     totalBudget: "10억 ~ 30억",
     createdAt: "2024-05-10",
+    deadline: "2024-07-10",
     description: "봄 시즌 옥외·디지털 통합 캠페인. 제작부터 리뷰 등록까지 완료.",
   },
   {
@@ -562,6 +575,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     budget: "5,000만원",
     totalBudget: "6,500만원",
     createdAt: "2024-06-01",
+    deadline: "2024-07-15",
     description: "내부 사정으로 일시 중단. 예산 재조정 후 재개 예정.",
   },
   {
@@ -578,6 +592,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     budget: "8,000만원",
     totalBudget: "1억원",
     createdAt: "2024-05-28",
+    deadline: "2024-07-28",
     description: "제품 출시 일정 무기한 연기로 프로젝트 취소.",
   },
 ] as const;

@@ -386,10 +386,11 @@ export default function AdminParticipationPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50">
-                  <TableHead className="w-[180px]">프로젝트 No</TableHead>
                   <TableHead>프로젝트명</TableHead>
                   <TableHead className="w-[120px]">프로젝트 유형</TableHead>
                   <TableHead className="w-[140px]">의뢰사</TableHead>
+                  <TableHead className="w-[110px]">등록 날짜</TableHead>
+                  <TableHead className="w-[110px]">마감 날짜</TableHead>
                   <TableHead className="w-[80px] text-center">지원 수</TableHead>
                   <TableHead>지원 회사</TableHead>
                 </TableRow>
@@ -397,7 +398,7 @@ export default function AdminParticipationPage() {
               <TableBody>
                 {projectRows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
                       조건에 해당하는 프로젝트가 없습니다.
                     </TableCell>
                   </TableRow>
@@ -410,9 +411,6 @@ export default function AdminParticipationPage() {
                     })
                     return (
                     <TableRow key={project.id}>
-                      <TableCell className="font-medium text-xs">
-                        {(project as any).projectNo ?? project.id}
-                      </TableCell>
                       <TableCell>{project.title}</TableCell>
                       <TableCell>
                         {project.type === "컨설팅" ? (
@@ -427,6 +425,8 @@ export default function AdminParticipationPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-sm">{project.client ?? "-"}</TableCell>
+                      <TableCell className="text-sm text-gray-600">{(project as any).createdAt ?? "-"}</TableCell>
+                      <TableCell className="text-sm text-gray-600">{(project as any).deadline ?? "-"}</TableCell>
                       <TableCell className="text-center font-semibold">
                         {participantIds.length > 0 ? (
                           <span className="text-pink-600">{participantIds.length}</span>
