@@ -977,7 +977,7 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
               return (
                 <TableRow 
                   key={project.id} 
-                  className="border-b border-gray-100 hover:bg-gray-50"
+                  className="border-b border-gray-100 hover:bg-gray-50 [&>td]:py-3"
                   data-testid={`row-project-${project.id}`}
                 >
                   <TableCell className="text-center">
