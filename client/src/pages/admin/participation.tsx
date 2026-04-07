@@ -386,8 +386,7 @@ export default function AdminParticipationPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50">
-                  <TableHead className="w-[200px]">프로젝트명</TableHead>
-                  <TableHead className="w-[120px]">프로젝트 유형</TableHead>
+                  <TableHead className="w-[240px]">프로젝트명</TableHead>
                   <TableHead className="w-[140px]">의뢰사</TableHead>
                   <TableHead className="w-[110px]">등록 날짜</TableHead>
                   <TableHead className="w-[110px]">마감 날짜</TableHead>
@@ -398,7 +397,7 @@ export default function AdminParticipationPage() {
               <TableBody>
                 {projectRows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
                       조건에 해당하는 프로젝트가 없습니다.
                     </TableCell>
                   </TableRow>
@@ -411,18 +410,22 @@ export default function AdminParticipationPage() {
                     })
                     return (
                     <TableRow key={project.id}>
-                      <TableCell>{project.title}</TableCell>
                       <TableCell>
-                        {project.type === "컨설팅" ? (
+                        <div className="flex flex-col gap-1">
+                          <span className="text-sm font-medium text-gray-900">{project.title}</span>
                           <div className="flex items-center gap-1">
-                            <Badge variant="outline">
-                              {project.consultingOutcomeKind === "MATCHING_1TO1" ? "1:1" : "공고"}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">컨설팅</Badge>
+                            {project.type === "컨설팅" ? (
+                              <>
+                                <Badge variant="outline" className="text-xs">
+                                  {project.consultingOutcomeKind === "MATCHING_1TO1" ? "1:1" : "공고"}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">컨설팅</Badge>
+                              </>
+                            ) : (
+                              <Badge variant="outline" className="text-xs">{project.type}</Badge>
+                            )}
                           </div>
-                        ) : (
-                          <Badge variant="outline">{project.type}</Badge>
-                        )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-sm">{project.client ?? "-"}</TableCell>
                       <TableCell className="text-sm text-gray-600">{(project as any).createdAt ?? "-"}</TableCell>
