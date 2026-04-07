@@ -78,6 +78,11 @@ const projectSubMenuItems = [
     url: "/admin/one-on-one",
     icon: HandHeart,
   },
+  {
+    title: "참여현황",
+    url: "/admin/participation",
+    icon: BarChart3,
+  },
 ]
 
 const contractsParentItem = { title: "계약 & 정산", url: "/admin/contracts", icon: CreditCard }
@@ -96,7 +101,6 @@ const memberMenuItems = [
   { title: "기업 관리", url: "/admin/companies", icon: Building2 },
   { title: "기업 인증 관리", url: "/admin/company-verification", icon: Building2 },
   { title: "회사소개서&포트폴리오", url: "/admin/company-portfolios", icon: FileText },
-  { title: "참여현황", url: "/admin/participation", icon: BarChart3 },
   { title: "등급 정책 관리", url: "/admin/system/grades", icon: Star },
 ]
 

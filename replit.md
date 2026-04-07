@@ -38,7 +38,8 @@ React + Vite 기반 풀스택 앱으로, 관리자 패널이 핵심 기능입니
 ├── 승인 대기                 /admin/pending-approval
 ├── 중단/취소 요청             /admin/stop-cancel
 ├── 공고 프로젝트              /admin/bidding
-└── 1:1 프로젝트              /admin/one-on-one
+├── 1:1 프로젝트              /admin/one-on-one
+└── 참여현황                  /admin/participation
 
 [계약 & 정산]                /admin/contracts
 [리뷰 관리]                  /admin/reviews
@@ -53,7 +54,6 @@ React + Vite 기반 풀스택 앱으로, 관리자 패널이 핵심 기능입니
 ├── 기업 관리                 /admin/companies
 ├── 기업 인증 관리             /admin/company-verification
 ├── 회사소개서&포트폴리오       /admin/company-portfolios
-├── 참여현황                  /admin/participation
 └── 등급 정책 관리             /admin/system/grades
 
 [운영 센터]                  /admin/cs/inquiry
