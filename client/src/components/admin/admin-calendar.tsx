@@ -60,20 +60,20 @@ export function AdminCalendar() {
     <div className="space-y-4">
       <Card data-testid="card-admin-calendar">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm">
-              <ChevronLeft className="h-4 w-4" />
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" className="h-6 w-6">
+              <ChevronLeft className="h-3 w-3" />
             </Button>
-            <span className="text-lg font-semibold">2024</span>
-            <Button variant="outline" size="sm">
-              <ChevronRight className="h-4 w-4" />
+            <span className="text-sm font-semibold">2024</span>
+            <Button variant="outline" size="icon" className="h-6 w-6">
+              <ChevronRight className="h-3 w-3" />
             </Button>
-            <Button variant="outline" size="sm">
-              <ChevronLeft className="h-4 w-4" />
+            <Button variant="outline" size="icon" className="h-6 w-6 ml-1">
+              <ChevronLeft className="h-3 w-3" />
             </Button>
-            <span className="text-lg font-semibold">6월 현황</span>
-            <Button variant="outline" size="sm">
-              <ChevronRight className="h-4 w-4" />
+            <span className="text-sm font-semibold">6월 현황</span>
+            <Button variant="outline" size="icon" className="h-6 w-6">
+              <ChevronRight className="h-3 w-3" />
             </Button>
           </div>
           <div className="text-sm text-muted-foreground">
