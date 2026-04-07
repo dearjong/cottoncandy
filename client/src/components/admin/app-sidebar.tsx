@@ -276,7 +276,7 @@ export function AppSidebar() {
                               <span className="flex items-center gap-1.5">
                                 {item.title}
                                 {projectCounts[item.url as keyof typeof projectCounts] > 0 && (
-                                  <span className="text-[10px] font-medium bg-sidebar-foreground/15 text-sidebar-foreground/50 rounded-full px-1.5 py-0.5 leading-none tabular-nums">
+                                  <span className="text-[10px] font-medium bg-gray-300 text-gray-600 rounded-full px-1.5 py-0.5 leading-none tabular-nums">
                                     {projectCounts[item.url as keyof typeof projectCounts]}
                                   </span>
                                 )}
@@ -305,7 +305,7 @@ export function AppSidebar() {
                                     ? <span className="text-[10px] font-semibold bg-red-500 text-white rounded-full px-1.5 py-0.5 leading-none">
                                         {projectCounts[item.url as keyof typeof projectCounts]}
                                       </span>
-                                    : <span className="text-[10px] font-medium bg-sidebar-foreground/15 text-sidebar-foreground/50 rounded-full px-1.5 py-0.5 leading-none">
+                                    : <span className="text-[10px] font-medium bg-gray-300 text-gray-600 rounded-full px-1.5 py-0.5 leading-none tabular-nums">
                                         {projectCounts[item.url as keyof typeof projectCounts]}
                                       </span>
                                 )}
