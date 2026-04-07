@@ -432,7 +432,7 @@ export default function AdminParticipationPage() {
                           const c = (project as any).createdAt ?? ""
                           const d = (project as any).deadline ?? ""
                           const fmt = (s: string) => s ? s.slice(5).replace(/-/g, "-") : "-"
-                          return c && d ? `${fmt(c)}~${fmt(d)}` : fmt(c) || "-"
+                          return c && d ? `${fmt(c)} ~ ${fmt(d)}` : fmt(c) || "-"
                         })()}
                       </TableCell>
                       <TableCell className="text-center font-semibold">
