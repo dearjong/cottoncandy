@@ -185,13 +185,6 @@ export default function AdminParticipationPage() {
           title={<span className="flex items-center gap-2"><BarChart3 className="h-6 w-6" />전체 참여현황</span>}
           description="기업별/프로젝트별/프로젝트 리스트별 참여 현황을 한눈에 확인합니다."
         />
-        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
-          <TabsList className="grid w-full max-w-[420px] grid-cols-3">
-            <TabsTrigger value="company">기업별</TabsTrigger>
-            <TabsTrigger value="project">프로젝트별</TabsTrigger>
-            <TabsTrigger value="projectList">프로젝트 유형별</TabsTrigger>
-          </TabsList>
-        </Tabs>
 
         <div className="grid grid-cols-3 gap-4">
           <Card>
@@ -252,6 +245,14 @@ export default function AdminParticipationPage() {
             </CardContent>
           </Card>
         </div>
+
+        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
+          <TabsList className="grid w-full max-w-[420px] grid-cols-3">
+            <TabsTrigger value="company">기업별</TabsTrigger>
+            <TabsTrigger value="project">프로젝트별</TabsTrigger>
+            <TabsTrigger value="projectList">프로젝트 유형별</TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <div className="flex flex-wrap gap-3 items-center">
