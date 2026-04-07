@@ -386,7 +386,7 @@ export default function AdminParticipationPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50">
-                  <TableHead className="w-[160px]">프로젝트 ID</TableHead>
+                  <TableHead className="w-[180px]">프로젝트 No</TableHead>
                   <TableHead>프로젝트명</TableHead>
                   <TableHead className="w-[120px]">프로젝트 유형</TableHead>
                   <TableHead className="w-[140px]">의뢰사</TableHead>
@@ -410,7 +410,9 @@ export default function AdminParticipationPage() {
                     })
                     return (
                     <TableRow key={project.id}>
-                      <TableCell className="font-medium">{project.id}</TableCell>
+                      <TableCell className="font-medium text-xs">
+                        {(project as any).projectNo ?? project.id}
+                      </TableCell>
                       <TableCell>{project.title}</TableCell>
                       <TableCell>
                         {project.type === "컨설팅" ? (

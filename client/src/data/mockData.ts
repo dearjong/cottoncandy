@@ -316,6 +316,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
   },
   {
     id: "PRJ-002",
+    projectNo: "PN-20240614-0001",
     title: "기업 IR 영상 제작",
     client: "스마트솔루션(주)",
     partner: "크리에이티브 스튜디오",
@@ -346,6 +347,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
   },
   {
     id: "PRJ-004",
+    projectNo: "PN-20240612-0002",
     title: "제품 소개 영상",
     client: "전자산업(주)",
     partner: "영상공작소 픽셀",
@@ -360,6 +362,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
   },
   {
     id: "PRJ-005",
+    projectNo: "PN-20240611-0003",
     title: "SNS 광고 캠페인",
     client: "뷰티브랜드",
     partner: "미디어 에이전시",
@@ -374,6 +377,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
   },
   {
     id: "PRJ-006",
+    projectNo: "PN-20240610-0004",
     title: "기업 홍보 다큐멘터리",
     client: "IT솔루션",
     partner: "필름 팩토리",
@@ -388,6 +392,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
   },
   {
     id: "PRJ-007",
+    projectNo: "PN-20240609-0005",
     title: "브랜딩 전략 수립",
     client: "(주)테크브랜드",
     partner: "브랜드 컨설팅 그룹",
@@ -433,6 +438,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
   },
   {
     id: "PRJ-009",
+    projectNo: "PN-20240607-0006",
     title: "TV CF 제작",
     client: "헬스케어",
     partner: "TVCF 프로덕션",
@@ -447,6 +453,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
   },
   {
     id: "PRJ-010",
+    projectNo: "PN-20240606-0007",
     title: "디지털 마케팅 컨설팅",
     client: "에코에너지",
     partner: "퍼포먼스 컨설팅 파트너",
@@ -472,6 +479,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
   },
   {
     id: "PRJ-013",
+    projectNo: "PN-20240605-0008",
     title: "영상 제작 방향 컨설팅 (직접 소개)",
     client: "스타트업허브",
     partner: "브랜드 컨설팅 그룹",
@@ -503,6 +511,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
   },
   {
     id: "PRJ-011",
+    projectNo: "PN-20240520-0009",
     title: "TV 신제품 판매촉진 프로모션",
     client: "베스트전자",
     partner: "솜사탕애드",
@@ -517,6 +526,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
   },
   {
     id: "PRJ-012",
+    projectNo: "PN-20240510-0010",
     title: "봄 시즌 브랜드 캠페인",
     client: "골드백화점",
     partner: "크리에이티브 스튜디오",
@@ -531,6 +541,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
   },
   {
     id: "PRJ-050",
+    projectNo: "PN-20240601-0011",
     title: "브랜드 리뉴얼 영상 제작",
     client: "(주)패션브랜드",
     partner: "스튜디오 블랙",
@@ -545,6 +556,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
   },
   {
     id: "PRJ-045",
+    projectNo: "PN-20240528-0012",
     title: "신제품 런칭 광고",
     client: "스마트전자(주)",
     partner: "미디어 에이전시",
