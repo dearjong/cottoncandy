@@ -314,7 +314,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     totalBudget: "1억 ~ 5억",
     createdAt: "2024-06-15",
     deadline: "2024-07-31",
-    partnerType: "제작" as const,
+    partnerType: "대행" as const,
     description: "신제품 런칭을 위한 브랜드 홍보 영상 제작 프로젝트입니다.",
   },
   {
