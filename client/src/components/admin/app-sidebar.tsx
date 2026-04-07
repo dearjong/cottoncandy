@@ -127,6 +127,18 @@ function SubNavLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
+/** 부가 필터 메뉴 라벨 — 대시(–) 접두로 핵심 메뉴와 시각적 구분 */
+function SubNavLabelSub({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="flex min-w-0 items-center gap-1">
+      <span className="shrink-0 text-sidebar-foreground/40 text-[10px]" aria-hidden>
+        –
+      </span>
+      <span className="truncate text-sidebar-foreground/70">{children}</span>
+    </span>
+  )
+}
+
 export function AppSidebar() {
   const [location] = useLocation()
   const isProjectSectionActive = useMemo(
@@ -271,7 +283,7 @@ export function AppSidebar() {
                           data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                         >
                           <Link href={item.url}>
-                            <SubNavLabel>{item.title}</SubNavLabel>
+                            <SubNavLabelSub>{item.title}</SubNavLabelSub>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
