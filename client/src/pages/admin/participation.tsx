@@ -388,8 +388,7 @@ export default function AdminParticipationPage() {
                 <TableRow className="bg-gray-50">
                   <TableHead className="w-[240px]">프로젝트명</TableHead>
                   <TableHead className="w-[140px]">의뢰사</TableHead>
-                  <TableHead className="w-[110px]">등록 날짜</TableHead>
-                  <TableHead className="w-[110px]">마감 날짜</TableHead>
+                  <TableHead className="w-[130px]">등록~마감</TableHead>
                   <TableHead className="w-[80px] text-center">지원 수</TableHead>
                   <TableHead>지원 회사</TableHead>
                 </TableRow>
@@ -397,7 +396,7 @@ export default function AdminParticipationPage() {
               <TableBody>
                 {projectRows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
                       조건에 해당하는 프로젝트가 없습니다.
                     </TableCell>
                   </TableRow>
@@ -428,8 +427,14 @@ export default function AdminParticipationPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-sm">{project.client ?? "-"}</TableCell>
-                      <TableCell className="text-sm text-gray-600">{(project as any).createdAt ?? "-"}</TableCell>
-                      <TableCell className="text-sm text-gray-600">{(project as any).deadline ?? "-"}</TableCell>
+                      <TableCell className="text-sm text-gray-600 whitespace-nowrap">
+                        {(() => {
+                          const c = (project as any).createdAt ?? ""
+                          const d = (project as any).deadline ?? ""
+                          const fmt = (s: string) => s ? s.slice(5).replace(/-/g, "-") : "-"
+                          return c && d ? `${fmt(c)}~${fmt(d)}` : fmt(c) || "-"
+                        })()}
+                      </TableCell>
                       <TableCell className="text-center font-semibold">
                         {participantIds.length > 0 ? (
                           <span className="text-pink-600">{participantIds.length}</span>
