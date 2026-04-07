@@ -116,26 +116,22 @@ const securityAuditMenuItems = [
   { title: "보안자료", url: "/admin/security/messages", icon: ShieldCheck },
 ]
 
-/** 사이드바 하위 메뉴 라벨 — 핵심 항목 (일반 굵기) */
+/** 사이드바 하위 메뉴 라벨 — 핵심 항목 */
 function SubNavLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="flex min-w-0 items-center gap-1">
-      <span className="shrink-0 text-sidebar-foreground/50" aria-hidden>
-        └
-      </span>
-      <span className="truncate font-normal">{children}</span>
+    <span className="flex min-w-0 items-center gap-1.5">
+      <span className="shrink-0 text-[7px] text-sidebar-foreground/50" aria-hidden>●</span>
+      <span className="truncate">{children}</span>
     </span>
   )
 }
 
-/** 사이드바 하위 메뉴 라벨 — 보조 항목 (흐린 색으로 구분) */
+/** 사이드바 하위 메뉴 라벨 — 보조 항목 */
 function SubNavLabelSub({ children }: { children: React.ReactNode }) {
   return (
-    <span className="flex min-w-0 items-center gap-1">
-      <span className="shrink-0 text-sidebar-foreground/40" aria-hidden>
-        └
-      </span>
-      <span className="truncate font-normal text-sidebar-foreground/60">{children}</span>
+    <span className="flex min-w-0 items-center gap-1.5">
+      <span className="shrink-0 text-[7px] text-sidebar-foreground/40" aria-hidden>●</span>
+      <span className="truncate text-sidebar-foreground/60">{children}</span>
     </span>
   )
 }
@@ -276,12 +272,16 @@ export function AppSidebar() {
                           data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                         >
                           <Link href={item.url}>
-                            <SubNavLabel>{item.title}</SubNavLabel>
-                            {projectCounts[item.url as keyof typeof projectCounts] > 0 && (
-                              <span className="ml-auto text-[10px] font-medium bg-sidebar-foreground/10 text-sidebar-foreground/60 rounded px-1 py-0.5 leading-none">
-                                {projectCounts[item.url as keyof typeof projectCounts]}
+                            <SubNavLabel>
+                              <span className="flex items-center gap-1">
+                                {item.title}
+                                {projectCounts[item.url as keyof typeof projectCounts] > 0 && (
+                                  <span className="text-[10px] font-medium bg-sidebar-foreground/10 text-sidebar-foreground/60 rounded px-1 leading-none py-0.5">
+                                    {projectCounts[item.url as keyof typeof projectCounts]}
+                                  </span>
+                                )}
                               </span>
-                            )}
+                            </SubNavLabel>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -297,12 +297,16 @@ export function AppSidebar() {
                           data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                         >
                           <Link href={item.url}>
-                            <SubNavLabelSub>{item.title}</SubNavLabelSub>
-                            {projectCounts[item.url as keyof typeof projectCounts] > 0 && (
-                              <span className="ml-auto text-[10px] font-medium bg-sidebar-foreground/10 text-sidebar-foreground/60 rounded px-1 py-0.5 leading-none">
-                                {projectCounts[item.url as keyof typeof projectCounts]}
+                            <SubNavLabelSub>
+                              <span className="flex items-center gap-1">
+                                {item.title}
+                                {projectCounts[item.url as keyof typeof projectCounts] > 0 && (
+                                  <span className="text-[10px] font-medium bg-sidebar-foreground/10 text-sidebar-foreground/60 rounded px-1 leading-none py-0.5">
+                                    {projectCounts[item.url as keyof typeof projectCounts]}
+                                  </span>
+                                )}
                               </span>
-                            )}
+                            </SubNavLabelSub>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
