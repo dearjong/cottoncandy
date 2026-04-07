@@ -895,7 +895,7 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
               placeholder="검색..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-48 h-8 text-sm pl-8"
+              className="w-72 h-8 text-sm pl-8"
               data-testid="input-project-search"
             />
             <Search className="absolute left-2.5 top-2 h-4 w-4 text-gray-400" />
