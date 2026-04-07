@@ -426,7 +426,12 @@ export default function AdminParticipationPage() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm">{project.client ?? "-"}</TableCell>
+                      <TableCell className="text-sm">
+                        <div>{project.client ?? "-"}</div>
+                        {(project as any).partnerType && (
+                          <div className="text-xs text-gray-400 mt-0.5">{(project as any).partnerType}사 모집</div>
+                        )}
+                      </TableCell>
                       <TableCell className="text-sm text-gray-600 whitespace-nowrap">
                         {(() => {
                           const c = (project as any).createdAt ?? ""
