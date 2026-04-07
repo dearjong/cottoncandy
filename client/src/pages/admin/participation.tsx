@@ -387,7 +387,7 @@ export default function AdminParticipationPage() {
               <TableHeader>
                 <TableRow className="bg-gray-50">
                   <TableHead className="w-[240px]">프로젝트명</TableHead>
-                  <TableHead className="w-[140px]">의뢰 / 수행</TableHead>
+                  <TableHead className="w-[140px]">의뢰 / 모집</TableHead>
                   <TableHead className="w-[130px]">등록~마감</TableHead>
                   <TableHead className="w-[80px] text-center">지원 수</TableHead>
                   <TableHead>지원 회사</TableHead>
@@ -426,7 +426,12 @@ export default function AdminParticipationPage() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm">{project.client ?? "-"}</TableCell>
+                      <TableCell className="text-sm">
+                        <div>{project.client ?? "-"}</div>
+                        {(project as any).partnerType && (
+                          <div className="text-xs text-gray-400 mt-0.5">{(project as any).partnerType}사 모집</div>
+                        )}
+                      </TableCell>
                       <TableCell className="text-sm text-gray-600 whitespace-nowrap">
                         {(() => {
                           const c = (project as any).createdAt ?? ""
