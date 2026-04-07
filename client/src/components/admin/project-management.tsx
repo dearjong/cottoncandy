@@ -772,19 +772,7 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
     }
 
     const base = project.budget ?? ""
-    const parsed = parseManwon(base)
-    if (parsed !== null) {
-      const manwon = new Intl.NumberFormat("ko-KR").format(parsed)
-      return (
-        <span className="inline-flex items-baseline gap-1 tabular-nums whitespace-nowrap">
-          <span className="font-semibold text-gray-900">{manwon}</span>
-          <span className="text-gray-300">/</span>
-          <span className="text-gray-600">{manwon}</span>
-          <span className="text-gray-400">만원</span>
-        </span>
-      )
-    }
-    return <span className="text-gray-600 whitespace-nowrap">{base}</span>
+    return <span className="text-gray-900 whitespace-nowrap">{base}</span>
   }
 
   const getConsultingProgress = (status: MainStatus) => {
