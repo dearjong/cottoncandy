@@ -387,6 +387,9 @@ function Router() {
       
       {/* Admin Routes (admin 폴더 전용) */}
       <Route path="/admin">
+        <AdminLayout><AdminProgress /></AdminLayout>
+      </Route>
+      <Route path="/admin/dashboard">
         <AdminLayout><AdminDashboard /></AdminLayout>
       </Route>
       <Route path="/admin/calendar">

@@ -46,7 +46,7 @@ import { Link, useLocation } from "wouter"
 // admin 폴더 전용 메뉴 (admin_v2와 분리)
 const mainParentItem = { title: "메인", url: "/admin", icon: Home }
 const mainMenuItems = [
-  { title: "대시보드", url: "/admin", icon: Home },
+  { title: "대시보드", url: "/admin/dashboard", icon: Home },
   { title: "관리자 캘린더", url: "/admin/calendar", icon: Calendar },
   { title: "진행 현황", url: "/admin/progress", icon: GitBranch },
 ]
