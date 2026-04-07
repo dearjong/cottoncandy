@@ -116,11 +116,11 @@ const securityAuditMenuItems = [
   { title: "보안자료", url: "/admin/security/messages", icon: ShieldCheck },
 ]
 
-/** 사이드바 하위 메뉴 라벨 — 핵심 항목 */
+/** 사이드바 하위 메뉴 라벨 — 핵심 항목 (└) */
 function SubNavLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="flex min-w-0 items-center gap-1.5">
-      <span className="shrink-0 text-[7px] text-sidebar-foreground/50" aria-hidden>●</span>
+    <span className="flex min-w-0 items-center gap-1">
+      <span className="shrink-0 text-sidebar-foreground/50" aria-hidden>└</span>
       <span className="truncate">{children}</span>
     </span>
   )
