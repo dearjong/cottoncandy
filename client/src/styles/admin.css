@@ -124,3 +124,9 @@
   --shadow-xl: 0px 2px 0px 0px hsl(220, 50%, 5%, 0.60), 0px 8px 10px -1px hsl(220, 50%, 3%, 0.45);
   --shadow-2xl: 0px 2px 0px 0px hsl(220, 50%, 5%, 0.65);
 }
+
+/* 사이드바 1단계 부모 메뉴 — 볼드 */
+[data-sidebar="menu-button"] > a > span:last-child,
+[data-sidebar="menu-button"] > span:last-child {
+  font-weight: 600;
+}
