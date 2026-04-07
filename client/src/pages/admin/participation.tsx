@@ -22,7 +22,7 @@ export default function AdminParticipationPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterType, setFilterType] = useState<FilterType>("ALL")
   const [filterStatus, setFilterStatus] = useState<"ALL" | "ongoing" | "completed">("ALL")
-  const [viewMode, setViewMode] = useState<ViewMode>("company")
+  const [viewMode, setViewMode] = useState<ViewMode>("project")
   const [openCompanyDetailId, setOpenCompanyDetailId] = useState<string | null>(null)
 
   const rows = useMemo(() => {
