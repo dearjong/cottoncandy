@@ -65,7 +65,7 @@ const projectCoreItems = [
 const projectFilterItems = [
   { title: "승인 대기", url: "/admin/pending-approval", icon: ClipboardCheck, alert: true },
   { title: "중단/취소 요청", url: "/admin/stop-cancel", icon: XCircle, alert: true },
-  { title: "참여현황", url: "/admin/participation", icon: BarChart3, alert: false },
+  { title: "지원현황", url: "/admin/participation", icon: BarChart3, alert: false },
 ]
 const projectSubMenuItems = [...projectCoreItems, ...projectFilterItems]
 

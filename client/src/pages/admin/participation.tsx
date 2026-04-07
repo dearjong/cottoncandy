@@ -182,8 +182,8 @@ export default function AdminParticipationPage() {
     <AdminLayout>
       <div className="space-y-6 p-6">
         <PageHeader
-          title={<span className="flex items-center gap-2"><BarChart3 className="h-6 w-6" />전체 참여현황</span>}
-          description="기업별/프로젝트별/프로젝트 리스트별 참여 현황을 한눈에 확인합니다."
+          title={<span className="flex items-center gap-2"><BarChart3 className="h-6 w-6" />지원현황</span>}
+          description="기업별/프로젝트별/프로젝트 유형별 지원 현황을 한눈에 확인합니다."
         />
 
         <div className="grid grid-cols-3 gap-4">
