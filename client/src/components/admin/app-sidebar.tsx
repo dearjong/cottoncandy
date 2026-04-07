@@ -115,26 +115,26 @@ const securityAuditMenuItems = [
   { title: "보안자료", url: "/admin/security/messages", icon: ShieldCheck },
 ]
 
-/** 사이드바 하위 메뉴 라벨 앞 트리 접두(└) — 핵심 메뉴: 볼드 */
+/** 사이드바 하위 메뉴 라벨 앞 트리 접두(└) — 일반 굵기 */
 function SubNavLabel({ children }: { children: React.ReactNode }) {
   return (
     <span className="flex min-w-0 items-center gap-1">
       <span className="shrink-0 text-sidebar-foreground/65" aria-hidden>
         └
       </span>
-      <span className="truncate font-semibold">{children}</span>
+      <span className="truncate font-normal text-sidebar-foreground/70">{children}</span>
     </span>
   )
 }
 
-/** 부가 필터 메뉴 라벨 — 일반 굵기로 핵심 메뉴와 구분 */
+/** 자주 사용하는 필터 메뉴 라벨 — 볼드로 강조 */
 function SubNavLabelSub({ children }: { children: React.ReactNode }) {
   return (
     <span className="flex min-w-0 items-center gap-1">
       <span className="shrink-0 text-sidebar-foreground/65" aria-hidden>
         └
       </span>
-      <span className="truncate font-normal text-sidebar-foreground/80">{children}</span>
+      <span className="truncate font-semibold">{children}</span>
     </span>
   )
 }
