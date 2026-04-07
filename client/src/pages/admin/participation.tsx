@@ -13,6 +13,7 @@ import { Search, BarChart3 } from "lucide-react"
 import { Link } from "wouter"
 import { MOCK_ADMIN_COMPANIES_V1, MOCK_ADMIN_PROJECTS_V1 } from "@/data/mockData"
 import { MainStatusLabels } from "@/types/project-status"
+import { ProjectManagement } from "@/components/admin/project-management"
 
 const COMPLETED_STATUSES = ["COMPLETE", "ADMIN_CHECKING", "ADMIN_CONFIRMED", "CANCELLED", "STOPPED"]
 
@@ -177,10 +178,6 @@ export default function AdminParticipationPage() {
   const selectedCompanyRow = useMemo(
     () => rows.find((row) => row.company.id === openCompanyDetailId) ?? null,
     [rows, openCompanyDetailId]
-  )
-  const selectedProject = useMemo(
-    () => MOCK_ADMIN_PROJECTS_V1.find((p) => p.id === openProjectDetailId) ?? null,
-    [openProjectDetailId]
   )
 
   return (
@@ -513,90 +510,20 @@ export default function AdminParticipationPage() {
         </div>
         {/* 프로젝트 상세 다이얼로그 */}
         <Dialog open={!!openProjectDetailId} onOpenChange={(open) => !open && setOpenProjectDetailId(null)}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-0" aria-describedby={undefined}>
+            <DialogHeader className="sr-only">
               <DialogTitle>프로젝트 상세</DialogTitle>
             </DialogHeader>
-            {selectedProject ? (
-              <div className="space-y-4">
-                <div className="rounded-lg border bg-muted/20 p-4">
-                  <div className="text-lg font-semibold">{selectedProject.title}</div>
-                  <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>{selectedProject.id}</span>
-                    <span>·</span>
-                    <Badge variant="outline" className="text-xs">{selectedProject.type}</Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {MainStatusLabels[selectedProject.status as keyof typeof MainStatusLabels] ?? selectedProject.status}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded border px-3 py-2">
-                    <div className="text-xs text-muted-foreground mb-1">의뢰사</div>
-                    <div className="font-medium">{selectedProject.client}</div>
-                  </div>
-                  <div className="rounded border px-3 py-2">
-                    <div className="text-xs text-muted-foreground mb-1">수행사</div>
-                    <div className="font-medium">
-                      {selectedProject.partner ?? (
-                        <span className="text-gray-400">
-                          {(selectedProject as any).partnerType ? `${(selectedProject as any).partnerType}사 모집` : "-"}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="rounded border px-3 py-2">
-                    <div className="text-xs text-muted-foreground mb-1">제작비</div>
-                    <div className="font-medium">{selectedProject.budget}</div>
-                    {(selectedProject as any).totalBudget && (
-                      <div className="text-xs text-muted-foreground mt-0.5">총 {(selectedProject as any).totalBudget}</div>
-                    )}
-                  </div>
-                  <div className="rounded border px-3 py-2">
-                    <div className="text-xs text-muted-foreground mb-1">등록~마감</div>
-                    <div className="font-medium">
-                      {(() => {
-                        const c = (selectedProject as any).createdAt ?? ""
-                        const d = (selectedProject as any).deadline ?? ""
-                        const fmt = (s: string) => s ? s.slice(5).replace(/-/g, "-") : "-"
-                        return c && d ? `${fmt(c)} ~ ${fmt(d)}` : fmt(c) || "-"
-                      })()}
-                    </div>
-                  </div>
-                </div>
-                {selectedProject.description && (
-                  <div className="rounded border px-3 py-2 text-sm">
-                    <div className="text-xs text-muted-foreground mb-1">설명</div>
-                    <div>{selectedProject.description}</div>
-                  </div>
-                )}
-                <div>
-                  <div className="mb-2 text-sm font-semibold">지원 회사 ({(selectedProject.participantCompanyIds ?? []).length})</div>
-                  <div className="flex flex-wrap gap-1">
-                    {(selectedProject.participantCompanyIds ?? []).length > 0 ? (
-                      (selectedProject.participantCompanyIds ?? []).map((cid) => {
-                        const company = MOCK_ADMIN_COMPANIES_V1.find((c) => c.id === cid)
-                        return (
-                          <Badge key={cid} variant="outline" className="text-xs font-normal">
-                            {company?.companyName ?? cid}
-                          </Badge>
-                        )
-                      })
-                    ) : (
-                      <span className="text-xs text-muted-foreground">지원 회사가 없습니다.</span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex justify-end">
-                  <Link
-                    href={`/admin/projects/${selectedProject.id}`}
-                    className="text-sm text-pink-600 hover:underline"
-                  >
-                    프로젝트 상세 페이지로 이동
-                  </Link>
-                </div>
+            {openProjectDetailId && (
+              <div className="p-6">
+                <ProjectManagement
+                  initialProjectId={openProjectDetailId}
+                  showCloseButton={true}
+                  onClose={() => setOpenProjectDetailId(null)}
+                  hideBackToListButton={true}
+                />
               </div>
-            ) : null}
+            )}
           </DialogContent>
         </Dialog>
 
