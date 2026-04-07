@@ -172,9 +172,9 @@ export function AppSidebar() {
     "/admin/one-on-one": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.type === "1:1").length,
     "/admin/pending-approval": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.status === "REQUESTED").length,
     "/admin/stop-cancel": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.status === "STOPPED" || p.status === "CANCELLED").length,
-    "/admin/participation": MOCK_ADMIN_PROJECTS_V1.reduce(
-      (sum, p) => sum + (p.participantCompanyIds?.length ?? 0), 0
-    ),
+    "/admin/participation": MOCK_ADMIN_PROJECTS_V1.filter(
+      (p) => !["COMPLETE", "ADMIN_CHECKING", "ADMIN_CONFIRMED", "CANCELLED", "STOPPED"].includes(p.status)
+    ).length,
   }), [])
   const isStatsSectionActive = useMemo(() => location === statsParentItem.url, [location])
   const isSystemSectionActive = useMemo(
