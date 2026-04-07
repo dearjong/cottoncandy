@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Search, BarChart3 } from "lucide-react"
 import { Link } from "wouter"
 import { MOCK_ADMIN_COMPANIES_V1, MOCK_ADMIN_PROJECTS_V1 } from "@/data/mockData"
-import { MainStatusLabels } from "@/types/project-status"
+import { MainStatusLabels, STATUSES_WITH_PARTNER } from "@/types/project-status"
 
 
 const COMPLETED_STATUSES = ["COMPLETE", "ADMIN_CHECKING", "ADMIN_CONFIRMED", "CANCELLED", "STOPPED"]
@@ -340,7 +340,13 @@ export default function AdminParticipationPage() {
                   filtered.map(({ company, ongoingCount, completedCount, asOwnerCount, asPartnerCount, biddingCount, oneToOneCount }) => (
                     <TableRow key={company.id}>
                       <TableCell>
-                        <div className="font-medium text-gray-900">{company.companyName}</div>
+                        <button
+                          type="button"
+                          className="font-medium text-gray-900 hover:text-pink-600 hover:underline cursor-pointer text-left"
+                          onClick={() => setOpenCompanyDetailId(company.id)}
+                        >
+                          {company.companyName}
+                        </button>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs">
@@ -431,10 +437,19 @@ export default function AdminParticipationPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-sm">
-                        <div>{project.client ?? "-"}</div>
-                        {(project as any).partnerType && (
-                          <div className="text-xs text-gray-400 mt-0.5">{(project as any).partnerType}사 모집</div>
-                        )}
+                        <div className="flex flex-col gap-1">
+                          <span>{project.client ?? "-"}</span>
+                          {STATUSES_WITH_PARTNER.has(project.status) && project.partner ? (
+                            <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                              {project.partner}
+                              {(project as any).partnerType && (
+                                <Badge variant="outline" className="h-4 px-1 text-[10px] text-gray-500">{(project as any).partnerType}사</Badge>
+                              )}
+                            </span>
+                          ) : (project as any).partnerType ? (
+                            <span className="text-xs text-gray-400">{(project as any).partnerType}사 모집</span>
+                          ) : null}
+                        </div>
                       </TableCell>
                       <TableCell className="text-sm text-gray-600 whitespace-nowrap">
                         {(() => {
@@ -532,7 +547,7 @@ export default function AdminParticipationPage() {
                       <div key={project.id} className="flex items-center justify-between rounded border px-3 py-2">
                         <div>
                           <div className="text-sm font-medium">{project.title}</div>
-                          <div className="text-xs text-muted-foreground">{project.id} · {project.type}</div>
+                          <div className="text-xs text-muted-foreground">{(project as any).projectNo ?? project.id} · {project.type}</div>
                         </div>
                         <Badge variant="outline" className="text-xs">
                           {MainStatusLabels[project.status as keyof typeof MainStatusLabels] ?? project.status}

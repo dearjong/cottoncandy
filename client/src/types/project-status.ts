@@ -177,3 +177,9 @@ export const PaymentLabels: Record<PaymentStatus, string> = {
   'BALANCE_PAID': '잔금 지급',
   'COMPLETE': '정산 완료'
 }
+
+export const STATUSES_WITH_PARTNER = new Set<MainStatus>([
+  "CONTRACT", "SHOOTING", "EDITING", "DRAFT_SUBMITTED", "FINAL_APPROVED",
+  "PRODUCTION_COMPLETE", "ONAIR_STARTED", "AFTER_SERVICE", "COMPLETE",
+  "ADMIN_CHECKING", "ADMIN_CONFIRMED",
+])
