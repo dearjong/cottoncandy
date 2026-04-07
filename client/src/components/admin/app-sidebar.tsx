@@ -57,33 +57,16 @@ const projectParentItem = {
   icon: Folder,
 }
 
-const projectSubMenuItems = [
-  {
-    title: "승인 대기",
-    url: "/admin/pending-approval",
-    icon: ClipboardCheck,
-  },
-  {
-    title: "중단/취소 요청",
-    url: "/admin/stop-cancel",
-    icon: XCircle,
-  },
-  {
-    title: "공고 프로젝트",
-    url: "/admin/bidding",
-    icon: Briefcase,
-  },
-  {
-    title: "1:1 프로젝트",
-    url: "/admin/one-on-one",
-    icon: HandHeart,
-  },
-  {
-    title: "참여현황",
-    url: "/admin/participation",
-    icon: BarChart3,
-  },
+const projectCoreItems = [
+  { title: "공고 프로젝트", url: "/admin/bidding", icon: Briefcase },
+  { title: "1:1 프로젝트", url: "/admin/one-on-one", icon: HandHeart },
 ]
+const projectFilterItems = [
+  { title: "승인 대기", url: "/admin/pending-approval", icon: ClipboardCheck },
+  { title: "중단/취소 요청", url: "/admin/stop-cancel", icon: XCircle },
+  { title: "참여현황", url: "/admin/participation", icon: BarChart3 },
+]
+const projectSubMenuItems = [...projectCoreItems, ...projectFilterItems]
 
 const contractsParentItem = { title: "계약 & 정산", url: "/admin/contracts", icon: CreditCard }
 const reviewsParentItem = { title: "리뷰 관리", url: "/admin/reviews", icon: Star }
@@ -264,7 +247,23 @@ export function AppSidebar() {
                 </SidebarMenuAction>
                 {projectsOpen && (
                   <SidebarMenuSub>
-                    {projectSubMenuItems.map((item) => (
+                    {projectCoreItems.map((item) => (
+                      <SidebarMenuSubItem key={item.title}>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={location === item.url}
+                          data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+                        >
+                          <Link href={item.url}>
+                            <SubNavLabel>{item.title}</SubNavLabel>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                    <SidebarMenuSubItem>
+                      <div className="mx-2 my-1 border-t border-sidebar-border" />
+                    </SidebarMenuSubItem>
+                    {projectFilterItems.map((item) => (
                       <SidebarMenuSubItem key={item.title}>
                         <SidebarMenuSubButton
                           asChild
