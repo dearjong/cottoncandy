@@ -63,9 +63,9 @@ const projectCoreItems = [
   { title: "1:1 프로젝트", url: "/admin/one-on-one", icon: HandHeart },
 ]
 const projectFilterItems = [
-  { title: "승인 대기", url: "/admin/pending-approval", icon: ClipboardCheck },
-  { title: "중단/취소 요청", url: "/admin/stop-cancel", icon: XCircle },
-  { title: "참여현황", url: "/admin/participation", icon: BarChart3 },
+  { title: "승인 대기", url: "/admin/pending-approval", icon: ClipboardCheck, alert: true },
+  { title: "중단/취소 요청", url: "/admin/stop-cancel", icon: XCircle, alert: true },
+  { title: "참여현황", url: "/admin/participation", icon: BarChart3, alert: false },
 ]
 const projectSubMenuItems = [...projectCoreItems, ...projectFilterItems]
 
@@ -273,10 +273,10 @@ export function AppSidebar() {
                         >
                           <Link href={item.url}>
                             <SubNavLabel>
-                              <span className="flex items-center gap-1">
+                              <span className="flex items-center gap-1.5">
                                 {item.title}
                                 {projectCounts[item.url as keyof typeof projectCounts] > 0 && (
-                                  <span className="text-[10px] font-medium bg-sidebar-foreground/10 text-sidebar-foreground/60 rounded px-1 leading-none py-0.5">
+                                  <span className="text-[10px] font-medium bg-sidebar-foreground/15 text-sidebar-foreground/50 rounded-full px-1.5 py-0.5 leading-none">
                                     {projectCounts[item.url as keyof typeof projectCounts]}
                                   </span>
                                 )}
@@ -298,12 +298,16 @@ export function AppSidebar() {
                         >
                           <Link href={item.url}>
                             <SubNavLabelSub>
-                              <span className="flex items-center gap-1">
+                              <span className="flex items-center gap-1.5">
                                 {item.title}
                                 {projectCounts[item.url as keyof typeof projectCounts] > 0 && (
-                                  <span className="text-[10px] font-medium bg-sidebar-foreground/10 text-sidebar-foreground/60 rounded px-1 leading-none py-0.5">
-                                    {projectCounts[item.url as keyof typeof projectCounts]}
-                                  </span>
+                                  item.alert
+                                    ? <span className="text-[10px] font-semibold bg-red-500 text-white rounded-full px-1.5 py-0.5 leading-none">
+                                        {projectCounts[item.url as keyof typeof projectCounts]}
+                                      </span>
+                                    : <span className="text-[10px] font-medium bg-sidebar-foreground/15 text-sidebar-foreground/50 rounded-full px-1.5 py-0.5 leading-none">
+                                        {projectCounts[item.url as keyof typeof projectCounts]}
+                                      </span>
                                 )}
                               </span>
                             </SubNavLabelSub>
