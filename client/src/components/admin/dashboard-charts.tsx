@@ -1,9 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { BarChart3, Activity } from "lucide-react"
 
 export function DashboardCharts() {
-  // TODO: remove mock data - replace with real chart library and API data
   const weeklyData = [
     { day: "월", projects: 45, contracts: 32, reviews: 28 },
     { day: "화", projects: 52, contracts: 38, reviews: 31 },
@@ -23,94 +21,69 @@ export function DashboardCharts() {
     { month: "6월", total: 1680, completed: 1580 },
   ]
 
+  const chartH = 108
+  const weeklyMax = Math.max(...weeklyData.map(d => d.projects + d.contracts + d.reviews))
+  const monthlyMax = Math.max(...monthlyData.map(d => d.total))
+
   return (
     <div className="grid gap-2 lg:grid-cols-2">
-      <Card data-testid="card-weekly-chart">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 py-2 px-4 pb-1">
           <CardTitle className="text-sm font-medium">주간 활동 현황</CardTitle>
           <BarChart3 className="h-3.5 w-3.5 text-muted-foreground" />
         </CardHeader>
-        <CardContent className="px-4 pb-3 pt-0">
-          <div className="space-y-2">
-            <div className="flex gap-3 text-xs">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 bg-chart-1 rounded-sm" />
-                <span>프로젝트</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 bg-chart-2 rounded-sm" />
-                <span>계약</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 bg-chart-3 rounded-sm" />
-                <span>리뷰</span>
-              </div>
-            </div>
-            <div className="space-y-1">
-              {weeklyData.map((data) => (
-                <div key={data.day} className="flex items-center gap-1.5 text-xs">
-                  <div className="w-5 font-medium shrink-0">{data.day}</div>
-                  <div className="flex-1 flex gap-0.5 min-w-0 overflow-hidden">
-                    <div
-                      className="bg-chart-1 h-3 rounded-sm shrink-0"
-                      style={{ width: `${(data.projects / 70) * 100}%` }}
-                    />
-                    <div
-                      className="bg-chart-2 h-3 rounded-sm shrink-0"
-                      style={{ width: `${(data.contracts / 70) * 100}%` }}
-                    />
-                    <div
-                      className="bg-chart-3 h-3 rounded-sm shrink-0"
-                      style={{ width: `${(data.reviews / 70) * 100}%` }}
-                    />
+        <CardContent className="px-4 pb-3 pt-1">
+          <div className="flex gap-3 text-xs mb-3">
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-chart-1 rounded-sm" /><span>프로젝트</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-chart-2 rounded-sm" /><span>계약</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-chart-3 rounded-sm" /><span>리뷰</span></div>
+          </div>
+          <div className="flex items-end justify-between gap-1.5" style={{ height: chartH }}>
+            {weeklyData.map((d) => {
+              const total = d.projects + d.contracts + d.reviews
+              const colH = Math.round((total / weeklyMax) * chartH)
+              const pH = Math.round((d.projects / total) * colH)
+              const cH = Math.round((d.contracts / total) * colH)
+              const rH = colH - pH - cH
+              return (
+                <div key={d.day} className="flex flex-col items-center gap-1 flex-1">
+                  <div className="w-full flex flex-col justify-end overflow-hidden rounded-t-sm" style={{ height: colH }}>
+                    <div className="bg-chart-3 w-full shrink-0" style={{ height: rH }} />
+                    <div className="bg-chart-2 w-full shrink-0" style={{ height: cH }} />
+                    <div className="bg-chart-1 w-full shrink-0" style={{ height: pH }} />
                   </div>
-                  <div className="w-8 text-right text-muted-foreground shrink-0 text-[10px] min-w-0">
-                    {data.projects + data.contracts + data.reviews}
-                  </div>
+                  <span className="text-[10px] text-muted-foreground">{d.day}</span>
                 </div>
-              ))}
-            </div>
+              )
+            })}
           </div>
         </CardContent>
       </Card>
 
-      <Card data-testid="card-monthly-chart">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 py-2 px-4 pb-1">
           <CardTitle className="text-sm font-medium">월간 프로젝트 현황</CardTitle>
           <Activity className="h-3.5 w-3.5 text-muted-foreground" />
         </CardHeader>
-        <CardContent className="px-4 pb-3 pt-0">
-          <div className="space-y-2">
-            <div className="flex gap-3 text-xs">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 bg-chart-4 rounded-sm" />
-                <span>총 등록</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 bg-chart-2 rounded-sm" />
-                <span>완료</span>
-              </div>
-            </div>
-            <div className="space-y-1">
-              {monthlyData.map((data) => (
-                <div key={data.month} className="flex items-center gap-1.5 text-xs">
-                  <div className="w-5 font-medium shrink-0">{data.month}</div>
-                  <div className="flex-1 relative h-3 min-w-0 overflow-hidden">
-                    <div
-                      className="bg-chart-4 h-3 rounded-sm absolute left-0 top-0"
-                      style={{ width: `${(data.total / 1800) * 100}%` }}
-                    />
-                    <div
-                      className="bg-chart-2 h-3 rounded-sm absolute left-0 top-0"
-                      style={{ width: `${(data.completed / 1800) * 100}%` }}
-                    />
+        <CardContent className="px-4 pb-3 pt-1">
+          <div className="flex gap-3 text-xs mb-3">
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-chart-4 rounded-sm" /><span>총 등록</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-chart-2 rounded-sm" /><span>완료</span></div>
+          </div>
+          <div className="flex items-end justify-between gap-1.5" style={{ height: chartH }}>
+            {monthlyData.map((d) => {
+              const totalH = Math.round((d.total / monthlyMax) * chartH)
+              const completedH = Math.round((d.completed / monthlyMax) * chartH)
+              return (
+                <div key={d.month} className="flex flex-col items-center gap-1 flex-1">
+                  <div className="w-full relative rounded-t-sm overflow-hidden" style={{ height: totalH }}>
+                    <div className="absolute inset-0 bg-chart-4" />
+                    <div className="absolute bottom-0 left-0 right-0 bg-chart-2" style={{ height: completedH }} />
                   </div>
-                  <div className="w-12 text-right text-muted-foreground shrink-0 text-[10px] min-w-0">
-                    {data.completed}/{data.total}
-                  </div>
+                  <span className="text-[10px] text-muted-foreground">{d.month}</span>
                 </div>
-              ))}
-            </div>
+              )
+            })}
           </div>
         </CardContent>
       </Card>
