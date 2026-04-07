@@ -1048,7 +1048,7 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1">
-                          <span className="text-xs text-blue-500">모집중</span>
+                          <span className="text-xs text-gray-400">모집중</span>
                           {(project as any).partnerType && (
                             <Badge variant="outline" className="h-4 px-1 text-[10px] text-gray-500">{(project as any).partnerType}</Badge>
                           )}
