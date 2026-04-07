@@ -314,6 +314,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     totalBudget: "1억 ~ 5억",
     createdAt: "2024-06-15",
     deadline: "2024-07-31",
+    partnerType: "제작" as const,
     description: "신제품 런칭을 위한 브랜드 홍보 영상 제작 프로젝트입니다.",
   },
   {
@@ -331,6 +332,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     totalBudget: "9,500만원",
     createdAt: "2024-06-14",
     deadline: "2024-07-30",
+    partnerType: "제작" as const,
     description: "투자 유치를 위한 IR 프레젠테이션 영상 제작",
   },
   {
@@ -346,6 +348,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     budget: "1,500만원",
     createdAt: "2024-06-13",
     deadline: "2024-07-28",
+    partnerType: "대행" as const,
     description: "온라인 마케팅 전략 수립 및 실행 계획 컨설팅",
     phone: "010-2345-6789",
     consultingOutcomeKind: "SIMPLE_CONSULT" as const,
@@ -365,6 +368,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     totalBudget: "8,500만원",
     createdAt: "2024-06-12",
     deadline: "2024-08-15",
+    partnerType: "제작" as const,
     description: "AI 제품 소개를 위한 영상 콘텐츠 제작",
   },
   {
@@ -382,6 +386,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     totalBudget: "5억 ~ 10억",
     createdAt: "2024-06-11",
     deadline: "2024-07-25",
+    partnerType: "대행" as const,
     description: "인스타그램/틱톡 인플루언서 협업 광고 캠페인",
   },
   {
@@ -399,6 +404,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     totalBudget: "8,500만원",
     createdAt: "2024-06-10",
     deadline: "2024-07-20",
+    partnerType: "제작" as const,
     description: "친환경 에너지 기업 소개 다큐멘터리 제작",
   },
   {
@@ -448,6 +454,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     totalBudget: "10억 ~ 30억",
     createdAt: "2024-06-08",
     deadline: "2024-08-31",
+    partnerType: "대행" as const,
     description: "기업 유튜브 채널 콘텐츠 기획 및 제작 운영",
   },
   {
@@ -465,6 +472,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     totalBudget: "6,500만원",
     createdAt: "2024-06-07",
     deadline: "2024-07-10",
+    partnerType: "제작" as const,
     description: "신규 모바일 앱 런칭 TV 광고 제작",
   },
   {
@@ -542,6 +550,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     totalBudget: "10억 ~ 30억",
     createdAt: "2024-05-20",
     deadline: "2024-07-20",
+    partnerType: "제작" as const,
     description: "신제품 런칭 TVCF 및 디지털 프로모션 캠페인. 제작·온에어·정산·리뷰 완료.",
   },
   {
@@ -559,6 +568,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     totalBudget: "10억 ~ 30억",
     createdAt: "2024-05-10",
     deadline: "2024-07-10",
+    partnerType: "제작" as const,
     description: "봄 시즌 옥외·디지털 통합 캠페인. 제작부터 리뷰 등록까지 완료.",
   },
   {
@@ -593,6 +603,7 @@ export const MOCK_ADMIN_PROJECTS_V1 = [
     totalBudget: "1억원",
     createdAt: "2024-05-28",
     deadline: "2024-07-28",
+    partnerType: "대행" as const,
     description: "제품 출시 일정 무기한 연기로 프로젝트 취소.",
   },
 ] as const;

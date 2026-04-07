@@ -81,6 +81,7 @@ interface Project {
   totalBudget?: string
   createdAt: string
   deadline?: string
+  partnerType?: "대행" | "제작"
   description: string
   /** 계약 시작일 (API 연동 시 사용) */
   contractStartDate?: string
@@ -1025,23 +1026,33 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
                           {getConsultingConsultantName(project) ?? project.partner ?? "-"}
                         </span>
                       ) : STATUSES_WITH_PARTNER.has(project.status) && project.partner ? (
-                        project.participantCompanyIds && project.participantCompanyIds.length > 0 ? (
-                          <button
-                            type="button"
-                            className="text-xs text-gray-500 text-left hover:text-pink-600 hover:underline cursor-pointer"
-                            onClick={() => {
-                              setOpenCompanyId(project.participantCompanyIds![0])
-                              setOpenCompanyRole("partner")
-                            }}
-                            title={project.partner}
-                          >
-                            {project.partner}
-                          </button>
-                        ) : (
-                          <span className="text-xs text-gray-500">{project.partner}</span>
-                        )
+                        <span className="inline-flex items-center gap-1">
+                          {project.participantCompanyIds && project.participantCompanyIds.length > 0 ? (
+                            <button
+                              type="button"
+                              className="text-xs text-gray-500 text-left hover:text-pink-600 hover:underline cursor-pointer"
+                              onClick={() => {
+                                setOpenCompanyId(project.participantCompanyIds![0])
+                                setOpenCompanyRole("partner")
+                              }}
+                              title={project.partner}
+                            >
+                              {project.partner}
+                            </button>
+                          ) : (
+                            <span className="text-xs text-gray-500">{project.partner}</span>
+                          )}
+                          {(project as any).partnerType && (
+                            <Badge variant="outline" className="h-4 px-1 text-[10px] text-gray-500">{(project as any).partnerType}</Badge>
+                          )}
+                        </span>
                       ) : (
-                        <span className="text-xs text-gray-500">-</span>
+                        <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                          <span>-</span>
+                          {(project as any).partnerType && (
+                            <Badge variant="outline" className="h-4 px-1 text-[10px] text-gray-500">{(project as any).partnerType}</Badge>
+                          )}
+                        </span>
                       )}
                     </div>
                   </TableCell>
