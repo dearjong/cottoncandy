@@ -11,8 +11,7 @@ import {
   Users,
   FileText,
   Video,
-  CheckCircle2,
-  Eye
+  CheckCircle2
 } from "lucide-react"
 import { Link } from "wouter"
 import { Project_detailPopup } from "@/components/admin/Project_detailPopup"
@@ -139,7 +138,10 @@ export default function ProgressPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-muted-foreground shrink-0">{project.id}</span>
-                      <span className="font-medium truncate">{project.title}</span>
+                      <span
+                        className="font-medium truncate cursor-pointer hover:underline hover:text-primary"
+                        onClick={() => { setDetailProjectId(project.id); setDetailOpen(true) }}
+                      >{project.title}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">{project.client}</p>
                   </div>
@@ -156,17 +158,6 @@ export default function ProgressPage() {
                         {project.participants}
                       </div>
                     )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => {
-                        setDetailProjectId(project.id)
-                        setDetailOpen(true)
-                      }}
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                    </Button>
                   </div>
                 </div>
               ))}
