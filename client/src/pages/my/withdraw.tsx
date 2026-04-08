@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { trackMyPageView, trackMyWithdrawAttempted } from "@/lib/analytics";
 
 const REASONS = [
@@ -24,6 +25,8 @@ export default function MyWithdraw() {
   const [agreeAll, setAgreeAll] = useState(false);
   const [agreeTV, setAgreeTV] = useState(false);
   const otherTextRef = useRef<HTMLTextAreaElement>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showDone, setShowDone] = useState(false);
 
   useEffect(() => {
     trackMyPageView("withdraw");
@@ -36,10 +39,16 @@ export default function MyWithdraw() {
   };
 
   const handleWithdraw = () => {
+    setShowConfirm(true);
+  };
+
+  const handleConfirm = () => {
     trackMyWithdrawAttempted({
       reason_count: checkedReasons.length,
       has_other_text: !!(otherTextRef.current?.value?.trim()),
     });
+    setShowConfirm(false);
+    setShowDone(true);
   };
 
   return (
@@ -119,6 +128,41 @@ export default function MyWithdraw() {
           </div>
         </div>
       </div>
+
+      {/* 1단계: 탈퇴 진행 확인 */}
+      <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <DialogContent className="max-w-sm rounded-2xl p-8 text-center">
+          <p className="text-lg font-semibold text-gray-900 mb-8">탈퇴처리를 진행할까요?</p>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              className="flex-1 rounded-full text-sm"
+              onClick={() => setShowConfirm(false)}
+            >
+              취소
+            </Button>
+            <Button
+              className="flex-1 rounded-full text-sm bg-pink-500 hover:bg-pink-600 text-white"
+              onClick={handleConfirm}
+            >
+              확인
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 2단계: 탈퇴 완료 */}
+      <Dialog open={showDone} onOpenChange={setShowDone}>
+        <DialogContent className="max-w-sm rounded-2xl p-8 text-center">
+          <p className="text-lg font-semibold text-gray-900 mb-8">탈퇴처리되었습니다.</p>
+          <Button
+            className="w-full rounded-full text-sm bg-pink-500 hover:bg-pink-600 text-white"
+            onClick={() => setShowDone(false)}
+          >
+            확인
+          </Button>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
