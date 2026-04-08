@@ -195,7 +195,7 @@ Cotton Candy 알림
               }`}
               data-testid="sidebar-participation"
             >
-참여현황
+참여관리
             </Link>
             <Link
               href="/work/project/ot-guide"
