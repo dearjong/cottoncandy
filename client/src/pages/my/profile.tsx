@@ -107,10 +107,10 @@ export default function MyProfile() {
                 </Button>
               </div>
 
-              <div className="mt-4 text-center">
+              <div className="mt-3 flex justify-end">
                 <button
                   onClick={() => setLocation("/my/withdraw")}
-                  className="text-sm text-gray-400 hover:text-gray-600 underline"
+                  className="text-xs text-gray-300 hover:text-gray-400 font-light underline"
                 >
                   회원탈퇴
                 </button>
