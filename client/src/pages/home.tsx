@@ -133,27 +133,29 @@ export default function Home() {
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-white to-gray-50 pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="flex flex-col items-center min-h-[220px] sm:min-h-[260px]">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 whitespace-pre-line hero-title" data-testid="hero-title">
+          <div className="hero-text-area w-full">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 whitespace-pre-line hero-title" data-testid="hero-title">
               {heroTitle}
             </h1>
-            <p className={`text-lg sm:text-xl text-gray-600 mb-3 ${heroSub ? "" : "invisible"}`} data-testid="hero-subtitle">
-              {heroSub || "placeholder"}
-            </p>
-            <div className={`py-2 px-4 mb-4 max-w-3xl mx-auto ${titleVariant === "variant_question" ? "invisible" : ""}`}>
-              <p className="text-sm text-gray-700" data-testid="promotion-text">
+            {heroSub && (
+              <p className="text-lg sm:text-xl text-gray-600 mt-1" data-testid="hero-subtitle">
+                {heroSub}
+              </p>
+            )}
+            {titleVariant !== "variant_question" && (
+              <p className="text-sm text-gray-700 mt-2" data-testid="promotion-text">
                 {eventInfo.subtitle}
                 <a href={eventInfo.link} className="text-pink-600 underline ml-1">{eventInfo.linkText}</a>
               </p>
-            </div>
-            <Button
-              className="btn-pink mb-8 max-w-md mx-auto"
-              data-testid="button-recommend"
-              onClick={handleCtaClick}
-            >
-              {ctaText}
-            </Button>
+            )}
           </div>
+          <Button
+            className="btn-pink mb-8 max-w-md mx-auto"
+            data-testid="button-recommend"
+            onClick={handleCtaClick}
+          >
+            {ctaText}
+          </Button>
 
           {/* Search Bar */}
           <SearchBar
