@@ -520,6 +520,11 @@ site_visit
 | `admin_member_suspended` | ✅ | ✅ | 완료 |
 | `admin_member_resumed` | ✅ | ✅ | 완료 |
 | `admin_member_banned` | ✅ | ✅ | 완료 |
+| `mypage_viewed` | ✅ | ✅ | 완료 — page: profile/withdraw/inquiry/notification_settings |
+| `mypage_profile_saved` | ✅ | ✅ | 완료 — 내정보 저장 |
+| `mypage_withdraw_attempted` | ✅ | ✅ | 완료 — reason_count, has_other_text |
+| `mypage_inquiry_submitted` | ✅ | ✅ | 완료 — tab: general/report, has_attachment |
+| `mypage_notification_settings_saved` | ✅ | ✅ | 완료 — app_on_count, email_on_count, sms_on_count |
 
 ---
 

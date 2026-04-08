@@ -1,10 +1,11 @@
+import { useEffect, useState, useRef } from "react";
 import Layout from "@/components/layout/layout";
 import MySidebar from "@/components/my/my-sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { trackMyPageView, trackMyWithdrawAttempted } from "@/lib/analytics";
 
 const REASONS = [
   { id: "no-work", label: "이 일을 더이상 하지 않아요" },
@@ -22,11 +23,23 @@ export default function MyWithdraw() {
   const [checkedReasons, setCheckedReasons] = useState<string[]>([]);
   const [agreeAll, setAgreeAll] = useState(false);
   const [agreeTV, setAgreeTV] = useState(false);
+  const otherTextRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    trackMyPageView("withdraw");
+  }, []);
 
   const toggleReason = (id: string) => {
     setCheckedReasons(prev =>
       prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
     );
+  };
+
+  const handleWithdraw = () => {
+    trackMyWithdrawAttempted({
+      reason_count: checkedReasons.length,
+      has_other_text: !!(otherTextRef.current?.value?.trim()),
+    });
   };
 
   return (
@@ -65,6 +78,7 @@ export default function MyWithdraw() {
               <div className="mb-4">
                 <p className="text-sm text-gray-700 mb-2">기타</p>
                 <textarea
+                  ref={otherTextRef}
                   className="w-full border border-gray-200 rounded-md p-3 text-sm text-gray-700 resize-none focus:outline-none focus:ring-1 focus:ring-gray-300"
                   rows={3}
                   placeholder="기타 사유를 입력해주세요."
@@ -97,6 +111,7 @@ export default function MyWithdraw() {
               <Button
                 className="w-full py-3 bg-gray-200 text-gray-500 rounded-full text-sm font-normal hover:bg-gray-300"
                 disabled={!agreeAll || !agreeTV}
+                onClick={handleWithdraw}
               >
                 탈퇴확인
               </Button>

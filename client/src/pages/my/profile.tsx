@@ -1,12 +1,25 @@
+import { useEffect } from "react";
 import Layout from "@/components/layout/layout";
 import MySidebar from "@/components/my/my-sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
 import { UserCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { trackMyPageView, trackMyProfileSaved } from "@/lib/analytics";
 
 export default function MyProfile() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    trackMyPageView("profile");
+  }, []);
+
+  const handleSave = () => {
+    trackMyProfileSaved();
+    toast({ description: "저장되었습니다." });
+  };
 
   return (
     <Layout>
@@ -89,7 +102,10 @@ export default function MyProfile() {
               </div>
 
               <div className="mt-8">
-                <Button className="w-full py-3 bg-gray-200 text-gray-500 rounded-full text-sm font-normal hover:bg-gray-300 cursor-pointer">
+                <Button
+                  className="w-full py-3 bg-gray-200 text-gray-500 rounded-full text-sm font-normal hover:bg-gray-300 cursor-pointer"
+                  onClick={handleSave}
+                >
                   저장하기
                 </Button>
               </div>

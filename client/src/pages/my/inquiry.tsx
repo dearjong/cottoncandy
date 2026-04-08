@@ -1,14 +1,28 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Layout from "@/components/layout/layout";
 import MySidebar from "@/components/my/my-sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
 import { Paperclip } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { trackMyPageView, trackMyInquirySubmitted } from "@/lib/analytics";
 
 export default function MyInquiry() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"general" | "report">("general");
+  const [fileName, setFileName] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    trackMyPageView("inquiry");
+  }, []);
+
+  const handleSubmit = () => {
+    trackMyInquirySubmitted({ tab: activeTab, has_attachment: !!fileName });
+    toast({ description: "문의가 접수되었습니다." });
+  };
 
   return (
     <Layout>
@@ -63,8 +77,25 @@ export default function MyInquiry() {
                     <Paperclip className="w-4 h-4" /> 첨부파일
                   </span>
                   <div className="flex-1 flex gap-2">
-                    <Input placeholder="업로드해주세요" className="flex-1" readOnly />
-                    <Button variant="outline" className="px-4 text-sm">Upload</Button>
+                    <Input
+                      placeholder="업로드해주세요"
+                      className="flex-1"
+                      readOnly
+                      value={fileName}
+                    />
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      onChange={(e) => setFileName(e.target.files?.[0]?.name ?? "")}
+                    />
+                    <Button
+                      variant="outline"
+                      className="px-4 text-sm"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Upload
+                    </Button>
                   </div>
                 </div>
 
@@ -76,7 +107,10 @@ export default function MyInquiry() {
                   >
                     취소
                   </Button>
-                  <Button className="flex-1 py-3 rounded-full text-sm bg-pink-500 hover:bg-pink-600 text-white">
+                  <Button
+                    className="flex-1 py-3 rounded-full text-sm bg-pink-500 hover:bg-pink-600 text-white"
+                    onClick={handleSubmit}
+                  >
                     확인
                   </Button>
                 </div>

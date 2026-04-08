@@ -477,6 +477,37 @@ export function trackAdminMemberBanned(props: { member_id: string; member_type?:
   publishAnalytics("admin_member_banned", { ...props, user_type: "admin" });
 }
 
+// ─── 내정보(마이페이지) 이벤트 ───────────────────────────────
+
+/** 내정보 섹션 페이지 진입 */
+export function trackMyPageView(page: "profile" | "withdraw" | "inquiry" | "notification_settings") {
+  publishAnalytics("mypage_viewed", { page });
+}
+
+/** 내정보 저장 완료 */
+export function trackMyProfileSaved() {
+  publishAnalytics("mypage_profile_saved", { user_type: "advertiser" });
+}
+
+/** 회원탈퇴 시도 */
+export function trackMyWithdrawAttempted(props: { reason_count: number; has_other_text: boolean }) {
+  publishAnalytics("mypage_withdraw_attempted", { ...props, user_type: "advertiser" });
+}
+
+/** 1:1 문의 제출 */
+export function trackMyInquirySubmitted(props: { tab: "general" | "report"; has_attachment: boolean }) {
+  publishAnalytics("mypage_inquiry_submitted", { ...props, user_type: "advertiser" });
+}
+
+/** 알림설정 저장 */
+export function trackMyNotificationSettingsSaved(props: {
+  app_on_count: number;
+  email_on_count: number;
+  sms_on_count: number;
+}) {
+  publishAnalytics("mypage_notification_settings_saved", { ...props, user_type: "advertiser" });
+}
+
 // ─── 라우트 리스너 ────────────────────────────────────────────
 
 /** GA4에 page_view 이벤트 전송 (SPA 경로 변경 시) */

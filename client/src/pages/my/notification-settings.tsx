@@ -1,9 +1,10 @@
+import { useEffect, useState } from "react";
 import Layout from "@/components/layout/layout";
 import MySidebar from "@/components/my/my-sidebar";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { trackMyPageView, trackMyNotificationSettingsSaved } from "@/lib/analytics";
 
 type NotifRow = {
   id: string;
@@ -28,10 +29,23 @@ export default function MyNotificationSettings() {
   const { toast } = useToast();
   const [rows, setRows] = useState<NotifRow[]>(DEFAULT_SETTINGS);
 
+  useEffect(() => {
+    trackMyPageView("notification_settings");
+  }, []);
+
   const toggle = (id: string, channel: "app" | "email" | "sms") => {
     setRows(prev =>
       prev.map(r => (r.id === id ? { ...r, [channel]: !r[channel] } : r))
     );
+  };
+
+  const handleSave = () => {
+    trackMyNotificationSettingsSaved({
+      app_on_count: rows.filter(r => r.app).length,
+      email_on_count: rows.filter(r => r.email).length,
+      sms_on_count: rows.filter(r => r.sms).length,
+    });
+    toast({ description: "저장되었습니다." });
   };
 
   return (
@@ -83,7 +97,7 @@ export default function MyNotificationSettings() {
                 </Button>
                 <Button
                   className="flex-1 py-3 rounded-full text-sm bg-pink-500 hover:bg-pink-600 text-white"
-                  onClick={() => toast({ description: "저장되었습니다." })}
+                  onClick={handleSave}
                 >
                   저장하기
                 </Button>
