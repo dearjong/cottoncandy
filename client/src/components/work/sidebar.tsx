@@ -165,7 +165,7 @@ Cotton Candy 알림
             data-testid="sidebar-projects"
           >
             <FileText className="w-5 h-5" />
-            <div className="flex-1 text-left">프로젝트 리스트</div>
+            <div className="flex-1 text-left">프로젝트 관리</div>
             <ChevronDown className={`w-4 h-4 transition-transform ${projectsOpen ? 'rotate-180' : ''}`} />
           </button>
           {projectsOpen && (
@@ -177,7 +177,7 @@ Cotton Candy 알림
               }`}
               data-testid="sidebar-project-list"
             >
-프로젝트 리스트
+프로젝트 관리
             </Link>
             <Link 
               href="/work/project/schedule" 
