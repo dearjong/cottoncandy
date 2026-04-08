@@ -483,7 +483,7 @@ site_visit
 | `consulting_message_sent` | ✅ | ✅ | 완료 |
 | `consulting_responded` | ✅ | ✅ | 완료 |
 | `consulting_project_linked` | ✅ | ✅ | 완료 |
-| `proposal_submitted` | ⬜ | ⬜ | 제안서 제출 UI 구현 후 추가 |
+| `proposal_submitted` | ✅ | ✅ | 완료 (`/work/project/proposal/register`) |
 | `partner_selected` | - | - | `contract_signed`로 통합, 별도 구현 없음 |
 | ~~`consulting_matched`~~ | - | - | 제거됨 (해당 구조 없음) |
 | ~~`consulting_to_project`~~ | - | - | 제거됨 (전환 아닌 연결 구조) |

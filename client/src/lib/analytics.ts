@@ -395,6 +395,19 @@ export function trackReviewCompleted(props: {
   publishAnalytics("review_completed", { ...props, user_type: "advertiser" });
 }
 
+// ─── 제안서 이벤트 ───────────────────────────────────────────
+
+/** 파트너사 제안서 제출 */
+export function trackProposalSubmitted(props: {
+  project_title?: string;
+  has_strategic_file?: boolean;
+  has_creative_file?: boolean;
+  concept_count?: number;
+  submission_file_count?: number;
+}) {
+  publishAnalytics("proposal_submitted", { ...props, user_type: "partner" });
+}
+
 // ─── 컨설팅 이벤트 ───────────────────────────────────────────
 
 /** 컨설턴트 메시지 발송 (상담 활동 기록) */

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLocation } from 'wouter';
 import Layout from '@/components/layout/layout';
 import WorkSidebar from '@/components/work/sidebar';
+import { Plus } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -36,7 +37,17 @@ export default function WorkProjectProposal() {
           <div className="flex gap-6">
             <WorkSidebar />
             <div className="flex-1">
-              <h1 className="work-title">제안서·시안 (제출현황)</h1>
+              <div className="flex items-center justify-between mb-0">
+                <h1 className="work-title">제안서·시안 (제출현황)</h1>
+                <button
+                  type="button"
+                  onClick={() => setLocation('/work/project/proposal/register')}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-pink-600 hover:bg-pink-700 rounded-lg transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  등록하기
+                </button>
+              </div>
 
               <div className="bg-white rounded-lg shadow-sm mt-6 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100">

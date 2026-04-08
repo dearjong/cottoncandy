@@ -49,6 +49,7 @@ import WorkProjectParticipation from "@/pages/work/project/participation";
 import WorkProjectOtGuide from "@/pages/work/project/ot-guide";
 import WorkProjectProposal from "@/pages/work/project/proposal";
 import WorkProjectProposalView from "@/pages/work/project/proposal-view";
+import WorkProjectProposalRegister from "@/pages/work/project/proposal-register";
 import WorkProjectContract from "@/pages/work/project/contract";
 import WorkProjectDeliverables from "@/pages/work/project/deliverables";
 import WorkProjectSettlement from "@/pages/work/project/settlement";
@@ -271,11 +272,14 @@ function Router() {
       <Route path="/work/project/ot-guide">
         <ProtectedRoute component={WorkProjectOtGuide} />
       </Route>
-      <Route path="/work/project/proposal">
-        <ProtectedRoute component={WorkProjectProposal} />
+      <Route path="/work/project/proposal/register">
+        <ProtectedRoute component={WorkProjectProposalRegister} />
       </Route>
       <Route path="/work/project/proposal/view/:companyId">
         <ProtectedRoute component={WorkProjectProposalView} />
+      </Route>
+      <Route path="/work/project/proposal">
+        <ProtectedRoute component={WorkProjectProposal} />
       </Route>
       <Route path="/work/project/contract">
         <ProtectedRoute component={WorkProjectContract} />
