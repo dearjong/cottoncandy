@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useLocation, useSearch } from "wouter";
+import { useLocation } from "wouter";
 import { Check } from "lucide-react";
 import { NaverIcon } from "@/components/ui/naver-icon";
 import Layout from "@/components/layout/layout";
@@ -23,12 +23,8 @@ import googleLogo from "@assets/Logo_Google_1759383453744.png";
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const search = useSearch();
-  const initialTab = new URLSearchParams(search).get("tab");
   const [email, setEmail] = useState("test@cottoncandy.kr");
-  const [selectedCard, setSelectedCard] = useState<'existing' | 'new' | null>(
-    initialTab === "new" ? "new" : "existing"
-  );
+  const [selectedCard, setSelectedCard] = useState<'existing' | 'new' | null>('existing');
   const [loginStep, setLoginStep] = useState<1 | 2>(1);
   const [customerType, setCustomerType] = useState<string>('advertiser');
   const [password, setPassword] = useState("test1234!");
