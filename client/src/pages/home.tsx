@@ -18,9 +18,9 @@ const CTA_COPY: Record<string, string> = {
 };
 
 const EXP_ID_TITLE = "home_hero_title";
-const TITLE_COPY: Record<string, { title: string; sub?: string }> = {
-  control:        { title: '"프로가 만드는 광고,\n프로가 선택한 전문기업"' },
-  variant_question: { title: "어떤 광고를 만들어드릴까요?" },
+const TITLE_COPY: Record<string, { title: string; sub: string }> = {
+  control:          { title: '"프로가 만드는 광고,\n프로가 선택한 전문기업"', sub: "광고주는 선택만, 제작은 전문가가, 이 모든것이 무료!" },
+  variant_question: { title: "어떤 광고를 만들어드릴까요?",                   sub: "기획부터 제작까지, 검증된 전문기업이 함께합니다." },
 };
 
 export default function Home() {
@@ -44,6 +44,7 @@ export default function Home() {
 
   const titleVariant = getExperimentVariant(EXP_ID_TITLE) ?? "control";
   const heroTitle = TITLE_COPY[titleVariant]?.title ?? TITLE_COPY.control.title;
+  const heroSub   = TITLE_COPY[titleVariant]?.sub   ?? TITLE_COPY.control.sub;
 
   const handleCtaClick = () => {
     publishAnalytics("home_cta_clicked", {
@@ -137,7 +138,7 @@ export default function Home() {
             {heroTitle}
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 mb-6" data-testid="hero-subtitle">
-            광고주는 선택만, 제작은 전문가가, 이 모든것이 무료!
+            {heroSub}
           </p>
           <div className="p-4 mb-8 max-w-3xl mx-auto">
             <p className="text-sm text-gray-700" data-testid="promotion-text">
