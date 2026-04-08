@@ -5,7 +5,9 @@ import WorkSidebar from '@/components/work/sidebar';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { ChevronDown, ExternalLink, Globe, Bookmark, Mail, Star, Trophy, CheckCircle2 } from 'lucide-react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ChevronDown, ExternalLink, Globe, Bookmark, Mail, Star, Trophy, CheckCircle2, Paperclip } from 'lucide-react';
 import {
   trackParticipationInviteToggled,
   trackParticipationOtConfirmed,
@@ -309,11 +311,177 @@ function CompanyRow({ company, activeTab, toggles, onToggle }: CompanyRowProps) 
   );
 }
 
+// ─── 메시지 발송 모달 ─────────────────────────────────────────
+interface SendMessageModalProps {
+  open: boolean;
+  onClose: () => void;
+  type?: 'normal' | 'reject';
+}
+
+function SendMessageModal({ open, onClose, type = 'normal' }: SendMessageModalProps) {
+  const { toast } = useToast();
+  const [channels, setChannels] = useState({ email: true, kakao: true, alimtalk: true, app: true });
+  const [subject, setSubject] = useState(
+    type === 'reject'
+      ? '[베스트전자] 스탠바이미2 프로젝트 미선정 안내드립니다.'
+      : '[베스트전자] 스탠바이미2 프로젝트 OT/PT 선정 결과 안내드립니다.'
+  );
+  const defaultBody = type === 'reject'
+    ? `안녕하세요.\n베스트전자 스탠바이미2 판매촉진 프로젝트에 관심을 가지고 비딩에 참여해주셔서 진심으로 감사드립니다.\n\n내부 검토 결과, 아쉽게도 귀사는 이번 선정 대상에 포함되지 않았음을 안내드립니다.\n\n참여해주신 정성과 제안 내용은 향후 프로젝트 추천 및 제안에 적극 반영하겠습니다.\n\n앞으로도 TVCF ADMarket을 통해 더 많은 기회를 함께하길 기대합니다.\n감사합니다.\n\nTVCF ADMarket 운영팀 드림`
+    : `안녕하세요.\n베스트전자 스탠바이미2 판매촉진 프로젝트에 관심을 가지고 비딩에 참여해주셔서 진심으로 감사드립니다.\n\n내부 검토 결과, 다양한 기준을 바탕으로 OT 참석 기업을 선별하게 되었으며 안타깝게도 귀사는 이번 OT 초대 대상에 포함되지 않았음을 안내드립니다.\n\n이번 프로젝트의 특성과 방향성에 가장 적합한 몇 개 기업을 한정하여 선정한 점, 너그러이 이해 부탁드립니다.\n참여해주신 정성과 제안 내용은 향후 프로젝트 추천 및 제안에 적극 반영하겠습니다.\n\n앞으로도 TVCF ADMarket을 통해 더 많은 기회를 함께하길 기대합니다.\n감사합니다.\n\nTVCF ADMarket 운영팀 드림\n\n──────────────────────────────────────────\n[참고: 이번 OT 선정은 다음과 같은 기준에 따라 진행되었습니다]\n- 브랜드 방향성과의 적합성\n- 이전 유사 캠페인 수행 이력\n- 제작 제안의 실현 가능성 및 일정 적합도\n- 가격/예산 구조의 균형 등`;
+  const [body, setBody] = useState(defaultBody);
+
+  function toggleChannel(ch: keyof typeof channels) {
+    setChannels(prev => ({ ...prev, [ch]: !prev[ch] }));
+  }
+
+  function handleSend() {
+    toast({ title: '발송하기', description: '메시지가 발송되었습니다.', duration: 2500 });
+    onClose();
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={v => !v && onClose()}>
+      <DialogContent className="max-w-lg p-0 overflow-hidden rounded-2xl max-h-[90vh] overflow-y-auto">
+        <div className="px-8 py-6">
+          {/* 제목 */}
+          <h2 className="text-xl font-bold text-center mb-6">메세지</h2>
+
+          {/* 관련 프로젝트 */}
+          <div className="mb-4">
+            <div className="flex items-start gap-2 mb-1">
+              <span className="text-pink-500 text-xs mt-0.5">•</span>
+              <span className="text-sm font-medium text-gray-700">관련 프로젝트</span>
+            </div>
+            <Select defaultValue="best">
+              <SelectTrigger className="w-full text-sm border-gray-300">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="best">[베스트전자] 스탠바이미2 판매촉진 프로모션</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* 수신 */}
+          <div className="mb-4">
+            <div className="flex items-start gap-2 mb-1">
+              <span className="text-pink-500 text-xs mt-0.5">•</span>
+              <span className="text-sm font-medium text-gray-700">수신</span>
+            </div>
+            <div className="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-700 bg-gray-50">
+              솜사탕애드, VEGA
+            </div>
+          </div>
+
+          {/* 제목 */}
+          <div className="mb-4">
+            <div className="flex items-start gap-2 mb-1">
+              <span className="text-pink-500 text-xs mt-0.5">•</span>
+              <span className="text-sm font-medium text-gray-700">제목</span>
+            </div>
+            <input
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-pink-400"
+              value={subject}
+              onChange={e => setSubject(e.target.value)}
+            />
+          </div>
+
+          {/* 본문 */}
+          <div className="mb-4">
+            <textarea
+              className="w-full border border-gray-300 rounded-md px-3 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-pink-400 resize-none leading-relaxed"
+              rows={14}
+              value={body}
+              onChange={e => setBody(e.target.value)}
+            />
+          </div>
+
+          {/* 발신자 정보 */}
+          <div className="border border-gray-200 rounded-lg p-4 mb-4 space-y-2">
+            {[
+              { icon: '🏢', placeholder: '베스트전자' },
+              { icon: '👤', placeholder: '나해피' },
+              { icon: '🏷️', placeholder: '기획팀' },
+              { icon: '💼', placeholder: '선임연구원' },
+            ].map((row, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center text-xs flex-shrink-0">{row.icon}</span>
+                <input
+                  className="flex-1 border border-gray-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-pink-400"
+                  defaultValue={row.placeholder}
+                />
+              </div>
+            ))}
+            {/* 전화번호 */}
+            <div className="flex items-center gap-2">
+              <span className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center text-xs flex-shrink-0">📞</span>
+              <Select defaultValue="02">
+                <SelectTrigger className="w-20 text-sm border-gray-200">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {['02','031','032','051','053','062','042','052','044'].map(c => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <input className="flex-1 border border-gray-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-pink-400" defaultValue="1234" />
+              <input className="flex-1 border border-gray-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-pink-400" defaultValue="5678" />
+            </div>
+            {/* 이메일 */}
+            <div className="flex items-center gap-2">
+              <span className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center text-xs flex-shrink-0">✉️</span>
+              <input
+                className="flex-1 border border-gray-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-pink-400"
+                defaultValue="iamhappy@dminusone.co.kr"
+              />
+            </div>
+          </div>
+
+          {/* 파일업로드 */}
+          <button className="w-full border border-gray-300 rounded-lg py-2.5 text-sm text-gray-600 flex items-center justify-center gap-2 hover:bg-gray-50 mb-4">
+            <Paperclip className="w-4 h-4" />
+            파일업로드
+          </button>
+
+          {/* 채널 선택 */}
+          <div className="flex items-center justify-center gap-6 mb-6">
+            {[
+              { key: 'email', label: '이메일' },
+              { key: 'kakao', label: '카카오' },
+              { key: 'alimtalk', label: '알림톡' },
+              { key: 'app', label: '앱알림' },
+            ].map(ch => (
+              <label key={ch.key} className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer">
+                <Checkbox
+                  checked={channels[ch.key as keyof typeof channels]}
+                  onCheckedChange={() => toggleChannel(ch.key as keyof typeof channels)}
+                  className="data-[state=checked]:bg-pink-500 data-[state=checked]:border-pink-500"
+                />
+                {ch.label}
+              </label>
+            ))}
+          </div>
+
+          {/* 버튼 */}
+          <div className="flex gap-3">
+            <button className="btn-white flex-1" onClick={onClose}>취소</button>
+            <button className="btn-pink flex-1" onClick={handleSend}>발송하기</button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── 메인 페이지 ──────────────────────────────────────────────
 export default function WorkProjectParticipation() {
   const [activeTab, setActiveTab] = useState('application');
   const [includeEnded, setIncludeEnded] = useState(false);
   const [toggles, setToggles] = useState<TabToggles>({});
   const [projectOpen, setProjectOpen] = useState(true);
+  const [msgModal, setMsgModal] = useState<{ open: boolean; type: 'normal' | 'reject' }>({ open: false, type: 'normal' });
   const { toast } = useToast();
 
   const handleToggle = (companyId: number, key: string, v: boolean) => {
@@ -332,6 +500,16 @@ export default function WorkProjectParticipation() {
         selected_count: selectedIds.length,
         company_ids: selectedIds,
       });
+      toast({ title: label, description: '처리되었습니다.', duration: 2500 });
+      return;
+    }
+    if (label === '메세지 발송') {
+      setMsgModal({ open: true, type: 'normal' });
+      return;
+    }
+    if (label === '미선정 메세지 발송') {
+      setMsgModal({ open: true, type: 'reject' });
+      return;
     }
     toast({
       title: label,
@@ -474,6 +652,12 @@ export default function WorkProjectParticipation() {
           </div>
         </div>
       </div>
+
+      <SendMessageModal
+        open={msgModal.open}
+        type={msgModal.type}
+        onClose={() => setMsgModal(prev => ({ ...prev, open: false }))}
+      />
     </Layout>
   );
 }
