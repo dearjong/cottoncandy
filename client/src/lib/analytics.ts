@@ -13,6 +13,7 @@ const SITE_VISIT_SESSION_KEY = "analytics_site_visit_sent";
 const SESSION_ID_KEY = "analytics_session_id";
 const UTM_SESSION_KEY = "analytics_utm_params";
 const EXPERIMENT_STORAGE_KEY = "analytics_experiments";
+const REFERRAL_CODE_KEY = "analytics_referral_code";
 
 // ─── UTM 파라미터 캡처 ───────────────────────────────────────
 
@@ -37,6 +38,53 @@ function captureUtmParams(): Record<string, string> {
     }
     return utm;
   } catch { return {}; }
+}
+
+// ─── Referral 코드 캡처 ──────────────────────────────────────
+
+/**
+ * URL의 `?ref=` 파라미터를 sessionStorage에 저장.
+ * 랜딩 시 1회만 저장하고 세션 내내 유지.
+ */
+export function captureReferralCode(): string | null {
+  try {
+    const stored = sessionStorage.getItem(REFERRAL_CODE_KEY);
+    if (stored) return stored;
+
+    const code = new URLSearchParams(window.location.search).get("ref");
+    if (code) sessionStorage.setItem(REFERRAL_CODE_KEY, code);
+    return code;
+  } catch { return null; }
+}
+
+/** 현재 세션에 캡처된 referral 코드 반환 */
+export function getReferralCode(): string | null {
+  try { return sessionStorage.getItem(REFERRAL_CODE_KEY); } catch { return null; }
+}
+
+/**
+ * 내 추천 링크 생성 (userId 기반).
+ * 예: https://admarket.co.kr/?ref=user-이꽃별
+ */
+export function generateReferralLink(userId?: string): string {
+  const id = userId ?? localStorage.getItem("analytics_user_id") ?? "unknown";
+  return `${window.location.origin}/?ref=${encodeURIComponent(id)}`;
+}
+
+/**
+ * 추천 링크 복사/공유 시 발송.
+ * 마이페이지 → 내 추천 링크 복사 버튼에서 호출.
+ */
+export function trackReferralSent(props: { method: "copy" | "share"; referrer_id?: string }) {
+  publishAnalytics("referral_sent", { ...props, user_type: "advertiser" });
+}
+
+/**
+ * 추천 링크를 통해 가입 완료 시 발송.
+ * signup-email.tsx의 가입 완료 직전에서 호출. ref 코드가 있을 때만 발송.
+ */
+export function trackReferralSignedUp(props: { referrer_code: string }) {
+  publishAnalytics("referral_signed_up", { ...props, user_type: "advertiser" });
 }
 
 /** 브라우저 세션 단위 ID (DB 적재 시 세션 묶음용) */
@@ -638,6 +686,7 @@ export function FunnelRouteListener() {
   useEffect(() => {
     reIdentifyIfLoggedIn();
     captureUtmParams();
+    captureReferralCode();
 
     const handleUnload = () => {
       const duration = Math.round((Date.now() - pageEnterTime.current) / 1000);

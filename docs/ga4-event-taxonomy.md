@@ -528,6 +528,8 @@ site_visit
 | `experiment_viewed` | ✅ | ✅ | 완료 — experiment_id, variant (A/B 테스트 노출) |
 | `time_on_page` | ✅ | ✅ | 완료 — path, duration_sec (SPA 경로 변경 시) |
 | `page_exit` | ✅ | ✅ | 완료 — path, time_on_page_sec (브라우저 종료/이탈 시) |
+| `referral_sent` | ✅ | ✅ | 완료 — method: copy/share (내정보 → 추천 링크 복사) |
+| `referral_signed_up` | ✅ | ✅ | 완료 — referrer_code (?ref= 파라미터 가입 시 발송) |
 
 ### 자동 첨부 프로퍼티 (모든 이벤트 공통)
 | 프로퍼티 | 설명 | 소스 |
