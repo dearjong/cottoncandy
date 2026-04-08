@@ -1,6 +1,6 @@
 # ADMarket GA4 · Mixpanel 이벤트 정의서
 
-> 버전: v2.1 | 작성일: 2026-04-08  
+> 버전: v2.2 | 작성일: 2026-04-08  
 > 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
 
 ---
@@ -161,8 +161,8 @@
 | `project_viewed` | 공고 상세 조회 | - | ✅ 완료 |
 | `partner_applied` | 참여신청 버튼 클릭 | ✅ 전환 | ✅ 완료 |
 | `proposal_submitted` | 제안서 제출 | ✅ 전환 | ⬜ 개발 필요 |
-| `partner_selected` | 파트너로 선정됨 | ✅ 전환 | ⬜ 개발 필요 |
-| `contract_signed` | 계약 체결 | ✅ 전환 | ⬜ 개발 필요 |
+| `partner_selected` | ~~별도 이벤트 없음~~ `contract_signed`로 통합 | - | 통합됨 |
+| `contract_signed` | 계약 등록 완료 = 파트너 선정 확정 | ✅ 전환 | ✅ 완료 |
 
 **`partner_applied` 파라미터**
 
@@ -273,7 +273,7 @@
 
 ---
 
-## 11. 관리자 운영 이벤트
+## 12. 관리자 운영 이벤트
 
 > 관리자 행동은 별도 GA4 Property 또는 Mixpanel 전용 프로젝트 권장
 
@@ -288,7 +288,7 @@
 
 ---
 
-## 12. GA4 전환 이벤트 설정 목록
+## 13. GA4 전환 이벤트 설정 목록
 
 > GA4 관리 콘솔 → 이벤트 → 아래 이벤트를 "전환으로 표시"
 
@@ -307,7 +307,7 @@
 
 ---
 
-## 13. 퍼널 설계 (GA4 탐색 보고서 / Mixpanel 퍼널)
+## 14. 퍼널 설계 (GA4 탐색 보고서 / Mixpanel 퍼널)
 
 ### 의뢰사 — 공고 프로젝트 퍼널
 
@@ -356,20 +356,20 @@ site_visit
 
 ---
 
-## 14. Mixpanel 코호트 분석 설계
+## 15. Mixpanel 코호트 분석 설계
 
 | 분석 목적 | 퍼널 / 코호트 구성 |
 |---------|---------|
 | 의뢰사 가입 → 등록 전환율 | `signup_complete (advertiser)` → `project_submitted` |
 | 공고 등록 이탈 단계 파악 | `step_1_*` ~ `step_16_*` → `project_submitted` |
 | 파트너사 발견 → 지원 전환율 | `project_viewed` → `partner_applied` |
-| 매칭 → 계약 전환율 | `partner_selected` → `contract_signed` |
+| 매칭 → 계약 전환율 | `participation_final_selected` → `contract_signed` |
 | 컨설팅 전환율 | `consulting_inquiry_submitted` → `consulting_to_project` |
 | 대행사 탐색 깊이 | `partner_searched` → `agency_favorited` → `project_submitted` |
 
 ---
 
-## 15. 구현 현황 요약
+## 16. 구현 현황 요약
 
 | 이벤트 | GA4 | Mixpanel | 상태 |
 |--------|-----|----------|------|
@@ -404,8 +404,7 @@ site_visit
 | `admin_banner_published` | ✅ | ✅ | 완료 |
 | `admin_notification_sent` | ✅ | ✅ | 완료 |
 | `proposal_submitted` | ⬜ | ⬜ | 제안서 제출 UI 구현 후 추가 |
-| `partner_selected` | ⬜ | ⬜ | 파트너 선정 UI 구현 후 추가 |
-| `contract_signed` | ⬜ | ⬜ | 계약 체결 UI 구현 후 추가 |
+| `partner_selected` | - | - | `contract_signed`로 통합, 별도 구현 없음 |
 | `consulting_matched` | ⬜ | ⬜ | 컨설턴트 매칭 UI 구현 후 추가 |
 | `consulting_to_project` | ⬜ | ⬜ | 컨설팅→프로젝트 전환 UI 구현 후 추가 |
 | `admin_member_suspended` | ⬜ | ⬜ | 회원 정지 기능 UI 구현 후 추가 |
