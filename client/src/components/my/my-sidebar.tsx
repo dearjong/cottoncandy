@@ -45,12 +45,9 @@ export default function MySidebar() {
               >
                 └ 문의하기
               </button>
-              <button
-                onClick={() => setLocation("/my/inquiry/list")}
-                className={`w-full text-left py-1.5 px-2 text-xs rounded ${isActive("/my/inquiry/list") ? "bg-gray-100 text-gray-900 font-medium" : "text-gray-500 hover:text-gray-900"}`}
-              >
+              <span className="w-full text-left py-1.5 px-2 text-xs rounded text-gray-400 block cursor-default">
                 └ 문의리스트
-              </button>
+              </span>
             </div>
           )}
         </div>
