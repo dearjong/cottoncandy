@@ -131,7 +131,7 @@ export default function Home() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-white to-gray-50 pt-16 pb-16">
+      <section className="bg-gradient-to-b from-white to-gray-50 pt-14 pb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="hero-text-area w-full">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 whitespace-pre-line hero-title" data-testid="hero-title">
@@ -150,7 +150,7 @@ export default function Home() {
             )}
           </div>
           <Button
-            className="btn-pink mb-8 max-w-md mx-auto"
+            className="btn-pink mb-4 max-w-md mx-auto"
             data-testid="button-recommend"
             onClick={handleCtaClick}
           >
@@ -165,7 +165,7 @@ export default function Home() {
           />
 
           {/* Categories */}
-          <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-4 mt-12">
+          <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-4 mt-6">
             {categories.map((category, index) => (
               <button
                 key={index}

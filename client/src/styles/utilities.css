@@ -409,7 +409,7 @@
 }
 
 .hero-text-area {
-  height: 180px;
+  height: 150px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -417,9 +417,9 @@
 }
 
 @media (min-width: 640px) {
-  .hero-text-area { height: 200px; }
+  .hero-text-area { height: 165px; }
 }
 
 @media (min-width: 1024px) {
-  .hero-text-area { height: 220px; }
+  .hero-text-area { height: 180px; }
 }
