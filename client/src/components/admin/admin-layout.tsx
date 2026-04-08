@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/admin/theme-provider";
 import { AppSidebar } from "@/components/admin/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Home, UserCog } from "lucide-react";
+import { Home, UserCog, FlaskConical } from "lucide-react";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -27,6 +27,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <header className="flex items-center justify-between p-4 border-b border-sidebar-border bg-background">
                 <SidebarTrigger data-testid="button-sidebar-toggle" />
                 <div className="flex items-center gap-4">
+                  <Link href="/admin/simulate">
+                    <Button variant="outline" size="sm">
+                      <FlaskConical className="h-4 w-4 mr-2" />
+                      시뮬레이션
+                    </Button>
+                  </Link>
                   <Link href="/">
                     <Button variant="outline" size="sm">
                       <Home className="h-4 w-4 mr-2" />
