@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { useLocation, useRoute } from "wouter";
 import { motion } from "framer-motion";
 import Layout from "@/components/layout/layout";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { getProjectById } from "@/lib/mockProjectData";
+import { trackProjectViewed, trackPartnerApplied } from "@/lib/analytics";
 
 export default function ProjectDetail() {
   const [, params] = useRoute("/project-list/:id");
@@ -11,6 +13,15 @@ export default function ProjectDetail() {
   const projectId = params?.id;
 
   const project = projectId ? getProjectById(projectId) : undefined;
+
+  useEffect(() => {
+    if (!projectId) return;
+    trackProjectViewed({
+      project_id: projectId,
+      project_type: "공고",
+      user_type: "guest",
+    });
+  }, [projectId]);
 
   if (!project) {
     return (
@@ -375,7 +386,17 @@ export default function ProjectDetail() {
               <Button className="btn-white flex-1">
                 문의하기
               </Button>
-              <Button className="btn-pink flex-1">
+              <Button
+                className="btn-pink flex-1"
+                onClick={() => {
+                  if (projectId) {
+                    trackPartnerApplied({
+                      project_id: projectId,
+                      project_type: "공고",
+                    });
+                  }
+                }}
+              >
                 참여신청
               </Button>
             </div>

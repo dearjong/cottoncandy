@@ -27,27 +27,37 @@ export function getAnalyticsSessionId(): string {
 }
 
 /**
- * Mixpanel 전송 + 서버 `analytics_events` 적재 (POST /api/analytics/events).
- * 운영에서 Postgres를 쓰면 동일 스키마로 Drizzle 연동하면 됩니다.
+ * Mixpanel 전송 + GA4 전송 + 서버 `analytics_events` 적재 (POST /api/analytics/events).
+ * GA4·Mixpanel 동일 이벤트명 사용.
  */
 export function publishAnalytics(
   eventName: string,
   properties?: Record<string, unknown>,
 ) {
   const props = properties ?? {};
+
+  // Mixpanel
   mixpanel.track(eventName, props);
-  const body = JSON.stringify({
-    eventName,
-    properties: props,
-    sessionId: getAnalyticsSessionId(),
-  });
+
+  // GA4
+  if (typeof gtag !== "undefined") {
+    gtag("event", eventName, props);
+  }
+
+  // 서버 적재
   void fetch("/api/analytics/events", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body,
+    body: JSON.stringify({
+      eventName,
+      properties: props,
+      sessionId: getAnalyticsSessionId(),
+    }),
     keepalive: true,
   }).catch(() => {});
 }
+
+// ─── 유입 & 세션 ───────────────────────────────────────────────
 
 /** 세션당 1회 — 퍼널 1단계(유입) */
 export function trackSiteVisitOnce(path: string) {
@@ -60,6 +70,8 @@ export function trackSiteVisitOnce(path: string) {
   }
 }
 
+// ─── 회원가입 ─────────────────────────────────────────────────
+
 /** 회원가입 플로우 — 화면별 (같은 이벤트명 + step으로 퍼널에서 단계 구분) */
 export function trackSignupFunnelStep(
   step: 1 | 2 | 3,
@@ -70,11 +82,15 @@ export function trackSignupFunnelStep(
 }
 
 /** 이메일 인증까지 완료 시 */
-export function trackSignupComplete() {
-  publishAnalytics("signup_complete", {});
+export function trackSignupComplete(userType?: "advertiser" | "partner") {
+  publishAnalytics("signup_complete", {
+    user_type: userType ?? "unknown",
+  });
 }
 
-/** 프로젝트 등록 마법사 화면 진입 (URL 기준) — 이벤트명 = step_{단계}_{파일베이스}, action=enter */
+// ─── 프로젝트 등록 마법사 ─────────────────────────────────────
+
+/** 프로젝트 등록 마법사 화면 진입 (URL 기준) */
 export function trackProjectRegisterStep(path: string) {
   const meta = CREATE_PROJECT_STEP_META[path];
   if (!meta) return;
@@ -88,10 +104,7 @@ export function trackProjectRegisterStep(path: string) {
   });
 }
 
-/**
- * 마법사 각 화면의 버튼(다음/이전/제출 등).
- * 이벤트명: `step_1_step1_partner_selection_cta` (`buildCreateProjectCtaEventName`).
- */
+/** 마법사 각 화면의 버튼(다음/이전/제출 등) */
 export function trackCreateProjectCta(
   pathname: string,
   action: "next" | "back" | "submit" | "confirm" | "complete",
@@ -105,6 +118,84 @@ export function trackCreateProjectCta(
     screen: meta.screen,
     title_ko: meta.title_ko,
     action,
+  });
+}
+
+// ─── 핵심 비즈니스 이벤트 ─────────────────────────────────────
+
+/** 프로젝트 최종 제출 완료 (GA4 전환 이벤트) */
+export function trackProjectSubmitted(props: {
+  project_type: "공고" | "1:1" | "컨설팅";
+  partner_type?: "제작" | "대행" | "unknown";
+  budget_range?: string;
+}) {
+  publishAnalytics("project_submitted", props);
+}
+
+/** 파트너사 공고 지원 완료 (GA4 전환 이벤트) */
+export function trackPartnerApplied(props: {
+  project_id: string;
+  project_type: "공고" | "1:1";
+  partner_type?: "제작사" | "대행사";
+}) {
+  publishAnalytics("partner_applied", props);
+}
+
+/** 컨설팅 문의 최종 접수 완료 (GA4 전환 이벤트) */
+export function trackConsultingInquirySubmitted(props: {
+  title?: string;
+  has_attachment?: boolean;
+}) {
+  publishAnalytics("consulting_inquiry_submitted", {
+    ...props,
+    user_type: "advertiser",
+  });
+}
+
+// ─── 발견 & 탐색 이벤트 ──────────────────────────────────────
+
+/** 공고 프로젝트 상세 조회 (파트너사 발견 퍼널) */
+export function trackProjectViewed(props: {
+  project_id: string;
+  project_type: "공고" | "1:1";
+  user_type?: "advertiser" | "partner" | "guest";
+}) {
+  publishAnalytics("project_viewed", props);
+}
+
+/** 파트너·대행사 검색 실행 */
+export function trackPartnerSearched(props: {
+  query: string;
+  category: "agency" | "production";
+  result_count?: number;
+}) {
+  publishAnalytics("partner_searched", {
+    ...props,
+    user_type: "advertiser",
+  });
+}
+
+/** 대행사/제작사 즐겨찾기 토글 */
+export function trackAgencyFavorited(props: {
+  company_id: string | number;
+  company_type: "agency" | "production";
+  action: "add" | "remove";
+}) {
+  publishAnalytics("agency_favorited", {
+    ...props,
+    user_type: "advertiser",
+  });
+}
+
+// ─── 라우트 리스너 ────────────────────────────────────────────
+
+/** GA4에 page_view 이벤트 전송 (SPA 경로 변경 시) */
+function trackGA4PageView(path: string) {
+  if (typeof gtag === "undefined") return;
+  gtag("event", "page_view", {
+    page_path: path,
+    page_title: document.title,
+    page_location: window.location.href,
   });
 }
 
@@ -126,16 +217,6 @@ export function trackFunnelRoute(path: string) {
   }
 
   trackProjectRegisterStep(path);
-}
-
-/** GA4에 페이지뷰 이벤트 전송 */
-function trackGA4PageView(path: string) {
-  if (typeof gtag === "undefined") return;
-  gtag("event", "page_view", {
-    page_path: path,
-    page_title: document.title,
-    page_location: window.location.href,
-  });
 }
 
 /** App 루트에 두면 경로 변경 시 퍼널 이벤트가 자동으로 쌓입니다. */

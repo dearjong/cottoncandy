@@ -1,7 +1,7 @@
 # ADMarket GA4 · Mixpanel 이벤트 정의서
 
-> 버전: v1.0 | 작성일: 2026-04-08  
-> 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명 사용)
+> 버전: v2.0 | 작성일: 2026-04-08  
+> 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
 
 ---
 
@@ -9,8 +9,10 @@
 
 - 이벤트명: `snake_case` 통일 (GA4·Mixpanel 공통)
 - 파라미터명: `snake_case` 통일
+- **`user_type`** 파라미터를 모든 이벤트에 포함 — `advertiser`(의뢰사) / `partner`(파트너사) / `guest`(비회원)
+- **`project_type`** 파라미터로 공고 vs 1:1 구분 — 퍼널이 서로 다르기 때문
 - GA4 파라미터 제한: 이벤트당 최대 25개, 값 최대 100자
-- 전환(Conversion) 이벤트는 GA4 관리 콘솔에서 별도 마킹 필요
+- GA4 전환 이벤트는 관리 콘솔에서 별도 마킹 필요
 
 ---
 
@@ -18,7 +20,7 @@
 
 | 이벤트명 | 수집 시점 | 툴 |
 |---------|---------|-----|
-| `page_view` | 페이지 이동 시 | GA4 + Mixpanel |
+| `page_view` | 페이지 이동 시 | GA4 + Mixpanel (FunnelRouteListener) |
 | `session_start` | 세션 시작 시 | GA4 자동 |
 | `first_visit` | 첫 방문 시 | GA4 자동 |
 
@@ -34,9 +36,9 @@
 
 ## 3. 유입 & 세션
 
-| 이벤트명 | 트리거 | 전환 여부 |
-|---------|--------|---------|
-| `site_visit` | 세션당 최초 1회 진입 | - |
+| 이벤트명 | 트리거 | 구현 |
+|---------|--------|------|
+| `site_visit` | 세션당 최초 1회 진입 | ✅ 완료 |
 
 **파라미터**
 
@@ -49,41 +51,87 @@
 
 ## 4. 회원가입 퍼널
 
-| 이벤트명 | 트리거 | GA4 전환 |
-|---------|--------|---------|
-| `signup_funnel` | 각 단계 화면 진입 시 | - |
-| `signup_complete` | 이메일 인증 완료 시 | ✅ 전환 |
+| 이벤트명 | 트리거 | GA4 전환 | 구현 |
+|---------|--------|---------|------|
+| `signup_funnel` | 각 단계 화면 진입 시 | - | ✅ 완료 |
+| `signup_complete` | 이메일 인증 완료 시 | ✅ 전환 | ✅ 완료 |
 
 **`signup_funnel` 파라미터**
 
+| 파라미터 | 예시값 |
+|---------|--------|
+| `step` | `1` / `2` / `3` |
+| `step_name` | `account` / `phone` / `email` |
+| `path` | `/signup` |
+
+**`signup_complete` 파라미터**
+
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `step` | `1` / `2` / `3` | 단계 번호 |
-| `step_name` | `account` / `phone` / `email` | 단계명 |
-| `path` | `/signup` | 경로 |
+| `user_type` | `advertiser` / `partner` | 역할 구분 (핵심) |
+
+> **설계 포인트**: `user_type`을 가입 완료 시점에 확정해야 이후 의뢰사/파트너사 퍼널을 분리해서 볼 수 있음
 
 ---
 
-## 5. 프로젝트 등록 퍼널 (의뢰사)
+## 5. 발견 & 탐색 이벤트 (Discovery)
 
-> 프로젝트 등록 마법사 각 화면 진입 시 자동 추적
+> 파트너사가 공고를 얼마나 보다가 지원하는지, 의뢰사가 대행사를 어떻게 탐색하는지 파악
 
-| 이벤트명 패턴 | 예시 | 설명 |
-|-------------|------|------|
-| `step_{N}_{화면명}` | `step_1_partner_selection` | 화면 진입 |
-| `step_{N}_{화면명}_cta` | `step_2_project_name_cta` | 버튼 클릭 |
+| 이벤트명 | 트리거 | GA4 전환 | 구현 |
+|---------|--------|---------|------|
+| `project_viewed` | 공고 상세 페이지 진입 | - | ✅ 완료 |
+| `partner_searched` | 파트너 검색 실행 (800ms 디바운스) | - | ✅ 완료 |
+| `agency_favorited` | 대행사·제작사 즐겨찾기 추가/해제 | - | ✅ 완료 |
 
-**공통 파라미터**
+**`project_viewed` 파라미터**
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `wizard_step` | `1` | 마법사 순서 |
-| `screen` | `partner_selection` | 화면 식별자 |
-| `title_ko` | `파트너 유형 선택` | 화면 제목(KR) |
-| `action` | `enter` / `next` / `back` / `submit` | 행동 유형 |
-| `path` | `/create-project/step1` | 경로 |
+| `project_id` | `PN-20240614-0001` | 프로젝트 ID |
+| `project_type` | `공고` / `1:1` | 유형 구분 |
+| `user_type` | `partner` / `guest` | 누가 보는지 |
 
-**등록 단계 목록**
+**`partner_searched` 파라미터**
+
+| 파라미터 | 예시값 |
+|---------|--------|
+| `query` | `영상 제작` |
+| `category` | `agency` / `production` |
+| `user_type` | `advertiser` |
+
+**`agency_favorited` 파라미터**
+
+| 파라미터 | 예시값 |
+|---------|--------|
+| `company_id` | `42` |
+| `company_type` | `agency` / `production` |
+| `action` | `add` / `remove` |
+| `user_type` | `advertiser` |
+
+---
+
+## 6. 프로젝트 등록 퍼널 (의뢰사, 공고/1:1)
+
+> 마법사 각 화면 진입 시 자동 추적 — URL 기반
+
+| 이벤트명 패턴 | 설명 | 구현 |
+|-------------|------|------|
+| `step_{N}_{화면명}` | 화면 진입 | ✅ 완료 |
+| `step_{N}_{화면명}_cta` | 버튼 클릭 | ✅ 완료 |
+| `project_submitted` | 최종 제출 완료 | ✅ 완료 |
+
+**`project_submitted` 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `project_type` | `공고` / `1:1` / `컨설팅` | 유형 구분 (핵심) |
+| `partner_type` | `제작` / `대행` | 파트너 유형 |
+| `budget_range` | `3000-5000` | 예산 구간(만원) |
+
+> **설계 포인트**: `project_type`으로 공고/1:1을 나눠야 퍼널 이탈률을 따로 볼 수 있음
+
+**등록 단계 이벤트 목록**
 
 | 단계 | 화면명 | 이벤트명 |
 |-----|--------|---------|
@@ -106,149 +154,158 @@
 
 ---
 
-## 6. 핵심 비즈니스 이벤트 (미구현 → 개발 요청 필요)
+## 7. 파트너사 퍼널 (공고 지원)
 
-### 6-1. 프로젝트
+| 이벤트명 | 트리거 | GA4 전환 | 구현 |
+|---------|--------|---------|------|
+| `project_viewed` | 공고 상세 조회 | - | ✅ 완료 |
+| `partner_applied` | 참여신청 버튼 클릭 | ✅ 전환 | ✅ 완료 |
+| `proposal_submitted` | 제안서 제출 | ✅ 전환 | ⬜ 개발 필요 |
+| `partner_selected` | 파트너로 선정됨 | ✅ 전환 | ⬜ 개발 필요 |
+| `contract_signed` | 계약 체결 | ✅ 전환 | ⬜ 개발 필요 |
 
-| 이벤트명 | 트리거 | GA4 전환 | 우선순위 |
-|---------|--------|---------|---------|
-| `project_submitted` | 프로젝트 최종 제출 | ✅ | 높음 |
-| `project_approved` | 관리자 승인 | - | 높음 |
-| `project_rejected` | 관리자 반려 | - | 중간 |
-| `project_cancelled` | 프로젝트 취소 | - | 중간 |
-
-**`project_submitted` 파라미터**
+**`partner_applied` 파라미터**
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `project_id` | `PID-20240615-0001` | 프로젝트 ID |
-| `project_type` | `공고` / `1:1` | 유형 |
-| `partner_type` | `제작` / `대행` | 파트너 유형 |
-| `budget_range` | `3000-5000` | 예산 구간(만원) |
-| `media_channel` | `TV` / `디지털` | 매체 |
+| `project_id` | `PN-20240614-0001` | 프로젝트 ID |
+| `project_type` | `공고` / `1:1` | 유형 구분 |
+| `partner_type` | `제작사` / `대행사` | 파트너 유형 |
 
 ---
 
-### 6-2. 파트너 매칭
+## 8. 컨설팅 퍼널
 
-| 이벤트명 | 트리거 | GA4 전환 | 우선순위 |
-|---------|--------|---------|---------|
-| `partner_applied` | 파트너사 지원 완료 | ✅ | 높음 |
-| `proposal_submitted` | 제안서 제출 | ✅ | 높음 |
-| `partner_selected` | 파트너 선정 완료 | ✅ | 높음 |
-| `contract_signed` | 계약 체결 | ✅ | 높음 |
+| 이벤트명 | 트리거 | GA4 전환 | 구현 |
+|---------|--------|---------|------|
+| `consulting_inquiry_submitted` | 컨설팅 문의 최종 접수 | ✅ 전환 | ✅ 완료 |
+| `consulting_matched` | 컨설턴트 매칭 완료 | ✅ 전환 | ⬜ 개발 필요 |
+| `consulting_to_project` | 컨설팅 → 프로젝트 전환 | ✅ 전환 | ⬜ 개발 필요 |
 
-**`partner_selected` 파라미터**
+**`consulting_inquiry_submitted` 파라미터**
 
 | 파라미터 | 예시값 |
 |---------|--------|
-| `project_id` | `PN-20240614-0001` |
-| `partner_type` | `제작사` / `대행사` |
-| `applicant_count` | `5` |
-| `days_to_select` | `12` |
+| `title` | `TV CF 제작 문의` (100자 이하) |
+| `has_attachment` | `true` / `false` |
+| `user_type` | `advertiser` |
 
 ---
 
-### 6-3. 컨설팅
+## 9. 관리자 운영 이벤트
 
-| 이벤트명 | 트리거 | GA4 전환 |
-|---------|--------|---------|
-| `consulting_inquiry_submitted` | 컨설팅 문의 제출 | ✅ |
-| `consulting_matched` | 컨설턴트 매칭 완료 | ✅ |
-| `consulting_to_project` | 컨설팅 → 프로젝트 전환 | ✅ |
+> 관리자 행동은 별도 GA4 Property 또는 Mixpanel 전용 프로젝트 권장
 
----
-
-### 6-4. 관리자 운영
-
-| 이벤트명 | 트리거 |
-|---------|--------|
-| `admin_project_approved` | 관리자 프로젝트 승인 |
-| `admin_project_rejected` | 관리자 프로젝트 반려 |
-| `admin_member_suspended` | 회원 정지 처리 |
-| `admin_notice_published` | 공지사항 게시 |
-| `admin_banner_published` | 배너 게시 |
-| `admin_notification_sent` | 알림 발송 |
+| 이벤트명 | 트리거 | 구현 |
+|---------|--------|------|
+| `admin_project_approved` | 관리자 프로젝트 승인 | ⬜ 개발 필요 |
+| `admin_project_rejected` | 관리자 프로젝트 반려 | ⬜ 개발 필요 |
+| `admin_member_suspended` | 회원 정지 처리 | ⬜ 개발 필요 |
+| `admin_notice_published` | 공지사항 게시 | ⬜ 개발 필요 |
+| `admin_banner_published` | 배너 게시 | ⬜ 개발 필요 |
+| `admin_notification_sent` | 알림 발송 | ⬜ 개발 필요 |
 
 ---
 
-## 7. GA4 전환 이벤트 설정 목록
+## 10. GA4 전환 이벤트 설정 목록
 
-GA4 관리 콘솔 → 이벤트 → 아래 이벤트를 "전환으로 표시"
+> GA4 관리 콘솔 → 이벤트 → 아래 이벤트를 "전환으로 표시"
 
-| 이벤트명 | 전환 의미 |
-|---------|----------|
-| `signup_complete` | 회원가입 완료 |
-| `project_submitted` | 프로젝트 등록 완료 |
-| `partner_applied` | 파트너 지원 완료 |
-| `proposal_submitted` | 제안서 제출 |
-| `partner_selected` | 파트너 선정 |
-| `contract_signed` | 계약 체결 |
-| `consulting_inquiry_submitted` | 컨설팅 문의 |
-| `consulting_to_project` | 컨설팅 → 프로젝트 전환 |
+| 이벤트명 | 전환 의미 | 역할 |
+|---------|----------|------|
+| `signup_complete` | 회원가입 완료 | 공통 |
+| `project_submitted` | 프로젝트 등록 완료 | 의뢰사 |
+| `partner_applied` | 파트너 지원 완료 | 파트너사 |
+| `proposal_submitted` | 제안서 제출 | 파트너사 |
+| `partner_selected` | 파트너 선정 | 의뢰사 |
+| `contract_signed` | 계약 체결 | 공통 |
+| `consulting_inquiry_submitted` | 컨설팅 문의 | 의뢰사 |
+| `consulting_to_project` | 컨설팅 → 프로젝트 전환 | 의뢰사 |
 
 ---
 
-## 8. GA4 퍼널 설계 (탐색 보고서)
+## 11. 퍼널 설계 (GA4 탐색 보고서 / Mixpanel 퍼널)
 
-### 의뢰사 핵심 퍼널
+### 의뢰사 — 공고 프로젝트 퍼널
 
 ```
 site_visit
-  → signup_complete
-    → project_submitted
-      → partner_selected
+  → signup_complete (user_type=advertiser)
+    → step_1_partner_selection  ← 등록 마법사 시작
+      → step_7_budget           ← 이탈률 집중 모니터링
+        → project_submitted (project_type=공고)
+          → partner_selected
+            → contract_signed
+```
+
+### 의뢰사 — 1:1 프로젝트 퍼널
+
+```
+site_visit
+  → signup_complete (user_type=advertiser)
+    → step_1_partner_selection
+      → project_submitted (project_type=1:1)
         → contract_signed
 ```
 
-### 파트너사 핵심 퍼널
+### 파트너사 — 지원 퍼널
 
 ```
 site_visit
-  → signup_complete
-    → partner_applied
-      → proposal_submitted
-        → partner_selected (수주)
+  → signup_complete (user_type=partner)
+    → project_viewed (project_type=공고)  ← 발견
+      → partner_applied                  ← 행동
+        → proposal_submitted
+          → partner_selected (수주)
 ```
 
-### 프로젝트 등록 이탈 퍼널
+### 컨설팅 전환 퍼널
 
 ```
-step_1_partner_selection
-  → step_7_budget (이탈률 주목)
-    → step_16_additional_description
-      → project_submitted
+site_visit
+  → consulting_inquiry_submitted
+    → consulting_matched
+      → consulting_to_project            ← 컨설팅 → 실제 프로젝트
+        → project_submitted
 ```
 
 ---
 
-## 9. Mixpanel 퍼널 / 코호트 설계
+## 12. Mixpanel 코호트 분석 설계
 
-| 분석 목적 | 퍼널 구성 |
+| 분석 목적 | 퍼널 / 코호트 구성 |
 |---------|---------|
-| 등록 전환율 | `site_visit` → `signup_complete` |
-| 의뢰 전환율 | `signup_complete` → `project_submitted` |
-| 매칭 전환율 | `project_submitted` → `partner_selected` |
-| 계약 전환율 | `partner_selected` → `contract_signed` |
-| 지원 전환율 | `signup_complete` → `partner_applied` |
+| 의뢰사 가입 → 등록 전환율 | `signup_complete (advertiser)` → `project_submitted` |
+| 공고 등록 이탈 단계 파악 | `step_1_*` ~ `step_16_*` → `project_submitted` |
+| 파트너사 발견 → 지원 전환율 | `project_viewed` → `partner_applied` |
+| 매칭 → 계약 전환율 | `partner_selected` → `contract_signed` |
+| 컨설팅 전환율 | `consulting_inquiry_submitted` → `consulting_to_project` |
+| 대행사 탐색 깊이 | `partner_searched` → `agency_favorited` → `project_submitted` |
 
 ---
 
-## 10. 구현 현황
+## 13. 구현 현황 요약
 
 | 이벤트 | GA4 | Mixpanel | 상태 |
 |--------|-----|----------|------|
 | `page_view` | ✅ | ✅ | 완료 |
 | `site_visit` | ✅ | ✅ | 완료 |
 | `signup_funnel` | ✅ | ✅ | 완료 |
-| `signup_complete` | ✅ | ✅ | 완료 |
-| `step_N_화면명` | ✅ | ✅ | 완료 |
-| `project_submitted` | ⬜ | ⬜ | 개발 필요 |
-| `partner_applied` | ⬜ | ⬜ | 개발 필요 |
+| `signup_complete` | ✅ | ✅ | 완료 (user_type 추가됨) |
+| `step_N_화면명` (16단계) | ✅ | ✅ | 완료 |
+| `project_submitted` | ✅ | ✅ | 완료 |
+| `project_viewed` | ✅ | ✅ | 완료 |
+| `partner_applied` | ✅ | ✅ | 완료 |
+| `consulting_inquiry_submitted` | ✅ | ✅ | 완료 |
+| `partner_searched` | ✅ | ✅ | 완료 |
+| `agency_favorited` | ✅ | ✅ | 완료 |
+| `proposal_submitted` | ⬜ | ⬜ | 개발 필요 |
 | `partner_selected` | ⬜ | ⬜ | 개발 필요 |
 | `contract_signed` | ⬜ | ⬜ | 개발 필요 |
-| `consulting_inquiry_submitted` | ⬜ | ⬜ | 개발 필요 |
+| `consulting_matched` | ⬜ | ⬜ | 개발 필요 |
+| `consulting_to_project` | ⬜ | ⬜ | 개발 필요 |
+| 관리자 이벤트 (6종) | ⬜ | ⬜ | 개발 필요 |
 
 ---
 
-*이 문서는 ADMarket 플랫폼 기반으로 작성된 초안입니다. 실제 구현 전 개발팀 검토 필요.*
+*이 문서는 ADMarket 플랫폼 GA4·Mixpanel 설계 기준입니다. 구현 완료 후 이 표를 업데이트하세요.*

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Layout from "@/components/layout/layout";
 import SearchBar from "@/components/common/search-bar";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Settings, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import CompanyCard from "@/components/work/company-card";
+import { trackPartnerSearched, trackAgencyFavorited } from "@/lib/analytics";
 import portfolio1 from "@assets/A000561001259B_1760322383639.jpg";
 import portfolio2 from "@assets/A000561002A4A6_1760322383641.jpg";
 import portfolio3 from "@assets/5_1760322393353.png";
@@ -18,17 +19,32 @@ export default function AgencySearch() {
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
   const [excludeAlignment, setExcludeAlignment] = useState(true);
   const { toast } = useToast();
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    if (value.trim().length < 1) return;
+    searchTimerRef.current = setTimeout(() => {
+      trackPartnerSearched({
+        query: value.trim(),
+        category: activeTab,
+      });
+    }, 800);
+  };
 
   const toggleFavorite = (id: number) => {
     const newFavorites = new Set(favorites);
     if (newFavorites.has(id)) {
       newFavorites.delete(id);
+      trackAgencyFavorited({ company_id: id, company_type: activeTab, action: "remove" });
       toast({
         description: "즐겨찾기 해제 완료",
         duration: 2000,
       });
     } else {
       newFavorites.add(id);
+      trackAgencyFavorited({ company_id: id, company_type: activeTab, action: "add" });
       toast({
         description: "즐겨찾기 추가 완료",
         duration: 2000,
@@ -54,7 +70,7 @@ export default function AgencySearch() {
             <div className="flex gap-3 max-w-2xl mx-auto mb-6">
               <SearchBar
                 value={searchQuery}
-                onChange={setSearchQuery}
+                onChange={handleSearchChange}
                 placeholder="검색어를 입력하세요"
                 className="flex-1"
               />

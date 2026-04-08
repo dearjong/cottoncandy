@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Upload } from "lucide-react";
 import { COMMON_MESSAGES } from "@/lib/messages";
-import { trackCreateProjectCta } from "@/lib/analytics";
+import { trackCreateProjectCta, trackConsultingInquirySubmitted } from "@/lib/analytics";
 
 export default function ConsultingInquiry() {
   const stepNumber = 2;
@@ -46,7 +46,6 @@ export default function ConsultingInquiry() {
 
   const handleSubmit = () => {
     trackCreateProjectCta(location, "submit");
-    // 첫 번째 확인 팝업 표시
     setShowConfirmDialog(true);
   };
 
@@ -86,7 +85,11 @@ export default function ConsultingInquiry() {
     }
 
     setCreatedProjectId(newId)
-    
+    trackConsultingInquirySubmitted({
+      title: title.trim().slice(0, 100),
+      has_attachment: files.length > 0,
+    });
+
     // 첫 번째 팝업 닫고 두 번째 완료 팝업 표시
     setShowConfirmDialog(false);
     setShowCompleteDialog(true);
