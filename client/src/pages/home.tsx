@@ -11,10 +11,16 @@ import {
   publishAnalytics,
 } from "@/lib/analytics";
 
-const EXP_ID = "home_cta_text";
+const EXP_ID_CTA = "home_cta_text";
 const CTA_COPY: Record<string, string> = {
   control:      "내 마음에 쏙드는 전문기업 추천받기 Go~*",
   variant_free: "지금 무료로 의뢰하기",
+};
+
+const EXP_ID_TITLE = "home_hero_title";
+const TITLE_COPY: Record<string, { title: string; sub?: string }> = {
+  control:        { title: '"프로가 만드는 광고,\n프로가 선택한 전문기업"' },
+  variant_question: { title: "어떤 광고를 만들어드릴까요?" },
 };
 
 export default function Home() {
@@ -24,17 +30,24 @@ export default function Home() {
   const eventInfo = getSubtitle();
 
   useEffect(() => {
-    assignExperiment(EXP_ID, ["control", "variant_free"]);
-    const v = getExperimentVariant(EXP_ID) ?? "control";
-    trackExperimentViewed(EXP_ID, v);
+    assignExperiment(EXP_ID_CTA, ["control", "variant_free"]);
+    const vCta = getExperimentVariant(EXP_ID_CTA) ?? "control";
+    trackExperimentViewed(EXP_ID_CTA, vCta);
+
+    assignExperiment(EXP_ID_TITLE, ["control", "variant_question"]);
+    const vTitle = getExperimentVariant(EXP_ID_TITLE) ?? "control";
+    trackExperimentViewed(EXP_ID_TITLE, vTitle);
   }, []);
 
-  const ctaVariant = getExperimentVariant(EXP_ID) ?? "control";
+  const ctaVariant = getExperimentVariant(EXP_ID_CTA) ?? "control";
   const ctaText = CTA_COPY[ctaVariant];
+
+  const titleVariant = getExperimentVariant(EXP_ID_TITLE) ?? "control";
+  const heroTitle = TITLE_COPY[titleVariant]?.title ?? TITLE_COPY.control.title;
 
   const handleCtaClick = () => {
     publishAnalytics("home_cta_clicked", {
-      experiment_id: EXP_ID,
+      experiment_id: EXP_ID_CTA,
       variant: ctaVariant,
     });
   };
@@ -120,9 +133,8 @@ export default function Home() {
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-white to-gray-50 pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4" data-testid="hero-title">
-            "프로가 만드는 광고,<br className="sm:hidden" />
-            <br className="hidden sm:block" /> 프로가 선택한 전문기업"
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 whitespace-pre-line" data-testid="hero-title">
+            {heroTitle}
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 mb-6" data-testid="hero-subtitle">
             광고주는 선택만, 제작은 전문가가, 이 모든것이 무료!
