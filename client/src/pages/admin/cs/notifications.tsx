@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { publishAnalytics } from "@/lib/analytics"
 import { PageHeader } from "@/components/admin/page-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -83,7 +84,14 @@ export default function CsNotificationsPage() {
                 <label className="text-sm font-medium">내용</label>
                 <Textarea placeholder="알림 내용" value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={4} />
               </div>
-              <Button className="w-full" onClick={() => setForm({ type: 'email', recipients: '', title: '', content: '' })}>
+              <Button className="w-full" onClick={() => {
+                publishAnalytics("admin_notification_sent", {
+                  notif_type: form.type,
+                  title: form.title.slice(0, 100),
+                  has_recipients: form.recipients.trim().length > 0,
+                })
+                setForm({ type: 'email', recipients: '', title: '', content: '' })
+              }}>
                 <Send className="h-4 w-4 mr-2" />알림 발송
               </Button>
             </CardContent>

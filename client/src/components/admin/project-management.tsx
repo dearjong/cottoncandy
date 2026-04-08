@@ -1,5 +1,6 @@
 import { useState, useEffect, forwardRef, useImperativeHandle, useMemo, type ReactNode } from "react"
 import { useLocation } from "wouter"
+import { publishAnalytics } from "@/lib/analytics"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -2457,7 +2458,12 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
               type="button"
               className="bg-pink-600 hover:bg-pink-700 text-white"
               onClick={() => {
-                // TODO: 실제 API 연동 시 상태 업데이트 및 이력 저장
+                publishAnalytics("admin_project_approved", {
+                  project_id: selectedProject?.id,
+                  project_title: selectedProject?.title?.slice(0, 100),
+                  client: selectedProject?.client,
+                  project_type: selectedProject?.type,
+                })
                 setApproveDialogOpen(false)
                 setSelectedProject(null)
               }}
@@ -2659,8 +2665,14 @@ export const ProjectManagement = forwardRef<ProjectManagementRef, ProjectManagem
               type="button"
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
+                publishAnalytics("admin_project_rejected", {
+                  project_id: selectedProject?.id,
+                  project_title: selectedProject?.title?.slice(0, 100),
+                  client: selectedProject?.client,
+                  project_type: selectedProject?.type,
+                  reject_reason: rejectReason?.slice(0, 200),
+                })
                 setConfirmRejectOpen(false)
-                // TODO: 실제 API 연동 시 상태 업데이트 및 이력 저장
                 setSelectedProject(null)
               }}
             >

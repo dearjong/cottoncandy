@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { publishAnalytics } from "@/lib/analytics"
 import { PageHeader } from "@/components/admin/page-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -88,7 +89,14 @@ export default function CsNoticesPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={() => setNewNotice({ title: '', content: '', type: 'general', language: 'ko' })}>공지 게시</Button>
+              <Button onClick={() => {
+                publishAnalytics("admin_notice_published", {
+                  notice_type: newNotice.type,
+                  language: newNotice.language,
+                  title: newNotice.title.slice(0, 100),
+                })
+                setNewNotice({ title: '', content: '', type: 'general', language: 'ko' })
+              }}>공지 게시</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

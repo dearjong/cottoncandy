@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { publishAnalytics } from "@/lib/analytics"
 import { PageHeader } from "@/components/admin/page-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -86,7 +87,15 @@ export default function CsBannersPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={() => setNewBanner({ title: '', imageUrl: '', linkUrl: '', position: 'main', startDate: '', endDate: '' })}>배너 등록</Button>
+              <Button onClick={() => {
+                publishAnalytics("admin_banner_published", {
+                  banner_title: newBanner.title.slice(0, 100),
+                  position: newBanner.position,
+                  start_date: newBanner.startDate,
+                  end_date: newBanner.endDate,
+                })
+                setNewBanner({ title: '', imageUrl: '', linkUrl: '', position: 'main', startDate: '', endDate: '' })
+              }}>배너 등록</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

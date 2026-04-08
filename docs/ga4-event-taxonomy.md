@@ -198,12 +198,12 @@
 
 | 이벤트명 | 트리거 | 구현 |
 |---------|--------|------|
-| `admin_project_approved` | 관리자 프로젝트 승인 | ⬜ 개발 필요 |
-| `admin_project_rejected` | 관리자 프로젝트 반려 | ⬜ 개발 필요 |
-| `admin_member_suspended` | 회원 정지 처리 | ⬜ 개발 필요 |
-| `admin_notice_published` | 공지사항 게시 | ⬜ 개발 필요 |
-| `admin_banner_published` | 배너 게시 | ⬜ 개발 필요 |
-| `admin_notification_sent` | 알림 발송 | ⬜ 개발 필요 |
+| `admin_project_approved` | 관리자 프로젝트 승인 | ✅ 완료 |
+| `admin_project_rejected` | 관리자 프로젝트 반려 | ✅ 완료 |
+| `admin_member_suspended` | 회원 정지 처리 | ⬜ 개발 필요 (회원관리 페이지 정지 기능 UI 필요) |
+| `admin_notice_published` | 공지사항 게시 | ✅ 완료 |
+| `admin_banner_published` | 배너 게시 | ✅ 완료 |
+| `admin_notification_sent` | 알림 발송 | ✅ 완료 |
 
 ---
 
@@ -299,12 +299,17 @@ site_visit
 | `consulting_inquiry_submitted` | ✅ | ✅ | 완료 |
 | `partner_searched` | ✅ | ✅ | 완료 |
 | `agency_favorited` | ✅ | ✅ | 완료 |
-| `proposal_submitted` | ⬜ | ⬜ | 개발 필요 |
-| `partner_selected` | ⬜ | ⬜ | 개발 필요 |
-| `contract_signed` | ⬜ | ⬜ | 개발 필요 |
-| `consulting_matched` | ⬜ | ⬜ | 개발 필요 |
-| `consulting_to_project` | ⬜ | ⬜ | 개발 필요 |
-| 관리자 이벤트 (6종) | ⬜ | ⬜ | 개발 필요 |
+| `admin_project_approved` | ✅ | ✅ | 완료 |
+| `admin_project_rejected` | ✅ | ✅ | 완료 |
+| `admin_notice_published` | ✅ | ✅ | 완료 |
+| `admin_banner_published` | ✅ | ✅ | 완료 |
+| `admin_notification_sent` | ✅ | ✅ | 완료 |
+| `proposal_submitted` | ⬜ | ⬜ | 제안서 제출 UI 구현 후 추가 |
+| `partner_selected` | ⬜ | ⬜ | 파트너 선정 UI 구현 후 추가 |
+| `contract_signed` | ⬜ | ⬜ | 계약 체결 UI 구현 후 추가 |
+| `consulting_matched` | ⬜ | ⬜ | 컨설턴트 매칭 UI 구현 후 추가 |
+| `consulting_to_project` | ⬜ | ⬜ | 컨설팅→프로젝트 전환 UI 구현 후 추가 |
+| `admin_member_suspended` | ⬜ | ⬜ | 회원 정지 기능 UI 구현 후 추가 |
 
 ---
 
