@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { getSubtitle } from "@/config/global-events";
-import { identifyUser } from "@/lib/analytics";
+import { identifyUser, trackLogin } from "@/lib/analytics";
 import memberImage from "@assets/로그인 회원_1759381986859.png";
 import nonMemberImage from "@assets/로그인 비회원_1759381986859.png";
 import googleLogo from "@assets/Logo_Google_1759383453744.png";
@@ -114,6 +114,7 @@ export default function Login() {
     localStorage.setItem('userType', '의뢰');
     localStorage.setItem('userMode', 'request');
     identifyUser({ userId: `user-${email}`, userName: "이꽃별", userType: "advertiser", email });
+    trackLogin({ method: "email", user_type: "advertiser" });
     setLocation('/work/home');
   };
 

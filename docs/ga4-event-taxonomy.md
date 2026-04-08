@@ -1,6 +1,6 @@
 # ADMarket GA4 · Mixpanel 이벤트 정의서
 
-> 버전: v2.5 | 작성일: 2026-04-08  
+> 버전: v2.7 | 작성일: 2026-04-08  
 > 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
 
 ---
@@ -37,6 +37,35 @@ localStorage.setItem("analytics_user_id", userId)   ← 새로고침 대응
 | `email` | 이메일 주소 | `kkotbyul@example.com` |
 
 > **실서비스 연동 시**: `userId`를 서버 DB의 사용자 PK(UUID)로 교체하면 완성.
+
+---
+
+### trackLogin — 로그인 이벤트
+
+> GA4 표준 `login` 이벤트 + Mixpanel `user_login` 커스텀 이벤트.  
+> `identifyUser()` 직후 호출.
+
+| 호출 위치 | 메서드 | 구현 |
+|-----------|--------|------|
+| `member/login.tsx` → `handleLogin` | `email` | ✅ 완료 |
+| `admin/login.tsx` → `handleLogin` | `email` | ✅ 완료 |
+
+#### 파라미터
+
+| 파라미터 | 타입 | 예시 |
+|---------|------|------|
+| `method` | `"email"` / `"naver"` / `"google"` / `"admin"` | `"email"` |
+| `user_type` | `"advertiser"` / `"partner"` / `"admin"` | `"advertiser"` |
+
+#### GA4 전송 형태
+
+```javascript
+gtag("event", "login", { method: "email" })   // GA4 표준 이벤트
+// Mixpanel: "user_login" { method, user_type }
+```
+
+> GA4 BigQuery 내보내기 시 `event_name = 'login'` 으로 필터.  
+> 소셜 로그인(네이버·구글) 연결 시 `method` 파라미터만 교체하면 됨.
 
 ---
 

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { identifyUser } from "@/lib/analytics"
+import { identifyUser, trackLogin } from "@/lib/analytics"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -57,6 +57,7 @@ export default function LoginPage() {
       userType: "admin",
       userName: loginData.email,
     })
+    trackLogin({ method: "email", user_type: "admin" })
     // TODO: 실제 로그인 API 호출
   }
 

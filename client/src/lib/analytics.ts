@@ -116,6 +116,25 @@ export function reIdentifyIfLoggedIn() {
   } catch {/* ignore */}
 }
 
+/**
+ * 로그인 완료 이벤트 — GA4 표준 `login` 이벤트 + Mixpanel 커스텀 이벤트.
+ * identifyUser() 호출 직후 함께 사용할 것.
+ */
+export function trackLogin(props: {
+  method?: "email" | "naver" | "google" | "admin";
+  user_type?: "advertiser" | "partner" | "admin";
+}) {
+  // GA4: 표준 login 이벤트 (BigQuery / 전환 분석에 활용 가능)
+  if (typeof gtag !== "undefined") {
+    gtag("event", "login", { method: props.method ?? "email" });
+  }
+  // Mixpanel: 커스텀 파라미터 포함
+  publishAnalytics("user_login", {
+    method: props.method ?? "email",
+    user_type: props.user_type ?? "advertiser",
+  });
+}
+
 // ─── 유입 & 세션 ───────────────────────────────────────────────
 
 /** 세션당 1회 — 퍼널 1단계(유입) */
