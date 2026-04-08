@@ -483,7 +483,7 @@ export default function Header() {
                             : 'text-gray-600'
                         }`}
                       >
-                        개인
+                        의뢰
                       </button>
                       <button
                         type="button"
@@ -502,7 +502,7 @@ export default function Header() {
                             : 'text-gray-600'
                         }`}
                       >
-                        기업
+                        참여
                       </button>
                       {/* Sliding background */}
                       <div
