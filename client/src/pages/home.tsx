@@ -20,7 +20,7 @@ const CTA_COPY: Record<string, string> = {
 const EXP_ID_TITLE = "home_hero_title";
 const TITLE_COPY: Record<string, { title: string; sub: string }> = {
   control:          { title: '"프로가 만드는 광고,\n프로가 선택한 전문기업"', sub: "" },
-  variant_question: { title: "어떤 광고를 만들어드릴까요?",                   sub: "기획부터 제작까지, 검증된 전문기업이 함께합니다." },
+  variant_question: { title: "어떤 광고를 만들어드릴까요?",                   sub: "광고주는 선택만, 제작은 전문가가, 이 모든것이 무료!" },
 };
 
 export default function Home() {
