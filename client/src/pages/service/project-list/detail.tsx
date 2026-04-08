@@ -1,16 +1,269 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useRoute } from "wouter";
 import { motion } from "framer-motion";
 import Layout from "@/components/layout/layout";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, X } from "lucide-react";
 import { getProjectById } from "@/lib/mockProjectData";
 import { trackProjectViewed, trackPartnerApplied } from "@/lib/analytics";
+
+const MOCK_COMPANY = {
+  name: "솔서창기획",
+  bizNo: "123-12-12345",
+  ceo: "나애도",
+  address: "서울특별시 강남구 매도스타로1길 1",
+};
+
+const MOCK_FILES = [
+  { name: "[HSAD] 사업자 등록증 서류.pdf", tag: "포트폴리오", date: "2024-04-06" },
+  { name: "[HSAD] 포트폴리오_20250807.pdf", tag: "포트폴리오", date: "2024-04-06" },
+  { name: "[HSAD] 회사소개서 2025.pdf", tag: "회사소개서", date: "2024-04-06" },
+  { name: "[HSAD] 비밀유지 서약서 2025.pdf", tag: "비밀유지서약서", date: "2024-04-06" },
+];
+
+function ApplicationModal({
+  projectId,
+  projectTitle,
+  onClose,
+  onConfirm,
+}: {
+  projectId: string;
+  projectTitle: string;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  const [agreed, setAgreed] = useState(false);
+  const [portfolio, setPortfolio] = useState("선택해주세요.");
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 max-h-[92vh] flex flex-col">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 shrink-0">
+          <h2 className="text-xl font-bold text-gray-900">참여신청서</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* 본문 스크롤 영역 */}
+        <div className="overflow-y-auto flex-1 px-6 pb-4 space-y-5">
+
+          {/* 1. 프로젝트 */}
+          <section>
+            <div className="inline-flex items-center bg-gray-900 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-4">
+              1. 프로젝트
+            </div>
+            <div className="space-y-2.5">
+              <div className="flex gap-3">
+                <span className="text-xs text-pink-600 font-medium w-24 shrink-0 pt-0.5">* 프로젝트명</span>
+                <span className="text-xs text-gray-900">{projectTitle}</span>
+              </div>
+              <div className="flex gap-3">
+                <span className="text-xs text-pink-600 font-medium w-24 shrink-0 pt-0.5">* 프로젝트번호</span>
+                <span className="text-xs text-gray-900">{projectId}</span>
+              </div>
+            </div>
+          </section>
+
+          {/* 2. 참여업체 정보 */}
+          <section>
+            <div className="inline-flex items-center bg-gray-900 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-4">
+              2. 참여업체 정보
+            </div>
+            <div className="space-y-2.5">
+              {[
+                { label: "* 회사명", value: MOCK_COMPANY.name },
+                { label: "* 사업자등록번호", value: MOCK_COMPANY.bizNo },
+                { label: "* 대표자명", value: MOCK_COMPANY.ceo },
+                { label: "* 주소", value: MOCK_COMPANY.address },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex gap-3">
+                  <span className="text-xs text-pink-600 font-medium w-24 shrink-0 pt-0.5">{label}</span>
+                  <span className="text-xs text-gray-900">{value}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* 3. 담당자명 */}
+          <section>
+            <div className="inline-flex items-center bg-gray-900 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-4">
+              3. 담당자명
+            </div>
+            <div className="space-y-2.5">
+              {[
+                { label: "담당자명", ph: "4x1 담당자명" },
+                { label: "부서", ph: "4x1 전략기획팀" },
+                { label: "직책", ph: "4x1 팀장" },
+              ].map(({ label, ph }) => (
+                <div key={label} className="flex gap-3 items-center">
+                  <span className="text-xs text-gray-600 w-24 shrink-0">{label}</span>
+                  <input
+                    type="text"
+                    placeholder={ph}
+                    className="flex-1 text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 text-gray-400 placeholder:text-gray-300 focus:outline-none focus:border-gray-400"
+                  />
+                </div>
+              ))}
+              <div className="flex gap-3 items-center">
+                <span className="text-xs text-gray-600 w-24 shrink-0">연락처</span>
+                <div className="flex-1 flex gap-1">
+                  <input placeholder="4x2" className="w-14 text-xs border border-gray-200 rounded-lg px-2 py-1.5 placeholder:text-gray-300 focus:outline-none focus:border-gray-400" />
+                  <span className="text-gray-300 self-center">-</span>
+                  <input placeholder="4x3 123" className="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-1.5 placeholder:text-gray-300 focus:outline-none focus:border-gray-400" />
+                  <span className="text-gray-300 self-center">-</span>
+                  <input placeholder="4x4 5567" className="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-1.5 placeholder:text-gray-300 focus:outline-none focus:border-gray-400" />
+                </div>
+              </div>
+              <div className="flex gap-3 items-center">
+                <span className="text-xs text-gray-600 w-24 shrink-0">핸드폰</span>
+                <div className="flex-1 flex gap-1">
+                  <input placeholder="4x5 010" className="w-14 text-xs border border-gray-200 rounded-lg px-2 py-1.5 placeholder:text-gray-300 focus:outline-none focus:border-gray-400" />
+                  <span className="text-gray-300 self-center">-</span>
+                  <input placeholder="4x6 1234" className="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-1.5 placeholder:text-gray-300 focus:outline-none focus:border-gray-400" />
+                  <span className="text-gray-300 self-center">-</span>
+                  <input placeholder="4x7 5678" className="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-1.5 placeholder:text-gray-300 focus:outline-none focus:border-gray-400" />
+                </div>
+              </div>
+              <div className="flex gap-3 items-center">
+                <span className="text-xs text-gray-600 w-24 shrink-0">이메일</span>
+                <input
+                  type="email"
+                  placeholder="4x8.set@admarket.co.kr"
+                  className="flex-1 text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 placeholder:text-gray-300 focus:outline-none focus:border-gray-400"
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* 4. 참가의사 */}
+          <section>
+            <div className="inline-flex items-center bg-gray-900 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-4">
+              4. 참가의사
+            </div>
+            <p className="text-xs text-gray-700 leading-relaxed">
+              당 회사는 상기 프로젝트에 정식으로 참여를 신청하며,<br />
+              Cotton Candy 플랫폼의 규정과 공고 조건을 준수할 것을 확약합니다.
+            </p>
+          </section>
+
+          {/* 5. 서약사항 */}
+          <section>
+            <div className="inline-flex items-center bg-gray-900 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-4">
+              5. 서약사항
+            </div>
+            <div className="text-xs text-gray-700 leading-relaxed space-y-1.5">
+              <p>제출한 정보와 서류는 사실과 다름이 없음을 확약합니다.</p>
+              <p>공고 조건 및 Cotton Candy 플랫폼의 규정을 준수하겠습니다.</p>
+              <p>프로젝트 진행 중 계약 조건을 성실히 이행할 것을 서약합니다.</p>
+              <p>담합, 부정행위 등 위반 사항 발생 시 불이익을 감수합니다.</p>
+            </div>
+          </section>
+
+          {/* 6. 참여 신청 정보 */}
+          <section>
+            <div className="inline-flex items-center bg-gray-900 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-4">
+              6. 참여 신청 정보
+            </div>
+            <div className="space-y-3">
+              <div className="flex gap-3 items-start">
+                <span className="text-xs text-gray-600 w-24 shrink-0 pt-2">제목</span>
+                <input
+                  type="text"
+                  placeholder="참여신청서 제목을 입력해주세요"
+                  className="flex-1 text-xs border border-gray-200 rounded-lg px-2.5 py-2 placeholder:text-gray-300 focus:outline-none focus:border-gray-400"
+                />
+              </div>
+              <div className="flex gap-3 items-center">
+                <span className="text-xs text-gray-600 w-24 shrink-0">* 기업소개서&<br/>포트폴리오</span>
+                <select
+                  value={portfolio}
+                  onChange={e => setPortfolio(e.target.value)}
+                  className="flex-1 text-xs border border-gray-200 rounded-lg px-2.5 py-2 text-gray-500 focus:outline-none focus:border-gray-400 bg-white"
+                >
+                  <option>선택해주세요.</option>
+                  <option>2025 회사소개서</option>
+                  <option>2025 포트폴리오</option>
+                </select>
+              </div>
+
+              {/* 파일업로드 */}
+              <div>
+                <div className="text-xs text-gray-500 mb-2">파일업로드</div>
+                <div className="space-y-2">
+                  {MOCK_FILES.map((file, idx) => (
+                    <div key={idx} className="border border-gray-200 rounded-lg px-3 py-2.5 flex items-start justify-between gap-2">
+                      <div>
+                        <div className="text-xs font-medium text-gray-800">{file.name}</div>
+                        <div className="text-xs text-gray-400 mt-0.5">{file.tag} | {file.date}</div>
+                      </div>
+                      <button className="text-gray-400 hover:text-gray-700 shrink-0 mt-0.5">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 동의 체크박스 */}
+          <div className="bg-gray-50 rounded-xl p-3.5">
+            <p className="text-xs text-gray-600 leading-relaxed mb-3">
+              본 신청을 통해 제공한 모든 정보가 정확하며, 허위로 사실이 있을 경우
+              해당 대는 신청이 취소될 수 있음을 인지하고 있습니다. 또한 낙찰되지
+              않을시 제출된 자료는 반환하거나 폐기할 것을 보장합니다.
+            </p>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={e => setAgreed(e.target.checked)}
+                className="w-4 h-4 accent-pink-600 rounded"
+              />
+              <span className="text-xs text-gray-700 font-medium">위 내용에 동의합니다.</span>
+            </label>
+          </div>
+        </div>
+
+        {/* 하단 버튼 */}
+        <div className="px-6 py-4 border-t border-gray-100 flex gap-2 shrink-0">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 rounded-full border border-gray-300 text-xs text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+          >
+            취소
+          </button>
+          <button
+            className="flex-1 py-2.5 rounded-full border border-gray-300 text-xs text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+          >
+            회사소개서&포트폴리오 관리
+          </button>
+          <button
+            disabled={!agreed}
+            onClick={onConfirm}
+            className={`flex-1 py-2.5 rounded-full text-xs font-medium transition-colors ${
+              agreed
+                ? "bg-gray-900 text-white hover:bg-gray-700"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+            }`}
+          >
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ProjectDetail() {
   const [, params] = useRoute("/project-list/:id");
   const [, setLocation] = useLocation();
   const projectId = params?.id;
+  const [showModal, setShowModal] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const project = projectId ? getProjectById(projectId) : undefined;
 
@@ -22,6 +275,14 @@ export default function ProjectDetail() {
       user_type: "guest",
     });
   }, [projectId]);
+
+  const handleConfirm = () => {
+    if (projectId) {
+      trackPartnerApplied({ project_id: projectId, project_type: "공고" });
+    }
+    setShowModal(false);
+    setSubmitted(true);
+  };
 
   if (!project) {
     return (
@@ -387,22 +648,25 @@ export default function ProjectDetail() {
                 문의하기
               </Button>
               <Button
-                className="btn-pink flex-1"
-                onClick={() => {
-                  if (projectId) {
-                    trackPartnerApplied({
-                      project_id: projectId,
-                      project_type: "공고",
-                    });
-                  }
-                }}
+                className={`flex-1 ${submitted ? "btn-white" : "btn-pink"}`}
+                onClick={() => !submitted && setShowModal(true)}
+                disabled={submitted}
               >
-                참여신청
+                {submitted ? "신청완료" : "참여신청"}
               </Button>
             </div>
           </motion.div>
         </div>
       </div>
+
+      {showModal && projectId && (
+        <ApplicationModal
+          projectId={projectId}
+          projectTitle={`[베스트전자] 신제품 판매촉진 프로모션 대행사 모집`}
+          onClose={() => setShowModal(false)}
+          onConfirm={handleConfirm}
+        />
+      )}
     </Layout>
   );
 }
