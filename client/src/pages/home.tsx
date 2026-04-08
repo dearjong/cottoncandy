@@ -141,12 +141,14 @@ export default function Home() {
               {heroSub}
             </p>
           )}
-          <div className="py-2 px-4 mb-4 max-w-3xl mx-auto">
-            <p className="text-sm text-gray-700" data-testid="promotion-text">
-              {eventInfo.subtitle} 
-              <a href={eventInfo.link} className="text-pink-600 underline ml-1">{eventInfo.linkText}</a>
-            </p>
-          </div>
+          {titleVariant !== "variant_question" && (
+            <div className="py-2 px-4 mb-4 max-w-3xl mx-auto">
+              <p className="text-sm text-gray-700" data-testid="promotion-text">
+                {eventInfo.subtitle} 
+                <a href={eventInfo.link} className="text-pink-600 underline ml-1">{eventInfo.linkText}</a>
+              </p>
+            </div>
+          )}
           <Button
             className="btn-pink mb-8 max-w-md mx-auto"
             data-testid="button-recommend"
