@@ -120,7 +120,7 @@ export default function MyProfile() {
                 </div>
                 <div className="border border-gray-200 rounded-xl p-5 bg-gray-50">
                   <p className="text-sm text-gray-600 mb-3">
-                    아래 링크를 공유하면 지인이 가입할 때 추천인으로 기록됩니다.
+                    이 링크로 가입한 지인이 생기면 내가 추천인으로 인정돼요.
                   </p>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500 truncate font-mono select-all">
