@@ -78,7 +78,6 @@ export default function MyNotificationSettings() {
                 <Button
                   variant="outline"
                   className="flex-1 py-3 rounded-full text-sm"
-                  onClick={() => setRows(DEFAULT_SETTINGS)}
                 >
                   취소
                 </Button>
