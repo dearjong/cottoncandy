@@ -120,24 +120,24 @@ export default function Home() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-white to-gray-50 pt-24 pb-16">
+      <section className="bg-gradient-to-b from-white to-gray-50 pt-24 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 whitespace-pre-line hero-title" data-testid="hero-title">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 whitespace-pre-line hero-title" data-testid="hero-title">
             {heroTitle}
           </h1>
           {heroSub && (
-            <p className="text-lg sm:text-xl text-gray-600 mb-3" data-testid="hero-subtitle">
+            <p className="text-lg sm:text-xl text-gray-600 mb-1" data-testid="hero-subtitle">
               {heroSub}
             </p>
           )}
-          <div className="py-2 px-4 mb-4 max-w-3xl mx-auto">
+          <div className="py-1 px-4 mb-2 max-w-3xl mx-auto">
             <p className="text-sm text-gray-700" data-testid="promotion-text">
               {eventInfo.subtitle} 
               <a href={eventInfo.link} className="text-pink-600 underline ml-1">{eventInfo.linkText}</a>
             </p>
           </div>
           <Button
-            className="btn-pink mb-8 max-w-md mx-auto"
+            className="btn-pink mb-4 max-w-md mx-auto"
             data-testid="button-recommend"
             onClick={handleCtaClick}
           >
