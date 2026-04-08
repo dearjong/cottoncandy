@@ -2,16 +2,35 @@ import Layout from "@/components/layout/layout";
 import MySidebar from "@/components/my/my-sidebar";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { useLocation } from "wouter";
-import { Paperclip } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
+type NotifRow = {
+  id: string;
+  label: string;
+  app: boolean;
+  email: boolean;
+  sms: boolean;
+};
+
+const DEFAULT_SETTINGS: NotifRow[] = [
+  { id: "project-apply", label: "프로젝트 지원·제안", app: true, email: true, sms: false },
+  { id: "project-contract", label: "계약·정산 알림", app: true, email: true, sms: true },
+  { id: "project-status", label: "프로젝트 진행 상태 변경", app: true, email: false, sms: false },
+  { id: "message", label: "메시지·쪽지 수신", app: true, email: false, sms: false },
+  { id: "review", label: "리뷰·평가 알림", app: true, email: false, sms: false },
+  { id: "consulting", label: "컨설팅 문의 답변", app: true, email: true, sms: false },
+  { id: "marketing", label: "마케팅·혜택 정보", app: false, email: false, sms: false },
+  { id: "notice", label: "공지사항·시스템 점검", app: true, email: false, sms: false },
+];
+
 export default function MyNotificationSettings() {
-  const [, setLocation] = useLocation();
-  const [toggle1, setToggle1] = useState(true);
-  const [toggle2, setToggle2] = useState(true);
-  const [toggle3, setToggle3] = useState(true);
+  const [rows, setRows] = useState<NotifRow[]>(DEFAULT_SETTINGS);
+
+  const toggle = (id: string, channel: "app" | "email" | "sms") => {
+    setRows(prev =>
+      prev.map(r => (r.id === id ? { ...r, [channel]: !r[channel] } : r))
+    );
+  };
 
   return (
     <Layout>
@@ -23,56 +42,40 @@ export default function MyNotificationSettings() {
             <MySidebar />
 
             <div className="flex-1 max-w-2xl">
-              <div className="space-y-4">
-                <div className="project-section project-section-horizontal items-center">
-                  <span className="project-section-title"><span className="cotton-candy-pink">*</span> 제목</span>
-                  <div className="flex-1 flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">Value</span>
-                      <Switch checked={toggle1} onCheckedChange={setToggle1} />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">Value</span>
-                      <Switch checked={toggle2} onCheckedChange={setToggle2} />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">Value</span>
-                      <Switch checked={toggle3} onCheckedChange={setToggle3} />
+              {/* 헤더 행 */}
+              <div className="flex items-center border-b border-gray-200 pb-3 mb-1">
+                <span className="flex-1 text-sm font-medium text-gray-700">알림 종류</span>
+                <div className="flex gap-8 text-xs text-gray-400 font-medium">
+                  <span className="w-10 text-center">앱</span>
+                  <span className="w-10 text-center">이메일</span>
+                  <span className="w-10 text-center">SMS</span>
+                </div>
+              </div>
+
+              {/* 알림 항목 */}
+              <div className="divide-y divide-gray-100">
+                {rows.map(row => (
+                  <div key={row.id} className="flex items-center py-4">
+                    <span className="flex-1 text-sm text-gray-700">{row.label}</span>
+                    <div className="flex gap-8">
+                      <div className="w-10 flex justify-center">
+                        <Switch checked={row.app} onCheckedChange={() => toggle(row.id, "app")} />
+                      </div>
+                      <div className="w-10 flex justify-center">
+                        <Switch checked={row.email} onCheckedChange={() => toggle(row.id, "email")} />
+                      </div>
+                      <div className="w-10 flex justify-center">
+                        <Switch checked={row.sms} onCheckedChange={() => toggle(row.id, "sms")} />
+                      </div>
                     </div>
                   </div>
-                </div>
+                ))}
+              </div>
 
-                <div>
-                  <textarea
-                    className="w-full border border-gray-200 rounded-md p-4 text-sm text-gray-400 resize-none focus:outline-none focus:ring-1 focus:ring-gray-300"
-                    rows={8}
-                    placeholder={`ex) 안녕하세요.\n프로젝트 계약이 완료된 후 결제 절차와 정산 방식에 대해 문의드립니다.\n계약금, 중도금, 잔금이 어떤 방식으로 지급되는지와 정산 완료 처리는 어떤 절차로 진행되는지 알고 싶습니다.\n또한, 영수증이나 세금계산서 발급은 어떻게 받을 수 있는지도 함께 확인 부탁드립니다.\n답변 기다리겠습니다. 감사합니다.`}
-                    readOnly
-                  />
-                </div>
-
-                <div className="project-section project-section-horizontal">
-                  <span className="project-section-title flex items-center gap-1">
-                    <Paperclip className="w-4 h-4" /> 첨부파일
-                  </span>
-                  <div className="flex-1 flex gap-2">
-                    <Input placeholder="업로드해주세요" className="flex-1" readOnly />
-                    <Button variant="outline" className="px-4 text-sm">Upload</Button>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 mt-6">
-                  <Button
-                    variant="outline"
-                    className="flex-1 py-3 rounded-full text-sm"
-                    onClick={() => setLocation("/my/profile")}
-                  >
-                    취소
-                  </Button>
-                  <Button className="flex-1 py-3 rounded-full text-sm bg-pink-500 hover:bg-pink-600 text-white">
-                    확인
-                  </Button>
-                </div>
+              <div className="mt-8">
+                <Button className="w-full py-3 rounded-full text-sm bg-pink-500 hover:bg-pink-600 text-white">
+                  저장하기
+                </Button>
               </div>
             </div>
           </div>
