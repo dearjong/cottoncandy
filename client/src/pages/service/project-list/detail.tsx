@@ -38,7 +38,7 @@ function ApplicationModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 max-h-[92vh] flex flex-col">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[92vh] flex flex-col">
         {/* 헤더 */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4 shrink-0">
           <h2 className="text-xl font-bold text-gray-900">참여신청서</h2>
