@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import {
   CREATE_PROJECT_STEP_META,
@@ -11,6 +11,33 @@ declare function gtag(...args: unknown[]): void;
 
 const SITE_VISIT_SESSION_KEY = "analytics_site_visit_sent";
 const SESSION_ID_KEY = "analytics_session_id";
+const UTM_SESSION_KEY = "analytics_utm_params";
+const EXPERIMENT_STORAGE_KEY = "analytics_experiments";
+
+// ─── UTM 파라미터 캡처 ───────────────────────────────────────
+
+/**
+ * URL의 UTM 파라미터를 sessionStorage에 저장하고 반환.
+ * 이후 같은 세션에선 저장된 값을 재사용 (랜딩 URL 기준으로 고정).
+ */
+function captureUtmParams(): Record<string, string> {
+  try {
+    const stored = sessionStorage.getItem(UTM_SESSION_KEY);
+    if (stored) return JSON.parse(stored);
+
+    const params = new URLSearchParams(window.location.search);
+    const utm: Record<string, string> = {};
+    ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].forEach(key => {
+      const val = params.get(key);
+      if (val) utm[key] = val;
+    });
+
+    if (Object.keys(utm).length > 0) {
+      sessionStorage.setItem(UTM_SESSION_KEY, JSON.stringify(utm));
+    }
+    return utm;
+  } catch { return {}; }
+}
 
 /** 브라우저 세션 단위 ID (DB 적재 시 세션 묶음용) */
 export function getAnalyticsSessionId(): string {
@@ -28,13 +55,20 @@ export function getAnalyticsSessionId(): string {
 
 /**
  * Mixpanel 전송 + GA4 전송 + 서버 `analytics_events` 적재 (POST /api/analytics/events).
- * GA4·Mixpanel 동일 이벤트명 사용.
+ * UTM 파라미터·user_id·experiment variant를 모든 이벤트에 자동 첨부.
  */
 export function publishAnalytics(
   eventName: string,
   properties?: Record<string, unknown>,
 ) {
-  const props = properties ?? {};
+  const utmProps = captureUtmParams();
+  const userId = (() => { try { return localStorage.getItem("analytics_user_id") ?? undefined; } catch { return undefined; } })();
+  const experiments = (() => { try { return JSON.parse(localStorage.getItem(EXPERIMENT_STORAGE_KEY) ?? "{}") as Record<string, string>; } catch { return {}; } })();
+  const experimentProps = Object.keys(experiments).length > 0
+    ? { active_experiments: Object.keys(experiments).join(","), ...Object.fromEntries(Object.entries(experiments).map(([k, v]) => [`exp_${k}`, v])) }
+    : {};
+
+  const props: Record<string, unknown> = { ...properties, ...utmProps, ...experimentProps };
 
   // Mixpanel
   mixpanel.track(eventName, props);
@@ -44,7 +78,7 @@ export function publishAnalytics(
     gtag("event", eventName, props);
   }
 
-  // 서버 적재
+  // 서버 적재 (user_id 포함)
   void fetch("/api/analytics/events", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -52,6 +86,7 @@ export function publishAnalytics(
       eventName,
       properties: props,
       sessionId: getAnalyticsSessionId(),
+      userId,
     }),
     keepalive: true,
   }).catch(() => {});
@@ -477,6 +512,48 @@ export function trackAdminMemberBanned(props: { member_id: string; member_type?:
   publishAnalytics("admin_member_banned", { ...props, user_type: "admin" });
 }
 
+// ─── A/B 테스트 프레임워크 ────────────────────────────────────
+
+/**
+ * 실험 variant 배정 (deterministic: userId 기반 일관된 배정).
+ * 한 번 배정된 variant는 localStorage에 고정 저장.
+ *
+ * @example
+ * const variant = assignExperiment("signup_cta_test", ["control", "variant_a", "variant_b"]);
+ */
+export function assignExperiment(experimentId: string, variants: string[]): string {
+  try {
+    const stored = JSON.parse(localStorage.getItem(EXPERIMENT_STORAGE_KEY) ?? "{}") as Record<string, string>;
+    if (stored[experimentId]) return stored[experimentId];
+
+    const userId = localStorage.getItem("analytics_user_id") ?? crypto.randomUUID();
+    const seed = [...`${userId}::${experimentId}`].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) >>> 0, 0);
+    const variant = variants[seed % variants.length];
+
+    stored[experimentId] = variant;
+    localStorage.setItem(EXPERIMENT_STORAGE_KEY, JSON.stringify(stored));
+    return variant;
+  } catch { return variants[0]; }
+}
+
+/**
+ * 현재 배정된 variant 조회 (미배정 시 null).
+ */
+export function getExperimentVariant(experimentId: string): string | null {
+  try {
+    const stored = JSON.parse(localStorage.getItem(EXPERIMENT_STORAGE_KEY) ?? "{}") as Record<string, string>;
+    return stored[experimentId] ?? null;
+  } catch { return null; }
+}
+
+/**
+ * 실험 노출 이벤트 — variant가 사용자에게 실제로 노출된 순간 호출.
+ * Mixpanel A/B Report & GA4 Funnel에서 experiment_id + variant로 분기 분석 가능.
+ */
+export function trackExperimentViewed(experimentId: string, variant: string) {
+  publishAnalytics("experiment_viewed", { experiment_id: experimentId, variant });
+}
+
 // ─── 내정보(마이페이지) 이벤트 ───────────────────────────────
 
 /** 내정보 섹션 페이지 진입 */
@@ -540,16 +617,42 @@ export function trackFunnelRoute(path: string) {
   trackProjectRegisterStep(path);
 }
 
-/** App 루트에 두면 경로 변경 시 퍼널 이벤트가 자동으로 쌓입니다. */
+/** App 루트에 두면 경로 변경 시 퍼널 이벤트 + 체류시간 + 이탈 이벤트가 자동으로 쌓입니다. */
 export function FunnelRouteListener() {
   const [path] = useLocation();
+  const pageEnterTime = useRef<number>(Date.now());
+  const prevPath = useRef<string>(path);
 
-  // 앱 마운트 시 이미 로그인된 사용자 재식별 (새로고침 대응)
+  // 앱 마운트 시 이미 로그인된 사용자 재식별 + UTM 캡처 + 브라우저 이탈 감지
   useEffect(() => {
     reIdentifyIfLoggedIn();
+    captureUtmParams();
+
+    const handleUnload = () => {
+      const duration = Math.round((Date.now() - pageEnterTime.current) / 1000);
+      publishAnalytics("page_exit", {
+        path: prevPath.current,
+        time_on_page_sec: duration,
+      });
+    };
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
   }, []);
 
   useEffect(() => {
+    // 경로가 바뀔 때 이전 페이지의 체류시간 전송
+    if (prevPath.current !== path) {
+      const duration = Math.round((Date.now() - pageEnterTime.current) / 1000);
+      if (duration > 0) {
+        publishAnalytics("time_on_page", {
+          path: prevPath.current,
+          duration_sec: duration,
+        });
+      }
+      prevPath.current = path;
+      pageEnterTime.current = Date.now();
+    }
+
     trackFunnelRoute(path);
     trackGA4PageView(path);
   }, [path]);

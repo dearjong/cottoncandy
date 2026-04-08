@@ -265,6 +265,7 @@ export class DbStorage implements IStorage {
         eventName: insert.eventName,
         properties: insert.properties ?? {},
         sessionId: insert.sessionId ?? null,
+        userId: insert.userId ?? null,
       })
       .returning({ id: analyticsEvents.id });
     return { id: row.id };

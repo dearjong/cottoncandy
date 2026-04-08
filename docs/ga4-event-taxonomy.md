@@ -525,6 +525,21 @@ site_visit
 | `mypage_withdraw_attempted` | ✅ | ✅ | 완료 — reason_count, has_other_text |
 | `mypage_inquiry_submitted` | ✅ | ✅ | 완료 — tab: general/report, has_attachment |
 | `mypage_notification_settings_saved` | ✅ | ✅ | 완료 — app_on_count, email_on_count, sms_on_count |
+| `experiment_viewed` | ✅ | ✅ | 완료 — experiment_id, variant (A/B 테스트 노출) |
+| `time_on_page` | ✅ | ✅ | 완료 — path, duration_sec (SPA 경로 변경 시) |
+| `page_exit` | ✅ | ✅ | 완료 — path, time_on_page_sec (브라우저 종료/이탈 시) |
+
+### 자동 첨부 프로퍼티 (모든 이벤트 공통)
+| 프로퍼티 | 설명 | 소스 |
+|---------|------|------|
+| `utm_source` | 유입 채널 (google, naver 등) | URL 파라미터 → sessionStorage 고정 |
+| `utm_medium` | 매체 (cpc, email 등) | URL 파라미터 |
+| `utm_campaign` | 캠페인명 | URL 파라미터 |
+| `utm_term` | 키워드 | URL 파라미터 |
+| `utm_content` | 광고 소재 구분 | URL 파라미터 |
+| `user_id` | 로그인 사용자 ID | localStorage |
+| `active_experiments` | 현재 진행 실험 목록 | localStorage |
+| `exp_<id>` | 실험별 배정 variant | localStorage |
 
 ---
 

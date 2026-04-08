@@ -687,6 +687,7 @@ Mail : marketing@lge.com`;
       eventName: insert.eventName,
       properties: insert.properties ?? {},
       sessionId: insert.sessionId ?? null,
+      userId: insert.userId ?? null,
       createdAt: now,
     };
     this.analyticsEvents.push(row);

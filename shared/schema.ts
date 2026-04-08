@@ -83,6 +83,7 @@ export const analyticsEvents = pgTable("analytics_events", {
   eventName: text("event_name").notNull(),
   properties: jsonb("properties").$type<Record<string, unknown>>().notNull().default({}),
   sessionId: text("session_id"),
+  userId: text("user_id"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
