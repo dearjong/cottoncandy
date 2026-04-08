@@ -1,7 +1,42 @@
 # ADMarket GA4 · Mixpanel 이벤트 정의서
 
-> 버전: v2.4 | 작성일: 2026-04-08  
+> 버전: v2.5 | 작성일: 2026-04-08  
 > 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
+
+---
+
+## 0. 사용자 식별 구조 (identifyUser)
+
+> 모든 이벤트에 `user_id`가 붙으려면 **로그인/가입 시점에 반드시 1회 호출** 필요.
+
+### 호출 위치
+
+| 위치 | 시점 | 구현 |
+|------|------|------|
+| `member/login.tsx` | 로그인 버튼 클릭 성공 | ✅ 완료 |
+| `member/signup-email.tsx` | 이메일 인증 완료 | ✅ 완료 |
+| `admin/login.tsx` | 관리자 로그인 성공 | ✅ 완료 |
+| `FunnelRouteListener` (앱 마운트) | 새로고침 후 재식별 | ✅ 완료 |
+
+### identifyUser 동작
+
+```
+mixpanel.identify(userId)           ← 익명 device_id → 실 사용자 ID 연결
+mixpanel.people.set({ $name, $email, user_type, last_login })
+gtag("set", "user_properties", { user_id, user_type })
+localStorage.setItem("analytics_user_id", userId)   ← 새로고침 대응
+```
+
+### 파라미터
+
+| 파라미터 | 설명 | 예시 |
+|---------|------|------|
+| `userId` | 고유 사용자 ID (실서비스: DB PK) | `user-kkotbyul@email.com` |
+| `userName` | 표시명 | `이꽃별` |
+| `userType` | `advertiser` / `partner` / `admin` | `advertiser` |
+| `email` | 이메일 주소 | `kkotbyul@example.com` |
+
+> **실서비스 연동 시**: `userId`를 서버 DB의 사용자 PK(UUID)로 교체하면 완성.
 
 ---
 
@@ -245,7 +280,10 @@
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
 | `partner_name` | `마케팅에이전션` | 계약 파트너명 |
-| `budget_range` | `1.5억~2억원` | 계약비 구간 |
+| `budget_range` | `1.5억~2억원` | 계약비 구간 (UX 표시용) |
+| `contract_value_krw` | `180000000` | **실제 계약 금액 (원)** — GA4 `value` 파라미터로도 전달, 매출 집계용 |
+| `value` | `180000000` | GA4 표준 매출 파라미터 (자동 설정) |
+| `currency` | `KRW` | 통화 (자동 설정) |
 | `user_type` | `advertiser` | 항상 의뢰사 |
 
 > **설계 포인트**: `partner_selected`(파트너 선정)과 `contract_signed`(계약 체결)을 `contract_signed` 하나로 통합.

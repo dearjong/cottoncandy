@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { trackSignupComplete } from "@/lib/analytics";
+import { trackSignupComplete, identifyUser } from "@/lib/analytics";
 import Layout from "@/components/layout/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,6 +67,7 @@ export default function SignupEmail() {
     }
     
     trackSignupComplete();
+    identifyUser({ userId: "user-이꽃별", userName: "이꽃별", userType: "advertiser", email: "kkotbyul@example.com" });
     // 인증 완료 후 로그인 상태로 전환하고 메인으로 이동
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('userName', '이꽃별');

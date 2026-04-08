@@ -45,6 +45,7 @@ export default function WorkProjectContract() {
   const [adType, setAdType] = useState<string[]>(['기획 확정형']);
   const [budgetRange, setBudgetRange] = useState('1.5억~2억원');
   const [extraRange, setExtraRange] = useState('3억~10억원');
+  const [contractValueInput, setContractValueInput] = useState(''); // 실제 계약 금액 (원)
   const [memo, setMemo] = useState('');
   const [files, setFiles] = useState(MOCK_FILES);
   const [agree1, setAgree1] = useState(true);
@@ -77,7 +78,9 @@ export default function WorkProjectContract() {
   }
 
   function handleRegister() {
-    trackContractSigned({ partner_name: PARTNER, budget_range: budgetRange });
+    const rawValue = contractValueInput.replace(/,/g, '').trim();
+    const contractValueKrw = rawValue ? parseInt(rawValue, 10) : undefined;
+    trackContractSigned({ partner_name: PARTNER, budget_range: budgetRange, contract_value_krw: contractValueKrw });
     setContractState('registered');
     toast({ title: '계약 등록 완료', description: '계약이 등록되었습니다. 파트너가 선정되었습니다.', duration: 3000 });
   }
@@ -163,18 +166,37 @@ export default function WorkProjectContract() {
                     </div>
 
                     {/* 계약비 */}
-                    <div className="flex items-center gap-4 py-3 border-b">
-                      <span className="text-sm text-gray-500 w-24 flex-shrink-0">계약비</span>
-                      <div className="flex items-center gap-3">
-                        <select
-                          value={budgetRange}
-                          onChange={e => setBudgetRange(e.target.value)}
-                          disabled={isReadonly}
-                          className="text-sm border border-gray-300 rounded px-2 py-1.5"
-                        >
-                          {BUDGET_RANGES.map(r => <option key={r} value={r}>{r} (VAT 포함)</option>)}
-                        </select>
-                        {!isReadonly && <button className="text-xs text-blue-500 hover:underline">바꾸기</button>}
+                    <div className="flex gap-4 py-3 border-b">
+                      <span className="text-sm text-gray-500 w-24 flex-shrink-0 pt-2">계약비</span>
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-3">
+                          <select
+                            value={budgetRange}
+                            onChange={e => setBudgetRange(e.target.value)}
+                            disabled={isReadonly}
+                            className="text-sm border border-gray-300 rounded px-2 py-1.5"
+                          >
+                            {BUDGET_RANGES.map(r => <option key={r} value={r}>{r} (VAT 포함)</option>)}
+                          </select>
+                          <span className="text-xs text-gray-400">구간 선택</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="text"
+                            inputMode="numeric"
+                            value={contractValueInput}
+                            onChange={e => setContractValueInput(e.target.value.replace(/[^0-9,]/g, ''))}
+                            disabled={isReadonly}
+                            placeholder="실제 계약 금액 (원 단위, 예: 180000000)"
+                            className="text-sm h-8 w-64"
+                          />
+                          <span className="text-xs text-gray-400">원 (VAT 포함, 실적 집계용)</span>
+                        </div>
+                        {contractValueInput && !isReadonly && (
+                          <p className="text-xs text-pink-600">
+                            {Number(contractValueInput.replace(/,/g, '')).toLocaleString('ko-KR')}원
+                          </p>
+                        )}
                       </div>
                     </div>
 

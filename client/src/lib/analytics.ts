@@ -57,6 +57,65 @@ export function publishAnalytics(
   }).catch(() => {});
 }
 
+// ─── 사용자 식별 (로그인/가입 시점 1회) ───────────────────────
+
+/**
+ * 로그인 또는 회원가입 완료 시 호출.
+ * Mixpanel.identify() + people.set() + GA4 user_properties 설정.
+ * 이후 모든 이벤트에 user_id가 자동으로 붙음.
+ */
+export function identifyUser(props: {
+  userId: string;
+  userName?: string;
+  userType?: "advertiser" | "partner" | "admin";
+  email?: string;
+}) {
+  const { userId, userName, userType, email } = props;
+
+  // Mixpanel: 디바이스 익명 ID → 실 사용자 ID로 연결
+  mixpanel.identify(userId);
+  mixpanel.people.set({
+    $name: userName ?? userId,
+    $email: email ?? "",
+    user_type: userType ?? "unknown",
+    last_login: new Date().toISOString(),
+  });
+
+  // GA4: user_id 설정 (세션 전체에 자동 첨부)
+  if (typeof gtag !== "undefined") {
+    gtag("set", "user_properties", {
+      user_id: userId,
+      user_type: userType ?? "unknown",
+    });
+  }
+
+  // localStorage에 저장 → 새로고침 후 재식별에 활용
+  try {
+    localStorage.setItem("analytics_user_id", userId);
+    localStorage.setItem("analytics_user_type", userType ?? "unknown");
+  } catch {/* ignore */}
+}
+
+/**
+ * 앱 초기 로드 시 이미 로그인된 경우 재식별.
+ * localStorage에 저장된 user_id가 있으면 Mixpanel.identify() 재호출.
+ */
+export function reIdentifyIfLoggedIn() {
+  try {
+    const userId = localStorage.getItem("analytics_user_id");
+    const userType = localStorage.getItem("analytics_user_type");
+    if (userId) {
+      mixpanel.identify(userId);
+      if (typeof gtag !== "undefined") {
+        gtag("set", "user_properties", {
+          user_id: userId,
+          user_type: userType ?? "unknown",
+        });
+      }
+    }
+  } catch {/* ignore */}
+}
+
 // ─── 유입 & 세션 ───────────────────────────────────────────────
 
 /** 세션당 1회 — 퍼널 1단계(유입) */
@@ -279,8 +338,19 @@ export function trackContractRequestSent(props: { partner_name?: string; request
 export function trackContractSigned(props: {
   partner_name?: string;
   budget_range?: string;
+  /** 실제 계약 금액 (원 단위). GA4 value 파라미터로도 전달해 매출 집계 가능. */
+  contract_value_krw?: number;
 }) {
-  publishAnalytics("contract_signed", { ...props, user_type: "advertiser" });
+  const { contract_value_krw, ...rest } = props;
+  publishAnalytics("contract_signed", {
+    ...rest,
+    user_type: "advertiser",
+    ...(contract_value_krw != null && {
+      contract_value_krw,
+      value: contract_value_krw,      // GA4 표준 value 파라미터 (매출 집계용)
+      currency: "KRW",
+    }),
+  });
 }
 
 /** 계약 취소 */
@@ -382,6 +452,12 @@ export function trackFunnelRoute(path: string) {
 /** App 루트에 두면 경로 변경 시 퍼널 이벤트가 자동으로 쌓입니다. */
 export function FunnelRouteListener() {
   const [path] = useLocation();
+
+  // 앱 마운트 시 이미 로그인된 사용자 재식별 (새로고침 대응)
+  useEffect(() => {
+    reIdentifyIfLoggedIn();
+  }, []);
+
   useEffect(() => {
     trackFunnelRoute(path);
     trackGA4PageView(path);

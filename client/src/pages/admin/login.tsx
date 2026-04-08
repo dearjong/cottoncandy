@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { identifyUser } from "@/lib/analytics"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -50,7 +51,12 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Login attempt:', { ...loginData, userType })
+    identifyUser({
+      userId: `admin-${loginData.email}`,
+      email: loginData.email,
+      userType: "admin",
+      userName: loginData.email,
+    })
     // TODO: 실제 로그인 API 호출
   }
 
