@@ -1,6 +1,6 @@
 # ADMarket GA4 · Mixpanel 이벤트 정의서
 
-> 버전: v2.2 | 작성일: 2026-04-08  
+> 버전: v2.3 | 작성일: 2026-04-08  
 > 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
 
 ---
@@ -176,11 +176,15 @@
 
 ## 8. 컨설팅 퍼널
 
+> **구조 설명**: 컨설팅은 "전환"이 아닌 **문의 → 응답 → 종결** 흐름.  
+> 프로젝트는 컨설턴트가 별도로 직접 생성한 뒤, 해당 컨설팅 케이스에 **연결**만 함.  
+> `consulting_to_project` (전환) 이벤트는 존재하지 않음 — 제거됨.
+
 | 이벤트명 | 트리거 | GA4 전환 | 구현 |
 |---------|--------|---------|------|
-| `consulting_inquiry_submitted` | 컨설팅 문의 최종 접수 | ✅ 전환 | ✅ 완료 |
-| `consulting_matched` | 컨설턴트 매칭 완료 | ✅ 전환 | ⬜ 개발 필요 |
-| `consulting_to_project` | 컨설팅 → 프로젝트 전환 | ✅ 전환 | ⬜ 개발 필요 |
+| `consulting_inquiry_submitted` | 의뢰사 컨설팅 문의 접수 | ✅ 전환 | ✅ 완료 |
+| `consulting_responded` | 컨설턴트 응답 완료 (케이스 종결) | - | ⬜ 개발 필요 |
+| `consulting_project_linked` | 컨설턴트가 새 프로젝트 생성 후 컨설팅에 연결 | - | ⬜ 개발 필요 |
 
 **`consulting_inquiry_submitted` 파라미터**
 
@@ -189,6 +193,14 @@
 | `title` | `TV CF 제작 문의` (100자 이하) |
 | `has_attachment` | `true` / `false` |
 | `user_type` | `advertiser` |
+
+**`consulting_project_linked` 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `consulting_id` | `CONS-20250401-001` | 연결 대상 컨설팅 케이스 ID |
+| `project_id` | `PID-20250401-0001` | 새로 생성된 프로젝트 ID |
+| `user_type` | `admin` | 항상 관리자(컨설턴트) |
 
 ---
 
@@ -301,8 +313,7 @@
 | `partner_selected` | ~~별도 이벤트 없음~~ `contract_signed`로 통합 | 의뢰사 | 통합됨 |
 | `contract_signed` | 계약 등록 완료 = 파트너 선정 확정 | 의뢰사 | ✅ |
 | `participation_final_selected` | 최종 파트너 선정 토글 | 의뢰사 | ✅ |
-| `consulting_inquiry_submitted` | 컨설팅 문의 | 의뢰사 | ✅ |
-| `consulting_to_project` | 컨설팅 → 프로젝트 전환 | 의뢰사 | ⬜ |
+| `consulting_inquiry_submitted` | 컨설팅 문의 접수 | 의뢰사 | ✅ |
 | `review_submitted` | 제작 리뷰 등록 = 프로젝트 완료 | 의뢰사 | ✅ |
 
 ---
@@ -344,15 +355,19 @@ site_visit
           → partner_selected (수주)
 ```
 
-### 컨설팅 전환 퍼널
+### 컨설팅 퍼널
 
 ```
 site_visit
-  → consulting_inquiry_submitted
-    → consulting_matched
-      → consulting_to_project            ← 컨설팅 → 실제 프로젝트
-        → project_submitted
+  → consulting_inquiry_submitted         ← 의뢰사 문의 접수 (GA4 전환)
+    → consulting_responded               ← 컨설턴트 응답 완료 (케이스 종결)
+
+[별도 흐름] 컨설턴트가 직접 새 프로젝트 생성 후 연결:
+  consulting_project_linked (consulting_id ↔ project_id)
 ```
+
+> ※ 컨설팅은 프로젝트로 자동 "전환"되지 않음.  
+> 프로젝트는 컨설턴트가 독립적으로 생성하고, 컨설팅 케이스에 연결(link)만 함.
 
 ---
 
@@ -364,7 +379,7 @@ site_visit
 | 공고 등록 이탈 단계 파악 | `step_1_*` ~ `step_16_*` → `project_submitted` |
 | 파트너사 발견 → 지원 전환율 | `project_viewed` → `partner_applied` |
 | 매칭 → 계약 전환율 | `participation_final_selected` → `contract_signed` |
-| 컨설팅 전환율 | `consulting_inquiry_submitted` → `consulting_to_project` |
+| 컨설팅 문의 → 응답 완료율 | `consulting_inquiry_submitted` → `consulting_responded` |
 | 대행사 탐색 깊이 | `partner_searched` → `agency_favorited` → `project_submitted` |
 
 ---
@@ -405,8 +420,10 @@ site_visit
 | `admin_notification_sent` | ✅ | ✅ | 완료 |
 | `proposal_submitted` | ⬜ | ⬜ | 제안서 제출 UI 구현 후 추가 |
 | `partner_selected` | - | - | `contract_signed`로 통합, 별도 구현 없음 |
-| `consulting_matched` | ⬜ | ⬜ | 컨설턴트 매칭 UI 구현 후 추가 |
-| `consulting_to_project` | ⬜ | ⬜ | 컨설팅→프로젝트 전환 UI 구현 후 추가 |
+| `consulting_responded` | ⬜ | ⬜ | 컨설턴트 응답 완료 기능 UI 구현 후 추가 |
+| `consulting_project_linked` | ⬜ | ⬜ | 컨설팅-프로젝트 연결 기능 UI 구현 후 추가 |
+| ~~`consulting_matched`~~ | - | - | 제거됨 (해당 구조 없음) |
+| ~~`consulting_to_project`~~ | - | - | 제거됨 (전환 아닌 연결 구조) |
 | `admin_member_suspended` | ⬜ | ⬜ | 회원 정지 기능 UI 구현 후 추가 |
 
 ---
