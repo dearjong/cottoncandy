@@ -47,28 +47,101 @@ const COMPANIES = [
 
 const VISIBLE_TAGS = 4;
 
-interface CompanyRowProps {
-  company: typeof COMPANIES[0];
-  invited: boolean;
-  onToggle: (v: boolean) => void;
+type TabToggles = Record<number, Record<string, boolean>>;
+
+function TabActions({
+  tab,
+  companyId,
+  toggles,
+  onToggle,
+}: {
+  tab: string;
+  companyId: number;
+  toggles: TabToggles;
+  onToggle: (companyId: number, key: string, v: boolean) => void;
+}) {
+  const val = (key: string) => toggles[companyId]?.[key] ?? false;
+  const set = (key: string, v: boolean) => onToggle(companyId, key, v);
+
+  if (tab === 'application') {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-gray-600">초대</span>
+        <Switch checked={val('invite')} onCheckedChange={v => set('invite', v)} />
+      </div>
+    );
+  }
+
+  if (tab === 'ot') {
+    return (
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">OT참석확정</span>
+          <Switch checked={val('ot_confirmed')} onCheckedChange={v => set('ot_confirmed', v)} />
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">OT참석완료</span>
+          <Switch checked={val('ot_done')} onCheckedChange={v => set('ot_done', v)} />
+        </div>
+      </div>
+    );
+  }
+
+  if (tab === 'pt1' || tab === 'pt2') {
+    return (
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">PT참석확정</span>
+          <Switch
+            checked={val('pt_confirmed')}
+            onCheckedChange={v => set('pt_confirmed', v)}
+            className="data-[state=checked]:bg-pink-500"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">PT완료</span>
+          <Switch
+            checked={val('pt_done')}
+            onCheckedChange={v => set('pt_done', v)}
+            className="data-[state=checked]:bg-pink-500"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (tab === 'final') {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-gray-600">최종선정</span>
+        <Switch checked={val('final_selected')} onCheckedChange={v => set('final_selected', v)} />
+      </div>
+    );
+  }
+
+  return null;
 }
 
-function CompanyRow({ company, invited, onToggle }: CompanyRowProps) {
+interface CompanyRowProps {
+  company: typeof COMPANIES[0];
+  activeTab: string;
+  toggles: TabToggles;
+  onToggle: (companyId: number, key: string, v: boolean) => void;
+}
+
+function CompanyRow({ company, activeTab, toggles, onToggle }: CompanyRowProps) {
   const visibleTags = company.industryTags.slice(0, VISIBLE_TAGS);
   const extraCount = company.industryTags.length - VISIBLE_TAGS;
 
   return (
     <div className="border rounded-lg p-5 bg-white">
-      {/* 상단 행: 로고 + 회사정보 + 초대 토글 */}
+      {/* 상단 행: 로고 + 회사정보 + 탭별 토글 */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-start gap-3 flex-1">
-          {/* 핑크 원형 로고 */}
           <div className="w-12 h-12 rounded-full bg-pink-400 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
             {company.initial}
           </div>
-
           <div className="flex-1 min-w-0">
-            {/* 회사명 + 뱃지 + 별점 */}
             <div className="flex items-center gap-2 mb-0.5">
               <CheckCircle2 className="w-4 h-4 text-blue-500 flex-shrink-0" />
               <span className="font-bold text-base">{company.name}</span>
@@ -78,7 +151,6 @@ function CompanyRow({ company, invited, onToggle }: CompanyRowProps) {
                 ))}
               </div>
             </div>
-            {/* 회사 유형 */}
             <div className="flex items-center gap-1 text-sm text-gray-600">
               <Trophy className="w-3.5 h-3.5 text-yellow-500" />
               {company.type}
@@ -86,16 +158,13 @@ function CompanyRow({ company, invited, onToggle }: CompanyRowProps) {
           </div>
         </div>
 
-        {/* 초대 토글 + 하트 */}
         <div className="flex items-center gap-3 ml-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">초대</span>
-            <Switch
-              checked={invited}
-              onCheckedChange={onToggle}
-              data-testid={`switch-invite-${company.id}`}
-            />
-          </div>
+          <TabActions
+            tab={activeTab}
+            companyId={company.id}
+            toggles={toggles}
+            onToggle={onToggle}
+          />
           <Bookmark className="w-4 h-4 text-gray-400 cursor-pointer hover:text-pink-500" />
         </div>
       </div>
@@ -156,11 +225,15 @@ function CompanyRow({ company, invited, onToggle }: CompanyRowProps) {
 export default function WorkProjectParticipation() {
   const [activeTab, setActiveTab] = useState('application');
   const [includeEnded, setIncludeEnded] = useState(false);
-  const [inviteStates, setInviteStates] = useState<Record<number, boolean>>({ 1: false, 2: false });
+  const [toggles, setToggles] = useState<TabToggles>({});
   const [projectOpen, setProjectOpen] = useState(true);
 
-  const toggleInvite = (id: number, v: boolean) =>
-    setInviteStates(prev => ({ ...prev, [id]: v }));
+  const handleToggle = (companyId: number, key: string, v: boolean) => {
+    setToggles(prev => ({
+      ...prev,
+      [companyId]: { ...prev[companyId], [key]: v },
+    }));
+  };
 
   return (
     <Layout>
@@ -170,7 +243,6 @@ export default function WorkProjectParticipation() {
             <WorkSidebar />
 
             <div className="flex-1 min-w-0">
-              {/* 페이지 타이틀 */}
               <h1 className="text-2xl font-bold text-center mb-6">참여현황</h1>
 
               <div className="bg-white rounded-lg border">
@@ -205,7 +277,6 @@ export default function WorkProjectParticipation() {
                                 ? 'border-pink-500 text-pink-600'
                                 : 'border-transparent text-gray-500 hover:text-gray-700'
                             }`}
-                            data-testid={`tab-${tab.id}`}
                           >
                             {tab.label}
                             <span className={`ml-1 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-400'}`}>
@@ -220,7 +291,7 @@ export default function WorkProjectParticipation() {
                     <div className="px-5 py-3 border-b flex items-center justify-between">
                       <span className="text-sm text-gray-600">[ 참여기업 총: 7 ]</span>
                       <div className="flex items-center gap-4">
-                        <select className="text-sm border border-gray-300 rounded px-2 py-1" data-testid="select-sort">
+                        <select className="text-sm border border-gray-300 rounded px-2 py-1">
                           <option>등록순</option>
                           <option>이름순</option>
                         </select>
@@ -228,7 +299,6 @@ export default function WorkProjectParticipation() {
                           <Checkbox
                             checked={!includeEnded}
                             onCheckedChange={v => setIncludeEnded(!v)}
-                            data-testid="checkbox-ongoing"
                           />
                           진행중
                         </label>
@@ -236,7 +306,6 @@ export default function WorkProjectParticipation() {
                           <Checkbox
                             checked={includeEnded}
                             onCheckedChange={v => setIncludeEnded(!!v)}
-                            data-testid="checkbox-ended"
                           />
                           종료/취소 포함
                         </label>
@@ -249,8 +318,9 @@ export default function WorkProjectParticipation() {
                         <Link key={c.id} href="/work/project/company-profile">
                           <CompanyRow
                             company={c}
-                            invited={inviteStates[c.id]}
-                            onToggle={v => toggleInvite(c.id, v)}
+                            activeTab={activeTab}
+                            toggles={toggles}
+                            onToggle={handleToggle}
                           />
                         </Link>
                       ))}
@@ -272,15 +342,9 @@ export default function WorkProjectParticipation() {
 
                     {/* 하단 액션 버튼 */}
                     <div className="px-5 py-4 border-t flex justify-center gap-3">
-                      <button className="btn-white" data-testid="button-send-message">
-                        메세지 발송
-                      </button>
-                      <button className="btn-white" data-testid="button-send-rejection">
-                        미선정 메세지 발송
-                      </button>
-                      <button className="btn-pink" data-testid="button-confirm-invite">
-                        초대 확정
-                      </button>
+                      <button className="btn-white">메세지 발송</button>
+                      <button className="btn-white">미선정 메세지 발송</button>
+                      <button className="btn-pink">초대 확정</button>
                     </div>
                   </>
                 )}
