@@ -282,6 +282,34 @@ export function trackCreateProjectCta(
   });
 }
 
+// ─── Activation 헬퍼 ─────────────────────────────────────────
+
+const ACT_KEY_PROJECT = "analytics_act_project_submitted";
+const ACT_KEY_APPLIED = "analytics_act_partner_applied";
+
+/**
+ * localStorage 기반 "처음" 감지.
+ * key가 없으면 true(처음) + 저장, 이미 있으면 false.
+ */
+function checkFirstTime(key: string): boolean {
+  try {
+    if (localStorage.getItem(key)) return false;
+    localStorage.setItem(key, "1");
+    return true;
+  } catch { return false; }
+}
+
+/**
+ * Activation 달성 이벤트.
+ * 의뢰사: 첫 project_submitted 시 / 파트너사: 첫 partner_applied 시 자동 발사.
+ */
+export function trackActivationAchieved(props: {
+  trigger_event: "project_submitted" | "partner_applied";
+  user_type: "advertiser" | "partner";
+}) {
+  publishAnalytics("activation_achieved", props);
+}
+
 // ─── 핵심 비즈니스 이벤트 ─────────────────────────────────────
 
 /** 프로젝트 최종 제출 완료 (GA4 전환 이벤트) */
@@ -290,7 +318,11 @@ export function trackProjectSubmitted(props: {
   partner_type?: "제작" | "대행" | "unknown";
   budget_range?: string;
 }) {
-  publishAnalytics("project_submitted", props);
+  const is_first_time = checkFirstTime(ACT_KEY_PROJECT);
+  publishAnalytics("project_submitted", { ...props, is_first_time });
+  if (is_first_time) {
+    trackActivationAchieved({ trigger_event: "project_submitted", user_type: "advertiser" });
+  }
 }
 
 /** 파트너사 공고 지원 완료 (GA4 전환 이벤트) */
@@ -299,7 +331,11 @@ export function trackPartnerApplied(props: {
   project_type: "공고" | "1:1";
   partner_type?: "제작사" | "대행사";
 }) {
-  publishAnalytics("partner_applied", props);
+  const is_first_time = checkFirstTime(ACT_KEY_APPLIED);
+  publishAnalytics("partner_applied", { ...props, is_first_time });
+  if (is_first_time) {
+    trackActivationAchieved({ trigger_event: "partner_applied", user_type: "partner" });
+  }
 }
 
 /** 컨설팅 문의 최종 접수 완료 (GA4 전환 이벤트) */

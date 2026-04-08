@@ -391,7 +391,56 @@ gtag("event", "login", { method: "email" })   // GA4 표준 이벤트
 
 ---
 
-## 13. GA4 전환 이벤트 설정 목록
+## 13. Activation 이벤트 설계
+
+> AARRR의 **Activation** = 가입 후 처음으로 핵심 가치를 경험하는 시점.  
+> ADMarket에서는 "처음 프로젝트 등록 완료(의뢰사)" 또는 "처음 공고 지원 완료(파트너사)"를 Activation 달성으로 정의.
+
+### Activation 퍼널
+
+```
+[의뢰사]
+signup_complete
+  → step_1_partner_selection (마법사 시작)
+    → ... (16단계 스텝 이벤트)
+      → project_submitted { is_first_time: true }   ← Activation 달성
+          → activation_achieved { trigger_event: "project_submitted", user_type: "advertiser" }
+
+[파트너사]
+signup_complete
+  → project_viewed
+    → partner_applied { is_first_time: true }        ← Activation 달성
+        → activation_achieved { trigger_event: "partner_applied", user_type: "partner" }
+```
+
+### activation_achieved 파라미터
+
+| 파라미터 | 타입 | 설명 |
+|---------|------|------|
+| `trigger_event` | `"project_submitted"` / `"partner_applied"` | Activation을 트리거한 이벤트 |
+| `user_type` | `"advertiser"` / `"partner"` | 사용자 유형 |
+
+### is_first_time 플래그
+
+`project_submitted`와 `partner_applied`에 `is_first_time: boolean` 파라미터가 자동 추가됨.  
+localStorage 기반으로 처음 여부를 감지하며, 첫 발사 시에만 `activation_achieved`가 함께 발사됨.
+
+### Mixpanel 코호트 활용
+
+| 분석 목적 | 쿼리 |
+|---------|------|
+| Activation 전환율 | `signup_complete` → `activation_achieved` |
+| 의뢰사 첫 등록 소요 시간 | `signup_complete` → `project_submitted(is_first_time=true)` 사이 시간 |
+| 파트너사 첫 지원 소요 시간 | `signup_complete` → `partner_applied(is_first_time=true)` 사이 시간 |
+| Activation 미달성 코호트 | `signup_complete` 후 7일 이내 `activation_achieved` 없는 유저 |
+
+### GA4 전환 이벤트 추가 등록
+
+GA4 관리 콘솔 → `activation_achieved`를 전환 이벤트로 추가 마킹.
+
+---
+
+## 14. GA4 전환 이벤트 설정 목록
 
 > GA4 관리 콘솔 → 이벤트 → 아래 이벤트를 "전환으로 표시"
 
@@ -409,7 +458,7 @@ gtag("event", "login", { method: "email" })   // GA4 표준 이벤트
 
 ---
 
-## 14. 퍼널 설계 (GA4 탐색 보고서 / Mixpanel 퍼널)
+## 15. 퍼널 설계 (GA4 탐색 보고서 / Mixpanel 퍼널)
 
 ### 의뢰사 — 공고 프로젝트 퍼널
 
@@ -462,7 +511,7 @@ site_visit
 
 ---
 
-## 15. Mixpanel 코호트 분석 설계
+## 16. Mixpanel 코호트 분석 설계
 
 | 분석 목적 | 퍼널 / 코호트 구성 |
 |---------|---------|
@@ -475,7 +524,7 @@ site_visit
 
 ---
 
-## 16. 구현 현황 요약
+## 17. 구현 현황 요약
 
 | 이벤트 | GA4 | Mixpanel | 상태 |
 |--------|-----|----------|------|
@@ -530,6 +579,7 @@ site_visit
 | `page_exit` | ✅ | ✅ | 완료 — path, time_on_page_sec (브라우저 종료/이탈 시) |
 | `referral_sent` | ✅ | ✅ | 완료 — method: copy/share (내정보 → 추천 링크 복사) |
 | `referral_signed_up` | ✅ | ✅ | 완료 — referrer_code (?ref= 파라미터 가입 시 발송) |
+| `activation_achieved` | ✅ | ✅ | 완료 — trigger_event, user_type (첫 핵심 행동 달성 시 자동 발사) |
 
 ### 자동 첨부 프로퍼티 (모든 이벤트 공통)
 | 프로퍼티 | 설명 | 소스 |
