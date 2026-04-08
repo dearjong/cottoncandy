@@ -1,6 +1,6 @@
 # ADMarket GA4 · Mixpanel 이벤트 정의서
 
-> 버전: v2.7 | 작성일: 2026-04-08  
+> 버전: v2.8 | 작성일: 2026-04-08 | 검증일: 2026-04-08  
 > 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
 
 ---
@@ -574,6 +574,8 @@ site_visit
 | `mypage_withdraw_attempted` | ✅ | ✅ | 완료 — reason_count, has_other_text |
 | `mypage_inquiry_submitted` | ✅ | ✅ | 완료 — tab: general/report, has_attachment |
 | `mypage_notification_settings_saved` | ✅ | ✅ | 완료 — app_on_count, email_on_count, sms_on_count |
+| `user_login` | - | ✅ | 완료 — method, user_type (Mixpanel 전용. GA4는 표준 `login` 이벤트 사용) |
+| `home_cta_clicked` | ✅ | ✅ | 완료 — experiment_id, variant (홈 Hero CTA 버튼 클릭) |
 | `experiment_viewed` | ✅ | ✅ | 완료 — experiment_id, variant (A/B 테스트 노출) |
 | `time_on_page` | ✅ | ✅ | 완료 — path, duration_sec (SPA 경로 변경 시) |
 | `page_exit` | ✅ | ✅ | 완료 — path, time_on_page_sec (브라우저 종료/이탈 시) |
@@ -592,6 +594,50 @@ site_visit
 | `user_id` | 로그인 사용자 ID | localStorage |
 | `active_experiments` | 현재 진행 실험 목록 | localStorage |
 | `exp_<id>` | 실험별 배정 variant | localStorage |
+
+---
+
+## 18. 활성 A/B 실험 목록
+
+> `assignExperiment(experimentId, variants)` 로 배정, `trackExperimentViewed(experimentId, variant)` 로 노출 기록.  
+> 배정된 variant는 localStorage(`analytics_experiments`)에 고정 저장.
+
+### 현재 실험
+
+| 실험 ID | 파일 | variants | 전환 기준 이벤트 | 상태 |
+|---------|------|---------|----------------|------|
+| `home_hero_title` | `pages/home.tsx` | `control`, `variant_question` | `project_submitted` | ✅ 활성 (10초 자동 전환) |
+
+### `home_hero_title` 상세
+
+| variant | 타이틀 | 서브 | CTA 텍스트 | 특이사항 |
+|---------|--------|------|-----------|---------|
+| `control` | `어떤 광고를\n만들어드릴까요?` | - | `지금 무료로 의뢰하기` | 프로모 텍스트 표시 |
+| `variant_question` | `어떤 광고를 만들어드릴까요?` | `광고주는 선택만, 제작은 전문가가, 이 모든것이 무료!` | `지금 무료로 시작하기` | 프로모 텍스트 숨김 |
+
+### 전송 이벤트 흐름
+
+```
+[홈 진입 or 10초 경과]
+  → assignExperiment("home_hero_title", ["control", "variant_question"])
+    → 배정된 variant를 localStorage에 고정
+      → trackExperimentViewed("home_hero_title", variant)  ← experiment_viewed 발사
+
+[CTA 버튼 클릭]
+  → publishAnalytics("home_cta_clicked", { experiment_id, variant })
+    → (프로젝트 등록까지 완료 시) project_submitted   ← 전환
+```
+
+### Mixpanel / GA4 분석 방법
+
+| 분석 목적 | 쿼리 |
+|---------|------|
+| 노출 대비 CTA 클릭률 | `experiment_viewed (experiment_id=home_hero_title)` → `hero_cta_clicked` |
+| variant별 최종 전환율 | `exp_home_hero_title = control` vs `variant_question` → `project_submitted` 비율 |
+| 실험 트래픽 배분 확인 | `experiment_viewed` 이벤트의 `variant` 분포 |
+
+> **유의사항**: GA4는 모든 이벤트에 `exp_home_hero_title` 프로퍼티가 자동 첨부됨.  
+> GA4 탐색 보고서에서 `exp_home_hero_title` 차원으로 세분화하면 variant별 지표 비교 가능.
 
 ---
 
