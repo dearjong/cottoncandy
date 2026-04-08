@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'wouter';
+import { useLocation } from 'wouter';
 import Layout from '@/components/layout/layout';
 import WorkSidebar from '@/components/work/sidebar';
 import { Switch } from '@/components/ui/switch';
@@ -214,11 +214,15 @@ interface CompanyRowProps {
 }
 
 function CompanyRow({ company, activeTab, toggles, onToggle }: CompanyRowProps) {
+  const [, navigate] = useLocation();
   const visibleTags = company.industryTags.slice(0, VISIBLE_TAGS);
   const extraCount = company.industryTags.length - VISIBLE_TAGS;
 
   return (
-    <div className="border rounded-lg p-5 bg-white">
+    <div
+      className="border rounded-lg p-5 bg-white cursor-pointer hover:border-pink-300 transition-colors"
+      onClick={() => navigate('/work/project/company-profile')}
+    >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-start gap-3 flex-1">
           <div className="w-12 h-12 rounded-full bg-pink-400 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
@@ -241,7 +245,11 @@ function CompanyRow({ company, activeTab, toggles, onToggle }: CompanyRowProps) 
           </div>
         </div>
 
-        <div className="flex items-center gap-3 ml-4">
+        {/* 토글 영역: 클릭 전파 차단 */}
+        <div
+          className="flex items-center gap-3 ml-4"
+          onClick={e => e.stopPropagation()}
+        >
           <TabActions
             tab={activeTab}
             company={company}
@@ -286,7 +294,7 @@ function CompanyRow({ company, activeTab, toggles, onToggle }: CompanyRowProps) 
         )}
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" onClick={e => e.stopPropagation()}>
         <span className="text-xs text-gray-500">
           ✓ Cotton Candy 활동 · {company.cottonCount}작품
         </span>
@@ -398,14 +406,13 @@ export default function WorkProjectParticipation() {
 
                     <div className="p-5 space-y-4">
                       {COMPANIES.map(c => (
-                        <Link key={c.id} href="/work/project/company-profile">
-                          <CompanyRow
-                            company={c}
-                            activeTab={activeTab}
-                            toggles={toggles}
-                            onToggle={handleToggle}
-                          />
-                        </Link>
+                        <CompanyRow
+                          key={c.id}
+                          company={c}
+                          activeTab={activeTab}
+                          toggles={toggles}
+                          onToggle={handleToggle}
+                        />
                       ))}
                     </div>
 
