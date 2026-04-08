@@ -690,7 +690,7 @@ export default function Header() {
                   trackHeaderInteraction({ target: "login" });
                   setLocation("/login");
                 }}
-                className="bg-black text-white hover:bg-gray-900 px-6 rounded-md text-sm font-normal"
+                className="btn-dark w-auto px-6"
                 data-testid="button-login-header"
               >
                 무료로 시작하기
