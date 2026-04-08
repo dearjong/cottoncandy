@@ -1,6 +1,6 @@
 # ADMarket GA4 · Mixpanel 이벤트 정의서
 
-> 버전: v2.3 | 작성일: 2026-04-08  
+> 버전: v2.4 | 작성일: 2026-04-08  
 > 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
 
 ---
@@ -293,7 +293,10 @@
 |---------|--------|------|
 | `admin_project_approved` | 관리자 프로젝트 승인 | ✅ 완료 |
 | `admin_project_rejected` | 관리자 프로젝트 반려 | ✅ 완료 |
-| `admin_member_suspended` | 회원 정지 처리 | ⬜ 개발 필요 (회원관리 페이지 정지 기능 UI 필요) |
+| `admin_member_warned` | 회원 경고 처리 | ✅ 완료 |
+| `admin_member_suspended` | 회원 정지 처리 | ✅ 완료 |
+| `admin_member_resumed` | 회원 정지 해제 | ✅ 완료 |
+| `admin_member_banned` | 회원 강제 탈퇴 | ✅ 완료 |
 | `admin_notice_published` | 공지사항 게시 | ✅ 완료 |
 | `admin_banner_published` | 배너 게시 | ✅ 완료 |
 | `admin_notification_sent` | 알림 발송 | ✅ 완료 |
@@ -424,7 +427,10 @@ site_visit
 | `consulting_project_linked` | ⬜ | ⬜ | 컨설팅-프로젝트 연결 기능 UI 구현 후 추가 |
 | ~~`consulting_matched`~~ | - | - | 제거됨 (해당 구조 없음) |
 | ~~`consulting_to_project`~~ | - | - | 제거됨 (전환 아닌 연결 구조) |
-| `admin_member_suspended` | ⬜ | ⬜ | 회원 정지 기능 UI 구현 후 추가 |
+| `admin_member_warned` | ✅ | ✅ | 완료 |
+| `admin_member_suspended` | ✅ | ✅ | 완료 |
+| `admin_member_resumed` | ✅ | ✅ | 완료 |
+| `admin_member_banned` | ✅ | ✅ | 완료 |
 
 ---
 

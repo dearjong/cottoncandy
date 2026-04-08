@@ -325,6 +325,28 @@ export function trackReviewCompleted(props: {
   publishAnalytics("review_completed", { ...props, user_type: "advertiser" });
 }
 
+// ─── 관리자 회원 제재 이벤트 ─────────────────────────────────
+
+/** 회원 경고 */
+export function trackAdminMemberWarned(props: { member_id: string; member_type?: string }) {
+  publishAnalytics("admin_member_warned", { ...props, user_type: "admin" });
+}
+
+/** 회원 정지 */
+export function trackAdminMemberSuspended(props: { member_id: string; member_type?: string }) {
+  publishAnalytics("admin_member_suspended", { ...props, user_type: "admin" });
+}
+
+/** 회원 정지 해제 */
+export function trackAdminMemberResumed(props: { member_id: string; member_type?: string }) {
+  publishAnalytics("admin_member_resumed", { ...props, user_type: "admin" });
+}
+
+/** 회원 강제 탈퇴 */
+export function trackAdminMemberBanned(props: { member_id: string; member_type?: string }) {
+  publishAnalytics("admin_member_banned", { ...props, user_type: "admin" });
+}
+
 // ─── 라우트 리스너 ────────────────────────────────────────────
 
 /** GA4에 page_view 이벤트 전송 (SPA 경로 변경 시) */

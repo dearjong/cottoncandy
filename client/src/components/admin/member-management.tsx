@@ -1,4 +1,10 @@
 import { useState } from "react"
+import {
+  trackAdminMemberWarned,
+  trackAdminMemberSuspended,
+  trackAdminMemberResumed,
+  trackAdminMemberBanned,
+} from "@/lib/analytics"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -178,13 +184,11 @@ export function MemberManagement() {
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: nextStatus } : m)))
     setSelectedMember((prev) => (prev?.id === id ? { ...prev, status: nextStatus } : prev))
 
-    // TODO: replace with real audit-log API call
-    console.log("[회원 관리 액션]", {
-      memberId: id,
-      actionType,
-      reason: actionReason.trim(),
-      timestamp: new Date().toISOString(),
-    })
+    const analyticsProps = { member_id: id, member_type: actionTargetMember.type }
+    if (actionType === "warn") trackAdminMemberWarned(analyticsProps)
+    else if (actionType === "suspend") trackAdminMemberSuspended(analyticsProps)
+    else if (actionType === "resume") trackAdminMemberResumed(analyticsProps)
+    else if (actionType === "ban") trackAdminMemberBanned(analyticsProps)
 
     setActionDialogOpen(false)
     setActionType(null)
