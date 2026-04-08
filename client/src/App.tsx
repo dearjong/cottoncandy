@@ -84,6 +84,10 @@ import FileRepository from "@/pages/work/file/file-repository";
 import SettingsCompanyInfo from "@/pages/work/settings/company-info";
 import SettingsMemberManagement from "@/pages/work/settings/member-management";
 import MemberManagement from "@/pages/my/member-management";
+import MyProfile from "@/pages/my/profile";
+import MyWithdraw from "@/pages/my/withdraw";
+import MyInquiry from "@/pages/my/inquiry";
+import MyNotificationSettings from "@/pages/my/notification-settings";
 import DesignSystem from "@/pages/design-system";
 import NotFound from "@/pages/not-found";
 import AdminLayout from "@/components/admin/admin-layout";
@@ -372,6 +376,18 @@ function Router() {
       </Route>
       <Route path="/mypage/members">
         <ProtectedRoute component={MemberManagement} />
+      </Route>
+      <Route path="/my/profile">
+        <ProtectedRoute component={MyProfile} />
+      </Route>
+      <Route path="/my/withdraw">
+        <ProtectedRoute component={MyWithdraw} />
+      </Route>
+      <Route path="/my/inquiry">
+        <ProtectedRoute component={MyInquiry} />
+      </Route>
+      <Route path="/my/notification-settings">
+        <ProtectedRoute component={MyNotificationSettings} />
       </Route>
       <Route path="/design-system" component={DesignSystem} />
       

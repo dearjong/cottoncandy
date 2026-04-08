@@ -1,0 +1,124 @@
+import Layout from "@/components/layout/layout";
+import MySidebar from "@/components/my/my-sidebar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useLocation } from "wouter";
+import { UserCircle } from "lucide-react";
+
+export default function MyProfile() {
+  const [, setLocation] = useLocation();
+
+  return (
+    <Layout>
+      <div className="py-12 bg-white min-h-screen">
+        <div className="page-content">
+          <h1 className="page-title mb-12">내정보</h1>
+
+          <div className="flex gap-8">
+            <MySidebar />
+
+            <div className="flex-1 max-w-2xl">
+              {/* 1. 개인정보 */}
+              <div className="mb-10">
+                <div className="inline-flex items-center bg-gray-900 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-8">
+                  1. 개인정보
+                </div>
+
+                <div className="space-y-6">
+                  <div className="project-section project-section-horizontal">
+                    <span className="project-section-title">프로필</span>
+                    <div className="flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 border border-gray-200 cursor-pointer hover:bg-gray-50">
+                      <div className="text-center">
+                        <UserCircle className="w-8 h-8 text-gray-400 mx-auto" />
+                        <span className="text-xs text-gray-400 mt-1 block">Profile</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="project-section project-section-horizontal">
+                    <span className="project-section-title"><span className="cotton-candy-pink">*</span> 이름</span>
+                    <Input placeholder="ex) 김에드" className="flex-1" />
+                  </div>
+
+                  <div className="project-section project-section-horizontal">
+                    <span className="project-section-title">낙네임</span>
+                    <Input placeholder="ex) 빠드린" className="flex-1" />
+                  </div>
+
+                  <div className="project-section project-section-horizontal">
+                    <span className="project-section-title"><span className="cotton-candy-pink">*</span> 휴대폰</span>
+                    <Input placeholder="ex) 010-1234-5678" className="flex-1" />
+                  </div>
+
+                  <div className="project-section project-section-horizontal">
+                    <span className="project-section-title"><span className="cotton-candy-pink">*</span> 이메일</span>
+                    <Input placeholder="ex) adqueen@tvcf.co.kr" className="flex-1" />
+                  </div>
+
+                  <div className="project-section project-section-horizontal">
+                    <span className="project-section-title"><span className="cotton-candy-pink">*</span> 비밀번호</span>
+                    <div className="flex-1">
+                      <Input type="password" placeholder="비밀번호를 입력해주세요." />
+                      <p className="text-xs text-gray-400 mt-1">※ 영문 소자, 특수문자 중 2가지 이상을 혼합하여 최소 7~17자까지 입력해주세요.</p>
+                    </div>
+                  </div>
+
+                  <div className="project-section project-section-horizontal">
+                    <span className="project-section-title"><span className="cotton-candy-pink">*</span> 비밀번호 확인</span>
+                    <Input type="password" placeholder="확인을 위해 비밀번호를 다시한번 입력해주세요." className="flex-1" />
+                  </div>
+                </div>
+              </div>
+
+              <hr className="my-8 border-gray-100" />
+
+              {/* 2. 회사정보 */}
+              <div className="mb-10">
+                <div className="inline-flex items-center bg-gray-900 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-8">
+                  2. 회사정보
+                </div>
+
+                <div className="space-y-6">
+                  <div className="project-section project-section-horizontal">
+                    <span className="project-section-title">회사명</span>
+                    <Input placeholder='코리반시인 경우에는 " 코리반시 "를 입력하여주세요.' className="flex-1" />
+                  </div>
+
+                  <div className="project-section project-section-horizontal">
+                    <span className="project-section-title">직무</span>
+                    <Input placeholder="ex) 기획자" className="flex-1" />
+                  </div>
+
+                  <div className="project-section project-section-horizontal">
+                    <span className="project-section-title">부서</span>
+                    <Input placeholder="ex) 전략기획팀" className="flex-1" />
+                  </div>
+
+                  <div className="project-section project-section-horizontal">
+                    <span className="project-section-title">직책</span>
+                    <Input placeholder="ex) 전임연구원" className="flex-1" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <Button className="w-full py-3 bg-gray-200 text-gray-500 rounded-full text-sm font-normal hover:bg-gray-300 cursor-pointer">
+                  저장하기
+                </Button>
+              </div>
+
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setLocation("/my/withdraw")}
+                  className="text-sm text-gray-400 hover:text-gray-600 underline"
+                >
+                  회원탈퇴
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+}

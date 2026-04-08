@@ -631,9 +631,9 @@ export default function Header() {
                       trackHeaderInteraction({
                         target: "dropdown_item",
                         item: "내정보",
-                        path: "/mypage/profile",
+                        path: "/my/profile",
                       });
-                      setLocation("/mypage/profile");
+                      setLocation("/my/profile");
                     }}
                   >
                     <span className="whitespace-nowrap">내정보</span>
