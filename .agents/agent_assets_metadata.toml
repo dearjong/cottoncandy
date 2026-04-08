@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "oET8xvmILFhF5v0ndMoQC"
+uri = "file://docs/ga4-event-taxonomy.md"
+type = "text"
+title = "GA4 · Mixpanel 이벤트 정의서 v1.0"
