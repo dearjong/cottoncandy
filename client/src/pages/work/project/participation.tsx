@@ -1,36 +1,166 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'wouter';
 import Layout from '@/components/layout/layout';
 import WorkSidebar from '@/components/work/sidebar';
-import CompanyCard from '@/components/work/company-card';
+import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ChevronDown, ExternalLink, Globe, Bookmark, Mail, Star, Trophy, CheckCircle2 } from 'lucide-react';
+import portfolio1 from '@assets/A000561001259B_1760322383639.jpg';
+import portfolio2 from '@assets/A000561002A4A6_1760322383641.jpg';
+import portfolio3 from '@assets/5_1760322393353.png';
+import portfolio4 from '@assets/Image_1760322393356.png';
+
+const TABS = [
+  { id: 'application', label: '참여신청', count: 2 },
+  { id: 'ot',          label: 'OT',       count: 2 },
+  { id: 'pt1',         label: 'PT1차',    count: 2 },
+  { id: 'pt2',         label: 'PT2차',    count: 0 },
+  { id: 'final',       label: '최종선정', count: 1 },
+];
+
+const COMPANIES = [
+  {
+    id: 1,
+    initial: '솜',
+    name: '솜사탕애드',
+    type: 'Creative 중심 대행사',
+    stars: 5,
+    recentClients: '골드백화점, 블루리조트, 달콤커피, 스마트전자',
+    pastClients: '아름건설, 하늘항공, 뷰티코스메틱, 마이패션',
+    stats: ['35회', '75직원', '직원 20명 이상', '최소 제작비 2억↑'],
+    industryTags: ['전기전자', '기업PR', '식품/제과', '공사/단체/공익/기업PR', '공공기관,정책캠페인', '#뷰티_쇼핑', '#급행제작 대응'],
+    cottonCount: 3,
+  },
+  {
+    id: 2,
+    initial: '이',
+    name: '이노선',
+    type: 'Creative 중심 대행사',
+    stars: 5,
+    recentClients: '삼성전자, 소니, 오뚜기, 빙그레',
+    pastClients: '아름건설, 하늘항공, 뷰티코스메틱, 마이패션',
+    stats: ['35회', '75직원', '직원 20명 이상', '최소 제작비 2억↑'],
+    industryTags: ['전기전자', '기업PR', '식품/제과', '공사/단체/공익/기업PR', '공공기관,정책캠페인', '#뷰티_쇼핑', '#급행제작 대응'],
+    cottonCount: 3,
+  },
+];
+
+const VISIBLE_TAGS = 4;
+
+interface CompanyRowProps {
+  company: typeof COMPANIES[0];
+  invited: boolean;
+  onToggle: (v: boolean) => void;
+}
+
+function CompanyRow({ company, invited, onToggle }: CompanyRowProps) {
+  const visibleTags = company.industryTags.slice(0, VISIBLE_TAGS);
+  const extraCount = company.industryTags.length - VISIBLE_TAGS;
+
+  return (
+    <div className="border rounded-lg p-5 bg-white">
+      {/* 상단 행: 로고 + 회사정보 + 초대 토글 */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-start gap-3 flex-1">
+          {/* 핑크 원형 로고 */}
+          <div className="w-12 h-12 rounded-full bg-pink-400 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+            {company.initial}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            {/* 회사명 + 뱃지 + 별점 */}
+            <div className="flex items-center gap-2 mb-0.5">
+              <CheckCircle2 className="w-4 h-4 text-blue-500 flex-shrink-0" />
+              <span className="font-bold text-base">{company.name}</span>
+              <div className="flex items-center gap-0.5">
+                {Array.from({ length: company.stars }).map((_, i) => (
+                  <Star key={i} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+            </div>
+            {/* 회사 유형 */}
+            <div className="flex items-center gap-1 text-sm text-gray-600">
+              <Trophy className="w-3.5 h-3.5 text-yellow-500" />
+              {company.type}
+            </div>
+          </div>
+        </div>
+
+        {/* 초대 토글 + 하트 */}
+        <div className="flex items-center gap-3 ml-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">초대</span>
+            <Switch
+              checked={invited}
+              onCheckedChange={onToggle}
+              data-testid={`switch-invite-${company.id}`}
+            />
+          </div>
+          <Bookmark className="w-4 h-4 text-gray-400 cursor-pointer hover:text-pink-500" />
+        </div>
+      </div>
+
+      {/* 거래 클라이언트 */}
+      <p className="text-sm text-gray-600 mb-1">
+        [대표고주] <span className="text-gray-800">{company.recentClients}</span>
+        <span className="text-gray-500 mx-1">[최근6개월]</span>
+        {company.pastClients}
+      </p>
+
+      {/* 통계 */}
+      <p className="text-sm text-gray-500 mb-3">
+        [최근 3년]{' '}
+        {company.stats.map((s, i) => (
+          <span key={i}>
+            {s}{i < company.stats.length - 1 && <span className="mx-1 text-gray-300">|</span>}
+          </span>
+        ))}
+      </p>
+
+      {/* 포트폴리오 이미지 */}
+      <div className="grid grid-cols-4 gap-2 mb-3">
+        {[portfolio1, portfolio2, portfolio3, portfolio4].map((img, i) => (
+          <div key={i} className="aspect-video rounded overflow-hidden bg-gray-100">
+            <img src={img} alt={`포트폴리오 ${i + 1}`} className="w-full h-full object-cover" />
+          </div>
+        ))}
+      </div>
+
+      {/* 산업 태그 */}
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        {visibleTags.map((tag, i) => (
+          <span key={i} className="text-xs px-2 py-0.5 bg-gray-100 text-gray-700 rounded">
+            {tag}
+          </span>
+        ))}
+        {extraCount > 0 && (
+          <span className="text-xs text-gray-400">+ {extraCount} more...</span>
+        )}
+      </div>
+
+      {/* 하단: Cotton Candy 활동 + 아이콘 */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-gray-500">
+          ✓ Cotton Candy 활동 · {company.cottonCount}작품
+        </span>
+        <div className="flex items-center gap-3 text-gray-400">
+          <Globe className="w-4 h-4 cursor-pointer hover:text-gray-600" />
+          <Bookmark className="w-4 h-4 cursor-pointer hover:text-gray-600" />
+          <Mail className="w-4 h-4 cursor-pointer hover:text-gray-600" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function WorkProjectParticipation() {
-  const [userMode, setUserMode] = useState<'request' | 'participate'>('request');
-  const [filterStatus, setFilterStatus] = useState<'ongoing' | 'all'>('ongoing');
-  const [companyStatuses, setCompanyStatuses] = useState<{ [key: number]: boolean }>({
-    1: false,
-    2: false,
-  });
+  const [activeTab, setActiveTab] = useState('application');
+  const [includeEnded, setIncludeEnded] = useState(false);
+  const [inviteStates, setInviteStates] = useState<Record<number, boolean>>({ 1: false, 2: false });
+  const [projectOpen, setProjectOpen] = useState(true);
 
-  useEffect(() => {
-    const savedMode = (localStorage.getItem('userMode') as 'request' | 'participate') || 'request';
-    setUserMode(savedMode);
-  }, []);
-
-  const handleStatusChange = (id: number, checked: boolean) => {
-    setCompanyStatuses(prev => ({
-      ...prev,
-      [id]: checked
-    }));
-  };
-
-  const tabs = [
-    { id: 'application', label: '참여신청', count: 2 },
-    { id: 'ot', label: 'OT', count: 2 },
-    { id: 'pt1', label: 'PT1st', count: 2 },
-    { id: 'pt2', label: 'PT2nd', count: 0 },
-    { id: 'final', label: '최종선정', count: 1 },
-  ];
+  const toggleInvite = (id: number, v: boolean) =>
+    setInviteStates(prev => ({ ...prev, [id]: v }));
 
   return (
     <Layout>
@@ -38,185 +168,110 @@ export default function WorkProjectParticipation() {
         <div className="work-content">
           <div className="flex gap-6">
             <WorkSidebar />
-            
-            <div className="flex-1">
-              <div className="mb-6">
-                <h1 className="work-title">[참여현황] 참여신청</h1>
-              </div>
 
-              <div className="bg-white rounded-lg shadow-sm mb-6">
-                <div className="px-6 py-4 border-b">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                      {userMode === 'request' ? 'AI 추천기업 (2) | ♥ 관심기업 (2)' : 'AI 추천프로젝트 (2) | ♥ 관심프로젝트 (2)'}
-                    </div>
+            <div className="flex-1 min-w-0">
+              {/* 페이지 타이틀 */}
+              <h1 className="text-2xl font-bold text-center mb-6">참여현황</h1>
+
+              <div className="bg-white rounded-lg border">
+                {/* 프로젝트 헤더 */}
+                <div className="px-5 py-3 border-b flex items-center justify-between">
+                  <button
+                    className="flex items-center gap-2 font-medium text-gray-800 hover:text-pink-600"
+                    onClick={() => setProjectOpen(v => !v)}
+                  >
+                    <ChevronDown className={`w-4 h-4 transition-transform ${projectOpen ? '' : '-rotate-90'}`} />
+                    [베스트전자] TV 신제품 판매촉진 프로모션
+                  </button>
+                  <div className="flex items-center gap-4">
+                    <ExternalLink className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
+                    <span className="text-sm text-gray-500">
+                      AI 추천기업(2) | <span className="text-pink-500">♥</span> 관심기업(2)
+                    </span>
                   </div>
                 </div>
 
-                <div className="px-6 py-4 border-b">
-                  <select className="w-full px-4 py-2 border border-gray-300 rounded" data-testid="select-project">
-                    <option>[베스트전자] TV 신제품 판매촉진 프로모션</option>
-                  </select>
-                </div>
+                {projectOpen && (
+                  <>
+                    {/* 단계 탭 */}
+                    <div className="px-5 border-b">
+                      <div className="flex gap-6">
+                        {TABS.map(tab => (
+                          <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`py-3 text-sm font-medium border-b-2 transition-colors ${
+                              activeTab === tab.id
+                                ? 'border-pink-500 text-pink-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                            }`}
+                            data-testid={`tab-${tab.id}`}
+                          >
+                            {tab.label}
+                            <span className={`ml-1 ${activeTab === tab.id ? 'text-pink-500' : 'text-gray-400'}`}>
+                              ({tab.count})
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
 
-                <div className="px-6 py-4 border-b">
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-8">
-                      {tabs.map((tab) => (
+                    {/* 필터 바 */}
+                    <div className="px-5 py-3 border-b flex items-center justify-between">
+                      <span className="text-sm text-gray-600">[ 참여기업 총: 7 ]</span>
+                      <div className="flex items-center gap-4">
+                        <select className="text-sm border border-gray-300 rounded px-2 py-1" data-testid="select-sort">
+                          <option>등록순</option>
+                          <option>이름순</option>
+                        </select>
+                        <label className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer">
+                          <Checkbox
+                            checked={!includeEnded}
+                            onCheckedChange={v => setIncludeEnded(!v)}
+                            data-testid="checkbox-ongoing"
+                          />
+                          진행중
+                        </label>
+                        <label className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer">
+                          <Checkbox
+                            checked={includeEnded}
+                            onCheckedChange={v => setIncludeEnded(!!v)}
+                            data-testid="checkbox-ended"
+                          />
+                          종료/취소 포함
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* 카드 목록 */}
+                    <div className="p-5 space-y-4">
+                      {COMPANIES.map(c => (
+                        <Link key={c.id} href="/work/project/company-profile">
+                          <CompanyRow
+                            company={c}
+                            invited={inviteStates[c.id]}
+                            onToggle={v => toggleInvite(c.id, v)}
+                          />
+                        </Link>
+                      ))}
+                    </div>
+
+                    {/* 페이지네이션 */}
+                    <div className="px-5 py-3 border-t flex justify-center gap-1">
+                      {['<<', '<', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '>', '>>'].map((p, i) => (
                         <button
-                          key={tab.id}
-                          className="text-sm font-medium text-gray-800"
-                          data-testid={`tab-${tab.id}`}
+                          key={i}
+                          className={`px-2.5 py-1 text-sm rounded ${
+                            p === 1 ? 'bg-pink-600 text-white' : 'text-gray-600 hover:bg-gray-100'
+                          }`}
                         >
-                          {tab.label} <span className="text-gray-500">({tab.count})</span>
+                          {p}
                         </button>
                       ))}
                     </div>
-                  </div>
-                </div>
 
-                <div className="px-6 py-4 border-b">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">[ 참여기업 총: 7 ]</div>
-                    <div className="flex gap-4 items-center">
-                      <select className="text-sm border border-gray-300 rounded px-3 py-1" data-testid="select-sort">
-                        <option>등록순</option>
-                      </select>
-                      <button
-                        onClick={() => setFilterStatus('ongoing')}
-                        className={`text-sm px-3 py-1 rounded ${
-                          filterStatus === 'ongoing' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600'
-                        }`}
-                        data-testid="filter-ongoing"
-                      >
-                        진행중
-                      </button>
-                      <button
-                        onClick={() => setFilterStatus('all')}
-                        className={`text-sm px-3 py-1 rounded ${
-                          filterStatus === 'all' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600'
-                        }`}
-                        data-testid="filter-all"
-                      >
-                        종료/ 취소 포함
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6 space-y-4">
-                  {userMode === 'request' ? (
-                    <>
-                      <Link href="/work/project/company-profile" className="block">
-                        <CompanyCard
-                          id={1}
-                          logoText="V"
-                          companyName="VEGA"
-                          companyType="Creative중심 제작사"
-                          clients="베스트전자, 대한항공, 자이, 서울특별시 [최근6개월] 알바천국, 기아자동차, LG유플러스, SK텔레콤, 현대자동차"
-                          stats="[최근 3년] 35회 75작품 | 직원 20명 이상 | 최소 제작비 2억 ↑"
-                          industryTags={['전기전자', '기업PR', '식품/제과', '공사/단체/공익/기업PR']}
-                          specialtyTags={['#공공기관_정책캠페인', '#뷰티_숏폼', '#급행제작 대응']}
-                          cottonCandyWorks="✓ Cotton Candy 활동 - 3작품"
-                          showMessageButton={true}
-                          showStatusSwitch={true}
-                          statusLabel="초대"
-                          statusChecked={companyStatuses[1]}
-                          onStatusChange={(checked) => handleStatusChange(1, checked)}
-                          variant="participation"
-                        />
-                      </Link>
-
-                      <Link href="/work/project/company-profile" className="block">
-                        <CompanyCard
-                          id={2}
-                          logoText="솜"
-                          companyName="솜사탕애드"
-                          companyType="Creative중심 대행사"
-                          clients="골드백화점, 블루리조트, 달콤커피, 스마트전자 [최근6개월] 아름건설, 하늘항공, 뷰티코스메틱, 마이패션"
-                          stats="[최근 3년] 35회 75작품 | 직원 20명 이상 | 최소 제작비 2억 ↑"
-                          industryTags={['전기전자', '기업PR', '식품/제과', '공사/단체/공익/기업PR']}
-                          specialtyTags={['#공공기관_정책캠페인', '#뷰티_숏폼', '#급행제작 대응']}
-                          cottonCandyWorks="✓ Cotton Candy 활동 - 3작품"
-                          showMessageButton={true}
-                          showStatusSwitch={true}
-                          statusLabel="초대"
-                          statusChecked={companyStatuses[2]}
-                          onStatusChange={(checked) => handleStatusChange(2, checked)}
-                          variant="participation"
-                        />
-                      </Link>
-                    </>
-                  ) : (
-                    <>
-                      <div className="border rounded-lg p-6">
-                        <div className="flex items-start justify-between">
-                          <div className="flex gap-4 flex-1">
-                            <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center text-2xl font-bold">
-                              B
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-sm font-mono">PN-20250721-0001</span>
-                                <span className="text-xs px-2 py-1 bg-green-100 text-green-600 rounded">접수중</span>
-                                <span className="text-xs px-2 py-1 bg-pink-100 text-pink-600 rounded">참여공고</span>
-                                <span className="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded">대행사 모집</span>
-                                <span className="text-xs px-2 py-1 bg-purple-100 text-purple-600 rounded">경쟁PT</span>
-                                <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-600 rounded">참여중</span>
-                              </div>
-                              <h3 className="font-bold text-lg mb-2">[베스트전자] 스탠바이미2 - 판매촉진 프로모션</h3>
-                              <p className="text-sm text-gray-600 mb-3">베스트전자 대기업 전기전자</p>
-                              <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                                <span>접수마감 2025.08.19</span>
-                                <span>납품기한 2025.12.25</span>
-                              </div>
-                              <p className="text-sm text-gray-600 mb-3">
-                                전략기획 크리에이티브 기획 영상 제작 미디어 집행 성과 측정 및 리포팅
-                              </p>
-                              <div className="flex gap-2 mb-3">
-                                <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded">#제품판매촉진</span>
-                                <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded">#브랜드 인지도 향상</span>
-                                <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded">#이벤트/프로모션</span>
-                              </div>
-                              <div className="flex gap-2">
-                                <span className="text-xs text-gray-600">✓ 급행 제작 대응</span>
-                                <span className="text-xs text-gray-600">✓ 경쟁사 수행기업 제외</span>
-                                <span className="text-xs text-gray-600">✓ 리젝션 Fee</span>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-sm text-gray-600 mb-1">총예산</div>
-                              <div className="text-xl font-bold">10~20억원</div>
-                              <div className="text-xs text-gray-500 mb-3">(제작비 3억~6억원)</div>
-                              <div className="text-sm text-pink-600 font-bold">PT D-35</div>
-                            </div>
-                          </div>
-                          <button className="text-sm text-gray-600 hover:text-pink-600 ml-4" data-testid="button-message-project">
-                            메세지
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                <div className="px-6 py-4 border-t">
-                  <div className="flex justify-center gap-2">
-                    <button className="px-3 py-1 text-sm">&lt;&lt;</button>
-                    <button className="px-3 py-1 text-sm">&lt;</button>
-                    <button className="px-3 py-1 text-sm bg-pink-600 text-white rounded">1</button>
-                    <button className="px-3 py-1 text-sm">2</button>
-                    <button className="px-3 py-1 text-sm">3</button>
-                    <button className="px-3 py-1 text-sm">...</button>
-                    <button className="px-3 py-1 text-sm">10</button>
-                    <button className="px-3 py-1 text-sm">&gt;</button>
-                    <button className="px-3 py-1 text-sm">&gt;&gt;</button>
-                  </div>
-                </div>
-
-                {userMode === 'request' && (
-                  <div className="px-6 py-4 border-t">
-                    <div className="flex justify-center gap-4">
+                    {/* 하단 액션 버튼 */}
+                    <div className="px-5 py-4 border-t flex justify-center gap-3">
                       <button className="btn-white" data-testid="button-send-message">
                         메세지 발송
                       </button>
@@ -227,7 +282,7 @@ export default function WorkProjectParticipation() {
                         초대 확정
                       </button>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             </div>
