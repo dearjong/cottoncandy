@@ -246,7 +246,7 @@ function ApplicationModal({
             onClick={onConfirm}
             className={`flex-1 py-2.5 rounded-full text-xs font-medium transition-colors ${
               agreed
-                ? "bg-gray-900 text-white hover:bg-gray-700"
+                ? "bg-pink-600 text-white hover:bg-pink-700"
                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }`}
           >
@@ -258,11 +258,61 @@ function ApplicationModal({
   );
 }
 
+function ConfirmSubmitModal({ onCancel, onConfirm }: { onCancel: () => void; onConfirm: () => void }) {
+  return (
+    <div className="fixed inset-0 z-60 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-8">
+        <button onClick={onCancel} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+          <X className="w-4 h-4" />
+        </button>
+        <p className="text-center text-lg font-bold text-gray-900 mb-8">참여 신청서를 제출할까요?</p>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3 rounded-full border border-gray-300 text-sm text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+          >
+            취소
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 py-3 rounded-full bg-pink-600 text-white text-sm font-medium hover:bg-pink-700 transition-colors"
+          >
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DoneModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-60 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-8">
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+          <X className="w-4 h-4" />
+        </button>
+        <p className="text-center text-lg font-bold text-gray-900 mb-8">참여신청이 완료되었어요.</p>
+        <button
+          onClick={onClose}
+          className="w-full py-3 rounded-full bg-pink-600 text-white text-sm font-medium hover:bg-pink-700 transition-colors"
+        >
+          확인
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function ProjectDetail() {
   const [, params] = useRoute("/project-list/:id");
   const [, setLocation] = useLocation();
   const projectId = params?.id;
   const [showModal, setShowModal] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showDone, setShowDone] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const project = projectId ? getProjectById(projectId) : undefined;
@@ -276,11 +326,21 @@ export default function ProjectDetail() {
     });
   }, [projectId]);
 
-  const handleConfirm = () => {
+  const handleApplicationConfirm = () => {
+    setShowModal(false);
+    setShowConfirm(true);
+  };
+
+  const handleSubmitConfirm = () => {
     if (projectId) {
       trackPartnerApplied({ project_id: projectId, project_type: "공고" });
     }
-    setShowModal(false);
+    setShowConfirm(false);
+    setShowDone(true);
+  };
+
+  const handleDoneClose = () => {
+    setShowDone(false);
     setSubmitted(true);
   };
 
@@ -664,8 +724,17 @@ export default function ProjectDetail() {
           projectId={projectId}
           projectTitle={`[베스트전자] 신제품 판매촉진 프로모션 대행사 모집`}
           onClose={() => setShowModal(false)}
-          onConfirm={handleConfirm}
+          onConfirm={handleApplicationConfirm}
         />
+      )}
+      {showConfirm && (
+        <ConfirmSubmitModal
+          onCancel={() => { setShowConfirm(false); setShowModal(true); }}
+          onConfirm={handleSubmitConfirm}
+        />
+      )}
+      {showDone && (
+        <DoneModal onClose={handleDoneClose} />
       )}
     </Layout>
   );
