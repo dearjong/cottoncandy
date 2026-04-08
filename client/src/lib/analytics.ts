@@ -263,6 +263,31 @@ export function trackParticipationFinalSelected(props: {
   });
 }
 
+// ─── 계약 이벤트 ─────────────────────────────────────────────
+
+/** 계약 임시저장 */
+export function trackContractSaved(props: { partner_name?: string }) {
+  publishAnalytics("contract_saved", { ...props, user_type: "advertiser" });
+}
+
+/** 파트너사에 계약 협의 요청 발송 */
+export function trackContractRequestSent(props: { partner_name?: string; request_type: "internal" | "partner" }) {
+  publishAnalytics("contract_request_sent", { ...props, user_type: "advertiser" });
+}
+
+/** 계약 등록 완료 = partner_selected + contract_signed (GA4 전환 이벤트) */
+export function trackContractSigned(props: {
+  partner_name?: string;
+  budget_range?: string;
+}) {
+  publishAnalytics("contract_signed", { ...props, user_type: "advertiser" });
+}
+
+/** 계약 취소 */
+export function trackContractCancelled(props: { partner_name?: string }) {
+  publishAnalytics("contract_cancelled", { ...props, user_type: "advertiser" });
+}
+
 // ─── 제작 리뷰 이벤트 ────────────────────────────────────────
 
 /** 리뷰 임시저장 */

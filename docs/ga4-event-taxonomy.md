@@ -217,7 +217,38 @@
 
 ---
 
-## 10. 제작 리뷰 이벤트 (의뢰사)
+## 10. 계약 이벤트 (의뢰사)
+
+> `/work/project/contract` — 계약 등록 완료가 `partner_selected` + `contract_signed` 통합 전환점
+
+| 이벤트명 | 트리거 | GA4 전환 | 구현 |
+|---------|--------|---------|------|
+| `contract_saved` | 임시저장 클릭 | - | ✅ 완료 |
+| `contract_request_sent` | 인정부서/파트너사 협의 요청 | - | ✅ 완료 |
+| `contract_signed` | 계약 등록 완료 = 파트너 선정 확정 | ✅ 전환 | ✅ 완료 |
+| `contract_cancelled` | 계약 취소 | - | ✅ 완료 |
+
+**`contract_signed` 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `partner_name` | `마케팅에이전션` | 계약 파트너명 |
+| `budget_range` | `1.5억~2억원` | 계약비 구간 |
+| `user_type` | `advertiser` | 항상 의뢰사 |
+
+> **설계 포인트**: `partner_selected`(파트너 선정)과 `contract_signed`(계약 체결)을 `contract_signed` 하나로 통합.
+> 참여현황의 `participation_final_selected`는 "후보 의향" 이벤트이고, 계약 등록 완료가 실제 비즈니스 전환점.
+
+**`contract_request_sent` 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `request_type` | `internal` / `partner` | 인정부서 vs 파트너사 요청 구분 |
+| `partner_name` | `마케팅에이전션` | 파트너명 |
+
+---
+
+## 11. 제작 리뷰 이벤트 (의뢰사)
 
 > `/work/project/review` — 리뷰 작성이 곧 프로젝트 완료를 의미
 
@@ -267,8 +298,8 @@
 | `project_submitted` | 프로젝트 등록 완료 | 의뢰사 | ✅ |
 | `partner_applied` | 파트너 지원 완료 | 파트너사 | ✅ |
 | `proposal_submitted` | 제안서 제출 | 파트너사 | ⬜ |
-| `partner_selected` | 파트너 선정 | 의뢰사 | ⬜ |
-| `contract_signed` | 계약 체결 | 공통 | ⬜ |
+| `partner_selected` | ~~별도 이벤트 없음~~ `contract_signed`로 통합 | 의뢰사 | 통합됨 |
+| `contract_signed` | 계약 등록 완료 = 파트너 선정 확정 | 의뢰사 | ✅ |
 | `participation_final_selected` | 최종 파트너 선정 토글 | 의뢰사 | ✅ |
 | `consulting_inquiry_submitted` | 컨설팅 문의 | 의뢰사 | ✅ |
 | `consulting_to_project` | 컨설팅 → 프로젝트 전환 | 의뢰사 | ⬜ |
@@ -363,6 +394,10 @@ site_visit
 | `review_submitted` | ✅ | ✅ | 완료 (GA4 전환) |
 | `review_edited` | ✅ | ✅ | 완료 |
 | `review_completed` | ✅ | ✅ | 완료 |
+| `contract_saved` | ✅ | ✅ | 완료 |
+| `contract_request_sent` | ✅ | ✅ | 완료 |
+| `contract_signed` | ✅ | ✅ | 완료 (GA4 전환, partner_selected 통합) |
+| `contract_cancelled` | ✅ | ✅ | 완료 |
 | `admin_project_approved` | ✅ | ✅ | 완료 |
 | `admin_project_rejected` | ✅ | ✅ | 완료 |
 | `admin_notice_published` | ✅ | ✅ | 완료 |

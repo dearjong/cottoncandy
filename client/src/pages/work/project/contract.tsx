@@ -1,403 +1,93 @@
 import { useState } from 'react';
 import Layout from '@/components/layout/layout';
 import WorkSidebar from '@/components/work/sidebar';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { FileText, Save, Send, CheckCircle } from 'lucide-react';
-import { ProposalSecurityGate } from '@/components/admin/proposal-security-gate';
+import { useToast } from '@/hooks/use-toast';
+import { ChevronDown, ExternalLink, X, FileText } from 'lucide-react';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  trackContractSaved,
+  trackContractRequestSent,
+  trackContractSigned,
+  trackContractCancelled,
+} from '@/lib/analytics';
 
-const MOCK_PROJECTS = [{ id: '1', label: '[베스트전자] TV 신제품 판매촉진 프로모션' }];
+const PARTNER = '마케팅에이전션';
 
-const MOCK_DELEGATION_TAGS = [
-  '전략기획', '크리에이티브 기획', '영상 제작', '성과 측정 및 리포팅', '인플루언서/SNS 마케팅',
-  '오프라인 이벤트/프로모션', '영상 기획', '영상 촬영', '편집 및 후반작업', '모델/배우 섭외', '매체 집행',
-  '급행 제작 대응', '당일 피드백 반영 가능', '미디어 집행', 'PR/언론보도 대응', '가격 확정형', '구간가격형',
-  '일정 유동성 대응', '음악/BGM', '이벤트/행사 대응', '미공개',
+const TASK_ITEMS = [
+  ['편집이행', '크리에이티브 기획', '영상 제작', '60초 이상'],
+  ['유튜브 채널 운영', '인스타그램/SNS 마케팅', 'PR/언론보도 대응'],
+  ['옥외/미디어 광고'],
+  ['의뢰 기획', '맞춤 광고', '맞춤 및 추가특성', '실의기획'],
+  ['이벤트/팝업 전략', '기타'],
+  ['공통 제작 기업', '상임 대응', '일반 우선순위 대표', '이벤트/행사기획'],
+];
+
+const BUDGET_RANGES = [
+  '1억 미만', '1억~1.5억원', '1.5억~2억원', '2억~3억원', '3억~5억원', '5억~10억원', '10억 이상',
 ];
 
 const MOCK_FILES = [
-  { name: '[계약서] LG 스탠바이미2 프로모션 광고계약서.pdf', type: '계약서', date: '2024-04-06' },
-  { name: '[HSAD] 사업자 등록증 사본.pdf', date: '2024-04-06' },
-  { name: '[HSAD] 비밀유지 서약서 2025.pdf', type: '비밀유지 서약서', date: '2024-04-06' },
-  { name: '[HSAD] 프로젝트 기획서 2025.pdf', type: '프로젝트 기획서', date: '2024-04-06' },
+  { id: 1, name: '[베스트전자] LG 전자마케팅 프로젝트 광고계약서.pdf', date: '2024-10-05' },
+  { id: 2, name: '[HSAD] 사업자 등록증 사본.pdf', date: '2024-10-05' },
+  { id: 3, name: '[HSAD] 비밀유지 서약서 2025.pdf', date: '2024-10-05' },
+  { id: 4, name: '[HSAD] 프로젝트 기획서 2025.pdf', date: '2024-10-05' },
 ];
 
+type ContractState = 'draft' | 'requested' | 'registered';
+
 export default function WorkProjectContract() {
-  const [projectId, setProjectId] = useState('1');
-  const [contractStatus, setContractStatus] = useState<'draft' | 'request' | 'requesting' | 'done'>('draft');
-  const [selectedDelegation, setSelectedDelegation] = useState<string[]>([]);
-  const [sensitiveOpen, setSensitiveOpen] = useState(false);
+  const { toast } = useToast();
+  const [open, setOpen] = useState(true);
+  const [contractState, setContractState] = useState<ContractState>('draft');
+  const [tasks, setTasks] = useState<string[]>(['크리에이티브 기획', '영상 제작']);
+  const [adType, setAdType] = useState<string[]>(['기획 확정형']);
+  const [budgetRange, setBudgetRange] = useState('1.5억~2억원');
+  const [extraRange, setExtraRange] = useState('3억~10억원');
+  const [memo, setMemo] = useState('');
+  const [files, setFiles] = useState(MOCK_FILES);
+  const [agree1, setAgree1] = useState(true);
+  const [agree2, setAgree2] = useState(true);
+  const [agree3, setAgree3] = useState(false);
 
-  const toggleDelegation = (tag: string) => {
-    setSelectedDelegation((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
-  };
+  const toggleTask = (t: string) =>
+    setTasks(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
 
-  const SCHEDULE_OPTIONS = [
-    '급행 제작 대응',
-    '당일 피드백 반영 가능',
-    '일정 유동성 대응',
-    '이벤트/행사 대응',
-  ];
-  const [scheduleResponse, setScheduleResponse] = useState<string[]>([]);
-  const toggleSchedule = (opt: string) => {
-    setScheduleResponse((prev) =>
-      prev.includes(opt) ? prev.filter((o) => o !== opt) : [...prev, opt]
-    );
-  };
+  const toggleAdType = (t: string) =>
+    setAdType(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
 
-  const isEmbed =
-    typeof window !== 'undefined' &&
-    new URLSearchParams(window.location.search).get('embed') === '1';
+  const removeFile = (id: number) =>
+    setFiles(prev => prev.filter(f => f.id !== id));
 
-  // 작성/편집용 본문 (사용자 화면)
-  const body = (
-    <div className="space-y-6">
-      {/* 계약파트너 */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <Label className="text-gray-500 text-sm">계약파트너</Label>
-        <p className="mt-1 text-gray-800 font-medium">예쓰커뮤니케이션</p>
-      </div>
-
-      {/* 의뢰 내용 (체크박스) */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <Label className="text-gray-500 text-sm block mb-3">의뢰 내용</Label>
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          {MOCK_DELEGATION_TAGS.map((tag) => (
-            <label key={tag} className="flex items-center gap-2 cursor-pointer">
-              <Checkbox
-                checked={selectedDelegation.includes(tag)}
-                onCheckedChange={() => toggleDelegation(tag)}
-              />
-              <span className="text-sm text-gray-700">{tag}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* 일정 대응 / 금액입력방식 */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="flex flex-col gap-6">
-          <div>
-            <Label className="text-gray-700 text-sm block mb-3">일정 대응</Label>
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
-              {SCHEDULE_OPTIONS.map((opt) => (
-                <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox
-                    checked={scheduleResponse.includes(opt)}
-                    onCheckedChange={() => toggleSchedule(opt)}
-                  />
-                  <span className="text-sm text-gray-700">{opt}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-          <div>
-            <Label className="text-gray-500 text-sm block mb-2">금액입력방식</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-              <div>
-                <p className="text-xs text-gray-500 mb-1">제작비</p>
-                <Input placeholder="ex) 200,000,000" className="mb-1" />
-                <p className="text-xs text-gray-500">원 VAT 포함</p>
-                <p className="text-xs text-gray-600 mt-1">1.5억~3억원 (VAT 포함)</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1">총 예산 (매체비포함)</p>
-                <Input placeholder="ex) 2,000,000,000" className="mb-1" />
-                <p className="text-xs text-gray-500">원 VAT 포함</p>
-                <p className="text-xs text-gray-600 mt-1">5억 ~ 10억원 (VAT 포함)</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 계약일 / 최종기획안 / 납품기한 / OnAir */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <Label className="text-gray-500 text-sm">계약일</Label>
-            <Input type="date" defaultValue="2025-10-15" className="mt-1" />
-          </div>
-          <div>
-            <Label className="text-gray-500 text-sm">최종기획안 제출일</Label>
-            <Input type="date" defaultValue="2025-10-15" className="mt-1" />
-          </div>
-          <div>
-            <Label className="text-gray-500 text-sm">1차 납품기한</Label>
-            <Input type="date" defaultValue="2025-10-15" className="mt-1" />
-          </div>
-          <div>
-            <Label className="text-gray-500 text-sm">최종 납품기한</Label>
-            <Input type="date" defaultValue="2025-10-15" className="mt-1" />
-          </div>
-          <div>
-            <Label className="text-gray-500 text-sm">OnAir</Label>
-            <Input type="date" defaultValue="2025-10-15" className="mt-1" />
-          </div>
-        </div>
-      </div>
-
-      {/* 선금 / 중도금 / 잔금 */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <Label className="text-gray-500 text-sm block mb-3">결제 조건</Label>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-gray-50">
-                <th className="py-2 px-3 text-left font-medium text-gray-700">구분</th>
-                <th className="py-2 px-3 text-left font-medium text-gray-700">시점</th>
-                <th className="py-2 px-3 text-center font-medium text-gray-700 w-20">비율</th>
-                <th className="py-2 px-3 text-left font-medium text-gray-700">일자</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b border-gray-100">
-                <td className="py-2 px-3">선금</td>
-                <td className="py-2 px-3">계약 체결 시</td>
-                <td className="py-2 px-3 text-center">0%</td>
-                <td className="py-2 px-3">2025.10.15</td>
-              </tr>
-              <tr className="border-b border-gray-100">
-                <td className="py-2 px-3">중도금</td>
-                <td className="py-2 px-3">기획안/스토리보드 확정 시</td>
-                <td className="py-2 px-3 text-center">0%</td>
-                <td className="py-2 px-3">2025.10.15</td>
-              </tr>
-              <tr className="border-b border-gray-100">
-                <td className="py-2 px-3">잔금</td>
-                <td className="py-2 px-3">최종 결과물 납품 시</td>
-                <td className="py-2 px-3 text-center">0%</td>
-                <td className="py-2 px-3">2025.10.15</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* 기업인증 */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <Label className="text-gray-500 text-sm block mb-2">기업인증</Label>
-        <p className="text-sm text-gray-700">사업자 정보·인증완료 (2027.12.31까지)</p>
-      </div>
-
-      {/* 기타 계약조건 */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <Label className="text-gray-500 text-sm block mb-2">기타 계약조건</Label>
-        <Textarea
-          className="min-h-[80px]"
-          placeholder="입력해주세요."
-        />
-      </div>
-
-      {/* 서명완료된 계약서 / 최종기획서 / 기타문서 등록 */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <Label className="text-gray-500 text-sm block mb-3">서명완료된 계약서 / 최종기획서 / 기타문서 등록</Label>
-        <ul className="space-y-2 mb-4">
-          {MOCK_FILES.map((f) => (
-            <li key={f.name} className="flex items-center gap-2 text-sm">
-              <FileText className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-800">{f.name}</span>
-              {f.type && <span className="text-gray-400">| {f.type}</span>}
-              <span className="text-gray-400">| {f.date}</span>
-            </li>
-          ))}
-        </ul>
-        <Button variant="outline" size="sm">파일 추가</Button>
-      </div>
-
-      {/* 안내 문구 */}
-      <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600 space-y-1">
-        <p>입력하신 정보는 안전하게 저장되며, 프로젝트 관리와 서비스 제공 목적에만 사용되는 것에 동의합니다.</p>
-        <p>계약은 파트너사의 확인 및 동의 후 완료됩니다.</p>
-        <p>계약이 확정되면 이후 수정은 불가능합니다.</p>
-      </div>
-
-      {/* 하단 버튼 */}
-      <div className="flex flex-wrap items-center gap-3">
-        <Button variant="outline" size="sm">
-          <Save className="w-4 h-4 mr-1" />
-          임시저장
-        </Button>
-        {contractStatus === 'draft' && (
-          <Button size="sm" className="bg-pink-600 hover:bg-pink-700">
-            <Send className="w-4 h-4 mr-1" />
-            선정사에 계약 확정 요청
-          </Button>
-        )}
-        {contractStatus === 'request' && (
-          <Button size="sm" variant="secondary" disabled>
-            선정사에 계약 확정 요청 중
-          </Button>
-        )}
-        {contractStatus === 'done' && (
-          <Button size="sm" className="bg-green-600 hover:bg-green-700">
-            <CheckCircle className="w-4 h-4 mr-1" />
-            계약 확정 완료
-          </Button>
-        )}
-        <Button variant="outline" size="sm">계약내용 확인 및 동의</Button>
-      </div>
-    </div>
-  );
-
-  // 임베드(운영자 탭)에서 사용하는 출력 전용 뷰
-  const bodyView = (
-    <div className="space-y-4">
-      <div className="bg-white rounded-lg border p-4">
-        <p className="text-xs text-gray-500 mb-1">계약파트너</p>
-        <p className="text-sm font-medium text-gray-900">예쓰커뮤니케이션</p>
-      </div>
-
-      <div className="bg-white rounded-lg border p-4">
-        <p className="text-xs text-gray-500 mb-2">의뢰 내용</p>
-        <div className="flex flex-wrap gap-2 text-xs text-gray-800">
-          {MOCK_DELEGATION_TAGS.map((tag) => (
-            <span key={tag} className="inline-flex items-center rounded-full border px-2 py-0.5">
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg border p-4">
-        <p className="text-xs text-gray-500 mb-2">일정 및 금액 구간</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-800">
-          <div>
-            <p className="text-gray-600 text-xs mb-1">일정 대응</p>
-            <p>급행 제작 대응, 당일 피드백 반영 가능</p>
-          </div>
-          <div>
-            <p className="text-gray-600 text-xs mb-1">제작비 (구간)</p>
-            <p>1.5억 ~ 3억원 (VAT 포함)</p>
-          </div>
-          <div>
-            <p className="text-gray-600 text-xs mb-1">총 예산 (구간)</p>
-            <p>5억 ~ 10억원 (VAT 포함)</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg border p-4">
-        <p className="text-xs text-gray-500 mb-2">주요 일정</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-gray-800">
-          <div>
-            <p className="text-gray-500 mb-0.5">계약일</p>
-            <p>2025-10-15</p>
-          </div>
-          <div>
-            <p className="text-gray-500 mb-0.5">최종기획안 제출일</p>
-            <p>2025-10-15</p>
-          </div>
-          <div>
-            <p className="text-gray-500 mb-0.5">1차 납품기한</p>
-            <p>2025-10-15</p>
-          </div>
-          <div>
-            <p className="text-gray-500 mb-0.5">최종 납품기한</p>
-            <p>2025-10-15</p>
-          </div>
-          <div>
-            <p className="text-gray-500 mb-0.5">OnAir</p>
-            <p>2025-10-15</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg border p-4">
-        <p className="text-xs text-gray-500 mb-2">결제 조건</p>
-        <table className="w-full text-xs text-gray-800">
-          <thead>
-            <tr className="border-b bg-gray-50">
-              <th className="py-1.5 px-2 text-left font-medium">구분</th>
-              <th className="py-1.5 px-2 text-left font-medium">시점</th>
-              <th className="py-1.5 px-2 text-center font-medium w-16">비율</th>
-              <th className="py-1.5 px-2 text-left font-medium">일자</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b border-gray-100">
-              <td className="py-1.5 px-2">선금</td>
-              <td className="py-1.5 px-2">계약 체결 시</td>
-              <td className="py-1.5 px-2 text-center">0%</td>
-              <td className="py-1.5 px-2">2025.10.15</td>
-            </tr>
-            <tr className="border-b border-gray-100">
-              <td className="py-1.5 px-2">중도금</td>
-              <td className="py-1.5 px-2">기획안/스토리보드 확정 시</td>
-              <td className="py-1.5 px-2 text-center">0%</td>
-              <td className="py-1.5 px-2">2025.10.15</td>
-            </tr>
-            <tr>
-              <td className="py-1.5 px-2">잔금</td>
-              <td className="py-1.5 px-2">최종 결과물 납품 시</td>
-              <td className="py-1.5 px-2 text-center">0%</td>
-              <td className="py-1.5 px-2">2025.10.15</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div className="bg-white rounded-lg border p-4">
-        <p className="text-xs text-gray-500 mb-2">기타 계약조건</p>
-        <button
-          type="button"
-          className="inline-flex items-center rounded border px-2 py-1 text-[11px] text-gray-700 hover:border-pink-400 hover:text-pink-600"
-          onClick={() => setSensitiveOpen(true)}
-        >
-          민감정보로 비공개 · 내용 보기 (보안)
-        </button>
-      </div>
-
-      <div className="bg-white rounded-lg border p-4">
-        <p className="text-xs text-gray-500 mb-2">첨부 문서</p>
-        <ul className="space-y-1 text-xs text-gray-800">
-          {MOCK_FILES.map((f) => (
-            <li key={f.name} className="flex items-center gap-2">
-              <FileText className="w-3 h-3 text-gray-400" />
-              <span>{f.name}</span>
-              {f.type && <span className="text-gray-400">| {f.type}</span>}
-              <span className="text-gray-400">| {f.date}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="bg-gray-50 rounded-lg p-3 text-[11px] text-gray-600 space-y-1">
-        <p>입력하신 정보는 프로젝트 관리와 서비스 제공 목적에만 사용됩니다.</p>
-        <p>계약은 파트너사의 확인 및 동의 후 완료됩니다. 계약 확정 후에는 수정이 불가능합니다.</p>
-      </div>
-    </div>
-  );
-
-  if (isEmbed) {
-    // 운영자 탭 등 임베드에서는 입력 UI 없이 출력용 뷰만 노출
-    return (
-      <div className="p-4">
-        {bodyView}
-        <ProposalSecurityGate
-          open={sensitiveOpen}
-          onCancel={() => setSensitiveOpen(false)}
-          onVerified={() => {
-            // TODO: 실제 기타 계약조건 내용 출력/확대 뷰 연동
-            setSensitiveOpen(false);
-          }}
-          validatePassword={() => true}
-        />
-      </div>
-    );
+  function handleSave() {
+    trackContractSaved({ partner_name: PARTNER });
+    toast({ title: '임시저장', description: '계약 정보가 임시저장되었습니다.', duration: 2000 });
   }
+
+  function handleInternalRequest() {
+    trackContractRequestSent({ partner_name: PARTNER, request_type: 'internal' });
+    toast({ title: '인정부서 계약 협의 요청', description: '인정부서에 협의 요청을 보냈습니다.', duration: 2500 });
+  }
+
+  function handlePartnerRequest() {
+    trackContractRequestSent({ partner_name: PARTNER, request_type: 'partner' });
+    setContractState('requested');
+    toast({ title: '파트너사 계약 협의 요청', description: `${PARTNER}에 계약 협의 요청을 보냈습니다.`, duration: 2500 });
+  }
+
+  function handleRegister() {
+    trackContractSigned({ partner_name: PARTNER, budget_range: budgetRange });
+    setContractState('registered');
+    toast({ title: '계약 등록 완료', description: '계약이 등록되었습니다. 파트너가 선정되었습니다.', duration: 3000 });
+  }
+
+  function handleCancel() {
+    trackContractCancelled({ partner_name: PARTNER });
+    toast({ title: '계약 취소', description: '계약이 취소되었습니다.', duration: 2500 });
+  }
+
+  const isReadonly = contractState === 'registered';
 
   return (
     <Layout>
@@ -405,22 +95,252 @@ export default function WorkProjectContract() {
         <div className="work-content">
           <div className="flex gap-6">
             <WorkSidebar />
-            <div className="flex-1">
-              <div className="mb-6 flex items-center justify-between">
-                <h1 className="work-title">계약정보 (임시저장)</h1>
-                <Select value={projectId} onValueChange={setProjectId}>
-                  <SelectTrigger className="w-full max-w-xl">
-                    <SelectValue placeholder="프로젝트 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {MOCK_PROJECTS.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
 
-              {body}
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold text-center mb-6">
+                계약정보{contractState === 'draft' && ' (임시저장)'}
+                {contractState === 'requested' && ' (협의 요청 중)'}
+                {contractState === 'registered' && ' (등록 완료)'}
+              </h1>
+
+              <div className="bg-white rounded-lg border">
+                {/* 프로젝트 헤더 */}
+                <div className="px-5 py-3 border-b flex items-center justify-between">
+                  <button
+                    className="flex items-center gap-2 font-medium text-gray-800 hover:text-pink-600"
+                    onClick={() => setOpen(v => !v)}
+                  >
+                    <ChevronDown className={`w-4 h-4 transition-transform ${open ? '' : '-rotate-90'}`} />
+                    [베스트전자] TV 신제품 판매촉진 프로모션
+                  </button>
+                  <ExternalLink className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
+                </div>
+
+                {open && (
+                  <div className="p-6 space-y-5">
+                    {/* 파트너사 */}
+                    <div className="flex items-center gap-4 py-3 border-b">
+                      <span className="text-sm text-gray-500 w-24 flex-shrink-0">파트너사</span>
+                      <span className="text-gray-800 font-medium">{PARTNER}</span>
+                    </div>
+
+                    {/* 의뢰 사항 */}
+                    <div className="flex gap-4 py-3 border-b">
+                      <span className="text-sm text-gray-500 w-24 flex-shrink-0 pt-1">의뢰 사항</span>
+                      <div className="flex-1 space-y-2">
+                        {TASK_ITEMS.map((row, ri) => (
+                          <div key={ri} className="flex flex-wrap gap-x-5 gap-y-1">
+                            {row.map(item => (
+                              <label key={item} className="flex items-center gap-1.5 cursor-pointer">
+                                <Checkbox
+                                  checked={tasks.includes(item)}
+                                  onCheckedChange={() => !isReadonly && toggleTask(item)}
+                                  disabled={isReadonly}
+                                />
+                                <span className="text-sm text-gray-700">{item}</span>
+                              </label>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 광고 담당자 */}
+                    <div className="flex items-center gap-4 py-3 border-b">
+                      <span className="text-sm text-gray-500 w-24 flex-shrink-0">광고 담당자</span>
+                      <div className="flex gap-6">
+                        {['기획 확정형', '공간가격형'].map(t => (
+                          <label key={t} className="flex items-center gap-1.5 cursor-pointer">
+                            <Checkbox
+                              checked={adType.includes(t)}
+                              onCheckedChange={() => !isReadonly && toggleAdType(t)}
+                              disabled={isReadonly}
+                            />
+                            <span className="text-sm text-gray-700">{t}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 계약비 */}
+                    <div className="flex items-center gap-4 py-3 border-b">
+                      <span className="text-sm text-gray-500 w-24 flex-shrink-0">계약비</span>
+                      <div className="flex items-center gap-3">
+                        <select
+                          value={budgetRange}
+                          onChange={e => setBudgetRange(e.target.value)}
+                          disabled={isReadonly}
+                          className="text-sm border border-gray-300 rounded px-2 py-1.5"
+                        >
+                          {BUDGET_RANGES.map(r => <option key={r} value={r}>{r} (VAT 포함)</option>)}
+                        </select>
+                        {!isReadonly && <button className="text-xs text-blue-500 hover:underline">바꾸기</button>}
+                      </div>
+                    </div>
+
+                    {/* 추가 특 */}
+                    <div className="flex items-center gap-4 py-3 border-b">
+                      <span className="text-sm text-gray-500 w-24 flex-shrink-0">추가 특</span>
+                      <div className="flex items-center gap-3">
+                        <select
+                          value={extraRange}
+                          onChange={e => setExtraRange(e.target.value)}
+                          disabled={isReadonly}
+                          className="text-sm border border-gray-300 rounded px-2 py-1.5"
+                        >
+                          {BUDGET_RANGES.map(r => <option key={r} value={r}>{r} (VAT 포함)</option>)}
+                        </select>
+                        {!isReadonly && <button className="text-xs text-blue-500 hover:underline">바꾸기</button>}
+                      </div>
+                    </div>
+
+                    {/* 날짜 */}
+                    <div className="py-3 border-b space-y-3">
+                      {[
+                        { label: '주무일', value: '2025.10.18' },
+                        { label: '기획/계약 담당자', value: '2025.10.18' },
+                        { label: '1차 납품기간', value: '2025.10.18' },
+                        { label: '최종 납품기간', value: '2025.10.18' },
+                        { label: 'D-day', value: '2025.10.18' },
+                      ].map(({ label, value }) => (
+                        <div key={label} className="flex items-center gap-4">
+                          <span className="text-sm text-gray-500 w-24 flex-shrink-0">{label}</span>
+                          <Input
+                            defaultValue={value}
+                            disabled={isReadonly}
+                            className="w-40 text-sm h-8"
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* 선금/중금/잔금 */}
+                    <div className="py-3 border-b">
+                      <div className="space-y-3">
+                        {[
+                          { label: '선금', timing: '제작 제작 시' },
+                          { label: '중금', timing: '기획/스토리보드 확정 시' },
+                          { label: '잔금', timing: '최종 결과물 납품 시' },
+                        ].map(({ label, timing }) => (
+                          <div key={label} className="flex items-center gap-3">
+                            <span className="text-sm text-gray-500 w-12 flex-shrink-0">{label}</span>
+                            <select disabled={isReadonly} className="text-sm border border-gray-300 rounded px-2 py-1.5 flex-1">
+                              <option>{timing}</option>
+                            </select>
+                            <select disabled={isReadonly} className="text-sm border border-gray-300 rounded px-2 py-1.5 w-20">
+                              <option>0%</option>
+                              <option>30%</option>
+                              <option>50%</option>
+                              <option>70%</option>
+                              <option>100%</option>
+                            </select>
+                            <Input defaultValue="2025.10.15" disabled={isReadonly} className="w-32 text-sm h-8" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 기업인증 */}
+                    <div className="flex items-center gap-4 py-3 border-b">
+                      <span className="text-sm text-gray-500 w-24 flex-shrink-0">기업인증</span>
+                      <span className="text-sm text-gray-600">사업자 정보 - 준비중</span>
+                    </div>
+
+                    {/* 사업인증 */}
+                    <div className="flex items-center gap-4 py-3 border-b">
+                      <span className="text-sm text-gray-500 w-24 flex-shrink-0">사업인증</span>
+                      <span className="text-sm text-gray-600">사업자 정보 없음 (2027.12.31까지)</span>
+                    </div>
+
+                    {/* 기타 메모 */}
+                    <div className="flex gap-4 py-3 border-b">
+                      <span className="text-sm text-gray-500 w-24 flex-shrink-0 pt-1">기타 메모</span>
+                      <Textarea
+                        value={memo}
+                        onChange={e => setMemo(e.target.value)}
+                        disabled={isReadonly}
+                        placeholder="입력해주세요."
+                        className="flex-1 min-h-[80px] resize-none text-sm"
+                      />
+                    </div>
+
+                    {/* 파일 첨부 */}
+                    <div className="py-3 border-b">
+                      <p className="text-sm text-gray-500 mb-3">서명완료된 계약서 / 최종기획서 / 기타서류 파일 등록</p>
+                      <div className="space-y-2">
+                        {files.map(f => (
+                          <div key={f.id} className="flex items-center justify-between bg-gray-50 rounded px-3 py-2">
+                            <div className="flex items-center gap-2">
+                              <FileText className="w-4 h-4 text-gray-400" />
+                              <span className="text-sm text-gray-800">{f.name}</span>
+                              <span className="text-xs text-gray-400">{f.date}</span>
+                            </div>
+                            {!isReadonly && (
+                              <button onClick={() => removeFile(f.id)} className="text-gray-400 hover:text-red-500">
+                                <X className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 동의 체크박스 */}
+                    <div className="space-y-2 py-2">
+                      {[
+                        { state: agree1, set: setAgree1, text: '입력하신 정보는 프로젝트 관리 서비스 제공 목적에만 사용되는 것에 동의합니다.' },
+                        { state: agree2, set: setAgree2, text: '파트너사의 확인 및 동의 후 계약이 완료됩니다.' },
+                        { state: agree3, set: setAgree3, text: '계약이 확정되면 이후 수정은 불가능합니다.' },
+                      ].map(({ state, set, text }, i) => (
+                        <label key={i} className="flex items-start gap-2 cursor-pointer">
+                          <Checkbox checked={state} onCheckedChange={v => set(!!v)} disabled={isReadonly} className="mt-0.5" />
+                          <span className="text-sm text-gray-600">{text}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    {/* 하단 버튼 */}
+                    <div className="pt-2 space-y-2">
+                      {/* 비활성 미리보기 */}
+                      <div className="flex gap-2">
+                        <button disabled className="flex-1 py-2 text-sm text-gray-400 bg-gray-100 rounded-full cursor-not-allowed">임시저장</button>
+                        <button disabled className="flex-1 py-2 text-sm text-gray-400 bg-gray-100 rounded-full cursor-not-allowed">인정부서 계약 협의 요청</button>
+                        <button disabled className="flex-1 py-2 text-sm text-gray-400 bg-gray-100 rounded-full cursor-not-allowed">계약취소</button>
+                        <button disabled className="flex-1 py-2 text-sm text-gray-400 bg-gray-100 rounded-full cursor-not-allowed">계약등록</button>
+                      </div>
+
+                      {/* 활성 버튼 */}
+                      {contractState !== 'registered' && (
+                        <div className="flex gap-2">
+                          <button className="btn-white flex-1 text-sm" onClick={handleSave}>임시저장</button>
+                          <button className="btn-white flex-1 text-sm" onClick={handleInternalRequest}>인정부서 계약 협의 요청</button>
+                          <button className="btn-white flex-1 text-sm" onClick={handleCancel}>계약취소</button>
+                        </div>
+                      )}
+
+                      {contractState === 'draft' && (
+                        <div className="flex gap-2">
+                          <button className="btn-pink flex-1" onClick={handlePartnerRequest}>파트너사 계약 협의 요청</button>
+                          <button disabled className="flex-1 py-2.5 text-sm text-gray-400 bg-gray-100 rounded-full cursor-not-allowed">계약등록</button>
+                        </div>
+                      )}
+
+                      {contractState === 'requested' && (
+                        <div className="flex gap-2">
+                          <button disabled className="flex-1 py-2.5 text-sm text-gray-400 bg-gray-100 rounded-full cursor-not-allowed">파트너사 협의 요청 중</button>
+                          <button className="btn-pink flex-1" onClick={handleRegister}>계약등록</button>
+                        </div>
+                      )}
+
+                      {contractState === 'registered' && (
+                        <button disabled className="w-full py-2.5 text-sm text-gray-400 bg-gray-100 rounded-full cursor-not-allowed">
+                          계약 등록 완료
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
