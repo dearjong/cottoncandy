@@ -262,6 +262,26 @@ export default function Login() {
                   </div>
                 </div>
 
+                <div className="project-section project-section-horizontal">
+                  <span className="project-section-title"><span className="cotton-candy-pink">*</span> 비밀번호</span>
+                  <div className="flex-1">
+                    <Input
+                      type="password"
+                      placeholder="비밀번호를 입력해주세요"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full"
+                      data-testid="input-password"
+                      onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                    />
+                    <div className="flex justify-end mt-1">
+                      <button type="button" className="text-xs text-gray-400 hover:text-gray-600">
+                        비밀번호 찾기
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="text-center space-y-4 pt-4">
                   <Button
                     onClick={handleLogin}
