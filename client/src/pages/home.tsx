@@ -133,7 +133,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-white to-gray-50 pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 whitespace-pre-line leading-[1.2]" data-testid="hero-title">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 whitespace-pre-line hero-title" data-testid="hero-title">
             {heroTitle}
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 mb-6" data-testid="hero-subtitle">

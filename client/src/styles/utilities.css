@@ -403,3 +403,7 @@
     color: var(--google-blue);
   }
 }
+
+.hero-title {
+  line-height: 1.2 !important;
+}
