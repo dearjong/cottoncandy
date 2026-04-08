@@ -37,35 +37,22 @@ export default function MyProfile() {
 
                   <div className="project-section project-section-horizontal">
                     <span className="project-section-title"><span className="cotton-candy-pink">*</span> 이름</span>
-                    <Input placeholder="ex) 김에드" className="flex-1" />
+                    <Input defaultValue="이꽃별" className="flex-1" />
                   </div>
 
                   <div className="project-section project-section-horizontal">
-                    <span className="project-section-title">낙네임</span>
-                    <Input placeholder="ex) 빠드린" className="flex-1" />
+                    <span className="project-section-title">닉네임</span>
+                    <Input defaultValue="꽃별이" className="flex-1" />
                   </div>
 
                   <div className="project-section project-section-horizontal">
                     <span className="project-section-title"><span className="cotton-candy-pink">*</span> 휴대폰</span>
-                    <Input placeholder="ex) 010-1234-5678" className="flex-1" />
+                    <Input defaultValue="010-1234-5678" className="flex-1" />
                   </div>
 
                   <div className="project-section project-section-horizontal">
                     <span className="project-section-title"><span className="cotton-candy-pink">*</span> 이메일</span>
-                    <Input placeholder="ex) adqueen@tvcf.co.kr" className="flex-1" />
-                  </div>
-
-                  <div className="project-section project-section-horizontal">
-                    <span className="project-section-title"><span className="cotton-candy-pink">*</span> 비밀번호</span>
-                    <div className="flex-1">
-                      <Input type="password" placeholder="비밀번호를 입력해주세요." />
-                      <p className="text-xs text-gray-400 mt-1">※ 영문 소자, 특수문자 중 2가지 이상을 혼합하여 최소 7~17자까지 입력해주세요.</p>
-                    </div>
-                  </div>
-
-                  <div className="project-section project-section-horizontal">
-                    <span className="project-section-title"><span className="cotton-candy-pink">*</span> 비밀번호 확인</span>
-                    <Input type="password" placeholder="확인을 위해 비밀번호를 다시한번 입력해주세요." className="flex-1" />
+                    <Input defaultValue="test@cottoncandy.kr" className="flex-1" />
                   </div>
                 </div>
               </div>
