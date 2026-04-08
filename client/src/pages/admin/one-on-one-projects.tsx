@@ -16,7 +16,7 @@ export default function OneOnOneProjectsPage() {
         </div>
       )}
       <PageHeader
-        title={<>1:1 프로젝트 관리{activeViewLabel && <span className="ml-3 text-xl font-semibold text-pink-600">/ {activeViewLabel}</span>}</>}
+        title={<>1:1 프로젝트{activeViewLabel && <span className="ml-3 text-xl font-semibold text-pink-600">/ {activeViewLabel}</span>}</>}
         description="1:1 비공개 프로젝트를 관리하세요"
       />
       

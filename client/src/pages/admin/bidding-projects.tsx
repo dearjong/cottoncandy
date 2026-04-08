@@ -16,7 +16,7 @@ export default function BiddingProjectsPage() {
         </div>
       )}
       <PageHeader
-        title={<>공고프로젝트 관리{activeViewLabel && <span className="ml-3 text-xl font-semibold text-pink-600">/ {activeViewLabel}</span>}</>}
+        title={<>공고 프로젝트{activeViewLabel && <span className="ml-3 text-xl font-semibold text-pink-600">/ {activeViewLabel}</span>}</>}
         description="공개 공고로 등록된 프로젝트를 관리하세요"
       />
       
