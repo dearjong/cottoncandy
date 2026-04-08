@@ -689,7 +689,7 @@ export default function Header() {
                 <Button
                   onClick={() => {
                     trackHeaderInteraction({ target: "signup" });
-                    setLocation("/signup");
+                    setLocation("/login?tab=new");
                   }}
                   className="btn-dark w-auto px-5"
                   data-testid="button-signup-header"
@@ -699,7 +699,7 @@ export default function Header() {
                 <button
                   onClick={() => {
                     trackHeaderInteraction({ target: "login" });
-                    setLocation("/login");
+                    setLocation("/login?tab=existing");
                   }}
                   className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
                   data-testid="button-login-icon"
