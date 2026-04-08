@@ -225,7 +225,7 @@ gtag("event", "login", { method: "email" })   // GA4 표준 이벤트
 | `project_viewed` | 공고 상세 조회 | - | ✅ 완료 |
 | `partner_applied` | 참여신청 버튼 클릭 | ✅ 전환 | ✅ 완료 |
 | `proposal_submitted` | 제안서 제출 | ✅ 전환 | ✅ 완료 |
-| `partner_selected` | ~~별도 이벤트 없음~~ `contract_signed`로 통합 | - | 통합됨 |
+| `partner_selected` | 최종선정 확정 CTA 클릭 | ✅ 전환 | ✅ 완료 |
 | `contract_signed` | 계약 등록 완료 = 파트너 선정 확정 | ✅ 전환 | ✅ 완료 |
 
 **`partner_applied` 파라미터**
@@ -401,7 +401,7 @@ gtag("event", "login", { method: "email" })   // GA4 표준 이벤트
 | `project_submitted` | 프로젝트 등록 완료 | 의뢰사 | ✅ |
 | `partner_applied` | 파트너 지원 완료 | 파트너사 | ✅ |
 | `proposal_submitted` | 제안서 제출 | 파트너사 | ✅ |
-| `partner_selected` | ~~별도 이벤트 없음~~ `contract_signed`로 통합 | 의뢰사 | 통합됨 |
+| `partner_selected` | 최종선정 확정 CTA 클릭 | 의뢰사 | ✅ |
 | `contract_signed` | 계약 등록 완료 = 파트너 선정 확정 | 의뢰사 | ✅ |
 | `participation_final_selected` | 최종 파트너 선정 토글 | 의뢰사 | ✅ |
 | `consulting_inquiry_submitted` | 컨설팅 문의 접수 | 의뢰사 | ✅ |
@@ -513,7 +513,7 @@ site_visit
 | `consulting_responded` | ✅ | ✅ | 완료 |
 | `consulting_project_linked` | ✅ | ✅ | 완료 |
 | `proposal_submitted` | ✅ | ✅ | 완료 (`/work/project/proposal/register`) |
-| `partner_selected` | - | - | `contract_signed`로 통합, 별도 구현 없음 |
+| `partner_selected` | ✅ | ✅ | 완료 — selected_count, company_ids (최종선정 확정 CTA) |
 | ~~`consulting_matched`~~ | - | - | 제거됨 (해당 구조 없음) |
 | ~~`consulting_to_project`~~ | - | - | 제거됨 (전환 아닌 연결 구조) |
 | `admin_member_warned` | ✅ | ✅ | 완료 |

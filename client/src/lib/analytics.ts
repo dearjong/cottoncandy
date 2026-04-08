@@ -388,6 +388,17 @@ export function trackContractRequestSent(props: { partner_name?: string; request
   publishAnalytics("contract_request_sent", { ...props, user_type: "advertiser" });
 }
 
+/**
+ * 최종선정 확정 CTA 클릭 — 스위치로 선택된 파트너를 확정하는 순간.
+ * participation.tsx 의 "최종선정 확정" 버튼에서 호출.
+ */
+export function trackPartnerSelected(props: {
+  selected_count: number;
+  company_ids?: string[];
+}) {
+  publishAnalytics("partner_selected", { ...props, user_type: "advertiser" });
+}
+
 /** 계약 등록 완료 = partner_selected + contract_signed (GA4 전환 이벤트) */
 export function trackContractSigned(props: {
   partner_name?: string;

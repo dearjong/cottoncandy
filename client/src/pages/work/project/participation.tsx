@@ -13,6 +13,7 @@ import {
   trackParticipationPtConfirmed,
   trackParticipationPtCompleted,
   trackParticipationFinalSelected,
+  trackPartnerSelected,
 } from '@/lib/analytics';
 import portfolio1 from '@assets/A000561001259B_1760322383639.jpg';
 import portfolio2 from '@assets/A000561002A4A6_1760322383641.jpg';
@@ -323,6 +324,15 @@ export default function WorkProjectParticipation() {
   };
 
   function handleBottomAction(label: string) {
+    if (label === '최종선정 확정') {
+      const selectedIds = Object.entries(toggles)
+        .filter(([, v]) => v['final_selected'])
+        .map(([id]) => id);
+      trackPartnerSelected({
+        selected_count: selectedIds.length,
+        company_ids: selectedIds,
+      });
+    }
     toast({
       title: label,
       description: '처리되었습니다.',
