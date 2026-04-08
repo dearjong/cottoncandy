@@ -3,6 +3,7 @@ import MySidebar from "@/components/my/my-sidebar";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
+import { useLocation } from "wouter";
 
 type NotifRow = {
   id: string;
@@ -24,6 +25,7 @@ const DEFAULT_SETTINGS: NotifRow[] = [
 ];
 
 export default function MyNotificationSettings() {
+  const [, setLocation] = useLocation();
   const [rows, setRows] = useState<NotifRow[]>(DEFAULT_SETTINGS);
 
   const toggle = (id: string, channel: "app" | "email" | "sms") => {
@@ -72,8 +74,15 @@ export default function MyNotificationSettings() {
                 ))}
               </div>
 
-              <div className="mt-8">
-                <Button className="w-full py-3 rounded-full text-sm bg-pink-500 hover:bg-pink-600 text-white">
+              <div className="flex gap-3 mt-8">
+                <Button
+                  variant="outline"
+                  className="flex-1 py-3 rounded-full text-sm"
+                  onClick={() => setLocation("/my/profile")}
+                >
+                  취소
+                </Button>
+                <Button className="flex-1 py-3 rounded-full text-sm bg-pink-500 hover:bg-pink-600 text-white">
                   저장하기
                 </Button>
               </div>
