@@ -7,6 +7,8 @@ import {
 } from "@/config/create-project-step-meta";
 import mixpanel from "mixpanel-browser";
 
+declare function gtag(...args: unknown[]): void;
+
 const SITE_VISIT_SESSION_KEY = "analytics_site_visit_sent";
 const SESSION_ID_KEY = "analytics_session_id";
 
@@ -126,11 +128,22 @@ export function trackFunnelRoute(path: string) {
   trackProjectRegisterStep(path);
 }
 
+/** GA4에 페이지뷰 이벤트 전송 */
+function trackGA4PageView(path: string) {
+  if (typeof gtag === "undefined") return;
+  gtag("event", "page_view", {
+    page_path: path,
+    page_title: document.title,
+    page_location: window.location.href,
+  });
+}
+
 /** App 루트에 두면 경로 변경 시 퍼널 이벤트가 자동으로 쌓입니다. */
 export function FunnelRouteListener() {
   const [path] = useLocation();
   useEffect(() => {
     trackFunnelRoute(path);
+    trackGA4PageView(path);
   }, [path]);
   return null;
 }
