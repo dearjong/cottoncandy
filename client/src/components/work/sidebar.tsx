@@ -189,22 +189,13 @@ Cotton Candy 알림
 일정관리
             </Link>
             <Link 
-              href="/work/project/selection" 
-              className={`block px-4 py-2 text-sm hover:text-pink-600 ${
-                location === '/work/project/selection' ? 'text-pink-600' : 'text-gray-600'
-              }`}
-              data-testid="sidebar-selection"
-            >
-참여관리
-            </Link>
-            <Link 
               href="/work/project/participation" 
               className={`block px-4 py-2 text-sm hover:text-pink-600 ${
                 location === '/work/project/participation' ? 'text-pink-600' : 'text-gray-600'
               }`}
-              data-testid="sidebar-participation-status"
+              data-testid="sidebar-participation"
             >
-              └ 참여현황
+참여현황
             </Link>
             <Link
               href="/work/project/ot-guide"

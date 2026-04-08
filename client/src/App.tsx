@@ -45,7 +45,6 @@ import Contest from "@/pages/contest";
 import WorkHome from "@/pages/work/home";
 import WorkProjectList from "@/pages/work/project/list";
 import WorkProjectSchedule from "@/pages/work/project/schedule";
-import WorkProjectSelection from "@/pages/work/project/selection";
 import WorkProjectParticipation from "@/pages/work/project/participation";
 import WorkProjectOtGuide from "@/pages/work/project/ot-guide";
 import WorkProjectProposal from "@/pages/work/project/proposal";
@@ -265,9 +264,6 @@ function Router() {
       </Route>
       <Route path="/work/project/schedule">
         <ProtectedRoute component={WorkProjectSchedule} />
-      </Route>
-      <Route path="/work/project/selection">
-        <ProtectedRoute component={WorkProjectSelection} />
       </Route>
       <Route path="/work/project/participation">
         <ProtectedRoute component={WorkProjectParticipation} />
