@@ -187,6 +187,82 @@ export function trackAgencyFavorited(props: {
   });
 }
 
+// ─── 참여현황 관리 이벤트 ─────────────────────────────────────
+
+/** 초대 토글 (참여신청 탭) */
+export function trackParticipationInviteToggled(props: {
+  company_id: number;
+  company_name: string;
+  invited: boolean;
+}) {
+  publishAnalytics("participation_invite_toggled", {
+    ...props,
+    user_type: "advertiser",
+  });
+}
+
+/** OT 참석 확정 토글 */
+export function trackParticipationOtConfirmed(props: {
+  company_id: number;
+  company_name: string;
+  confirmed: boolean;
+}) {
+  publishAnalytics("participation_ot_confirmed", {
+    ...props,
+    user_type: "advertiser",
+  });
+}
+
+/** OT 참석 완료 토글 */
+export function trackParticipationOtCompleted(props: {
+  company_id: number;
+  company_name: string;
+  completed: boolean;
+}) {
+  publishAnalytics("participation_ot_completed", {
+    ...props,
+    user_type: "advertiser",
+  });
+}
+
+/** PT 참석 확정 토글 */
+export function trackParticipationPtConfirmed(props: {
+  company_id: number;
+  company_name: string;
+  pt_round: "pt1" | "pt2";
+  confirmed: boolean;
+}) {
+  publishAnalytics("participation_pt_confirmed", {
+    ...props,
+    user_type: "advertiser",
+  });
+}
+
+/** PT 완료 토글 */
+export function trackParticipationPtCompleted(props: {
+  company_id: number;
+  company_name: string;
+  pt_round: "pt1" | "pt2";
+  completed: boolean;
+}) {
+  publishAnalytics("participation_pt_completed", {
+    ...props,
+    user_type: "advertiser",
+  });
+}
+
+/** 최종 선정 토글 */
+export function trackParticipationFinalSelected(props: {
+  company_id: number;
+  company_name: string;
+  selected: boolean;
+}) {
+  publishAnalytics("participation_final_selected", {
+    ...props,
+    user_type: "advertiser",
+  });
+}
+
 // ─── 라우트 리스너 ────────────────────────────────────────────
 
 /** GA4에 page_view 이벤트 전송 (SPA 경로 변경 시) */
