@@ -1,15 +1,43 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import Layout from "@/components/layout/layout";
 import { Button } from "@/components/ui/button";
 import { getSubtitle } from "@/config/global-events";
 import SearchBar from "@/components/common/search-bar";
+import {
+  assignExperiment,
+  getExperimentVariant,
+  trackExperimentViewed,
+  publishAnalytics,
+} from "@/lib/analytics";
+
+const EXP_ID = "home_cta_text";
+const CTA_COPY: Record<string, string> = {
+  control:      "내 마음에 쏙드는 전문기업 추천받기 Go~*",
+  variant_free: "지금 무료로 의뢰하기",
+};
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   
   // 전체 사이트 서브타이틀 사용 (홈페이지는 특정 메뉴에 속하지 않음)
   const eventInfo = getSubtitle();
+
+  useEffect(() => {
+    assignExperiment(EXP_ID, ["control", "variant_free"]);
+    const v = getExperimentVariant(EXP_ID) ?? "control";
+    trackExperimentViewed(EXP_ID, v);
+  }, []);
+
+  const ctaVariant = getExperimentVariant(EXP_ID) ?? "control";
+  const ctaText = CTA_COPY[ctaVariant];
+
+  const handleCtaClick = () => {
+    publishAnalytics("home_cta_clicked", {
+      experiment_id: EXP_ID,
+      variant: ctaVariant,
+    });
+  };
 
   const categories = [
     { name: "정보통신", icon: "💻" },
@@ -105,8 +133,12 @@ export default function Home() {
               <a href={eventInfo.link} className="text-pink-600 underline ml-1">{eventInfo.linkText}</a>
             </p>
           </div>
-          <Button className="btn-pink mb-8 max-w-md mx-auto" data-testid="button-recommend">
-            내 마음에 쏙드는 전문기업 추천받기 Go~*
+          <Button
+            className="btn-pink mb-8 max-w-md mx-auto"
+            data-testid="button-recommend"
+            onClick={handleCtaClick}
+          >
+            {ctaText}
           </Button>
 
           {/* Search Bar */}
