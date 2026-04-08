@@ -430,24 +430,32 @@ export default function WorkProjectParticipation() {
                     </div>
 
                     <div className="px-5 py-4 border-t flex justify-center gap-3">
-                      <button
-                        className="btn-white"
-                        onClick={() => handleBottomAction('메세지 발송')}
-                      >
-                        메세지 발송
-                      </button>
-                      <button
-                        className="btn-white"
-                        onClick={() => handleBottomAction('미선정 메세지 발송')}
-                      >
-                        미선정 메세지 발송
-                      </button>
-                      <button
-                        className="btn-pink"
-                        onClick={() => handleBottomAction('초대 확정')}
-                      >
-                        초대 확정
-                      </button>
+                      {activeTab === 'application' && (
+                        <>
+                          <button className="btn-white" onClick={() => handleBottomAction('메세지 발송')}>
+                            메세지 발송
+                          </button>
+                          <button className="btn-white" onClick={() => handleBottomAction('미선정 메세지 발송')}>
+                            미선정 메세지 발송
+                          </button>
+                          <button className="btn-pink" onClick={() => handleBottomAction('초대 확정')}>
+                            초대 확정
+                          </button>
+                        </>
+                      )}
+                      {(activeTab === 'ot' || activeTab === 'pt1' || activeTab === 'pt2') && (
+                        <button className="btn-white" onClick={() => handleBottomAction('메세지 발송')}>
+                          메세지 발송
+                        </button>
+                      )}
+                      {activeTab === 'final' && (
+                        <button
+                          className="btn-pink w-full"
+                          onClick={() => handleBottomAction('최종선정 확정')}
+                        >
+                          최종선정 확정
+                        </button>
+                      )}
                     </div>
                   </>
                 )}
