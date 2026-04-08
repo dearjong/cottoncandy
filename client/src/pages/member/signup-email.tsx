@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input";
 export default function SignupEmail() {
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [codeSent, setCodeSent] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("123456");
+  const [codeSent, setCodeSent] = useState(true);
   const [emailError, setEmailError] = useState("");
   const [verificationCodeError, setVerificationCodeError] = useState("");
 

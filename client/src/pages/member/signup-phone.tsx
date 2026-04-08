@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 export default function SignupPhone() {
   const [, setLocation] = useLocation();
   const [phone1, setPhone1] = useState("010");
-  const [phone2, setPhone2] = useState("");
-  const [phone3, setPhone3] = useState("");
+  const [phone2, setPhone2] = useState("1234");
+  const [phone3, setPhone3] = useState("5678");
 
   const handleVerify = () => {
     console.log('휴대폰 인증:', `${phone1}-${phone2}-${phone3}`);

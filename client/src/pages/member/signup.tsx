@@ -13,9 +13,9 @@ export default function Signup() {
   const [, setLocation] = useLocation();
   const [selectedCard, setSelectedCard] = useState<'existing' | 'new'>('new');
   const [customerType, setCustomerType] = useState<string>('advertiser');
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [email, setEmail] = useState("test@cottoncandy.kr");
+  const [password, setPassword] = useState("test1234!");
+  const [passwordConfirm, setPasswordConfirm] = useState("test1234!");
   
   // 메뉴별 서브타이틀 가져오기 (광고제작 의뢰하기 메뉴)
   const eventInfo = getSubtitle(undefined, 'request');
