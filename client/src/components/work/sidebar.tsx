@@ -188,6 +188,9 @@ Cotton Candy 알림
             >
 일정관리
             </Link>
+            <span className="block px-4 py-2 text-sm text-gray-600">
+참여관리
+            </span>
             <Link 
               href="/work/project/participation" 
               className={`block px-4 py-2 text-sm hover:text-pink-600 ${
@@ -195,7 +198,7 @@ Cotton Candy 알림
               }`}
               data-testid="sidebar-participation"
             >
-참여관리
+              └ 참여현황
             </Link>
             <Link
               href="/work/project/ot-guide"
