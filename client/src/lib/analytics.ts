@@ -263,6 +263,43 @@ export function trackParticipationFinalSelected(props: {
   });
 }
 
+// ─── 제작 리뷰 이벤트 ────────────────────────────────────────
+
+/** 리뷰 임시저장 */
+export function trackReviewSaved(props: {
+  project_id?: string;
+  partner_name?: string;
+}) {
+  publishAnalytics("review_saved", { ...props, user_type: "advertiser" });
+}
+
+/** 리뷰 등록 완료 → 프로젝트 완료 처리 (GA4 전환 이벤트) */
+export function trackReviewSubmitted(props: {
+  project_id?: string;
+  partner_name?: string;
+  has_client_rating: boolean;
+  has_partner_rating: boolean;
+  has_text: boolean;
+}) {
+  publishAnalytics("review_submitted", { ...props, user_type: "advertiser" });
+}
+
+/** 리뷰 수정 (등록 후 7일 이내) */
+export function trackReviewEdited(props: {
+  project_id?: string;
+  partner_name?: string;
+}) {
+  publishAnalytics("review_edited", { ...props, user_type: "advertiser" });
+}
+
+/** 리뷰 최종 완료 확인 */
+export function trackReviewCompleted(props: {
+  project_id?: string;
+  partner_name?: string;
+}) {
+  publishAnalytics("review_completed", { ...props, user_type: "advertiser" });
+}
+
 // ─── 라우트 리스너 ────────────────────────────────────────────
 
 /** GA4에 page_view 이벤트 전송 (SPA 경로 변경 시) */

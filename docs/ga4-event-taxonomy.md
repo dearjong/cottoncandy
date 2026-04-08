@@ -1,6 +1,6 @@
 # ADMarket GA4 · Mixpanel 이벤트 정의서
 
-> 버전: v2.0 | 작성일: 2026-04-08  
+> 버전: v2.1 | 작성일: 2026-04-08  
 > 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
 
 ---
@@ -192,7 +192,57 @@
 
 ---
 
-## 9. 관리자 운영 이벤트
+## 9. 참여현황 관리 이벤트 (의뢰사)
+
+> `/work/project/participation` — 의뢰사가 참여 기업을 관리하는 행동 추적
+
+| 이벤트명 | 트리거 | GA4 전환 | 구현 |
+|---------|--------|---------|------|
+| `participation_invite_toggled` | 참여신청 탭 초대 토글 | - | ✅ 완료 |
+| `participation_ot_confirmed` | OT참석확정 토글 | - | ✅ 완료 |
+| `participation_ot_completed` | OT참석완료 토글 | - | ✅ 완료 |
+| `participation_pt_confirmed` | PT참석확정 토글 | - | ✅ 완료 |
+| `participation_pt_completed` | PT완료 토글 | - | ✅ 완료 |
+| `participation_final_selected` | 최종선정 토글 | ✅ 전환 | ✅ 완료 |
+
+**공통 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `company_id` | `1` | 기업 ID |
+| `company_name` | `솜사탕애드` | 기업명 |
+| `user_type` | `advertiser` | 항상 의뢰사 |
+| `invited` / `confirmed` / `completed` / `selected` | `true` / `false` | 토글 상태 |
+| `pt_round` | `pt1` / `pt2` | PT 차수 (PT 이벤트만) |
+
+---
+
+## 10. 제작 리뷰 이벤트 (의뢰사)
+
+> `/work/project/review` — 리뷰 작성이 곧 프로젝트 완료를 의미
+
+| 이벤트명 | 트리거 | GA4 전환 | 구현 |
+|---------|--------|---------|------|
+| `review_saved` | 임시저장 버튼 클릭 | - | ✅ 완료 |
+| `review_submitted` | 등록하기 클릭 (프로젝트 완료) | ✅ 전환 | ✅ 완료 |
+| `review_edited` | 수정 버튼 클릭 (7일 이내) | - | ✅ 완료 |
+| `review_completed` | 완료 버튼 클릭 | - | ✅ 완료 |
+
+**`review_submitted` 파라미터** (핵심 전환)
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `partner_name` | `솜사탕애드` | 파트너 기업명 |
+| `has_client_rating` | `true` | 의뢰사 평점 작성 여부 |
+| `has_partner_rating` | `true` | 파트너사 평점 작성 여부 |
+| `has_text` | `true` | 리뷰 텍스트 작성 여부 |
+| `user_type` | `advertiser` | 항상 의뢰사 |
+
+> **설계 포인트**: `review_submitted` = 프로젝트 완료 전환. GA4 퍼널 마지막 단계 `contract_signed` → `review_submitted`로 이어짐
+
+---
+
+## 11. 관리자 운영 이벤트
 
 > 관리자 행동은 별도 GA4 Property 또는 Mixpanel 전용 프로젝트 권장
 
@@ -207,24 +257,26 @@
 
 ---
 
-## 10. GA4 전환 이벤트 설정 목록
+## 12. GA4 전환 이벤트 설정 목록
 
 > GA4 관리 콘솔 → 이벤트 → 아래 이벤트를 "전환으로 표시"
 
-| 이벤트명 | 전환 의미 | 역할 |
-|---------|----------|------|
-| `signup_complete` | 회원가입 완료 | 공통 |
-| `project_submitted` | 프로젝트 등록 완료 | 의뢰사 |
-| `partner_applied` | 파트너 지원 완료 | 파트너사 |
-| `proposal_submitted` | 제안서 제출 | 파트너사 |
-| `partner_selected` | 파트너 선정 | 의뢰사 |
-| `contract_signed` | 계약 체결 | 공통 |
-| `consulting_inquiry_submitted` | 컨설팅 문의 | 의뢰사 |
-| `consulting_to_project` | 컨설팅 → 프로젝트 전환 | 의뢰사 |
+| 이벤트명 | 전환 의미 | 역할 | 구현 |
+|---------|----------|------|------|
+| `signup_complete` | 회원가입 완료 | 공통 | ✅ |
+| `project_submitted` | 프로젝트 등록 완료 | 의뢰사 | ✅ |
+| `partner_applied` | 파트너 지원 완료 | 파트너사 | ✅ |
+| `proposal_submitted` | 제안서 제출 | 파트너사 | ⬜ |
+| `partner_selected` | 파트너 선정 | 의뢰사 | ⬜ |
+| `contract_signed` | 계약 체결 | 공통 | ⬜ |
+| `participation_final_selected` | 최종 파트너 선정 토글 | 의뢰사 | ✅ |
+| `consulting_inquiry_submitted` | 컨설팅 문의 | 의뢰사 | ✅ |
+| `consulting_to_project` | 컨설팅 → 프로젝트 전환 | 의뢰사 | ⬜ |
+| `review_submitted` | 제작 리뷰 등록 = 프로젝트 완료 | 의뢰사 | ✅ |
 
 ---
 
-## 11. 퍼널 설계 (GA4 탐색 보고서 / Mixpanel 퍼널)
+## 13. 퍼널 설계 (GA4 탐색 보고서 / Mixpanel 퍼널)
 
 ### 의뢰사 — 공고 프로젝트 퍼널
 
@@ -234,8 +286,9 @@ site_visit
     → step_1_partner_selection  ← 등록 마법사 시작
       → step_7_budget           ← 이탈률 집중 모니터링
         → project_submitted (project_type=공고)
-          → partner_selected
+          → participation_final_selected ← 최종 파트너 선정
             → contract_signed
+              → review_submitted          ← 프로젝트 완료
 ```
 
 ### 의뢰사 — 1:1 프로젝트 퍼널
@@ -246,6 +299,7 @@ site_visit
     → step_1_partner_selection
       → project_submitted (project_type=1:1)
         → contract_signed
+          → review_submitted             ← 프로젝트 완료
 ```
 
 ### 파트너사 — 지원 퍼널
@@ -271,7 +325,7 @@ site_visit
 
 ---
 
-## 12. Mixpanel 코호트 분석 설계
+## 14. Mixpanel 코호트 분석 설계
 
 | 분석 목적 | 퍼널 / 코호트 구성 |
 |---------|---------|
@@ -284,14 +338,14 @@ site_visit
 
 ---
 
-## 13. 구현 현황 요약
+## 15. 구현 현황 요약
 
 | 이벤트 | GA4 | Mixpanel | 상태 |
 |--------|-----|----------|------|
 | `page_view` | ✅ | ✅ | 완료 |
 | `site_visit` | ✅ | ✅ | 완료 |
 | `signup_funnel` | ✅ | ✅ | 완료 |
-| `signup_complete` | ✅ | ✅ | 완료 (user_type 추가됨) |
+| `signup_complete` | ✅ | ✅ | 완료 |
 | `step_N_화면명` (16단계) | ✅ | ✅ | 완료 |
 | `project_submitted` | ✅ | ✅ | 완료 |
 | `project_viewed` | ✅ | ✅ | 완료 |
@@ -299,6 +353,16 @@ site_visit
 | `consulting_inquiry_submitted` | ✅ | ✅ | 완료 |
 | `partner_searched` | ✅ | ✅ | 완료 |
 | `agency_favorited` | ✅ | ✅ | 완료 |
+| `participation_invite_toggled` | ✅ | ✅ | 완료 |
+| `participation_ot_confirmed` | ✅ | ✅ | 완료 |
+| `participation_ot_completed` | ✅ | ✅ | 완료 |
+| `participation_pt_confirmed` | ✅ | ✅ | 완료 |
+| `participation_pt_completed` | ✅ | ✅ | 완료 |
+| `participation_final_selected` | ✅ | ✅ | 완료 (GA4 전환) |
+| `review_saved` | ✅ | ✅ | 완료 |
+| `review_submitted` | ✅ | ✅ | 완료 (GA4 전환) |
+| `review_edited` | ✅ | ✅ | 완료 |
+| `review_completed` | ✅ | ✅ | 완료 |
 | `admin_project_approved` | ✅ | ✅ | 완료 |
 | `admin_project_rejected` | ✅ | ✅ | 완료 |
 | `admin_notice_published` | ✅ | ✅ | 완료 |

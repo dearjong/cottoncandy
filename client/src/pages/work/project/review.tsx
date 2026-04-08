@@ -6,6 +6,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronDown, ExternalLink, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  trackReviewSaved,
+  trackReviewSubmitted,
+  trackReviewEdited,
+  trackReviewCompleted,
+} from '@/lib/analytics';
 
 const CLIENT_ITEMS = [
   '전반적 만족도',
@@ -75,11 +81,20 @@ export default function WorkProjectReview() {
 
   const isReadonly = submitState !== 'editing';
 
+  const PARTNER = '솜사탕애드';
+
   function handleSave() {
+    trackReviewSaved({ partner_name: PARTNER });
     toast({ title: '임시저장', description: '임시저장되었습니다.', duration: 2000 });
   }
 
   function handleSubmit() {
+    trackReviewSubmitted({
+      partner_name: PARTNER,
+      has_client_rating: Object.keys(clientRatings).length > 0,
+      has_partner_rating: Object.keys(partnerRatings).length > 0,
+      has_text: reviewText.trim().length > 0,
+    });
     setSubmitState('submitted');
     toast({
       title: '프로젝트 완료',
@@ -89,11 +104,13 @@ export default function WorkProjectReview() {
   }
 
   function handleEdit() {
+    trackReviewEdited({ partner_name: PARTNER });
     setSubmitState('editing');
     toast({ title: '수정 모드', description: '등록 후 7일 이내에 수정할 수 있습니다.', duration: 2000 });
   }
 
   function handleComplete() {
+    trackReviewCompleted({ partner_name: PARTNER });
     setSubmitState('completed');
     toast({ title: '완료', description: '프로젝트가 최종 완료되었습니다.', duration: 2000 });
   }
