@@ -13,6 +13,7 @@ export default function MyProfile() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const userName = localStorage.getItem("userName") ?? "회원";
 
   const handleCopyReferral = () => {
     const link = generateReferralLink();
@@ -120,7 +121,7 @@ export default function MyProfile() {
                 </div>
                 <div className="border border-gray-200 rounded-xl p-5 bg-gray-50">
                   <p className="text-sm text-gray-600 mb-3">
-                    이 링크로 가입한 지인이 생기면 내가 추천인으로 인정돼요.
+                    친구에게 이 링크를 공유해주세요. 이 링크를 통해서 가입하면 <span className="font-medium text-gray-800">{userName}님</span>이 추천인으로 혜택을 받으실 수 있어요.
                   </p>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-500 truncate font-mono select-all">
