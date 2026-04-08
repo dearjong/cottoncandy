@@ -5,9 +5,8 @@ import WorkSidebar from '@/components/work/sidebar';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChevronDown, ExternalLink, Globe, Bookmark, Mail, Star, Trophy, CheckCircle2, Paperclip } from 'lucide-react';
+import { ChevronDown, ExternalLink, Globe, Bookmark, Mail, Star, Trophy, CheckCircle2, Paperclip, X } from 'lucide-react';
 import {
   trackParticipationInviteToggled,
   trackParticipationOtConfirmed,
@@ -340,9 +339,21 @@ function SendMessageModal({ open, onClose, type = 'normal' }: SendMessageModalPr
     onClose();
   }
 
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="max-w-lg p-0 overflow-hidden rounded-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* 오버레이 */}
+      <div className="absolute inset-0 bg-black/25" onClick={onClose} />
+      {/* 모달 본체 */}
+      <div className="relative z-10 bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+        {/* X 닫기 */}
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 p-1.5 rounded-full hover:bg-gray-100 text-gray-500"
+        >
+          <X className="w-5 h-5" />
+        </button>
         <div className="px-8 py-6">
           {/* 제목 */}
           <h2 className="text-xl font-bold text-center mb-6">메세지</h2>
@@ -470,8 +481,8 @@ function SendMessageModal({ open, onClose, type = 'normal' }: SendMessageModalPr
             <button className="btn-pink flex-1" onClick={handleSend}>발송하기</button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
 
