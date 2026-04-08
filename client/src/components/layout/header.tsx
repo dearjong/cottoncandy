@@ -701,7 +701,7 @@ export default function Header() {
                     trackHeaderInteraction({ target: "login" });
                     setLocation("/login");
                   }}
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                  className="w-9 h-9 aspect-square shrink-0 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
                   data-testid="button-login-icon"
                   title="로그인"
                 >
