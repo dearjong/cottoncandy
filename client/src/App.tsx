@@ -102,6 +102,7 @@ import AdminSettings from "@/pages/admin/admin-settings";
 import AdminSettingsPlatform from "@/pages/admin/settings/platform";
 import AdminSettingsLogs from "@/pages/admin/settings/logs";
 import AdminSecurityMessages from "@/pages/admin/security/messages";
+import AdminSimulate from "@/pages/admin/simulate";
 import AdminPlaceholder from "@/pages/admin/placeholder";
 import AdminContracts from "@/pages/admin/contracts";
 import AdminReviews from "@/pages/admin/reviews";
@@ -569,6 +570,9 @@ function Router() {
 
       <Route path="/admin/security/messages">
         <AdminLayout><AdminSecurityMessages /></AdminLayout>
+      </Route>
+      <Route path="/admin/simulate">
+        <AdminLayout><AdminSimulate /></AdminLayout>
       </Route>
       
       <Route component={NotFound} />

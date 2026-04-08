@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { startSimulation, getSimJob } from "./simulate-analytics";
 import {
   projectDataSchema,
   type ProjectData,
@@ -306,6 +307,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error updating schedule:', error);
       res.status(500).json({ error: 'Failed to update schedule' });
     }
+  });
+
+  // POST /api/admin/simulate/start — 시뮬레이션 시작 (비동기 job)
+  app.post("/api/admin/simulate/start", async (req, res) => {
+    try {
+      const userCount = Math.min(5000, Math.max(100, parseInt(String(req.body.userCount ?? "1000"), 10) || 1000));
+      const jobId = await startSimulation(userCount);
+      res.json({ jobId });
+    } catch (error) {
+      console.error("Simulation start error:", error);
+      res.status(500).json({ error: "Failed to start simulation" });
+    }
+  });
+
+  // GET /api/admin/simulate/status/:jobId — 진행 상황 조회
+  app.get("/api/admin/simulate/status/:jobId", (req, res) => {
+    const job = getSimJob(req.params.jobId);
+    if (!job) return res.status(404).json({ error: "Job not found" });
+    res.json(job);
   });
 
   const httpServer = createServer(app);

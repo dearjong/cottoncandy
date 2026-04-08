@@ -25,6 +25,7 @@ import {
   ChevronRight,
   Bell,
   ShieldCheck,
+  FlaskConical,
 } from "lucide-react"
 
 import {
@@ -521,6 +522,18 @@ export function AppSidebar() {
                   <Link href={statsParentItem.url}>
                     <statsParentItem.icon />
                     <span>{statsParentItem.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location === "/admin/simulate"}
+                  data-testid="nav-simulate"
+                >
+                  <Link href="/admin/simulate">
+                    <FlaskConical />
+                    <span>Analytics 시뮬레이션</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
