@@ -1,4 +1,9 @@
 import { useEffect, useMemo, useState } from "react"
+import {
+  trackConsultingMessageSent,
+  trackConsultingResponded,
+  trackConsultingProjectLinked,
+} from "@/lib/analytics"
 import { format } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -393,6 +398,10 @@ export function ConsultingInquiryAdminView({
     onUpdateProject(patch)
     setQuickRegisterDraft("")
     setConsultValidationError("")
+    trackConsultingMessageSent({
+      consulting_id: project.id,
+      channel: selectedMessageChannels.join(","),
+    })
   }
 
   const handleSaveReply = () => {
@@ -404,9 +413,11 @@ export function ConsultingInquiryAdminView({
 
   const handleSaveOutcomeAfterComplete = () => {
     if (!isAdmin || !isComplete) return
+    const linkedId = showLinkedIdField ? (linkedProjectIdDraft.trim() || undefined) : undefined
+    const prevLinkedId = project.consultingLinkedProjectId?.trim() || undefined
     onUpdateProject({
       consultingOutcomeKind: outcomeKindDraft || undefined,
-      consultingLinkedProjectId: showLinkedIdField ? (linkedProjectIdDraft.trim() || undefined) : undefined,
+      consultingLinkedProjectId: linkedId,
       consultingMatchingInfo: showMatchingInfoField ? (matchingInfoDraft.trim() || undefined) : undefined,
       consultingAmount: amountDraft.trim() || undefined,
       consultingConclusion: conclusionDraft.trim() || undefined,
@@ -414,6 +425,13 @@ export function ConsultingInquiryAdminView({
       consultingPaymentMethod: paymentMethodDraft || undefined,
       consultingServiceTier: serviceTierDraft,
     })
+    if (linkedId && linkedId !== prevLinkedId) {
+      trackConsultingProjectLinked({
+        consulting_id: project.id,
+        project_id: linkedId,
+        outcome_kind: outcomeKindDraft || undefined,
+      })
+    }
   }
 
   const handleCompleteConsulting = () => {
@@ -425,10 +443,11 @@ export function ConsultingInquiryAdminView({
       return
     }
     setConsultValidationError("")
+    const linkedId = showLinkedIdField ? (linkedProjectIdDraft.trim() || undefined) : undefined
     onUpdateProject({
       status: "COMPLETE",
       consultingOutcomeKind: outcomeKindDraft,
-      consultingLinkedProjectId: showLinkedIdField ? (linkedProjectIdDraft.trim() || undefined) : undefined,
+      consultingLinkedProjectId: linkedId,
       consultingMatchingInfo: showMatchingInfoField ? (matchingInfoDraft.trim() || undefined) : undefined,
       consultingAmount: amountDraft.trim() || undefined,
       consultingConclusion: conclusionDraft.trim() || undefined,
@@ -436,6 +455,18 @@ export function ConsultingInquiryAdminView({
       consultingPaymentMethod: paymentMethodDraft || undefined,
       consultingServiceTier: serviceTierDraft,
     })
+    trackConsultingResponded({
+      consulting_id: project.id,
+      outcome_kind: outcomeKindDraft,
+      service_tier: serviceTierDraft,
+    })
+    if (linkedId) {
+      trackConsultingProjectLinked({
+        consulting_id: project.id,
+        project_id: linkedId,
+        outcome_kind: outcomeKindDraft,
+      })
+    }
   }
 
   const quickPlaceholder = "고객에게 발송할 메시지를 입력하세요..."

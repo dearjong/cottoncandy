@@ -395,6 +395,34 @@ export function trackReviewCompleted(props: {
   publishAnalytics("review_completed", { ...props, user_type: "advertiser" });
 }
 
+// ─── 컨설팅 이벤트 ───────────────────────────────────────────
+
+/** 컨설턴트 메시지 발송 (상담 활동 기록) */
+export function trackConsultingMessageSent(props: {
+  consulting_id: string;
+  channel?: string;
+}) {
+  publishAnalytics("consulting_message_sent", { ...props, user_type: "admin" });
+}
+
+/** 컨설팅 케이스 완료·종결 처리 */
+export function trackConsultingResponded(props: {
+  consulting_id: string;
+  outcome_kind?: string;
+  service_tier?: string;
+}) {
+  publishAnalytics("consulting_responded", { ...props, user_type: "admin" });
+}
+
+/** 컨설턴트가 새 프로젝트를 생성하고 컨설팅 케이스에 연결 */
+export function trackConsultingProjectLinked(props: {
+  consulting_id: string;
+  project_id: string;
+  outcome_kind?: string;
+}) {
+  publishAnalytics("consulting_project_linked", { ...props, user_type: "admin" });
+}
+
 // ─── 관리자 회원 제재 이벤트 ─────────────────────────────────
 
 /** 회원 경고 */

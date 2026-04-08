@@ -218,8 +218,9 @@ localStorage.setItem("analytics_user_id", userId)   ← 새로고침 대응
 | 이벤트명 | 트리거 | GA4 전환 | 구현 |
 |---------|--------|---------|------|
 | `consulting_inquiry_submitted` | 의뢰사 컨설팅 문의 접수 | ✅ 전환 | ✅ 완료 |
-| `consulting_responded` | 컨설턴트 응답 완료 (케이스 종결) | - | ⬜ 개발 필요 |
-| `consulting_project_linked` | 컨설턴트가 새 프로젝트 생성 후 컨설팅에 연결 | - | ⬜ 개발 필요 |
+| `consulting_message_sent` | 컨설턴트 메시지 발송 (SMS·카톡·웹) | - | ✅ 완료 |
+| `consulting_responded` | 컨설턴트 케이스 종결 처리 | - | ✅ 완료 |
+| `consulting_project_linked` | 컨설팅 케이스에 공고/1:1 프로젝트 연결 | - | ✅ 완료 |
 
 **`consulting_inquiry_submitted` 파라미터**
 
@@ -229,13 +230,33 @@ localStorage.setItem("analytics_user_id", userId)   ← 새로고침 대응
 | `has_attachment` | `true` / `false` |
 | `user_type` | `advertiser` |
 
+**`consulting_message_sent` 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `consulting_id` | `CONS-20250401-001` | 컨설팅 케이스 ID |
+| `channel` | `SMS,KAKAO` | 발송 채널 (복수 시 콤마 구분) |
+| `user_type` | `admin` | 항상 관리자(컨설턴트) |
+
+**`consulting_responded` 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `consulting_id` | `CONS-20250401-001` | 컨설팅 케이스 ID |
+| `outcome_kind` | `MATCHING_PUBLIC` | 결과 유형 (`MATCHING_PUBLIC` / `MATCHING_1TO1` / `DIRECT_INTRO` / `SIMPLE_CONSULT`) |
+| `service_tier` | `FULLCARE_PT` | 서비스 티어 (`SIMPLE_MATCH` / `PROJECT_RUN` / `FULLCARE_PT` / `CUSTOM`) |
+| `user_type` | `admin` | 항상 관리자(컨설턴트) |
+
 **`consulting_project_linked` 파라미터**
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
 | `consulting_id` | `CONS-20250401-001` | 연결 대상 컨설팅 케이스 ID |
-| `project_id` | `PID-20250401-0001` | 새로 생성된 프로젝트 ID |
+| `project_id` | `PID-20250401-0001` | 연결된 프로젝트 ID |
+| `outcome_kind` | `MATCHING_PUBLIC` | 결과 유형 |
 | `user_type` | `admin` | 항상 관리자(컨설턴트) |
+
+> **이벤트 연결 위치**: `/work/consulting/inquiries` → `ConsultingInquiryAdminView` 컴포넌트
 
 ---
 
@@ -459,10 +480,11 @@ site_visit
 | `admin_notice_published` | ✅ | ✅ | 완료 |
 | `admin_banner_published` | ✅ | ✅ | 완료 |
 | `admin_notification_sent` | ✅ | ✅ | 완료 |
+| `consulting_message_sent` | ✅ | ✅ | 완료 |
+| `consulting_responded` | ✅ | ✅ | 완료 |
+| `consulting_project_linked` | ✅ | ✅ | 완료 |
 | `proposal_submitted` | ⬜ | ⬜ | 제안서 제출 UI 구현 후 추가 |
 | `partner_selected` | - | - | `contract_signed`로 통합, 별도 구현 없음 |
-| `consulting_responded` | ⬜ | ⬜ | 컨설턴트 응답 완료 기능 UI 구현 후 추가 |
-| `consulting_project_linked` | ⬜ | ⬜ | 컨설팅-프로젝트 연결 기능 UI 구현 후 추가 |
 | ~~`consulting_matched`~~ | - | - | 제거됨 (해당 구조 없음) |
 | ~~`consulting_to_project`~~ | - | - | 제거됨 (전환 아닌 연결 구조) |
 | `admin_member_warned` | ✅ | ✅ | 완료 |
