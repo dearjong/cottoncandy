@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { getSubtitle } from "@/config/global-events";
+import memberImage from "@assets/로그인 회원_1759381986859.png";
+import nonMemberImage from "@assets/로그인 비회원_1759381986859.png";
 
 export default function Signup() {
   const [, setLocation] = useLocation();
@@ -80,6 +82,9 @@ export default function Signup() {
                 data-testid="card-existing-user"
               >
                 <div className="text-center">
+                  <div className="unified-card-icon relative overflow-hidden">
+                    <img src={memberImage} alt="TVCF 회원" className="w-full h-full object-contain" />
+                  </div>
                   <h3 className="unified-card-title">TVCF/ Cotton Candy 회원</h3>
                   <p className="unified-card-description">
                     TVCF 기존 회원은 별도 절차없이 바로 로그인
@@ -103,6 +108,9 @@ export default function Signup() {
                 data-testid="card-new-user"
               >
                 <div className="text-center">
+                  <div className="unified-card-icon relative overflow-hidden">
+                    <img src={nonMemberImage} alt="신규 이용자" className="w-full h-full object-contain" />
+                  </div>
                   <h3 className="unified-card-title">신규 이용자예요</h3>
                   <p className="unified-card-description">
                     TVCF나 Cotton Candy가 처음이예요.
