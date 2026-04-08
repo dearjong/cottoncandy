@@ -173,36 +173,6 @@ export default function Login() {
             className="mb-8 sm:mb-12 md:mb-16"
           >
             <div className="w-full mx-auto card-grid-2cols">
-              {/* 기존 회원 카드 */}
-              <motion.div
-                whileHover={{ 
-                  y: -4,
-                  scale: 1.02,
-                  transition: { duration: 0.2 }
-                }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleExistingUserClick}
-                className={`unified-card ${selectedCard === 'existing' ? 'unified-card-selected' : 'bg-white'}`}
-                data-testid="card-existing-user"
-              >
-                <div className="text-center">
-                  <div className="unified-card-icon relative overflow-hidden">
-                    <img 
-                      src={memberImage} 
-                      alt="TVCF 회원" 
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <h3 className="unified-card-title">Cotton Candy·TVCF 회원</h3>
-                  <p className="unified-card-description">
-                    TVCF 기존 회원은 별도 절차없이 바로 로그인
-                  </p>
-                  <div className="unified-card-check">
-                    <Check className={`w-6 h-6 ${selectedCard === 'existing' ? 'text-white' : 'text-gray-300'}`} strokeWidth={3} />
-                  </div>
-                </div>
-              </motion.div>
-
               {/* 신규 이용자 카드 */}
               <motion.div
                 whileHover={{ 
@@ -229,6 +199,36 @@ export default function Login() {
                   </p>
                   <div className="unified-card-check">
                     <Check className={`w-6 h-6 ${selectedCard === 'new' ? 'text-white' : 'text-gray-300'}`} strokeWidth={3} />
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* 기존 회원 카드 */}
+              <motion.div
+                whileHover={{ 
+                  y: -4,
+                  scale: 1.02,
+                  transition: { duration: 0.2 }
+                }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleExistingUserClick}
+                className={`unified-card ${selectedCard === 'existing' ? 'unified-card-selected' : 'bg-white'}`}
+                data-testid="card-existing-user"
+              >
+                <div className="text-center">
+                  <div className="unified-card-icon relative overflow-hidden">
+                    <img 
+                      src={memberImage} 
+                      alt="TVCF 회원" 
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <h3 className="unified-card-title">Cotton Candy·TVCF 회원</h3>
+                  <p className="unified-card-description">
+                    TVCF 기존 회원은 별도 절차없이 바로 로그인
+                  </p>
+                  <div className="unified-card-check">
+                    <Check className={`w-6 h-6 ${selectedCard === 'existing' ? 'text-white' : 'text-gray-300'}`} strokeWidth={3} />
                   </div>
                 </div>
               </motion.div>
