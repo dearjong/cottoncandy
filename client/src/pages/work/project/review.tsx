@@ -81,17 +81,21 @@ export default function WorkProjectReview() {
 
   function handleSubmit() {
     setSubmitState('submitted');
-    toast({ title: '등록 완료', description: '리뷰가 등록되었습니다.', duration: 2000 });
+    toast({
+      title: '프로젝트 완료',
+      description: '제작 리뷰가 등록되어 프로젝트가 완료 처리되었습니다.',
+      duration: 3000,
+    });
   }
 
   function handleEdit() {
     setSubmitState('editing');
-    toast({ title: '수정 모드', description: '리뷰를 수정할 수 있습니다.', duration: 2000 });
+    toast({ title: '수정 모드', description: '등록 후 7일 이내에 수정할 수 있습니다.', duration: 2000 });
   }
 
   function handleComplete() {
     setSubmitState('completed');
-    toast({ title: '완료', description: '리뷰가 최종 완료되었습니다.', duration: 2000 });
+    toast({ title: '완료', description: '프로젝트가 최종 완료되었습니다.', duration: 2000 });
   }
 
   return (
