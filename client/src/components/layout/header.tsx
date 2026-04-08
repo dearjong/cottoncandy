@@ -685,27 +685,28 @@ export default function Header() {
             </DropdownMenu>
               </>
             ) : (
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => {
-                    trackHeaderInteraction({ target: "login" });
-                    setLocation("/login");
-                  }}
-                  className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
-                  data-testid="button-login-text"
-                >
-                  로그인
-                </button>
+              <div className="flex items-center gap-2">
                 <Button
                   onClick={() => {
                     trackHeaderInteraction({ target: "signup" });
                     setLocation("/signup");
                   }}
-                  className="btn-dark w-auto px-6"
+                  className="btn-dark w-auto px-5"
                   data-testid="button-signup-header"
                 >
                   무료로 시작하기
                 </Button>
+                <button
+                  onClick={() => {
+                    trackHeaderInteraction({ target: "login" });
+                    setLocation("/login");
+                  }}
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                  data-testid="button-login-icon"
+                  title="로그인"
+                >
+                  <User className="w-5 h-5 text-gray-600" />
+                </button>
               </div>
             )}
           </div>
