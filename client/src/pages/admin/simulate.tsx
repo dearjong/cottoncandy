@@ -127,7 +127,7 @@ export default function AdminSimulatePage() {
 
             <div className="text-xs text-gray-400 border rounded px-3 py-2 bg-gray-50">
               <span className="font-medium text-gray-600">이벤트 구성</span>
-              &nbsp;· 의뢰사 70% / 파트너 30%
+              &nbsp;· 의뢰사 10% / 파트너 90%
               &nbsp;· UTM: google/naver/kakao/referral/organic
               &nbsp;· A/B: control vs variant_question (50:50)
             </div>

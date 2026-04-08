@@ -119,7 +119,7 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
 
   for (let i = 1; i <= userCount; i++) {
     const uid = `sim_user_${String(i).padStart(4, "0")}`;
-    const userType = i <= Math.floor(userCount * 0.7) ? "advertiser" : "partner";
+    const userType = i <= Math.floor(userCount * 0.1) ? "advertiser" : "partner";
     const utm = weightedRandom(UTM_SOURCES);
     const joinSecsAgo = Math.floor(Math.random() * 30 * 86400);
     const baseTs = tsAgo(joinSecsAgo);
