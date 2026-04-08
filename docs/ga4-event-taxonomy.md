@@ -224,7 +224,7 @@ gtag("event", "login", { method: "email" })   // GA4 표준 이벤트
 |---------|--------|---------|------|
 | `project_viewed` | 공고 상세 조회 | - | ✅ 완료 |
 | `partner_applied` | 참여신청 버튼 클릭 | ✅ 전환 | ✅ 완료 |
-| `proposal_submitted` | 제안서 제출 | ✅ 전환 | ⬜ 개발 필요 |
+| `proposal_submitted` | 제안서 제출 | ✅ 전환 | ✅ 완료 |
 | `partner_selected` | ~~별도 이벤트 없음~~ `contract_signed`로 통합 | - | 통합됨 |
 | `contract_signed` | 계약 등록 완료 = 파트너 선정 확정 | ✅ 전환 | ✅ 완료 |
 
@@ -400,7 +400,7 @@ gtag("event", "login", { method: "email" })   // GA4 표준 이벤트
 | `signup_complete` | 회원가입 완료 | 공통 | ✅ |
 | `project_submitted` | 프로젝트 등록 완료 | 의뢰사 | ✅ |
 | `partner_applied` | 파트너 지원 완료 | 파트너사 | ✅ |
-| `proposal_submitted` | 제안서 제출 | 파트너사 | ⬜ |
+| `proposal_submitted` | 제안서 제출 | 파트너사 | ✅ |
 | `partner_selected` | ~~별도 이벤트 없음~~ `contract_signed`로 통합 | 의뢰사 | 통합됨 |
 | `contract_signed` | 계약 등록 완료 = 파트너 선정 확정 | 의뢰사 | ✅ |
 | `participation_final_selected` | 최종 파트너 선정 토글 | 의뢰사 | ✅ |
