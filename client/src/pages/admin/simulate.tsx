@@ -4,6 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SimJob {
   status: "pending" | "generating" | "sending" | "done" | "error";
@@ -41,6 +51,7 @@ export default function AdminSimulatePage() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [job, setJob] = useState<SimJob | null>(null);
   const [loading, setLoading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   function stopPolling() {
@@ -121,7 +132,7 @@ export default function AdminSimulatePage() {
           </div>
           <Button
             className="btn-pink ml-auto"
-            onClick={startSim}
+            onClick={() => setConfirmOpen(true)}
             disabled={!!isRunning || loading}
           >
             {loading ? "시작 중..." : isRunning ? "실행 중..." : "▶ 시뮬레이션 시작"}
@@ -247,6 +258,28 @@ export default function AdminSimulatePage() {
           </ul>
         </div>
       )}
+
+      {/* 시작 확인 팝업 */}
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>시뮬레이션을 시작할까요?</AlertDialogTitle>
+            <AlertDialogDescription>
+              가상 사용자 <strong>{parseInt(userCount).toLocaleString()}명</strong>의 이벤트를 생성하여
+              Mixpanel에 전송합니다. 실제 데이터에 시뮬레이션 이벤트가 추가됩니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-pink-600 hover:bg-pink-700 text-white"
+              onClick={() => { setConfirmOpen(false); startSim(); }}
+            >
+              확인
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
