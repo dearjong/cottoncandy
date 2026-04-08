@@ -23,12 +23,12 @@ import googleLogo from "@assets/Logo_Google_1759383453744.png";
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("test@cottoncandy.kr");
   const [selectedCard, setSelectedCard] = useState<'existing' | 'new' | null>('existing');
   const [loginStep, setLoginStep] = useState<1 | 2>(1);
-  const [customerType, setCustomerType] = useState<string>('');
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [customerType, setCustomerType] = useState<string>('advertiser');
+  const [password, setPassword] = useState("test1234!");
+  const [passwordConfirm, setPasswordConfirm] = useState("test1234!");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   
   // 팝업 상태
