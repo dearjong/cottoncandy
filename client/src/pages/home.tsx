@@ -16,6 +16,7 @@ const TITLE_COPY: Record<string, { title: string; sub: string; cta: string }> = 
   control:          { title: '"프로가 만드는 광고,\n프로가 선택한 전문기업"', sub: "",                                              cta: "내 마음에 쏙드는 전문기업 추천받기 Go~*" },
   variant_question: { title: "어떤 광고를 만들어드릴까요?",                   sub: "광고주는 선택만, 제작은 전문가가, 이 모든것이 무료!", cta: "지금 무료로 의뢰하기" },
 };
+const VARIANTS = Object.keys(TITLE_COPY);
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,13 +24,23 @@ export default function Home() {
   // 전체 사이트 서브타이틀 사용 (홈페이지는 특정 메뉴에 속하지 않음)
   const eventInfo = getSubtitle();
 
+  const [titleVariant, setTitleVariant] = useState<string>(() => {
+    assignExperiment(EXP_ID_TITLE, VARIANTS);
+    return getExperimentVariant(EXP_ID_TITLE) ?? "control";
+  });
+
   useEffect(() => {
-    assignExperiment(EXP_ID_TITLE, ["control", "variant_question"]);
-    const vTitle = getExperimentVariant(EXP_ID_TITLE) ?? "control";
-    trackExperimentViewed(EXP_ID_TITLE, vTitle);
+    trackExperimentViewed(EXP_ID_TITLE, titleVariant);
+    let idx = VARIANTS.indexOf(titleVariant);
+    const timer = setInterval(() => {
+      idx = (idx + 1) % VARIANTS.length;
+      const next = VARIANTS[idx];
+      setTitleVariant(next);
+      trackExperimentViewed(EXP_ID_TITLE, next);
+    }, 10000);
+    return () => clearInterval(timer);
   }, []);
 
-  const titleVariant = getExperimentVariant(EXP_ID_TITLE) ?? "control";
   const heroTitle = TITLE_COPY[titleVariant]?.title ?? TITLE_COPY.control.title;
   const heroSub   = TITLE_COPY[titleVariant]?.sub   ?? TITLE_COPY.control.sub;
   const ctaText   = TITLE_COPY[titleVariant]?.cta   ?? TITLE_COPY.control.cta;
@@ -120,24 +131,24 @@ export default function Home() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-white to-gray-50 pt-24 pb-8">
+      <section className="bg-gradient-to-b from-white to-gray-50 pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-1 whitespace-pre-line hero-title" data-testid="hero-title">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 whitespace-pre-line hero-title" data-testid="hero-title">
             {heroTitle}
           </h1>
           {heroSub && (
-            <p className="text-lg sm:text-xl text-gray-600 mb-1" data-testid="hero-subtitle">
+            <p className="text-lg sm:text-xl text-gray-600 mb-3" data-testid="hero-subtitle">
               {heroSub}
             </p>
           )}
-          <div className="py-1 px-4 mb-2 max-w-3xl mx-auto">
+          <div className="py-2 px-4 mb-4 max-w-3xl mx-auto">
             <p className="text-sm text-gray-700" data-testid="promotion-text">
               {eventInfo.subtitle} 
               <a href={eventInfo.link} className="text-pink-600 underline ml-1">{eventInfo.linkText}</a>
             </p>
           </div>
           <Button
-            className="btn-pink mb-4 max-w-md mx-auto"
+            className="btn-pink mb-8 max-w-md mx-auto"
             data-testid="button-recommend"
             onClick={handleCtaClick}
           >
