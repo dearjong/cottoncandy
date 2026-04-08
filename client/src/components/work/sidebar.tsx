@@ -188,9 +188,15 @@ Cotton Candy 알림
             >
 일정관리
             </Link>
-            <span className="block px-4 py-2 text-sm text-gray-600">
+            <Link
+              href="/work/project/participation"
+              className={`block px-4 py-2 text-sm hover:text-pink-600 ${
+                location === '/work/project/participation' ? 'text-pink-600' : 'text-gray-600'
+              }`}
+              data-testid="sidebar-participation-parent"
+            >
 참여관리
-            </span>
+            </Link>
             <Link 
               href="/work/project/participation" 
               className={`block px-4 py-2 text-sm hover:text-pink-600 ${
