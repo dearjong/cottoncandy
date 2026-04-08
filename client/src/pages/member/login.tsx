@@ -25,6 +25,7 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState("");
   const [selectedCard, setSelectedCard] = useState<'existing' | 'new' | null>('existing');
+  const [loginStep, setLoginStep] = useState<1 | 2>(1);
   const [customerType, setCustomerType] = useState<string>('');
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -87,6 +88,7 @@ export default function Login() {
 
   const handleExistingUserClick = () => {
     setSelectedCard('existing');
+    setLoginStep(1);
     setEmailError("");
     setPasswordError("");
     setPasswordConfirmError("");
@@ -94,18 +96,19 @@ export default function Login() {
 
   const handleNewUserClick = () => {
     setSelectedCard('new');
+    setLoginStep(1);
     setEmailError("");
     setPasswordError("");
     setPasswordConfirmError("");
   };
 
+  const handleEmailNext = () => {
+    if (!validateEmail(email)) return;
+    setLoginStep(2);
+  };
+
   const handleLogin = () => {
-    // 버튼 클릭시 검증
-    if (!validateEmail(email)) {
-      return;
-    }
-    
-    // 로그인 상태 저장
+    if (!validatePassword(password)) return;
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('userName', '이꽃별');
     localStorage.setItem('userType', '의뢰');
@@ -240,77 +243,119 @@ export default function Login() {
               className="mb-10 sm:mb-14 options-container"
             >
               <div className="space-y-8">
-                <div className="project-section project-section-horizontal">
-                  <span className="project-section-title"><span className="cotton-candy-pink">*</span> 이메일</span>
-                  <div className="flex-1">
-                    <Input
-                      type="email"
-                      placeholder="ex) tvcfad@tvcf.co.kr"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        if (emailError) {
-                          validateEmail(e.target.value);
-                        }
-                      }}
-                      className="w-full"
-                      data-testid="input-email"
-                    />
-                    {emailError && (
-                      <p className="text-xs text-red-500 mt-1">※ {emailError}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="project-section project-section-horizontal">
-                  <span className="project-section-title"><span className="cotton-candy-pink">*</span> 비밀번호</span>
-                  <div className="flex-1">
-                    <Input
-                      type="password"
-                      placeholder="비밀번호를 입력해주세요"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full"
-                      data-testid="input-password"
-                      onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                    />
-                    <div className="flex justify-end mt-1">
-                      <button type="button" className="text-xs text-gray-400 hover:text-gray-600">
-                        비밀번호 찾기
-                      </button>
+                {/* ── 1단계: 이메일 입력 ── */}
+                {loginStep === 1 && (
+                  <>
+                    <div className="project-section project-section-horizontal">
+                      <span className="project-section-title"><span className="cotton-candy-pink">*</span> 이메일</span>
+                      <div className="flex-1">
+                        <Input
+                          type="email"
+                          placeholder="ex) tvcfad@tvcf.co.kr"
+                          value={email}
+                          onChange={(e) => {
+                            setEmail(e.target.value);
+                            if (emailError) validateEmail(e.target.value);
+                          }}
+                          onKeyDown={(e) => e.key === 'Enter' && handleEmailNext()}
+                          className="w-full"
+                          data-testid="input-email"
+                          autoFocus
+                        />
+                        {emailError && (
+                          <p className="text-xs text-red-500 mt-1">※ {emailError}</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="text-center space-y-4 pt-4">
-                  <Button
-                    onClick={handleLogin}
-                    className="btn-pink"
-                    disabled={!email}
-                    data-testid="button-login"
-                  >
-                    통합 로그인 (Cotton Candy/TVCF)
-                  </Button>
+                    <div className="text-center space-y-4 pt-4">
+                      <Button
+                        onClick={handleEmailNext}
+                        className="btn-pink"
+                        disabled={!email}
+                        data-testid="button-email-next"
+                      >
+                        다음
+                      </Button>
 
-                  <div className="space-y-2">
-                    <Button
-                      onClick={() => console.log('네이버 로그인')}
-                      className="btn-white"
-                      data-testid="button-naver"
-                    >
-                      <NaverIcon className="w-5 h-5 mr-2 icon-naver" />
-                      네이버 로그인
-                    </Button>
-                    <Button
-                      onClick={() => console.log('구글 로그인')}
-                      className="btn-white"
-                      data-testid="button-google"
-                    >
-                      <img src={googleLogo} alt="Google" className="w-5 h-5 mr-2" />
-                      구글 로그인
-                    </Button>
-                  </div>
-                </div>
+                      <div className="space-y-2">
+                        <Button
+                          onClick={() => console.log('네이버 로그인')}
+                          className="btn-white"
+                          data-testid="button-naver"
+                        >
+                          <NaverIcon className="w-5 h-5 mr-2 icon-naver" />
+                          네이버 로그인
+                        </Button>
+                        <Button
+                          onClick={() => console.log('구글 로그인')}
+                          className="btn-white"
+                          data-testid="button-google"
+                        >
+                          <img src={googleLogo} alt="Google" className="w-5 h-5 mr-2" />
+                          구글 로그인
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* ── 2단계: 비밀번호 입력 ── */}
+                {loginStep === 2 && (
+                  <>
+                    <div className="project-section project-section-horizontal">
+                      <span className="project-section-title">이메일</span>
+                      <div className="flex-1 flex items-center gap-2">
+                        <span className="text-sm text-gray-700">{email}</span>
+                        <button
+                          type="button"
+                          onClick={() => { setLoginStep(1); setPassword(""); setPasswordError(""); }}
+                          className="text-xs text-gray-400 hover:text-gray-600 underline"
+                        >
+                          변경
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="project-section project-section-horizontal">
+                      <span className="project-section-title"><span className="cotton-candy-pink">*</span> 비밀번호</span>
+                      <div className="flex-1">
+                        <Input
+                          type="password"
+                          placeholder="비밀번호를 입력해주세요"
+                          value={password}
+                          onChange={(e) => {
+                            setPassword(e.target.value);
+                            if (passwordError) validatePassword(e.target.value);
+                          }}
+                          onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                          className="w-full"
+                          data-testid="input-password"
+                          autoFocus
+                        />
+                        {passwordError && (
+                          <p className="text-xs text-red-500 mt-1">※ {passwordError}</p>
+                        )}
+                        <div className="flex justify-end mt-1">
+                          <button type="button" className="text-xs text-gray-400 hover:text-gray-600">
+                            비밀번호 찾기
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-center pt-4">
+                      <Button
+                        onClick={handleLogin}
+                        className="btn-pink"
+                        disabled={!password}
+                        data-testid="button-login"
+                      >
+                        통합 로그인 (Cotton Candy/TVCF)
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
             </motion.div>
           )}
