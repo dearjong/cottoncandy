@@ -61,7 +61,6 @@ const FUNNEL_ORDER = [
 
 function ActivityTab() {
   const [data, setData] = useState<{ jobId: string; job: SimJob } | null>(null);
-  const [loading, setLoading] = useState(true);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [, navigate] = useLocation();
 
@@ -70,9 +69,7 @@ function ActivityTab() {
       const res = await fetch("/api/admin/simulate/latest");
       const json = await res.json();
       setData(json);
-    } catch { /* ignore */ } finally {
-      setLoading(false);
-    }
+    } catch { /* ignore */ }
   }
 
   useEffect(() => {
@@ -84,26 +81,13 @@ function ActivityTab() {
   const job = data?.job ?? null;
   const isRunning = job && (job.status === "pending" || job.status === "generating" || job.status === "sending");
   const isDone = job?.status === "done";
+  const hasData = job && job.totalEvents > 0;
 
-  const siteVisit = job?.funnelBreakdown["site_visit"] ?? 0;
+  const totalUsers = job?.totalUsers ?? 0;
+  const siteVisit = job?.funnelBreakdown?.["site_visit"] ?? 0;
   const utmBreakdown = job?.utmBreakdown ?? {};
   const userTypeBreakdown = job?.userTypeBreakdown ?? {};
   const geoBreakdown = job?.geoBreakdown ?? {};
-
-  if (loading) {
-    return <div className="py-20 text-center text-gray-400 text-sm">불러오는 중...</div>;
-  }
-
-  if (!job) {
-    return (
-      <div className="py-20 text-center space-y-3">
-        <p className="text-gray-400 text-sm">아직 실행된 시뮬레이션이 없습니다.</p>
-        <Button className="btn-pink" onClick={() => navigate("/admin/simulate")}>
-          ▶ 시뮬레이션 실행하기
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -112,19 +96,21 @@ function ActivityTab() {
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-800">마지막 시뮬레이션</span>
+              <span className="font-medium text-gray-800">활동현황</span>
+              {!job && <Badge variant="outline" className="text-[10px] text-gray-400">데이터 없음</Badge>}
               {isRunning && <Badge className="bg-blue-100 text-blue-700 animate-pulse border-0 text-[10px]">실행 중</Badge>}
               {isDone   && <Badge className="bg-green-100 text-green-700 border-0 text-[10px]">완료</Badge>}
-              {job.status === "error" && <Badge variant="destructive" className="text-[10px]">오류</Badge>}
+              {job?.status === "error" && <Badge variant="destructive" className="text-[10px]">오류</Badge>}
             </div>
             <p className="text-xs text-gray-400">
-              {new Date(job.startedAt).toLocaleString("ko-KR")} &nbsp;·&nbsp;
-              <span className="text-gray-600 font-medium">{job.totalUsers.toLocaleString()}명</span> &nbsp;·&nbsp;
-              <span className="text-gray-600 font-medium">{job.totalEvents.toLocaleString()}개 이벤트</span>
+              {job
+                ? <>{new Date(job.startedAt).toLocaleString("ko-KR")} &nbsp;·&nbsp; <span className="text-gray-600 font-medium">{job.totalUsers.toLocaleString()}명</span> &nbsp;·&nbsp; <span className="text-gray-600 font-medium">{job.totalEvents.toLocaleString()}개 이벤트</span></>
+                : "시뮬레이션을 실행하면 이 화면에 값이 업데이트됩니다."
+              }
             </p>
           </div>
           <Button variant="outline" className="text-xs" onClick={() => navigate("/admin/simulate")}>
-            시뮬레이션 설정
+            ▶ 시뮬레이션 실행
           </Button>
         </div>
 
@@ -139,8 +125,8 @@ function ActivityTab() {
         )}
       </div>
 
-      {/* 결과 카드 (이벤트 있을 때만) */}
-      {job.totalEvents > 0 && (
+      {/* 항상 표시되는 차트들 */}
+      {(
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-4">
@@ -156,7 +142,7 @@ function ActivityTab() {
                     { key: "organic", label: "Organic",    color: "bg-gray-400"   },
                   ].map(({ key, label, color }) => {
                     const count = utmBreakdown[key] ?? 0;
-                    const pct = job.totalUsers > 0 ? Math.round((count / job.totalUsers) * 100) : 0;
+                    const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
                     return (
                       <div key={key} className="flex items-center gap-3">
                         <div className="w-20 text-xs text-gray-600 shrink-0">{label}</div>
@@ -187,7 +173,7 @@ function ActivityTab() {
                     { key: "해외",    color: "bg-indigo-400" },
                   ].map(({ key, color }) => {
                     const count = geoBreakdown[key] ?? 0;
-                    const pct = job.totalUsers > 0 ? Math.round((count / job.totalUsers) * 100) : 0;
+                    const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
                     return (
                       <div key={key} className="flex items-center gap-3">
                         <div className="w-16 text-xs text-gray-600 shrink-0">{key}</div>
@@ -215,10 +201,10 @@ function ActivityTab() {
                       { key: "advertiser", label: "광고주",   color: "bg-blue-500",   count: userTypeBreakdown["advertiser"] ?? 0 },
                       { key: "agency",     label: "대행사",   color: "bg-green-500",  count: userTypeBreakdown["agency"] ?? 0 },
                       { key: "production", label: "제작사",   color: "bg-purple-500", count: userTypeBreakdown["production"] ?? 0 },
-                      { key: "milogin",    label: "미로그인", color: "bg-gray-300",   count: job.totalUsers - authSum },
+                      { key: "milogin",    label: "미로그인", color: "bg-gray-300",   count: totalUsers - authSum },
                     ];
                     return rows.map(({ key, label, color, count }) => {
-                      const pct = job.totalUsers > 0 ? Math.round((count / job.totalUsers) * 100) : 0;
+                      const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
                       return (
                         <div key={key} className="flex items-center gap-3">
                           <div className="w-14 text-xs text-gray-600 shrink-0">{label}</div>
@@ -240,7 +226,7 @@ function ActivityTab() {
               <p className="font-medium text-gray-800">AARRR 퍼널</p>
               <div className="space-y-2">
                 {FUNNEL_ORDER.map(({ key, label, color, aarrr }) => {
-                  const count = job.funnelBreakdown[key] ?? 0;
+                  const count = job?.funnelBreakdown?.[key] ?? 0;
                   const pct = siteVisit > 0 ? Math.round((count / siteVisit) * 100) : 0;
                   return (
                     <div key={key} className="flex items-center gap-2">
@@ -267,15 +253,14 @@ function ActivityTab() {
           </div>
 
           {/* 직접 유입 / 북마크 랜딩 페이지 */}
-          {Object.keys(job.directEntryBreakdown ?? {}).length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-              <div>
-                <p className="font-medium text-gray-800">직접 유입 / 북마크 랜딩 페이지</p>
-                <p className="text-[10px] text-gray-400">북마크하거나 URL을 직접 입력해 들어온 페이지 분포</p>
-              </div>
-              <div className="space-y-2">
-                {(() => {
-                  const entries = Object.entries(job.directEntryBreakdown ?? {}).sort(([, a], [, b]) => b - a);
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
+            <div>
+              <p className="font-medium text-gray-800">직접 유입 / 북마크 랜딩 페이지</p>
+              <p className="text-[10px] text-gray-400">북마크하거나 URL을 직접 입력해 들어온 페이지 분포</p>
+            </div>
+            <div className="space-y-2">
+              {(() => {
+                  const entries = Object.entries(job?.directEntryBreakdown ?? {}).sort(([, a], [, b]) => b - a);
                   const totalDirect = entries.reduce((s, [, v]) => s + v, 0);
                   const maxCount = entries[0]?.[1] ?? 1;
                   const PAGE_LABELS: Record<string, string> = {
@@ -307,11 +292,9 @@ function ActivityTab() {
                 })()}
               </div>
             </div>
-          )}
 
           {/* 프로젝트 등록 단계별 퍼널 */}
-          {Object.keys(job.stepFunnelBreakdown ?? {}).length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <p className="font-medium text-gray-800">프로젝트 등록 단계별 퍼널</p>
@@ -320,19 +303,20 @@ function ActivityTab() {
                 <div className="flex gap-4 text-xs">
                   <span className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-indigo-400 inline-block" />
-                    임시저장 <strong>{job.draftSavedCount ?? 0}건</strong>
+                    임시저장 <strong>{job?.draftSavedCount ?? 0}건</strong>
                   </span>
                   <span className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-green-400 inline-block" />
-                    저장 후 재개 <strong>{job.draftResumedCount ?? 0}건</strong>
+                    저장 후 재개 <strong>{job?.draftResumedCount ?? 0}건</strong>
                   </span>
                 </div>
               </div>
               <div className="space-y-1.5">
                 {Array.from({ length: 18 }, (_, i) => i + 1).map((step) => {
-                  const reached = job.stepFunnelBreakdown[step] ?? 0;
-                  const dropped = job.stepDropoffBreakdown[step] ?? 0;
-                  const pct = Math.round((reached / Math.max(...Object.values(job.stepFunnelBreakdown), 1)) * 100);
+                  const stepFunnel = job?.stepFunnelBreakdown ?? {};
+                  const reached = stepFunnel[step] ?? 0;
+                  const dropped = (job?.stepDropoffBreakdown ?? {})[step] ?? 0;
+                  const pct = Math.round((reached / Math.max(...Object.values(stepFunnel), 1)) * 100);
                   const dropPct = reached > 0 ? Math.round((dropped / reached) * 100) : 0;
                   const isHighDropoff = dropPct >= 15;
                   return (
@@ -360,19 +344,17 @@ function ActivityTab() {
                 <span><span className="text-amber-500">주황색</span> = 일부 이탈</span>
               </div>
             </div>
-          )}
 
           {/* 포트폴리오 등록 섹션별 퍼널 */}
-          {Object.keys(job.portfolioFunnelBreakdown ?? {}).length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
               <div>
                 <p className="font-medium text-gray-800">포트폴리오 등록 섹션별 퍼널</p>
                 <p className="text-[10px] text-gray-400">파트너가 어느 섹션에서 포트폴리오 작성을 멈추는지 확인합니다</p>
               </div>
               <div className="space-y-1.5">
                 {(() => {
-                  const pfFunnel = job.portfolioFunnelBreakdown ?? {};
-                  const pfDropoff = job.portfolioDropoffBreakdown ?? {};
+                  const pfFunnel = job?.portfolioFunnelBreakdown ?? {};
+                  const pfDropoff = job?.portfolioDropoffBreakdown ?? {};
                   const PORTFOLIO_LABELS: Record<number, string> = {
                     1: "기업 정보", 2: "담당자 정보", 3: "경험·특화 분야",
                     4: "광고 목적별 분야", 5: "제작 기법별 분야", 6: "대표 광고주",
@@ -413,7 +395,6 @@ function ActivityTab() {
                 <span className="text-amber-500">주황색</span> = 일부 이탈
               </div>
             </div>
-          )}
         </>
       )}
     </div>
