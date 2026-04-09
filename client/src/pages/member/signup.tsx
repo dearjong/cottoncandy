@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getSubtitle } from "@/config/global-events";
+import { publishAnalytics } from "@/lib/analytics";
 import memberImage from "@assets/로그인 회원_1759381986859.png";
 import nonMemberImage from "@assets/로그인 비회원_1759381986859.png";
 
@@ -34,6 +35,7 @@ export default function Signup() {
   };
 
   const handleNext = () => {
+    publishAnalytics("signup_started", { method: "email", user_type: customerType });
     // 회원가입 정보 저장
     localStorage.setItem('signupEmail', email);
     localStorage.setItem('signupCustomerType', customerType);

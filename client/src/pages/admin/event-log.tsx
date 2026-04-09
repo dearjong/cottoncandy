@@ -90,6 +90,8 @@ function describeEvent(name: string, props: Record<string, unknown>): { label: s
       return { label: "사이트 방문", detail: `${p.landing_path ?? ""}`, badge: "유입" };
     case "signup_type_selected":
       return { label: "가입 유형 선택", detail: `${p.user_type === "advertiser" ? "광고주" : "파트너사"}${p.partner_type ? ` (${p.partner_type === "agency" ? "대행사" : "제작사"})` : ""}`, badge: "가입" };
+    case "signup_started":
+      return { label: "회원가입 시작", detail: `${p.method ?? "email"} · ${p.user_type ?? ""}`, badge: "가입" };
     case "signup_complete":
       return { label: "가입 완료", detail: `${p.user_type ?? ""}`, badge: "가입" };
     case "company_registered":

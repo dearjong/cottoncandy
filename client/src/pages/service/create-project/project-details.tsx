@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { trackCreateProjectCta } from "@/lib/analytics";
+import { trackCreateProjectCta, trackProjectSubmitted } from "@/lib/analytics";
 
 type CtaMode = 'new_public' | 'edit_public' | 'edit_private';
 
@@ -55,6 +55,8 @@ export default function Step18() {
 
   const handleConfirm = () => {
     trackCreateProjectCta(location, "confirm");
+    const projectType = ctaMode === "new_public" || ctaMode === "edit_public" ? "공고" : "1:1";
+    trackProjectSubmitted({ project_type: projectType });
     setIsConfirmOpen(false);
     setIsCompleteOpen(true);
   };
