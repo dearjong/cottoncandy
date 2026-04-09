@@ -15,13 +15,15 @@ const MOCK_COMPANIES = [
 
 export default function SignupJobInfo() {
   const [, setLocation] = useLocation();
-  const [companySearch, setCompanySearch] = useState("");
-  const [selectedCompany, setSelectedCompany] = useState<{ id: number; name: string; address: string } | null>(null);
+  const [companySearch, setCompanySearch] = useState("애드크림");
+  const [selectedCompany, setSelectedCompany] = useState<{ id: number; name: string; address: string } | null>(
+    { id: 1, name: "애드크림", address: "서울특별시 강남구 도산대로12길 25 1논현동" }
+  );
   const [showDropdown, setShowDropdown] = useState(false);
   const [isNewCompany, setIsNewCompany] = useState(false);
-  const [job, setJob] = useState("");
-  const [department, setDepartment] = useState("");
-  const [position, setPosition] = useState("");
+  const [job, setJob] = useState("기획자");
+  const [department, setDepartment] = useState("기획팀");
+  const [position, setPosition] = useState("선임연구원");
 
   const filteredCompanies = MOCK_COMPANIES.filter(
     (c) => companySearch.length > 0 && c.name.includes(companySearch)
