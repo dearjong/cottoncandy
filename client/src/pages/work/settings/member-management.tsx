@@ -2,6 +2,7 @@ import { useState } from "react";
 import Layout from "@/components/layout/layout";
 import WorkSidebar from "@/components/work/sidebar";
 import { Search, X, ChevronDown } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   trackMemberApproved,
   trackMemberActivityToggled,
@@ -20,12 +21,13 @@ type Member = {
   isActive: boolean;
   isPending: boolean;
   section: "approved" | "active" | "pending";
+  hasProject?: boolean;
 };
 
 const INITIAL_MEMBERS: Member[] = [
   { id: '1', name: '이애드', nickname: '왕솜사탕', department: '경영지원', position: '대표이사', role: '대표관리자', email: 'king@somsatang.com', isActive: false, isPending: false, section: 'approved' },
   { id: '2', name: '김애드', nickname: '중솜사탕', department: '기획', position: '부장', role: '부관리자', email: 'middle@somsatang.com', isActive: false, isPending: false, section: 'approved' },
-  { id: '3', name: '나애드', nickname: '솜사탕', department: '마케팅', position: '차장', role: '부관리자', email: 'middle2@somsatang.com', isActive: false, isPending: false, section: 'approved' },
+  { id: '3', name: '나애드', nickname: '솜사탕', department: '마케팅', position: '차장', role: '부관리자', email: 'middle2@somsatang.com', isActive: false, isPending: false, section: 'approved', hasProject: true },
   { id: '4', name: '나애드', nickname: '솜사탕', department: '마케팅', position: '차장', role: '일반직원', email: 'middle2@somsatang.com', isActive: true, isPending: false, section: 'active' },
   { id: '5', name: '나애드', nickname: '솜사탕', department: '마케팅', position: '차장', role: '일반직원', email: 'middle2@somsatang.com', isActive: true, isPending: false, section: 'active' },
   { id: '6', name: '박에드', nickname: '미니사탕', department: '디자인', position: '과장', role: '일반직원', email: 'mini@somsatang.com', isActive: false, isPending: true, section: 'pending' },
@@ -42,12 +44,24 @@ const tabs = [
 const departments = ['전체', '경영지원', '기획', '마케팅', '디자인'];
 const alphabets = ['전체', 'ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ', 'A-Z'];
 
+type PopupState =
+  | { type: "none" }
+  | { type: "role_confirm"; member: Member; newRole: string }
+  | { type: "role_done" }
+  | { type: "approve_confirm"; member: Member }
+  | { type: "approve_done" }
+  | { type: "remove_confirm"; member: Member }
+  | { type: "remove_done" }
+  | { type: "remove_blocked" };
+
 export default function SettingsMemberManagement() {
   const [activeTab, setActiveTab] = useState('all');
   const [activeDept, setActiveDept] = useState('전체');
   const [activeAlpha, setActiveAlpha] = useState('전체');
   const [searchQuery, setSearchQuery] = useState('');
   const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS);
+  const [popup, setPopup] = useState<PopupState>({ type: "none" });
+  const [removeAlsoTvcf, setRemoveAlsoTvcf] = useState(false);
 
   const approvedMembers = members.filter(m => m.section === 'approved');
   const activeMembers = members.filter(m => m.section === 'active');
@@ -69,25 +83,53 @@ export default function SettingsMemberManagement() {
     trackMemberActivityToggled({ member_id: member.id, is_active: newIsActive, member_name: member.name });
   };
 
-  const handleRemove = (member: Member) => {
-    setMembers(prev => prev.filter(m => m.id !== member.id));
-    trackMemberRemoved({ member_id: member.id, member_name: member.name, section: member.section });
+  const handleRemoveClick = (member: Member) => {
+    if (member.hasProject) {
+      setPopup({ type: "remove_blocked" });
+    } else {
+      setRemoveAlsoTvcf(false);
+      setPopup({ type: "remove_confirm", member });
+    }
   };
 
-  const handleApprovePending = (member: Member) => {
+  const handleRemoveConfirm = () => {
+    if (popup.type !== "remove_confirm") return;
+    const member = popup.member;
+    setMembers(prev => prev.filter(m => m.id !== member.id));
+    trackMemberRemoved({ member_id: member.id, member_name: member.name, section: member.section });
+    setPopup({ type: "remove_done" });
+  };
+
+  const handleApprovePendingClick = (member: Member) => {
+    setPopup({ type: "approve_confirm", member });
+  };
+
+  const handleApproveConfirm = () => {
+    if (popup.type !== "approve_confirm") return;
+    const member = popup.member;
     setMembers(prev =>
       prev.map(m => m.id === member.id ? { ...m, isPending: false, section: 'approved' } : m)
     );
     trackMemberApproved({ member_id: member.id, member_name: member.name });
+    setPopup({ type: "approve_done" });
   };
 
   const handleRoleChange = (member: Member, newRole: string) => {
+    setPopup({ type: "role_confirm", member, newRole });
+  };
+
+  const handleRoleConfirm = () => {
+    if (popup.type !== "role_confirm") return;
+    const { member, newRole } = popup;
     const prevRole = member.role;
     setMembers(prev =>
       prev.map(m => m.id === member.id ? { ...m, role: newRole } : m)
     );
     trackMemberRoleChanged({ member_id: member.id, member_name: member.name, prev_role: prevRole, new_role: newRole });
+    setPopup({ type: "role_done" });
   };
+
+  const closePopup = () => setPopup({ type: "none" });
 
   const renderMemberRow = (member: Member, isPendingRow = false) => (
     <tr key={member.id} className="border-b border-gray-100">
@@ -120,7 +162,7 @@ export default function SettingsMemberManagement() {
       <td className="py-4 px-3 text-center">
         {isPendingRow ? (
           <button
-            onClick={() => handleApprovePending(member)}
+            onClick={() => handleApprovePendingClick(member)}
             className="px-3 py-1 text-[12px] border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
           >
             구성원승인
@@ -138,7 +180,7 @@ export default function SettingsMemberManagement() {
       </td>
       <td className="py-4 px-3 text-center">
         <button
-          onClick={() => handleRemove(member)}
+          onClick={() => handleRemoveClick(member)}
           className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center mx-auto"
         >
           <X className="w-5 h-5 text-gray-400" />
@@ -274,6 +316,82 @@ export default function SettingsMemberManagement() {
           </div>
         </div>
       </div>
+
+      {/* ── 권한 변경 확인 팝업 ── */}
+      <Dialog open={popup.type === "role_confirm"} onOpenChange={closePopup}>
+        <DialogContent className="sm:max-w-[280px] p-6">
+          <p className="text-[16px] font-bold text-gray-900 mb-6">권한을 변경하시겠습니까?</p>
+          <div className="popup-buttons">
+            <button onClick={closePopup} className="btn-white">취소</button>
+            <button onClick={handleRoleConfirm} className="btn-pink">확인</button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── 권한 변경 완료 팝업 ── */}
+      <Dialog open={popup.type === "role_done"} onOpenChange={closePopup}>
+        <DialogContent className="sm:max-w-[280px] p-6">
+          <p className="text-[16px] font-bold text-gray-900 mb-6">변경이 완료되었어요.</p>
+          <button onClick={closePopup} className="btn-pink w-full">확인</button>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── 구성원 승인 확인 팝업 ── */}
+      <Dialog open={popup.type === "approve_confirm"} onOpenChange={closePopup}>
+        <DialogContent className="sm:max-w-[280px] p-6">
+          <p className="text-[16px] font-bold text-gray-900 mb-6">구성원으로 승인하시겠습니까?</p>
+          <div className="popup-buttons">
+            <button onClick={closePopup} className="btn-white">취소</button>
+            <button onClick={handleApproveConfirm} className="btn-pink">확인</button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── 구성원 승인 완료 팝업 ── */}
+      <Dialog open={popup.type === "approve_done"} onOpenChange={closePopup}>
+        <DialogContent className="sm:max-w-[280px] p-6">
+          <p className="text-[16px] font-bold text-gray-900 mb-6">승인되었어요.</p>
+          <button onClick={closePopup} className="btn-pink w-full">확인</button>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── 구성원 제외 확인 팝업 ── */}
+      <Dialog open={popup.type === "remove_confirm"} onOpenChange={closePopup}>
+        <DialogContent className="sm:max-w-[280px] p-6">
+          <p className="text-[16px] font-bold text-gray-900 mb-3">구성원을 제외하시겠습니까?</p>
+          <label className="flex items-center gap-2 text-[12px] text-gray-500 mb-6 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={removeAlsoTvcf}
+              onChange={(e) => setRemoveAlsoTvcf(e.target.checked)}
+              className="w-3.5 h-3.5 accent-pink-500"
+            />
+            TVCF 구성원에서도 삭제합니다.
+          </label>
+          <div className="popup-buttons">
+            <button onClick={closePopup} className="btn-white">취소</button>
+            <button onClick={handleRemoveConfirm} className="btn-pink">확인</button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── 구성원 제외 완료 팝업 ── */}
+      <Dialog open={popup.type === "remove_done"} onOpenChange={closePopup}>
+        <DialogContent className="sm:max-w-[280px] p-6">
+          <p className="text-[16px] font-bold text-gray-900 mb-6">제외되었어요.</p>
+          <button onClick={closePopup} className="btn-pink w-full">확인</button>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── 제외 불가 (담당 프로젝트 있음) 팝업 ── */}
+      <Dialog open={popup.type === "remove_blocked"} onOpenChange={closePopup}>
+        <DialogContent className="sm:max-w-[280px] p-6">
+          <p className="text-[16px] font-bold text-gray-900 text-center mb-6 leading-snug">
+            담당프로젝트를 모두 이관하신 후<br />제외가 가능합니다.
+          </p>
+          <button onClick={closePopup} className="btn-pink w-full">확인</button>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
