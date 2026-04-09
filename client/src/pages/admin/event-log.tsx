@@ -82,6 +82,20 @@ function describeEvent(name: string, props: Record<string, unknown>): { label: s
         badge: "실험",
       };
 
+    // ── 페이지 체류 / 스크롤
+    case "time_on_page": {
+      const dur = p.duration_sec ?? 0;
+      const scroll = p.max_scroll_pct ?? 0;
+      return { label: "페이지 체류", detail: `${p.path ?? ""} · ${dur}초 · 최대 스크롤 ${scroll}%`, badge: "UX" };
+    }
+    case "page_exit": {
+      const dur = p.time_on_page_sec ?? 0;
+      const scroll = p.max_scroll_pct ?? 0;
+      return { label: "페이지 이탈", detail: `${p.path ?? ""} · ${dur}초 · 최대 스크롤 ${scroll}%`, badge: "UX" };
+    }
+    case "scroll_depth":
+      return { label: `스크롤 ${p.depth_pct}% 도달`, detail: `${p.path ?? ""}`, badge: "UX" };
+
     // ── 퍼널 이벤트
     case "site_visit":
       return { label: "사이트 방문", detail: `${p.landing_path ?? ""}`, badge: "유입" };
@@ -124,7 +138,7 @@ const FILTER_OPTIONS = [
   { value: "홈", label: "홈 클릭" },
   { value: "헤더", label: "GNB / 헤더" },
   { value: "채팅", label: "AI 채팅" },
-  { value: "UX", label: "맨 위로" },
+  { value: "UX", label: "스크롤 / 체류 / 맨위로" },
   { value: "실험", label: "A/B 실험" },
   { value: "유입", label: "유입" },
   { value: "전환", label: "전환" },

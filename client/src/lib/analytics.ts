@@ -773,11 +773,41 @@ export function trackFunnelRoute(path: string) {
   trackProjectRegisterStep(path);
 }
 
-/** App 루트에 두면 경로 변경 시 퍼널 이벤트 + 체류시간 + 이탈 이벤트가 자동으로 쌓입니다. */
+/** 스크롤 깊이(%) 계산 */
+function getScrollPct(): number {
+  const el = document.documentElement;
+  const scrollable = el.scrollHeight - el.clientHeight;
+  if (scrollable <= 0) return 100;
+  return Math.min(100, Math.round((window.scrollY / scrollable) * 100));
+}
+
+/** App 루트에 두면 경로 변경 시 퍼널 이벤트 + 체류시간 + 스크롤깊이 + 이탈 이벤트가 자동으로 쌓입니다. */
 export function FunnelRouteListener() {
   const [path] = useLocation();
   const pageEnterTime = useRef<number>(Date.now());
   const prevPath = useRef<string>(path);
+  const maxScrollPct = useRef<number>(0);
+  const firedMilestones = useRef<Set<number>>(new Set());
+
+  // 스크롤 이벤트 — 최대 깊이 갱신 + 25/50/75/100% 마일스톤 이벤트
+  useEffect(() => {
+    const MILESTONES = [25, 50, 75, 100];
+
+    const handleScroll = () => {
+      const pct = getScrollPct();
+      if (pct > maxScrollPct.current) maxScrollPct.current = pct;
+
+      for (const m of MILESTONES) {
+        if (pct >= m && !firedMilestones.current.has(m)) {
+          firedMilestones.current.add(m);
+          publishAnalytics("scroll_depth", { path: prevPath.current, depth_pct: m });
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // 앱 마운트 시 이미 로그인된 사용자 재식별 + UTM 캡처 + 브라우저 이탈 감지
   useEffect(() => {
@@ -790,6 +820,7 @@ export function FunnelRouteListener() {
       publishAnalytics("page_exit", {
         path: prevPath.current,
         time_on_page_sec: duration,
+        max_scroll_pct: maxScrollPct.current,
       });
     };
     window.addEventListener("beforeunload", handleUnload);
@@ -797,17 +828,21 @@ export function FunnelRouteListener() {
   }, []);
 
   useEffect(() => {
-    // 경로가 바뀔 때 이전 페이지의 체류시간 전송
+    // 경로가 바뀔 때 이전 페이지의 체류시간 + 스크롤 깊이 전송
     if (prevPath.current !== path) {
       const duration = Math.round((Date.now() - pageEnterTime.current) / 1000);
       if (duration > 0) {
         publishAnalytics("time_on_page", {
           path: prevPath.current,
           duration_sec: duration,
+          max_scroll_pct: maxScrollPct.current,
         });
       }
       prevPath.current = path;
       pageEnterTime.current = Date.now();
+      maxScrollPct.current = 0;
+      firedMilestones.current = new Set();
+      window.scrollTo(0, 0);
     }
 
     trackFunnelRoute(path);
