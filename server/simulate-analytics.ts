@@ -19,6 +19,7 @@ export interface SimJob {
   funnelBreakdown: Record<string, number>;
   utmBreakdown: Record<string, number>;
   userTypeBreakdown: Record<string, number>;
+  geoBreakdown: Record<string, number>;
   errors: string[];
   startedAt: number;
   completedAt?: number;
@@ -157,9 +158,9 @@ export interface SimConfig {
 
 export const DEFAULT_CONFIG: SimConfig = {
   userCount: 1000,
-  pctAdvertiser: 5, pctAgency: 30, pctProduction: 55,
+  pctAdvertiser: 5, pctAgency: 30, pctProduction: 65,
   pctTvcf: 85, pctGoogle: 5, pctNaver: 5, pctKakao: 3, pctOrganic: 2,
-  tvcfSsoRate: 50, tvcfManualLoginRate: 60, signupRate: 5,
+  tvcfSsoRate: 20, tvcfManualLoginRate: 25, signupRate: 3,
 };
 
 export async function startSimulation(cfg: SimConfig): Promise<string> {
@@ -175,6 +176,7 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     funnelBreakdown: {},
     utmBreakdown: {},
     userTypeBreakdown: {},
+    geoBreakdown: {},
     errors: [],
     startedAt: Date.now(),
   };
@@ -199,6 +201,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   const funnel = job.funnelBreakdown;
   const utmCount = job.utmBreakdown;
   const userTypeCount = job.userTypeBreakdown;
+  const geoCount = job.geoBreakdown;
 
   function add(event: string, distinctId: string, ts: number, props: Record<string, unknown>) {
     events.push({
@@ -288,8 +291,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const geo      = weightedPick(GEO_LIST);
     const isPartner = userType === "agency" || userType === "production";
 
-    // UTM 집계 (모든 유저)
+    // UTM / 지역 집계 (모든 유저)
     utmCount[utm.utm_source] = (utmCount[utm.utm_source] ?? 0) + 1;
+    const region = geo.geo_region as string;
+    geoCount[region] = (geoCount[region] ?? 0) + 1;
 
     const joinSecsAgo = Math.floor(Math.random() * 69 * 3600); // 최근 69시간
     const baseTs = tsAgo(joinSecsAgo);

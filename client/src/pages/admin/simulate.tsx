@@ -19,6 +19,7 @@ interface SimJob {
   funnelBreakdown: Record<string, number>;
   utmBreakdown: Record<string, number>;
   userTypeBreakdown: Record<string, number>;
+  geoBreakdown: Record<string, number>;
   errors: string[];
   startedAt: number;
   completedAt?: number;
@@ -35,7 +36,7 @@ const DEFAULTS: SimConfig = {
   userCount: 1000,
   pctAdvertiser: 5, pctAgency: 30, pctProduction: 65,
   pctTvcf: 85, pctGoogle: 5, pctNaver: 5, pctKakao: 3, pctOrganic: 2,
-  tvcfSsoRate: 50, tvcfManualLoginRate: 60, signupRate: 5,
+  tvcfSsoRate: 20, tvcfManualLoginRate: 25, signupRate: 3,
 };
 
 const FUNNEL_ORDER = [
@@ -133,6 +134,7 @@ export default function AdminSimulatePage() {
   const siteVisit = job?.funnelBreakdown["site_visit"] ?? 0;
   const utmBreakdown = job?.utmBreakdown ?? {} as Record<string, number>;
   const userTypeBreakdown = job?.userTypeBreakdown ?? {} as Record<string, number>;
+  const geoBreakdown = job?.geoBreakdown ?? {} as Record<string, number>;
 
   const utmSum = cfg.pctTvcf + cfg.pctGoogle + cfg.pctNaver + cfg.pctKakao + cfg.pctOrganic;
   const userSum = cfg.pctAdvertiser + cfg.pctAgency + cfg.pctProduction;
@@ -287,6 +289,37 @@ export default function AdminSimulatePage() {
                       </div>
                       <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
                       <div className="w-8 text-right text-xs text-gray-400">{actualPct}%</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 접속 지역 */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
+              <p className="font-medium text-gray-800">접속 지역</p>
+              <div className="space-y-2">
+                {[
+                  { key: "서울",    color: "bg-blue-500"   },
+                  { key: "경기도",  color: "bg-blue-400"   },
+                  { key: "부산",    color: "bg-purple-400" },
+                  { key: "인천",    color: "bg-green-400"  },
+                  { key: "대구",    color: "bg-yellow-400" },
+                  { key: "대전",    color: "bg-orange-400" },
+                  { key: "광주",    color: "bg-pink-400"   },
+                  { key: "기타지방",color: "bg-gray-400"   },
+                  { key: "해외",    color: "bg-indigo-400" },
+                ].map(({ key, color }) => {
+                  const count = geoBreakdown[key] ?? 0;
+                  const pct = job.totalUsers > 0 ? Math.round((count / job.totalUsers) * 100) : 0;
+                  return (
+                    <div key={key} className="flex items-center gap-3">
+                      <div className="w-16 text-xs text-gray-600 shrink-0">{key}</div>
+                      <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                        <div className={`${color} h-3 rounded-full`} style={{ width: `${pct}%` }} />
+                      </div>
+                      <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                      <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
                     </div>
                   );
                 })}
