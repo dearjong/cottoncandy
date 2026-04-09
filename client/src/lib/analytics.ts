@@ -169,12 +169,20 @@ export function publishAnalytics(
 
   const props: Record<string, unknown> = { ...properties, ...utmProps, ...trafficSource, ...experimentProps };
 
-  // Mixpanel
+  // Mixpanel (제한 없음)
   mixpanel.track(eventName, props);
 
-  // GA4
+  // GA4 — 파라미터 값 100자 초과 시 드롭되므로 잘라서 전송
   if (typeof gtag !== "undefined") {
-    gtag("event", eventName, props);
+    const ga4Props: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(props)) {
+      if (typeof v === "string" && v.length > 100) {
+        ga4Props[k] = v.slice(0, 100);
+      } else {
+        ga4Props[k] = v;
+      }
+    }
+    gtag("event", eventName, ga4Props);
   }
 
   // 서버 적재 (user_id 포함)
