@@ -81,7 +81,6 @@ async function ga4(clientId, userId, eventName, params, tsMs) {
     events: [{
       name: eventName,
       params: {
-        session_id: genSessionId(),
         engagement_time_msec: randInt(800, 20000),
         ...params,
       },
@@ -153,9 +152,10 @@ async function simulateUser(i) {
   const ageGroup = pick(AGE_GROUPS);
   const location = pick(LOCATIONS);
   const sessionStart = genTimestamp();
+  const sessionId = genSessionId(); // 유저당 1개 고정 — GA4 세션 묶음용
   let t = sessionStart;
   const next = (minMs = 2000, maxMs = 25000) => { t += randInt(minMs, maxMs); return t; };
-  const base = { user_type: userType, gender, age_group: ageGroup, ...location };
+  const base = { user_type: userType, gender, age_group: ageGroup, session_id: sessionId, ...location };
 
   // 1. 홈 방문 (100%)
   await emit(clientId, userId, "page_view", { page_location: "/", page_title: "홈", ...base }, t);
