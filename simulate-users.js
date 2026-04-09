@@ -153,7 +153,7 @@ const USER_TYPES = [
   "production","production","production","production","production","production","production","production","production","production","production",
   "visitor","visitor",
 ];
-const GENDERS    = ["male","male","male","female","female"]; // 남 60% / 여 40%
+const GENDERS    = ["male","female"]; // 남 50% / 여 50%
 const AGE_GROUPS = ["20s","30s","30s","30s","40s","40s","50s"]; // 30-40대 중심
 
 // UTM 유입 채널 (가중치 배열)

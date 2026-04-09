@@ -111,7 +111,7 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
     { value: "production", weight: 55 },
     { value: "visitor",    weight: 10 },
   ];
-  const GENDERS    = [{ value: "male", weight: 60 }, { value: "female", weight: 40 }];
+  const GENDERS    = [{ value: "male", weight: 50 }, { value: "female", weight: 50 }];
   const AGE_GROUPS = [{ value: "20s", weight: 10 }, { value: "30s", weight: 35 }, { value: "40s", weight: 35 }, { value: "50s", weight: 20 }];
 
   // UTM: google 35% / naver 30% / kakao 15% / referral 10% / organic 10%
