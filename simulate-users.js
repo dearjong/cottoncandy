@@ -69,15 +69,28 @@ function genTimestamp(baseMs = 0) {
 }
 
 function genSessionId() { return Math.floor(Math.random() * 1e12).toString(); }
-function genClientId() { return `${Math.random().toString(36).slice(2,10)}.${randInt(1e8,9e8)}`; }
+// GA4 표준 client_id 형식: 10자리숫자.10자리숫자
+function genClientId() {
+  const a = String(Math.floor(Math.random() * 9_000_000_000) + 1_000_000_000); // 10자리
+  const b = String(Math.floor(Math.random() * 9_000_000_000) + 1_000_000_000); // 10자리
+  return `${a}.${b}`;
+}
 function genUserId(i) { return `sim_${i.toString().padStart(4,"0")}_${Math.random().toString(36).slice(2,7)}`; }
 
 // ── 이벤트 전송 ─────────────────────────────────────
 async function ga4(clientId, userId, eventName, params, tsMs) {
+  // user_properties: GA4 사용자 범위 속성 (user_type, gender, age_group 등)
+  const userProps = {};
+  if (params.user_type) userProps.user_type  = { value: params.user_type };
+  if (params.gender)    userProps.gender      = { value: params.gender };
+  if (params.age_group) userProps.age_group   = { value: params.age_group };
+  if (params.geo_region) userProps.geo_region = { value: params.geo_region };
+
   const body = {
     client_id: clientId,
     user_id: userId,
     timestamp_micros: (tsMs * 1000).toString(),
+    user_properties: userProps,
     events: [{
       name: eventName,
       params: {
