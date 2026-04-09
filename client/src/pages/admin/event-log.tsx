@@ -55,6 +55,19 @@ function describeEvent(name: string, props: Record<string, unknown>): { label: s
     case "home_faq_more_click":
       return { label: "홈 FAQ 전체보기 클릭", detail: "", badge: "홈" };
 
+    // ── 채팅 / 맨위로
+    case "chat_opened":
+      return { label: "AI 채팅 열기", detail: `페이지: ${p.page ?? ""}`, badge: "채팅" };
+    case "chat_closed": {
+      const dur = p.duration_sec ?? 0;
+      const cnt = p.messages_sent ?? 0;
+      return { label: "AI 채팅 닫기", detail: `${dur}초 이용 · 메시지 ${cnt}건 전송`, badge: "채팅" };
+    }
+    case "chat_message_sent":
+      return { label: "AI 채팅 메시지 전송", detail: `${p.message_index}번째 · ${p.message_length}자`, badge: "채팅" };
+    case "scroll_to_top":
+      return { label: "맨 위로 클릭", detail: `페이지: ${p.page ?? ""}`, badge: "UX" };
+
     // ── GNB / 헤더
     case "gnb_menu_click":
       return { label: "GNB 메뉴 클릭", detail: `${p.menu_label ?? p.menu_key ?? ""}`, badge: "헤더" };
@@ -95,6 +108,8 @@ function describeEvent(name: string, props: Record<string, unknown>): { label: s
 const BADGE_COLORS: Record<string, string> = {
   "홈": "bg-pink-100 text-pink-700",
   "헤더": "bg-blue-100 text-blue-700",
+  "채팅": "bg-emerald-100 text-emerald-700",
+  "UX": "bg-amber-100 text-amber-700",
   "실험": "bg-purple-100 text-purple-700",
   "유입": "bg-gray-100 text-gray-700",
   "전환": "bg-orange-100 text-orange-700",
@@ -108,6 +123,8 @@ const FILTER_OPTIONS = [
   { value: "all", label: "전체" },
   { value: "홈", label: "홈 클릭" },
   { value: "헤더", label: "GNB / 헤더" },
+  { value: "채팅", label: "AI 채팅" },
+  { value: "UX", label: "맨 위로" },
   { value: "실험", label: "A/B 실험" },
   { value: "유입", label: "유입" },
   { value: "전환", label: "전환" },

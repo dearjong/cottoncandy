@@ -1,5 +1,6 @@
 import { ArrowUp, MessageCircle, X, Send } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { publishAnalytics } from "@/lib/analytics";
 
 export default function Footer() {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -7,15 +8,46 @@ export default function Footer() {
     { text: "안녕하세요! Cotton Candy 챗봇입니다. 무엇을 도와드릴까요?", isUser: false }
   ]);
   const [inputMessage, setInputMessage] = useState("");
+  const chatOpenedAtRef = useRef<number | null>(null);
+  const userMessageCountRef = useRef(0);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    publishAnalytics("scroll_to_top", { section: "footer", page: window.location.pathname });
+  };
+
+  const openChat = () => {
+    setIsChatOpen(true);
+    chatOpenedAtRef.current = Date.now();
+    userMessageCountRef.current = 0;
+    publishAnalytics("chat_opened", { section: "footer", page: window.location.pathname });
+  };
+
+  const closeChat = () => {
+    const durationSec = chatOpenedAtRef.current
+      ? Math.round((Date.now() - chatOpenedAtRef.current) / 1000)
+      : 0;
+    publishAnalytics("chat_closed", {
+      section: "footer",
+      duration_sec: durationSec,
+      messages_sent: userMessageCountRef.current,
+      page: window.location.pathname,
+    });
+    setIsChatOpen(false);
+    chatOpenedAtRef.current = null;
   };
 
   const handleSendMessage = () => {
     if (!inputMessage.trim()) return;
+    userMessageCountRef.current += 1;
+    const msgText = inputMessage;
+    publishAnalytics("chat_message_sent", {
+      section: "footer",
+      message_length: msgText.length,
+      message_index: userMessageCountRef.current,
+    });
 
-    setMessages(prev => [...prev, { text: inputMessage, isUser: true }]);
+    setMessages(prev => [...prev, { text: msgText, isUser: true }]);
     
     setTimeout(() => {
       setMessages(prev => [...prev, { 
@@ -102,7 +134,7 @@ export default function Footer() {
               <span className="font-semibold">Cotton Candy 채팅 상담</span>
             </div>
             <button
-              onClick={() => setIsChatOpen(false)}
+              onClick={closeChat}
               className="hover:bg-white/20 rounded-full p-1 transition-colors"
               data-testid="button-close-chat"
             >
@@ -158,7 +190,7 @@ export default function Footer() {
       <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-40">
         {/* Chat/Message Button */}
         <button
-          onClick={() => setIsChatOpen(!isChatOpen)}
+          onClick={() => isChatOpen ? closeChat() : openChat()}
           className="w-12 h-12 bg-[#EA4C89] rounded-full flex items-center justify-center shadow-lg hover:bg-[#d6417a] transition-colors"
           data-testid="button-chat"
           aria-label="문의하기"
