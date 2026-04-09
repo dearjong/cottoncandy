@@ -10,6 +10,7 @@ import Signup from "@/pages/member/signup";
 import SignupPhone from "@/pages/member/signup-phone";
 import SignupEmail from "@/pages/member/signup-email";
 import SignupAccountType from "@/pages/member/signup-account-type";
+import SignupJobInfo from "@/pages/member/signup-job-info";
 import Step1PartnerSelection from "@/pages/service/create-project/step1-partner-selection";
 import ConsultingInquiry from "@/pages/service/create-project/consulting-inquiry";
 import PartnerType from "@/pages/service/create-project/partner-type";
@@ -157,6 +158,7 @@ function Router() {
       <Route path="/signup/phone" component={SignupPhone} />
       <Route path="/signup/email" component={SignupEmail} />
       <Route path="/signup/account-type" component={SignupAccountType} />
+      <Route path="/signup/job-info" component={SignupJobInfo} />
       <Route path="/create-project/step1">
         <ProtectedRoute component={Step1PartnerSelection} />
       </Route>
