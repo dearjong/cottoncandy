@@ -47,6 +47,35 @@ const TRAFFIC_SOURCE_KEY = "analytics_traffic_source";
 const SEARCH_ENGINES = ["google", "naver", "daum", "bing", "yahoo", "baidu", "yandex", "duckduckgo"];
 const SOCIAL_DOMAINS = ["facebook", "instagram", "twitter", "x.com", "linkedin", "tiktok", "youtube", "pinterest", "kakao"];
 
+/**
+ * URL 경로를 사람이 읽기 좋은 페이지명으로 변환.
+ * "/" → "home", "/admin" → "admin_dashboard" 등.
+ */
+function normalizePath(path: string): string {
+  const MAP: Record<string, string> = {
+    "/":                      "home",
+    "/login":                 "login",
+    "/signup":                "signup",
+    "/signup/type":           "signup_type",
+    "/admin":                 "admin_dashboard",
+    "/admin/calendar":        "admin_calendar",
+    "/admin/progress":        "admin_progress",
+    "/admin/projects":        "admin_projects",
+    "/admin/pending-approval":"admin_pending_approval",
+    "/admin/bidding":         "admin_bidding",
+    "/admin/one-on-one":      "admin_one_on_one",
+    "/admin/contracts":       "admin_contracts",
+    "/admin/reviews":         "admin_reviews",
+    "/admin/members":         "admin_members",
+    "/admin/companies":       "admin_companies",
+    "/admin/reports":         "admin_reports",
+    "/admin/simulate":        "admin_simulate",
+  };
+  if (MAP[path]) return MAP[path];
+  // 동적 경로: 슬래시를 언더스코어로, 앞 슬래시 제거
+  return path.replace(/^\//, "").replace(/\//g, "_") || "home";
+}
+
 function deriveChannel(utm: Record<string, string>, referrerDomain: string): string {
   const medium = (utm.utm_medium ?? "").toLowerCase();
   const source = (utm.utm_source ?? "").toLowerCase();
@@ -81,7 +110,7 @@ export function captureTrafficSource(): Record<string, string> {
       referrer: rawReferrer || "direct",
       referrer_domain: referrerDomain || "direct",
       channel,
-      landing_path: window.location.pathname,
+      landing_path: normalizePath(window.location.pathname),
     };
 
     sessionStorage.setItem(TRAFFIC_SOURCE_KEY, JSON.stringify(source));
@@ -272,14 +301,15 @@ export function trackLogin(props: {
 
 /** 세션당 1회 — 퍼널 1단계(유입). referrer·channel·UTM 포함 */
 export function trackSiteVisitOnce(path: string) {
+  const pageName = normalizePath(path);
   try {
     if (sessionStorage.getItem(SITE_VISIT_SESSION_KEY)) return;
     sessionStorage.setItem(SITE_VISIT_SESSION_KEY, "1");
     const traffic = captureTrafficSource();
-    publishAnalytics("site_visit", { path, ...traffic });
+    publishAnalytics("site_visit", { path: pageName, ...traffic });
   } catch {
     const traffic = captureTrafficSource();
-    publishAnalytics("site_visit", { path, ...traffic });
+    publishAnalytics("site_visit", { path: pageName, ...traffic });
   }
 }
 
