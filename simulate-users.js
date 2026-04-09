@@ -119,8 +119,29 @@ async function emit(clientId, userId, name, params, ts) {
   ]);
 }
 
+// Mixpanel People 프로필 등록 (가입 완료 시 호출)
+async function setMixpanelProfile(userId, profileProps) {
+  const body = [{
+    $token: MIXPANEL_TOKEN,
+    $distinct_id: userId,
+    $set: profileProps,
+  }];
+  await fetch("https://api.mixpanel.com/engage#profile-set", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).catch(() => {});
+}
+
 // ── 유저 행동 시뮬레이션 ─────────────────────────────
-const USER_TYPES = ["advertiser","advertiser","advertiser","partner","agency"];
+// 광고주 50% / 대행사 30% / 제작사 20%
+const USER_TYPES = [
+  "advertiser","advertiser","advertiser","advertiser","advertiser",
+  "agency","agency","agency",
+  "production","production",
+];
+const GENDERS   = ["male","male","male","female","female"]; // 남 60% / 여 40%
+const AGE_GROUPS = ["20s","30s","30s","30s","40s","40s","50s"]; // 30-40대 중심
 const CATEGORIES = ["영상광고","브랜드디자인","사진촬영","SNS마케팅","PPT디자인","웹개발"];
 const SEARCH_TERMS = ["영상","브랜드","광고","디자인","사진","마케팅","촬영"];
 
@@ -128,11 +149,13 @@ async function simulateUser(i) {
   const userId = genUserId(i);
   const clientId = genClientId();
   const userType = pick(USER_TYPES);
+  const gender   = pick(GENDERS);
+  const ageGroup = pick(AGE_GROUPS);
   const location = pick(LOCATIONS);
   const sessionStart = genTimestamp();
   let t = sessionStart;
   const next = (minMs = 2000, maxMs = 25000) => { t += randInt(minMs, maxMs); return t; };
-  const base = { user_type: userType, ...location };
+  const base = { user_type: userType, gender, age_group: ageGroup, ...location };
 
   // 1. 홈 방문 (100%)
   await emit(clientId, userId, "page_view", { page_location: "/", page_title: "홈", ...base }, t);
@@ -170,6 +193,19 @@ async function simulateUser(i) {
           const accountType = chance(0.68) ? "personal" : "corporate";
           await emit(clientId, userId, "signup_funnel", { step: 4, step_name: "account_type", path: "/signup/account-type", ...base }, next());
           await emit(clientId, userId, "signup_complete", { account_type: accountType, ...base }, next(1000, 3000));
+
+          // Mixpanel People 프로필 등록 (가입 완료 시)
+          await setMixpanelProfile(userId, {
+            gender,
+            age_group: ageGroup,
+            user_type: userType,
+            account_type: accountType,
+            $city: location.$city,
+            $region: location.$region,
+            $country_code: location.$country_code,
+            geo_region: location.geo_region,
+            signup_date: new Date(t).toISOString().slice(0, 10),
+          });
 
           if (accountType === "corporate" && chance(0.62)) { // 기업정보 등록 (62% of corporate)
             await emit(clientId, userId, "signup_funnel", { step: 5, step_name: "job_info", path: "/signup/job-info", ...base }, next());
