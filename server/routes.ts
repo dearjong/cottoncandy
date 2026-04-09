@@ -320,7 +320,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pctAdvertiser:        num("pctAdvertiser", 0, 100),
         pctAgency:            num("pctAgency", 0, 100),
         pctProduction:        num("pctProduction", 0, 100),
-        pctVisitor:           num("pctVisitor", 0, 100),
         pctTvcf:              num("pctTvcf", 0, 100),
         pctGoogle:            num("pctGoogle", 0, 100),
         pctNaver:             num("pctNaver", 0, 100),

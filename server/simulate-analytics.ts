@@ -76,8 +76,9 @@ interface Ga4UserEvents {
 }
 
 // GA4 키 이벤트만 전송 (real-time 가시성을 위해 timestamp_micros 생략)
+// ⚠ first_visit은 GA4 예약어라 배치 전체 거부됨 → 제외
 const GA4_KEY_EVENTS = new Set([
-  "site_visit", "first_visit", "sso_login", "login",
+  "site_visit", "sso_login", "login",
   "signup_started", "signup_complete",
   "project_submitted", "partner_applied", "contract_signed",
   "review_submitted", "project_completed", "activation_achieved",
@@ -144,7 +145,6 @@ export interface SimConfig {
   pctAdvertiser: number;
   pctAgency: number;
   pctProduction: number;
-  pctVisitor: number;
   pctTvcf: number;
   pctGoogle: number;
   pctNaver: number;
@@ -157,7 +157,7 @@ export interface SimConfig {
 
 export const DEFAULT_CONFIG: SimConfig = {
   userCount: 1000,
-  pctAdvertiser: 5, pctAgency: 30, pctProduction: 55, pctVisitor: 10,
+  pctAdvertiser: 5, pctAgency: 30, pctProduction: 55,
   pctTvcf: 85, pctGoogle: 5, pctNaver: 5, pctKakao: 3, pctOrganic: 2,
   tvcfSsoRate: 50, tvcfManualLoginRate: 60, signupRate: 5,
 };
@@ -239,11 +239,11 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   }
 
   // ── 유저 속성 풀 ──────────────────────────────────────
+  // 유저 타입은 로그인한 유저 중 구성비 (미로그인 = total - authenticated)
   const USER_TYPE_LIST = [
     { value: "advertiser", weight: cfg.pctAdvertiser },
     { value: "agency",     weight: cfg.pctAgency     },
     { value: "production", weight: cfg.pctProduction  },
-    { value: "visitor",    weight: cfg.pctVisitor     },
   ];
   const GENDERS    = [{ value: "male", weight: 50 }, { value: "female", weight: 50 }];
   const AGE_GROUPS = [{ value: "20s", weight: 10 }, { value: "30s", weight: 35 }, { value: "40s", weight: 35 }, { value: "50s", weight: 20 }];
@@ -288,9 +288,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const geo      = weightedPick(GEO_LIST);
     const isPartner = userType === "agency" || userType === "production";
 
-    // UTM / 유저타입 집계
+    // UTM 집계 (모든 유저)
     utmCount[utm.utm_source] = (utmCount[utm.utm_source] ?? 0) + 1;
-    userTypeCount[userType] = (userTypeCount[userType] ?? 0) + 1;
 
     const joinSecsAgo = Math.floor(Math.random() * 69 * 3600); // 최근 69시간
     const baseTs = tsAgo(joinSecsAgo);
@@ -307,11 +306,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     initGa4User(uid, uid, { user_type: userType, gender, age_group: ageGroup });
 
     // ── Acquisition ──────────────────────────────────
-    add("site_visit",  uid, baseTs,     { path: "/", ...common });
-    add("first_visit", uid, baseTs + 1, { path: "/", ...common });
-
-    // 뜨내기: 홈만 보다 이탈
-    if (userType === "visitor") continue;
+    add("site_visit", uid, baseTs, { path: "/", ...common });
 
     // ── 인증 결정 ─────────────────────────────────────
     let isAuthenticated = false;
@@ -355,6 +350,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
     // ── 핵심행동: 인증 완료 유저만 ─────────────────────
     if (!isAuthenticated) continue;
+
+    // 유저 타입 집계 (인증된 유저만 — 미로그인은 total - sum으로 계산)
+    userTypeCount[userType] = (userTypeCount[userType] ?? 0) + 1;
 
     const partnerType = userType === "agency" ? "대행사" : "제작사";
 

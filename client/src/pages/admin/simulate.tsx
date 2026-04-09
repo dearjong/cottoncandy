@@ -26,14 +26,14 @@ interface SimJob {
 
 interface SimConfig {
   userCount: number;
-  pctAdvertiser: number; pctAgency: number; pctProduction: number; pctVisitor: number;
+  pctAdvertiser: number; pctAgency: number; pctProduction: number;
   pctTvcf: number; pctGoogle: number; pctNaver: number; pctKakao: number; pctOrganic: number;
   tvcfSsoRate: number; tvcfManualLoginRate: number; signupRate: number;
 }
 
 const DEFAULTS: SimConfig = {
   userCount: 1000,
-  pctAdvertiser: 5, pctAgency: 30, pctProduction: 55, pctVisitor: 10,
+  pctAdvertiser: 5, pctAgency: 30, pctProduction: 65,
   pctTvcf: 85, pctGoogle: 5, pctNaver: 5, pctKakao: 3, pctOrganic: 2,
   tvcfSsoRate: 50, tvcfManualLoginRate: 60, signupRate: 5,
 };
@@ -135,7 +135,7 @@ export default function AdminSimulatePage() {
   const userTypeBreakdown = job?.userTypeBreakdown ?? {} as Record<string, number>;
 
   const utmSum = cfg.pctTvcf + cfg.pctGoogle + cfg.pctNaver + cfg.pctKakao + cfg.pctOrganic;
-  const userSum = cfg.pctAdvertiser + cfg.pctAgency + cfg.pctProduction + cfg.pctVisitor;
+  const userSum = cfg.pctAdvertiser + cfg.pctAgency + cfg.pctProduction;
 
   return (
     <div className="space-y-6 p-6">
@@ -163,14 +163,14 @@ export default function AdminSimulatePage() {
         {/* 유저 타입 비율 */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-600">유저 타입 비율</span>
-            {sumWarn([cfg.pctAdvertiser, cfg.pctAgency, cfg.pctProduction, cfg.pctVisitor], "유저 타입")}
+            <span className="text-xs font-medium text-gray-600">로그인 유저 내 구성</span>
+            <span className="text-[10px] text-gray-400">미로그인 유저는 인증 전환율에 따라 자동 계산</span>
+            {sumWarn([cfg.pctAdvertiser, cfg.pctAgency, cfg.pctProduction], "유저 타입")}
           </div>
           <div className="flex flex-wrap gap-4">
             <NumInput label="광고주" value={cfg.pctAdvertiser} onChange={(v) => set("pctAdvertiser", v)} />
             <NumInput label="대행사" value={cfg.pctAgency}     onChange={(v) => set("pctAgency", v)} />
             <NumInput label="제작사" value={cfg.pctProduction} onChange={(v) => set("pctProduction", v)} />
-            <NumInput label="뜨내기" value={cfg.pctVisitor}    onChange={(v) => set("pctVisitor", v)} />
             <div className="flex items-end pb-1">
               <span className={`text-xs font-semibold ${userSum === 100 ? "text-green-600" : "text-amber-500"}`}>
                 합계 {userSum}%
@@ -295,27 +295,34 @@ export default function AdminSimulatePage() {
 
             {/* 유저 타입 */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-              <p className="font-medium text-gray-800">유저 타입 비율</p>
+              <div>
+                <p className="font-medium text-gray-800">인증 현황</p>
+                <p className="text-[10px] text-gray-400">미로그인 = 전체 - 로그인 유저 합계</p>
+              </div>
               <div className="space-y-2">
-                {[
-                  { key: "advertiser", label: "광고주",  color: "bg-blue-500",   pct: cfg.pctAdvertiser },
-                  { key: "agency",     label: "대행사",  color: "bg-green-500",  pct: cfg.pctAgency     },
-                  { key: "production", label: "제작사",  color: "bg-purple-500", pct: cfg.pctProduction },
-                  { key: "visitor",    label: "뜨내기",  color: "bg-gray-400",   pct: cfg.pctVisitor    },
-                ].map(({ key, label, color, pct }) => {
-                  const count = userTypeBreakdown[key] ?? Math.round((job.totalUsers * pct) / 100);
-                  const actualPct = job.totalUsers > 0 ? Math.round((count / job.totalUsers) * 100) : pct;
-                  return (
-                    <div key={key} className="flex items-center gap-3">
-                      <div className="w-14 text-xs text-gray-600 shrink-0">{label}</div>
-                      <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                        <div className={`${color} h-3 rounded-full`} style={{ width: `${actualPct}%` }} />
+                {(() => {
+                  const authSum = Object.values(userTypeBreakdown).reduce((a, b) => a + b, 0);
+                  const miloginCount = job.totalUsers - authSum;
+                  const rows = [
+                    { key: "advertiser", label: "광고주", color: "bg-blue-500",   count: userTypeBreakdown["advertiser"] ?? 0 },
+                    { key: "agency",     label: "대행사", color: "bg-green-500",  count: userTypeBreakdown["agency"] ?? 0 },
+                    { key: "production", label: "제작사", color: "bg-purple-500", count: userTypeBreakdown["production"] ?? 0 },
+                    { key: "milogin",    label: "미로그인", color: "bg-gray-300", count: miloginCount },
+                  ];
+                  return rows.map(({ key, label, color, count }) => {
+                    const pct = job.totalUsers > 0 ? Math.round((count / job.totalUsers) * 100) : 0;
+                    return (
+                      <div key={key} className="flex items-center gap-3">
+                        <div className="w-14 text-xs text-gray-600 shrink-0">{label}</div>
+                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                          <div className={`${color} h-3 rounded-full`} style={{ width: `${pct}%` }} />
+                        </div>
+                        <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                        <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
                       </div>
-                      <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                      <div className="w-8 text-right text-xs text-gray-400">{actualPct}%</div>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
               </div>
             </div>
           </div>
