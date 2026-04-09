@@ -24,6 +24,7 @@ export interface SimJob {
   stepDropoffBreakdown: Record<number, number>;
   draftSavedCount: number;
   draftResumedCount: number;
+  directEntryBreakdown: Record<string, number>;
   errors: string[];
   startedAt: number;
   completedAt?: number;
@@ -50,6 +51,18 @@ const PROJECT_STEPS = [
   { step: 17, screen: "additional_description", title: "상세설명",             passRate: 0.88 },
   { step: 18, screen: "project_details",        title: "최종 확인 & 등록",    passRate: 1.00 },
 ] as const;
+
+// 북마크 / 직접 유입 랜딩 페이지 (weight = 상대적 비율)
+const DIRECT_LANDING_PAGES = [
+  { path: "/",                      label: "홈",                 weight: 38 },
+  { path: "/work/home",             label: "마이페이지 홈",      weight: 18 },
+  { path: "/work/projects",         label: "내 프로젝트",        weight: 14 },
+  { path: "/partner",               label: "파트너 찾기",        weight: 10 },
+  { path: "/create-project/step1",  label: "프로젝트 등록",       weight: 7  },
+  { path: "/work/profile",          label: "프로필",              weight: 6  },
+  { path: "/work/proposals",        label: "제안 현황",           weight: 4  },
+  { path: "/work/contracts",        label: "계약 관리",           weight: 3  },
+];
 
 const jobs = new Map<string, SimJob>();
 
@@ -213,6 +226,7 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     stepDropoffBreakdown: {},
     draftSavedCount: 0,
     draftResumedCount: 0,
+    directEntryBreakdown: {},
     errors: [],
     startedAt: Date.now(),
   };
@@ -240,6 +254,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   const geoCount = job.geoBreakdown;
   const stepFunnel = job.stepFunnelBreakdown;
   const stepDropoff = job.stepDropoffBreakdown;
+  const directCount = job.directEntryBreakdown;
 
   function add(event: string, distinctId: string, ts: number, props: Record<string, unknown>) {
     events.push({
@@ -386,6 +401,20 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       isAuthenticated = true;
     }
     // else: 미로그인 (roll >= signupThreshold)
+
+    // ── 직접 유입 / 북마크 추적 ────────────────────────
+    // 재방문(직접 유입) 확률: 인증 유저 40%, 미인증 유저 20%
+    if (chance(isAuthenticated ? 0.40 : 0.20)) {
+      // 인증 유저는 내부 페이지로, 미인증은 공개 페이지 위주
+      const landingPage = isAuthenticated
+        ? weightedPick(DIRECT_LANDING_PAGES)
+        : weightedPick(DIRECT_LANDING_PAGES.filter((p) => ["홈","파트너 찾기","프로젝트 등록"].includes(p.label)));
+      directCount[landingPage.path] = (directCount[landingPage.path] ?? 0) + 1;
+      add("direct_entry", uid, baseTs + 5, {
+        path: landingPage.path, page_label: landingPage.label,
+        is_authenticated: isAuthenticated, referrer: "direct", ...common,
+      });
+    }
 
     // ── 핵심행동: 인증 완료 유저만 ─────────────────────
     if (!isAuthenticated) continue;

@@ -27,6 +27,7 @@ interface SimJob {
   stepDropoffBreakdown: Record<number, number>;
   draftSavedCount: number;
   draftResumedCount: number;
+  directEntryBreakdown: Record<string, number>;
   errors: string[];
   startedAt: number;
   completedAt?: number;
@@ -486,6 +487,64 @@ export default function AdminSimulatePage() {
                 ✅ GA4 + Mixpanel 전송 완료 — GA4 실시간 개요 / Mixpanel Funnels에서 확인하세요.
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 직접 유입 / 북마크 랜딩 페이지 */}
+      {job && Object.keys(job.directEntryBreakdown ?? {}).length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
+          <div>
+            <p className="font-medium text-gray-800">직접 유입 / 북마크 랜딩 페이지</p>
+            <p className="text-[10px] text-gray-400">북마크하거나 URL을 직접 입력해 들어온 페이지 분포입니다</p>
+          </div>
+          <div className="space-y-2">
+            {(() => {
+              const entries = Object.entries(job.directEntryBreakdown ?? {})
+                .sort(([, a], [, b]) => b - a);
+              const totalDirect = entries.reduce((s, [, v]) => s + v, 0);
+              const maxCount = entries[0]?.[1] ?? 1;
+              const PAGE_LABELS: Record<string, string> = {
+                "/":                     "홈",
+                "/work/home":            "마이페이지 홈",
+                "/work/projects":        "내 프로젝트",
+                "/partner":              "파트너 찾기",
+                "/create-project/step1": "프로젝트 등록",
+                "/work/profile":         "프로필",
+                "/work/proposals":       "제안 현황",
+                "/work/contracts":       "계약 관리",
+              };
+              const PAGE_COLORS: Record<string, string> = {
+                "/":                     "bg-pink-400",
+                "/work/home":            "bg-blue-400",
+                "/work/projects":        "bg-indigo-400",
+                "/partner":              "bg-green-400",
+                "/create-project/step1": "bg-amber-400",
+                "/work/profile":         "bg-purple-400",
+                "/work/proposals":       "bg-sky-400",
+                "/work/contracts":       "bg-orange-400",
+              };
+              return entries.map(([path, count]) => {
+                const barPct = Math.round((count / maxCount) * 100);
+                const sharePct = totalDirect > 0 ? Math.round((count / totalDirect) * 100) : 0;
+                return (
+                  <div key={path} className="flex items-center gap-3">
+                    <div className="w-28 text-xs text-gray-600 truncate shrink-0">
+                      {PAGE_LABELS[path] ?? path}
+                    </div>
+                    <div className="text-[10px] text-gray-400 w-36 truncate shrink-0">{path}</div>
+                    <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                      <div
+                        className={`${PAGE_COLORS[path] ?? "bg-gray-400"} h-3 rounded-full transition-all duration-500`}
+                        style={{ width: `${Math.max(barPct, 2)}%` }}
+                      />
+                    </div>
+                    <div className="w-12 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                    <div className="w-8 text-right text-xs text-gray-400">{sharePct}%</div>
+                  </div>
+                );
+              });
+            })()}
           </div>
         </div>
       )}
