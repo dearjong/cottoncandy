@@ -5,7 +5,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { useLocation } from "wouter";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 
 interface SimJob {
   status: "pending" | "generating" | "sending" | "done" | "error";
@@ -29,6 +34,52 @@ interface SimJob {
   errors: string[];
   startedAt: number;
   completedAt?: number;
+}
+
+interface SimConfig {
+  userCount: number; periodDays: number;
+  pctAdvertiser: number; pctAgency: number; pctProduction: number;
+  pctTvcf: number; pctGoogle: number; pctNaver: number; pctKakao: number; pctOrganic: number;
+  pctSsoLogin: number; pctManualLogin: number; pctSignup: number;
+  pctMale: number; pctFemale: number;
+  pct20s: number; pct30s: number; pct40s: number; pct50s: number;
+  pctSeoul: number; pctGyeonggi: number; pctBusan: number; pctIncheon: number;
+  pctDaegu: number; pctDaejeon: number; pctGwangju: number; pctOtherRegion: number; pctAbroad: number;
+}
+
+const DEFAULTS: SimConfig = {
+  userCount: 1000, periodDays: 3,
+  pctAdvertiser: 5,  pctAgency: 30,       pctProduction: 65,
+  pctTvcf: 85,       pctGoogle: 5,         pctNaver: 5,        pctKakao: 3,   pctOrganic: 2,
+  pctSsoLogin: 17,   pctManualLogin: 17,   pctSignup: 3,
+  pctMale: 60,       pctFemale: 40,
+  pct20s: 10,        pct30s: 35,           pct40s: 35,          pct50s: 20,
+  pctSeoul: 35,      pctGyeonggi: 20,      pctBusan: 8,         pctIncheon: 5,
+  pctDaegu: 4,       pctDaejeon: 3,        pctGwangju: 3,       pctOtherRegion: 17, pctAbroad: 5,
+};
+
+function NumInput({ label, value, onChange, min = 0, max = 100, unit = "%" }: {
+  label: string; value: number; onChange: (v: number) => void; min?: number; max?: number; unit?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[10px] text-gray-400 leading-tight">{label}</span>
+      <div className="flex items-center gap-1">
+        <input
+          type="number" min={min} max={max} value={value}
+          onChange={(e) => onChange(Math.max(min, Math.min(max, Number(e.target.value) || 0)))}
+          className="w-16 border border-gray-200 rounded px-2 py-1 text-xs text-gray-800 text-right focus:outline-none focus:ring-1 focus:ring-pink-300"
+        />
+        <span className="text-xs text-gray-400">{unit}</span>
+      </div>
+    </div>
+  );
+}
+
+function sumWarn(vals: number[], label: string) {
+  const s = vals.reduce((a, b) => a + b, 0);
+  if (s !== 100) return <span className="text-[10px] text-amber-500">합계 {s}% (100% 권장) — {label}</span>;
+  return null;
 }
 
 const PROJECT_STEP_LABELS: Record<number, string> = {
@@ -62,7 +113,35 @@ const FUNNEL_ORDER = [
 function ActivityTab() {
   const [data, setData] = useState<{ jobId: string; job: SimJob } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [, navigate] = useLocation();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [cfg, setCfg] = useState<SimConfig>(DEFAULTS);
+  const [dialogCfg, setDialogCfg] = useState<SimConfig>(DEFAULTS);
+  const [loading, setLoading] = useState(false);
+
+  function setD<K extends keyof SimConfig>(key: K, val: SimConfig[K]) {
+    setDialogCfg((prev) => ({ ...prev, [key]: val }));
+  }
+
+  function stopPolling() {
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+  }
+
+  async function startSim(runCfg: SimConfig) {
+    setCfg(runCfg);
+    setDialogOpen(false);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/simulate/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(runCfg),
+      });
+      await res.json();
+      setLoading(false);
+    } catch {
+      setLoading(false);
+    }
+  }
 
   async function fetchLatest() {
     try {
@@ -75,19 +154,26 @@ function ActivityTab() {
   useEffect(() => {
     fetchLatest();
     pollRef.current = setInterval(fetchLatest, 3000);
-    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+    return () => stopPolling();
   }, []);
 
   const job = data?.job ?? null;
   const isRunning = job && (job.status === "pending" || job.status === "generating" || job.status === "sending");
   const isDone = job?.status === "done";
-  const hasData = job && job.totalEvents > 0;
 
   const totalUsers = job?.totalUsers ?? 0;
   const siteVisit = job?.funnelBreakdown?.["site_visit"] ?? 0;
   const utmBreakdown = job?.utmBreakdown ?? {};
   const userTypeBreakdown = job?.userTypeBreakdown ?? {};
   const geoBreakdown = job?.geoBreakdown ?? {};
+
+  const dUtmSum    = dialogCfg.pctTvcf + dialogCfg.pctGoogle + dialogCfg.pctNaver + dialogCfg.pctKakao + dialogCfg.pctOrganic;
+  const dUserSum   = dialogCfg.pctAdvertiser + dialogCfg.pctAgency + dialogCfg.pctProduction;
+  const dLoginSum  = dialogCfg.pctSsoLogin + dialogCfg.pctManualLogin + dialogCfg.pctSignup;
+  const dGenderSum = dialogCfg.pctMale + dialogCfg.pctFemale;
+  const dAgeSum    = dialogCfg.pct20s + dialogCfg.pct30s + dialogCfg.pct40s + dialogCfg.pct50s;
+  const dGeoSum    = dialogCfg.pctSeoul + dialogCfg.pctGyeonggi + dialogCfg.pctBusan + dialogCfg.pctIncheon
+                   + dialogCfg.pctDaegu + dialogCfg.pctDaejeon + dialogCfg.pctGwangju + dialogCfg.pctOtherRegion + dialogCfg.pctAbroad;
 
   return (
     <div className="space-y-6">
@@ -109,8 +195,12 @@ function ActivityTab() {
               }
             </p>
           </div>
-          <Button variant="outline" className="text-xs" onClick={() => navigate("/admin/simulate")}>
-            ▶ 시뮬레이션 실행
+          <Button
+            className="btn-pink text-xs"
+            onClick={() => { setDialogCfg(cfg); setDialogOpen(true); }}
+            disabled={!!isRunning || loading}
+          >
+            {loading ? "시작 중..." : isRunning ? "실행 중..." : "▶ 시뮬레이션 실행"}
           </Button>
         </div>
 
@@ -397,6 +487,172 @@ function ActivityTab() {
             </div>
         </>
       )}
+
+      {/* 시뮬레이션 설정 다이얼로그 */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>시뮬레이션 설정</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-5 py-2">
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">기본 설정</p>
+              <div className="flex flex-wrap gap-5 items-end">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[10px] text-gray-400 leading-tight">가상 사용자 수</span>
+                  <Select value={String(dialogCfg.userCount)} onValueChange={(v) => setD("userCount", Number(v))}>
+                    <SelectTrigger className="w-32 h-8 text-xs border-gray-200"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {[100, 300, 500, 1000, 2000, 3000, 5000, 10000].map((n) => (
+                        <SelectItem key={n} value={String(n)}>{n.toLocaleString()}명</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[10px] text-gray-400 leading-tight">이벤트 기간</span>
+                  <Select value={String(dialogCfg.periodDays)} onValueChange={(v) => setD("periodDays", Number(v))}>
+                    <SelectTrigger className="w-32 h-8 text-xs border-gray-200"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 7, 14, 30, 60, 90].map((d) => (
+                        <SelectItem key={d} value={String(d)}>최근 {d}일</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            <hr className="border-gray-100" />
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-medium text-gray-600">인증 현황</span>
+                <span className="text-[10px] text-gray-400">전체 방문자 기준 % — 나머지는 미로그인</span>
+                {dLoginSum > 100 && <span className="text-[10px] text-red-500">합계 {dLoginSum}% (100% 초과)</span>}
+              </div>
+              <div className="flex flex-wrap gap-4 items-end">
+                <NumInput label="SSO 로그인"  value={dialogCfg.pctSsoLogin}    onChange={(v) => setD("pctSsoLogin", v)} />
+                <NumInput label="수동 로그인"  value={dialogCfg.pctManualLogin} onChange={(v) => setD("pctManualLogin", v)} />
+                <NumInput label="신규 가입"    value={dialogCfg.pctSignup}      onChange={(v) => setD("pctSignup", v)} />
+                <div className="flex flex-col gap-0.5 pb-1">
+                  <span className="text-[10px] text-gray-400">미로그인</span>
+                  <span className="text-sm font-semibold text-gray-700">{Math.max(0, 100 - dLoginSum)}%</span>
+                </div>
+              </div>
+            </div>
+
+            <hr className="border-gray-100" />
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-medium text-gray-600">로그인 유저 내 구성</span>
+                {sumWarn([dialogCfg.pctAdvertiser, dialogCfg.pctAgency, dialogCfg.pctProduction], "유저 타입")}
+              </div>
+              <div className="flex flex-wrap gap-4">
+                <NumInput label="광고주" value={dialogCfg.pctAdvertiser} onChange={(v) => setD("pctAdvertiser", v)} />
+                <NumInput label="대행사" value={dialogCfg.pctAgency}     onChange={(v) => setD("pctAgency", v)} />
+                <NumInput label="제작사" value={dialogCfg.pctProduction} onChange={(v) => setD("pctProduction", v)} />
+                <div className="flex items-end pb-1">
+                  <span className={`text-xs font-semibold ${dUserSum === 100 ? "text-green-600" : "text-amber-500"}`}>합계 {dUserSum}%</span>
+                </div>
+              </div>
+            </div>
+
+            <hr className="border-gray-100" />
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-medium text-gray-600">UTM 유입 비율</span>
+                {sumWarn([dialogCfg.pctTvcf, dialogCfg.pctGoogle, dialogCfg.pctNaver, dialogCfg.pctKakao, dialogCfg.pctOrganic], "UTM")}
+              </div>
+              <div className="flex flex-wrap gap-4">
+                <NumInput label="tvcf.co.kr" value={dialogCfg.pctTvcf}    onChange={(v) => setD("pctTvcf", v)} />
+                <NumInput label="Google"     value={dialogCfg.pctGoogle}   onChange={(v) => setD("pctGoogle", v)} />
+                <NumInput label="Naver"      value={dialogCfg.pctNaver}    onChange={(v) => setD("pctNaver", v)} />
+                <NumInput label="Kakao"      value={dialogCfg.pctKakao}    onChange={(v) => setD("pctKakao", v)} />
+                <NumInput label="Organic"    value={dialogCfg.pctOrganic}  onChange={(v) => setD("pctOrganic", v)} />
+                <div className="flex items-end pb-1">
+                  <span className={`text-xs font-semibold ${dUtmSum === 100 ? "text-green-600" : "text-amber-500"}`}>합계 {dUtmSum}%</span>
+                </div>
+              </div>
+            </div>
+
+            <hr className="border-gray-100" />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-medium text-gray-600">성별</span>
+                  {sumWarn([dialogCfg.pctMale, dialogCfg.pctFemale], "성별")}
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  <NumInput label="남성" value={dialogCfg.pctMale}   onChange={(v) => setD("pctMale", v)} />
+                  <NumInput label="여성" value={dialogCfg.pctFemale} onChange={(v) => setD("pctFemale", v)} />
+                  <div className="flex items-end pb-1">
+                    <span className={`text-xs font-semibold ${dGenderSum === 100 ? "text-green-600" : "text-amber-500"}`}>합계 {dGenderSum}%</span>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-medium text-gray-600">연령대</span>
+                  {sumWarn([dialogCfg.pct20s, dialogCfg.pct30s, dialogCfg.pct40s, dialogCfg.pct50s], "연령대")}
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  <NumInput label="20대" value={dialogCfg.pct20s} onChange={(v) => setD("pct20s", v)} />
+                  <NumInput label="30대" value={dialogCfg.pct30s} onChange={(v) => setD("pct30s", v)} />
+                  <NumInput label="40대" value={dialogCfg.pct40s} onChange={(v) => setD("pct40s", v)} />
+                  <NumInput label="50대" value={dialogCfg.pct50s} onChange={(v) => setD("pct50s", v)} />
+                  <div className="flex items-end pb-1">
+                    <span className={`text-xs font-semibold ${dAgeSum === 100 ? "text-green-600" : "text-amber-500"}`}>합계 {dAgeSum}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr className="border-gray-100" />
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-medium text-gray-600">접속 지역</span>
+                {sumWarn([dialogCfg.pctSeoul, dialogCfg.pctGyeonggi, dialogCfg.pctBusan, dialogCfg.pctIncheon,
+                          dialogCfg.pctDaegu, dialogCfg.pctDaejeon, dialogCfg.pctGwangju, dialogCfg.pctOtherRegion, dialogCfg.pctAbroad], "지역")}
+              </div>
+              <div className="flex flex-wrap gap-4">
+                <NumInput label="서울"    value={dialogCfg.pctSeoul}        onChange={(v) => setD("pctSeoul", v)} />
+                <NumInput label="경기도"  value={dialogCfg.pctGyeonggi}     onChange={(v) => setD("pctGyeonggi", v)} />
+                <NumInput label="부산"    value={dialogCfg.pctBusan}        onChange={(v) => setD("pctBusan", v)} />
+                <NumInput label="인천"    value={dialogCfg.pctIncheon}      onChange={(v) => setD("pctIncheon", v)} />
+                <NumInput label="대구"    value={dialogCfg.pctDaegu}        onChange={(v) => setD("pctDaegu", v)} />
+                <NumInput label="대전"    value={dialogCfg.pctDaejeon}      onChange={(v) => setD("pctDaejeon", v)} />
+                <NumInput label="광주"    value={dialogCfg.pctGwangju}      onChange={(v) => setD("pctGwangju", v)} />
+                <NumInput label="기타지방" value={dialogCfg.pctOtherRegion} onChange={(v) => setD("pctOtherRegion", v)} />
+                <NumInput label="해외"    value={dialogCfg.pctAbroad}       onChange={(v) => setD("pctAbroad", v)} />
+                <div className="flex items-end pb-1">
+                  <span className={`text-xs font-semibold ${dGeoSum === 100 ? "text-green-600" : "text-amber-500"}`}>합계 {dGeoSum}%</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 text-xs text-amber-700">
+              ⚠ 실행 시 실제 GA4 + Mixpanel 계정에 가상 이벤트가 추가됩니다.
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>취소</Button>
+            <Button
+              className="bg-pink-600 hover:bg-pink-700 text-white"
+              onClick={() => startSim(dialogCfg)}
+              disabled={!!isRunning || loading}
+            >
+              {loading ? "시작 중..." : `▶ ${dialogCfg.userCount.toLocaleString()}명 / 최근 ${dialogCfg.periodDays}일 시작`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
