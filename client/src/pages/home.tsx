@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
+import { useLocation } from "wouter";
 import Layout from "@/components/layout/layout";
 import { Button } from "@/components/ui/button";
 import { getSubtitle } from "@/config/global-events";
@@ -20,8 +21,8 @@ const VARIANTS = Object.keys(TITLE_COPY);
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
-  
-  // 전체 사이트 서브타이틀 사용 (홈페이지는 특정 메뉴에 속하지 않음)
+  const [, navigate] = useLocation();
+
   const eventInfo = getSubtitle();
 
   const [titleVariant, setTitleVariant] = useState<string>(() => {
@@ -50,6 +51,7 @@ export default function Home() {
       experiment_id: EXP_ID_TITLE,
       variant: titleVariant,
     });
+    navigate("/create-project/step1");
   };
 
   const categories = [
@@ -169,8 +171,9 @@ export default function Home() {
             {categories.map((category, index) => (
               <button
                 key={index}
-                className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-white hover:shadow-md transition-all"
+                className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-white hover:shadow-md transition-all cursor-pointer"
                 data-testid={`category-${index}`}
+                onClick={() => navigate(`/agency-search?category=${encodeURIComponent(category.name)}`)}
               >
                 <div className="text-3xl">{category.icon}</div>
                 <span className="text-xs sm:text-sm text-gray-700">{category.name}</span>
@@ -188,7 +191,12 @@ export default function Home() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((project, index) => (
-              <div key={index} className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow" data-testid={`project-${index}`}>
+              <div
+                key={index}
+                className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                data-testid={`project-${index}`}
+                onClick={() => navigate("/project-list")}
+              >
                 <h3 className="font-bold text-lg mb-2">{project.title}</h3>
                 <p className="text-gray-600 text-sm mb-3">{project.company}</p>
                 <div className="flex items-center justify-between">
@@ -200,6 +208,15 @@ export default function Home() {
                 <p className="text-xs text-gray-500 mt-3">{project.period}</p>
               </div>
             ))}
+          </div>
+          <div className="text-center mt-8">
+            <Button
+              variant="outline"
+              className="btn-white"
+              onClick={() => navigate("/project-list")}
+            >
+              프로젝트 전체보기
+            </Button>
           </div>
         </div>
       </section>
@@ -231,12 +248,22 @@ export default function Home() {
             {partners.map((partner, index) => (
               <div
                 key={index}
-                className="border border-gray-200 rounded-lg p-4 text-center hover:shadow-md transition-shadow"
+                className="border border-gray-200 rounded-lg p-4 text-center hover:shadow-md hover:border-pink-300 transition-all cursor-pointer"
                 data-testid={`partner-${index}`}
+                onClick={() => navigate("/agency-search")}
               >
                 <span className="text-sm text-gray-700">{partner}</span>
               </div>
             ))}
+          </div>
+          <div className="text-center mt-8">
+            <Button
+              variant="outline"
+              className="btn-white"
+              onClick={() => navigate("/agency-search")}
+            >
+              파트너사 전체보기
+            </Button>
           </div>
         </div>
       </section>
@@ -257,6 +284,14 @@ export default function Home() {
               </div>
             ))}
           </div>
+          <div className="text-center mt-10">
+            <Button
+              className="btn-pink"
+              onClick={() => navigate("/create-project/step1")}
+            >
+              지금 바로 시작하기
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -270,6 +305,12 @@ export default function Home() {
             <p className="text-lg font-medium mb-2">모든 과정 무료!</p>
             <p className="text-gray-600">(프로젝트 등록/ 대행사·제작사추천/ 프로젝트 관리 서비스)</p>
             <p className="text-sm text-gray-500 mt-4">프리미엄 서비스 (전담 전문가 배정 요청 시 20만원 부터~)</p>
+            <Button
+              className="btn-pink mt-6"
+              onClick={() => navigate("/create-project/step1")}
+            >
+              무료로 시작하기
+            </Button>
           </div>
         </div>
       </section>
