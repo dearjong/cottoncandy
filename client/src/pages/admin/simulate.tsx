@@ -24,10 +24,7 @@ interface SimJob {
   batchesSent: number;
   totalBatches: number;
   funnelBreakdown: Record<string, number>;
-  abBreakdown: {
-    control: { viewed: number; ctaClicked: number };
-    variant_question: { viewed: number; ctaClicked: number };
-  };
+  utmBreakdown: Record<string, number>;
   errors: string[];
   startedAt: number;
   completedAt?: number;
@@ -35,13 +32,17 @@ interface SimJob {
 
 const FUNNEL_ORDER = [
   { key: "site_visit",              label: "유입",             color: "bg-blue-400",    aarrr: "Acquisition" },
-  { key: "experiment_viewed",       label: "A/B 실험 노출",    color: "bg-purple-400",  aarrr: "" },
-  { key: "home_cta_clicked",        label: "CTA 클릭",         color: "bg-pink-400",    aarrr: "" },
   { key: "signup_complete",         label: "가입 완료",        color: "bg-orange-400",  aarrr: "Activation" },
   { key: "activation_achieved",     label: "핵심행동 달성",    color: "bg-yellow-400",  aarrr: "" },
+  { key: "portfolio_registered",    label: "포트폴리오 등록",  color: "bg-purple-400",  aarrr: "" },
   { key: "project_submitted",       label: "프로젝트 등록",    color: "bg-green-400",   aarrr: "" },
   { key: "partner_applied",         label: "공고 지원",        color: "bg-teal-400",    aarrr: "" },
   { key: "contract_signed",         label: "계약 체결",        color: "bg-emerald-500", aarrr: "Revenue" },
+  { key: "draft_submitted",         label: "시안 등록",        color: "bg-sky-400",     aarrr: "" },
+  { key: "draft_confirmed",         label: "시안 확정",        color: "bg-sky-500",     aarrr: "" },
+  { key: "deliverable_submitted",   label: "산출물 등록",      color: "bg-violet-400",  aarrr: "" },
+  { key: "deliverable_confirmed",   label: "산출물 확정",      color: "bg-violet-500",  aarrr: "" },
+  { key: "project_completed",       label: "프로젝트 완료",    color: "bg-pink-500",    aarrr: "" },
   { key: "review_submitted",        label: "리뷰 등록",        color: "bg-gray-400",    aarrr: "" },
   { key: "referral_sent",           label: "추천 공유",        color: "bg-indigo-400",  aarrr: "Referral" },
 ];
@@ -92,10 +93,7 @@ export default function AdminSimulatePage() {
   }
 
   const siteVisit = job?.funnelBreakdown["site_visit"] ?? 0;
-  const ctrl = job?.abBreakdown.control ?? { viewed: 0, ctaClicked: 0 };
-  const varq = job?.abBreakdown.variant_question ?? { viewed: 0, ctaClicked: 0 };
-  const ctrlCtr = ctrl.viewed > 0 ? ((ctrl.ctaClicked / ctrl.viewed) * 100).toFixed(1) : "-";
-  const varCtr  = varq.viewed > 0 ? ((varq.ctaClicked / varq.viewed) * 100).toFixed(1) : "-";
+  const utmBreakdown = job?.utmBreakdown ?? {} as Record<string, number>;
 
   return (
     <div className="space-y-6 p-6">
@@ -124,11 +122,11 @@ export default function AdminSimulatePage() {
             </Select>
           </div>
           <div className="flex items-center gap-3 text-xs text-gray-400 border rounded px-3 py-1.5">
-            <span>의뢰사 10% / 파트너사 90%</span>
+            <span>광고주 50% / 대행사 30% / 제작사 20%</span>
             <span>·</span>
             <span>UTM: google/naver/kakao/referral/organic</span>
             <span>·</span>
-            <span>A/B: control vs variant_question (50:50)</span>
+            <span>남 60% / 여 40% · 30~40대 중심</span>
           </div>
           <Button
             className="btn-pink ml-auto"
@@ -183,36 +181,35 @@ export default function AdminSimulatePage() {
         </div>
       )}
 
-      {/* A/B + AARRR 나란히 */}
+      {/* UTM + AARRR 나란히 */}
       {job && job.totalEvents > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* A/B 테스트 */}
+          {/* UTM 유입 현황 */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
-            <p className="font-medium text-gray-800">A/B 테스트 — home_hero_title</p>
-            <div className="grid grid-cols-2 gap-3">
+            <p className="font-medium text-gray-800">UTM 유입 채널</p>
+            <div className="space-y-2">
               {[
-                { key: "control",          label: "control",          desc: "2줄 타이틀 + 프로모", viewed: ctrl.viewed, clicked: ctrl.ctaClicked, ctr: ctrlCtr, highlight: false },
-                { key: "variant_question", label: "variant_question", desc: "1줄 + 서브 텍스트",    viewed: varq.viewed, clicked: varq.ctaClicked, ctr: varCtr,  highlight: true  },
-              ].map((v) => (
-                <div key={v.key} className={`rounded-lg border p-4 space-y-3 ${v.highlight ? "border-pink-200 bg-pink-50/30" : "border-gray-200"}`}>
-                  <div>
-                    <div className="text-sm font-medium text-gray-800">{v.label}</div>
-                    <div className="text-xs text-gray-400 mt-0.5">{v.desc}</div>
-                  </div>
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between"><span className="text-gray-500">노출</span><span>{v.viewed.toLocaleString()}</span></div>
-                    <div className="flex justify-between"><span className="text-gray-500">CTA 클릭</span><span>{v.clicked.toLocaleString()}</span></div>
-                    <div className="flex justify-between border-t pt-1.5">
-                      <span className="font-medium text-gray-700">CTR</span>
-                      <span className={`font-bold text-lg ${v.highlight ? "text-pink-600" : "text-gray-700"}`}>{v.ctr}%</span>
+                { key: "google",   label: "Google",   color: "bg-blue-400",   pct: 35 },
+                { key: "naver",    label: "Naver",    color: "bg-green-500",  pct: 30 },
+                { key: "kakao",    label: "Kakao",    color: "bg-yellow-400", pct: 15 },
+                { key: "referral", label: "Referral", color: "bg-purple-400", pct: 10 },
+                { key: "organic",  label: "Organic",  color: "bg-gray-400",   pct: 10 },
+              ].map(({ key, label, color, pct }) => {
+                const count = utmBreakdown[key] ?? Math.round((job.totalUsers * pct) / 100);
+                const total = job.totalUsers;
+                const actualPct = total > 0 ? Math.round((count / total) * 100) : pct;
+                return (
+                  <div key={key} className="flex items-center gap-3">
+                    <div className="w-16 text-xs text-gray-600 shrink-0">{label}</div>
+                    <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                      <div className={`${color} h-3 rounded-full`} style={{ width: `${actualPct}%` }} />
                     </div>
+                    <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                    <div className="w-8 text-right text-xs text-gray-400">{actualPct}%</div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
-            {isDone && (
-              <p className="text-xs text-gray-400">variant_question(~22%)이 control(~15%)보다 높은 CTR로 설계됨</p>
-            )}
           </div>
 
           {/* AARRR 퍼널 */}
@@ -251,10 +248,10 @@ export default function AdminSimulatePage() {
         <div className="bg-gray-50 rounded-xl border border-dashed border-gray-200 p-6 text-sm text-gray-500 space-y-2">
           <p className="font-medium text-gray-700">시뮬레이션 동작 방식</p>
           <ul className="space-y-1 list-disc list-inside text-xs text-gray-400">
-            <li>가상 사용자별로 AARRR 퍼널을 따라 이벤트 자동 생성</li>
-            <li>Acquisition → Activation(가입+첫행동) → Retention(재방문) → Revenue(계약) → Referral(추천)</li>
-            <li>A/B: control 50% / variant_question 50%, CTR이 각각 ~15% / ~22%로 다르게 설계</li>
-            <li>Mixpanel HTTP API로 배치 전송 (50개씩) — 완료 후 대시보드에서 퍼널·코호트·A/B 분석 가능</li>
+            <li>광고주 50% / 대행사 30% / 제작사 20% · 남 60% / 여 40% · 30~40대 중심</li>
+            <li>UTM: google 35% / naver 30% / kakao 15% / referral 10% / organic 10%</li>
+            <li>유입 → 가입 → 핵심행동 → 포트폴리오/프로젝트 → 계약 → 시안 → 산출물 → 완료 → 리뷰</li>
+            <li>GA4 + Mixpanel 동시 전송 — 완료 후 Mixpanel Funnels / GA4 탐색 분석에서 확인</li>
           </ul>
         </div>
       )}

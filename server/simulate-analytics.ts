@@ -13,10 +13,7 @@ export interface SimJob {
   batchesSent: number;
   totalBatches: number;
   funnelBreakdown: Record<string, number>;
-  abBreakdown: {
-    control: { viewed: number; ctaClicked: number };
-    variant_question: { viewed: number; ctaClicked: number };
-  };
+  utmBreakdown: Record<string, number>;
   errors: string[];
   startedAt: number;
   completedAt?: number;
@@ -28,16 +25,19 @@ export function getSimJob(jobId: string): SimJob | undefined {
   return jobs.get(jobId);
 }
 
-function weightedRandom<T>(items: Array<{ value: T; weight: number }>): T {
+function weightedPick<T>(items: Array<{ value: T; weight: number }>): T {
   const total = items.reduce((s, x) => s + x.weight, 0);
   let r = Math.random() * total;
   for (const x of items) { r -= x.weight; if (r <= 0) return x.value; }
   return items[items.length - 1].value;
 }
 
-function randomFrom<T>(arr: T[]): T {
+function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
+
+function chance(p: number) { return Math.random() < p; }
+function randInt(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
 function tsAgo(seconds: number): number {
   return Math.floor((Date.now() - seconds * 1000) / 1000);
@@ -73,10 +73,7 @@ export async function startSimulation(userCount: number): Promise<string> {
     batchesSent: 0,
     totalBatches: 0,
     funnelBreakdown: {},
-    abBreakdown: {
-      control: { viewed: 0, ctaClicked: 0 },
-      variant_question: { viewed: 0, ctaClicked: 0 },
-    },
+    utmBreakdown: {},
     errors: [],
     startedAt: Date.now(),
   };
@@ -96,7 +93,7 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
 
   const events: MpEvent[] = [];
   const funnel = job.funnelBreakdown;
-  const ab = job.abBreakdown;
+  const utmCount = job.utmBreakdown;
 
   function add(event: string, distinctId: string, ts: number, props: Record<string, unknown>) {
     events.push({
@@ -106,165 +103,209 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
     funnel[event] = (funnel[event] ?? 0) + 1;
   }
 
-  const UTM_SOURCES = [
-    { value: { utm_source: "organic",  utm_medium: "(none)",   utm_campaign: "(organic)",       channel: "organic",  referrer: "https://search.naver.com/",      referrer_domain: "search.naver.com" }, weight: 20 },
-    { value: { utm_source: "google",   utm_medium: "(none)",   utm_campaign: "(organic)",       channel: "organic",  referrer: "https://www.google.com/",         referrer_domain: "google.com"        }, weight: 10 },
-    { value: { utm_source: "google",   utm_medium: "cpc",      utm_campaign: "brand_awareness", channel: "paid",     referrer: "https://www.google.com/",         referrer_domain: "google.com"        }, weight: 20 },
-    { value: { utm_source: "naver",    utm_medium: "cpc",      utm_campaign: "검색광고",          channel: "paid",     referrer: "https://search.naver.com/",      referrer_domain: "search.naver.com" }, weight: 20 },
-    { value: { utm_source: "kakao",    utm_medium: "display",  utm_campaign: "카카오비즈",         channel: "paid",     referrer: "https://www.kakao.com/",          referrer_domain: "kakao.com"         }, weight: 10 },
-    { value: { utm_source: "instagram",utm_medium: "social",   utm_campaign: "브랜드_sns",         channel: "social",   referrer: "https://www.instagram.com/",      referrer_domain: "instagram.com"     }, weight: 10 },
-    { value: { utm_source: "referral", utm_medium: "referral", utm_campaign: "(referral)",      channel: "referral", referrer: "https://blog.naver.com/adreview", referrer_domain: "blog.naver.com"    }, weight: 5  },
-    { value: { utm_source: "(direct)", utm_medium: "(none)",   utm_campaign: "(direct)",        channel: "direct",   referrer: "direct",                          referrer_domain: "direct"            }, weight: 5  },
+  // ── 유저 속성 풀 ──────────────────────────────────────
+  // 광고주 50% / 대행사 30% / 제작사 20%
+  const USER_TYPE_LIST = [
+    { value: "advertiser", weight: 50 },
+    { value: "agency",     weight: 30 },
+    { value: "production", weight: 20 },
+  ];
+  const GENDERS    = [{ value: "male", weight: 60 }, { value: "female", weight: 40 }];
+  const AGE_GROUPS = [{ value: "20s", weight: 10 }, { value: "30s", weight: 35 }, { value: "40s", weight: 35 }, { value: "50s", weight: 20 }];
+
+  // UTM: google 35% / naver 30% / kakao 15% / referral 10% / organic 10%
+  const UTM_LIST = [
+    { value: { utm_source: "google",   utm_medium: "cpc",      channel: "paid" },     weight: 35 },
+    { value: { utm_source: "naver",    utm_medium: "cpc",      channel: "paid" },     weight: 30 },
+    { value: { utm_source: "kakao",    utm_medium: "display",  channel: "paid" },     weight: 15 },
+    { value: { utm_source: "referral", utm_medium: "referral", channel: "referral" }, weight: 10 },
+    { value: { utm_source: "organic",  utm_medium: "organic",  channel: "organic" },  weight: 10 },
   ];
 
-  const PARTNERS = ["솜사탕애드", "마케팅에이전션", "크리에이티브랩", "광고제작소", "미디어웍스"];
-  const BUDGET_RANGES = ["500-1000만", "1000-3000만", "3000-5000만", "5000만-1억", "1억 이상"];
+  const GEO_LIST = [
+    { value: { geo_region: "서울" },   weight: 35 },
+    { value: { geo_region: "경기도" }, weight: 20 },
+    { value: { geo_region: "부산" },   weight: 8  },
+    { value: { geo_region: "인천" },   weight: 5  },
+    { value: { geo_region: "대구" },   weight: 4  },
+    { value: { geo_region: "대전" },   weight: 3  },
+    { value: { geo_region: "광주" },   weight: 3  },
+    { value: { geo_region: "기타지방"},weight: 17 },
+    { value: { geo_region: "해외" },   weight: 5  },
+  ];
+
+  const CATEGORIES   = ["영상광고","브랜드디자인","사진촬영","SNS마케팅","PPT디자인","웹개발"];
+  const PARTNERS     = ["솜사탕애드","마케팅에이전시","크리에이티브랩","광고제작소","미디어웍스"];
+  const BUDGET_RANGES = ["500-1000만","1000-3000만","3000-5000만","5000만-1억","1억 이상"];
 
   for (let i = 1; i <= userCount; i++) {
-    const uid = `sim_user_${String(i).padStart(4, "0")}`;
-    const userType = i <= Math.floor(userCount * 0.1) ? "advertiser" : "partner";
-    const utm = weightedRandom(UTM_SOURCES);
-    const joinSecsAgo = Math.floor(Math.random() * 30 * 86400);
-    const baseTs = tsAgo(joinSecsAgo);
-    const variant: "control" | "variant_question" = i % 2 === 0 ? "control" : "variant_question";
+    const uid      = `sim_user_${String(i).padStart(4, "0")}`;
+    const userType = weightedPick(USER_TYPE_LIST);
+    const gender   = weightedPick(GENDERS);
+    const ageGroup = weightedPick(AGE_GROUPS);
+    const utm      = weightedPick(UTM_LIST);
+    const geo      = weightedPick(GEO_LIST);
+    const isPartner = userType === "agency" || userType === "production";
 
-    const common = {
+    // UTM 집계
+    utmCount[utm.utm_source] = (utmCount[utm.utm_source] ?? 0) + 1;
+
+    const joinSecsAgo = Math.floor(Math.random() * 69 * 3600); // 최근 69시간
+    const baseTs = tsAgo(joinSecsAgo);
+
+    const common: Record<string, unknown> = {
       user_type: userType,
+      gender,
+      age_group: ageGroup,
       ...utm,
-      exp_home_hero_title: variant,
-      active_experiments: "home_hero_title",
+      ...geo,
     };
 
-    // Acquisition
-    add("site_visit", uid, baseTs, { path: "/", ...common });
+    // ── Acquisition ──────────────────────────────────
+    add("site_visit",  uid, baseTs,     { path: "/", ...common });
+    add("first_visit", uid, baseTs + 1, { path: "/", ...common });
 
-    // A/B 실험 노출 (80%)
-    if (Math.random() < 0.8) {
-      add("experiment_viewed", uid, baseTs + 2, {
-        experiment_id: "home_hero_title",
-        variant,
-        ...common,
-      });
-      ab[variant].viewed += 1;
+    // ── 회원가입 (40%) ────────────────────────────────
+    if (chance(0.40)) {
+      add("signup_started", uid, baseTs + 30, { method: "email", ...common });
+      add("signup_funnel",  uid, baseTs + 35, { step: 1, step_name: "account",  path: "/signup",              ...common });
 
-      // CTA 클릭: control 15%, variant_question 22%
-      const ctaRate = variant === "variant_question" ? 0.22 : 0.15;
-      if (Math.random() < ctaRate) {
-        add("home_cta_clicked", uid, baseTs + 5, {
-          experiment_id: "home_hero_title",
-          variant,
-          ...common,
-        });
-        ab[variant].ctaClicked += 1;
+      if (chance(0.88)) {
+        add("signup_funnel", uid, baseTs + 120, { step: 2, step_name: "email", path: "/signup/email", ...common });
+
+        if (chance(0.82)) {
+          add("signup_funnel", uid, baseTs + 200, { step: 3, step_name: "phone", path: "/signup/phone", ...common });
+          add("signup_complete", uid, baseTs + 250, { ...common });
+
+          if (chance(0.78)) {
+            const accountType = chance(0.68) ? "personal" : "corporate";
+            add("signup_funnel", uid, baseTs + 300, { step: 4, step_name: "account_type", path: "/signup/account-type", ...common });
+
+            if (accountType === "corporate" && chance(0.62)) {
+              add("signup_funnel", uid, baseTs + 400, { step: 5, step_name: "job_info", path: "/signup/job-info", ...common });
+            }
+          }
+
+          if (chance(0.38)) {
+            add("activation_achieved", uid, baseTs + 500, { trigger_event: "signup_complete", ...common });
+          }
+        }
       }
     }
 
-    // 회원가입 (40%)
-    if (Math.random() < 0.4) {
-      add("signup_funnel", uid, baseTs + 30, { step: 1, step_name: "account", path: "/signup", ...common });
-      if (Math.random() < 0.85) {
-        add("signup_funnel", uid, baseTs + 120, { step: 2, step_name: "phone", path: "/signup/phone", ...common });
-        if (Math.random() < 0.9) {
-          add("signup_funnel", uid, baseTs + 200, { step: 3, step_name: "email", path: "/signup/email", ...common });
-          add("signup_complete", uid, baseTs + 250, { ...common });
+    // ── 프로젝트 등록 (광고주 12%) ────────────────────
+    if (userType === "advertiser" && chance(0.12)) {
+      const projTs = baseTs + 600;
+      const category  = pick(CATEGORIES);
+      const budget    = pick(BUDGET_RANGES);
+      const projectId = `proj_${randInt(100, 999)}`;
+      const pType     = pick(["공고", "1:1"] as const);
 
-          // Retention — 복수 세션 (55%)
-          if (Math.random() < 0.55) {
-            for (const dayOffset of [1, 3, 7, 14]) {
-              if (Math.random() < 0.55) {
-                add("page_view", uid, baseTs + dayOffset * 86400, {
-                  page_path: "/service/project-list",
-                  ...common,
-                });
-              }
-            }
-          }
+      add("step1_cta_click", uid, projTs, { selected_option: pType === "공고" ? "public" : "private", ...common });
 
-          // Activation
-          if (userType === "advertiser" && Math.random() < 0.35) {
-            const wTs = baseTs + 600;
-            for (let step = 1; step <= 16; step++) {
-              if (Math.random() < 0.85) {
-                add(`step_${step}_wizard`, uid, wTs + step * 60, { wizard_step: step, ...common });
-              }
-            }
-            const pType = randomFrom(["공고", "1:1"] as const);
-            const budget = randomFrom(BUDGET_RANGES);
-            add("project_submitted", uid, wTs + 1200, {
-              project_type: pType, partner_type: "advertiser",
-              budget_range: budget, is_first_time: true, ...common,
-            });
-            add("activation_achieved", uid, wTs + 1201, {
-              trigger_event: "project_submitted", ...common,
-            });
+      if (chance(0.68)) {
+        add("project_submitted", uid, projTs + 1200, {
+          project_id: projectId, project_type: pType, category, budget_range: budget,
+          is_first_time: true, ...common,
+        });
+        add("activation_achieved", uid, projTs + 1201, { trigger_event: "project_submitted", ...common });
 
-            // Revenue (30%)
-            if (Math.random() < 0.3) {
-              add("participation_final_selected", uid, wTs + 5 * 86400, {
-                company_id: Math.floor(Math.random() * 100) + 1,
-                company_name: randomFrom(PARTNERS),
-                selected: true, ...common,
-              });
-              const cVal = (Math.floor(Math.random() * 25) + 5) * 10_000_000;
-              add("contract_signed", uid, wTs + 7 * 86400, {
-                partner_name: randomFrom(PARTNERS),
-                budget_range: budget,
-                contract_value_krw: cVal,
-                value: cVal,
-                currency: "KRW", ...common,
-              });
+        // Revenue
+        if (chance(0.30)) {
+          add("contract_signed", uid, projTs + 7 * 86400, {
+            project_id: projectId,
+            partner_name: pick(PARTNERS),
+            budget_range: budget,
+            contract_value_krw: (randInt(5, 30)) * 10_000_000,
+            ...common,
+          });
 
-              // 리뷰 (70%)
-              if (Math.random() < 0.7) {
-                add("review_submitted", uid, wTs + 30 * 86400, {
-                  project_id: `PN-SIM-${i}`,
-                  has_client_rating: true,
-                  has_partner_rating: Math.random() < 0.8,
-                  has_text: Math.random() < 0.6, ...common,
-                });
-              }
-            }
-
-          } else if (userType === "partner" && Math.random() < 0.45) {
-            const pid = `PN-2024-${String(Math.floor(Math.random() * 50) + 1).padStart(4, "0")}`;
-            add("project_viewed", uid, baseTs + 400, {
-              project_id: pid, project_type: "공고", user_type: "partner", ...common,
-            });
-            add("partner_applied", uid, baseTs + 500, {
-              project_id: pid, project_type: "공고",
-              partner_type: "제작사", is_first_time: true, ...common,
-            });
-            add("activation_achieved", uid, baseTs + 501, {
-              trigger_event: "partner_applied", ...common,
-            });
-
-            // 제안서 (40%)
-            if (Math.random() < 0.4) {
-              add("proposal_submitted", uid, baseTs + 3 * 86400, {
-                project_title: `광고 프로젝트 ${Math.floor(Math.random() * 100)}`,
-                has_strategic_file: Math.random() < 0.7,
-                has_creative_file: Math.random() < 0.8,
-                concept_count: Math.floor(Math.random() * 3) + 1, ...common,
-              });
-            }
-          }
-
-          // Referral (8%)
-          if (Math.random() < 0.08) {
-            add("referral_sent", uid, baseTs + 3 * 86400, {
-              method: Math.random() < 0.7 ? "copy" : "share",
-              referrer_id: uid, ...common,
+          if (chance(0.70)) {
+            add("review_submitted", uid, projTs + 30 * 86400, {
+              project_id: projectId, has_client_rating: true,
+              has_partner_rating: chance(0.8), has_text: chance(0.6), ...common,
             });
           }
         }
       }
+    }
+
+    // ── 파트너 지원 흐름 ──────────────────────────────
+    if (isPartner && chance(0.22)) {
+      const projectId  = `proj_${randInt(100, 999)}`;
+      const partnerTs  = baseTs + 400;
+      const partnerType = userType === "agency" ? "대행사" : "제작사";
+
+      add("partner_applied", uid, partnerTs, {
+        project_id: projectId, project_type: pick(["공고","1:1"]),
+        partner_type: partnerType, is_first_time: true, ...common,
+      });
+      add("activation_achieved", uid, partnerTs + 1, { trigger_event: "partner_applied", ...common });
+
+      // 포트폴리오 등록 (55%)
+      if (chance(0.55)) {
+        add("portfolio_registered", uid, partnerTs + 100, {
+          portfolio_id: `pf_${randInt(1000, 9999)}`,
+          category: pick(CATEGORIES), partner_type: partnerType, ...common,
+        });
+      }
+
+      // 계약 → 시안 → 산출물 → 완료 (40%)
+      if (chance(0.40)) {
+        add("contract_signed", uid, partnerTs + 7 * 86400, {
+          project_id: projectId, partner_type: partnerType, ...common,
+        });
+
+        add("draft_submitted", uid, partnerTs + 14 * 86400, {
+          project_id: projectId, draft_round: 1,
+          category: pick(CATEGORIES), ...common,
+        });
+
+        if (chance(0.70)) {
+          add("draft_confirmed", uid, partnerTs + 16 * 86400, {
+            project_id: projectId, draft_round: 1, ...common,
+          });
+
+          if (chance(0.80)) {
+            add("deliverable_submitted", uid, partnerTs + 25 * 86400, {
+              project_id: projectId, category: pick(CATEGORIES), ...common,
+            });
+
+            if (chance(0.85)) {
+              add("deliverable_confirmed", uid, partnerTs + 27 * 86400, {
+                project_id: projectId, ...common,
+              });
+              add("project_completed", uid, partnerTs + 28 * 86400, {
+                project_id: projectId, partner_type: partnerType,
+                category: pick(CATEGORIES), ...common,
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // 포트폴리오만 등록 (파트너 신규 20%)
+    if (isPartner && chance(0.20)) {
+      add("portfolio_registered", uid, baseTs + 200, {
+        portfolio_id: `pf_${randInt(1000, 9999)}`,
+        category: pick(CATEGORIES),
+        partner_type: userType === "agency" ? "대행사" : "제작사", ...common,
+      });
+    }
+
+    // ── Referral (8%) ─────────────────────────────────
+    if (chance(0.08)) {
+      add("referral_sent", uid, baseTs + 3 * 86400, {
+        method: chance(0.7) ? "copy" : "share", referrer_id: uid, ...common,
+      });
     }
   }
 
   job.totalEvents = events.length;
   job.totalBatches = Math.ceil(events.length / BATCH_SIZE);
   job.status = "sending";
-  job.message = `Mixpanel 전송 중...`;
+  job.message = "Mixpanel 전송 중...";
 
   for (let i = 0; i < events.length; i += BATCH_SIZE) {
     const batch = events.slice(i, i + BATCH_SIZE);

@@ -152,8 +152,17 @@ const USER_TYPES = [
   "agency","agency","agency",
   "production","production",
 ];
-const GENDERS   = ["male","male","male","female","female"]; // 남 60% / 여 40%
+const GENDERS    = ["male","male","male","female","female"]; // 남 60% / 여 40%
 const AGE_GROUPS = ["20s","30s","30s","30s","40s","40s","50s"]; // 30-40대 중심
+
+// UTM 유입 채널 (가중치 배열)
+const UTM_SOURCES = [
+  ...Array(7).fill({ utm_source: "google",   utm_medium: "cpc",      channel: "paid" }),    // 35%
+  ...Array(6).fill({ utm_source: "naver",    utm_medium: "cpc",      channel: "paid" }),    // 30%
+  ...Array(3).fill({ utm_source: "kakao",    utm_medium: "social",   channel: "social" }),  // 15%
+  ...Array(2).fill({ utm_source: "referral", utm_medium: "referral", channel: "referral" }),// 10%
+  ...Array(2).fill({ utm_source: "organic",  utm_medium: "organic",  channel: "organic" }), // 10%
+];
 const CATEGORIES = ["영상광고","브랜드디자인","사진촬영","SNS마케팅","PPT디자인","웹개발"];
 const SEARCH_TERMS = ["영상","브랜드","광고","디자인","사진","마케팅","촬영"];
 
@@ -164,11 +173,12 @@ async function simulateUser(i) {
   const gender   = pick(GENDERS);
   const ageGroup = pick(AGE_GROUPS);
   const location = pick(LOCATIONS);
+  const utmSource  = pick(UTM_SOURCES);
   const sessionStart = genTimestamp();
   const sessionId = genSessionId(); // 유저당 1개 고정 — GA4 세션 묶음용
   let t = sessionStart;
   const next = (minMs = 2000, maxMs = 25000) => { t += randInt(minMs, maxMs); return t; };
-  const base = { user_type: userType, gender, age_group: ageGroup, session_id: sessionId, ...location };
+  const base = { user_type: userType, gender, age_group: ageGroup, session_id: sessionId, ...utmSource, ...location };
 
   // 1-a. 최초 방문 — GA4 코호트 집단 기준 이벤트 (100%)
   await emit(clientId, userId, "first_visit", { page_location: "/", page_title: "홈", ...base }, t);
