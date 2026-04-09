@@ -117,21 +117,25 @@ async function simulateUser(i) {
     await emit(clientId, userId, "category_viewed", { category: pick(CATEGORIES), ...base }, next());
   }
 
-  // 5. 회원가입 플로우 (22%)
+  // 5. 회원가입 플로우 (22%) — 실제 앱 이벤트명 사용
   if (chance(0.22)) {
+    // step 1: 기본정보 입력 페이지 진입
     await emit(clientId, userId, "signup_started", { method: "email", ...base }, next());
+    await emit(clientId, userId, "signup_funnel", { step: 1, step_name: "account", path: "/signup", ...base }, next(1000, 5000));
 
     if (chance(0.88)) { // 이메일 인증 (88%)
-      await emit(clientId, userId, "signup_email_verified", base, next());
+      await emit(clientId, userId, "signup_funnel", { step: 2, step_name: "email", path: "/signup/email", ...base }, next());
 
       if (chance(0.82)) { // 전화 인증 (82%)
-        await emit(clientId, userId, "signup_phone_verified", base, next());
+        await emit(clientId, userId, "signup_funnel", { step: 3, step_name: "phone", path: "/signup/phone", ...base }, next());
 
-        if (chance(0.78)) { // 가입 완료 (78%)
+        if (chance(0.78)) { // 계정 유형 선택 (78%)
           const accountType = chance(0.68) ? "personal" : "corporate";
-          await emit(clientId, userId, "signup_complete", { account_type: accountType, ...base }, next());
+          await emit(clientId, userId, "signup_funnel", { step: 4, step_name: "account_type", path: "/signup/account-type", ...base }, next());
+          await emit(clientId, userId, "signup_complete", { account_type: accountType, ...base }, next(1000, 3000));
 
           if (accountType === "corporate" && chance(0.62)) { // 기업정보 등록 (62% of corporate)
+            await emit(clientId, userId, "signup_funnel", { step: 5, step_name: "job_info", path: "/signup/job-info", ...base }, next());
             const companySizes = ["solo","small","medium","large"];
             await emit(clientId, userId, "job_info_submitted", {
               company_size: pick(companySizes),

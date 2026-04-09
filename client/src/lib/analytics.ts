@@ -928,12 +928,20 @@ export function trackFunnelRoute(path: string) {
     trackSignupFunnelStep(1, "account", path);
     return;
   }
-  if (path === "/signup/phone") {
-    trackSignupFunnelStep(2, "phone", path);
+  if (path === "/signup/email") {
+    trackSignupFunnelStep(2, "email", path);
     return;
   }
-  if (path === "/signup/email") {
-    trackSignupFunnelStep(3, "email", path);
+  if (path === "/signup/phone") {
+    trackSignupFunnelStep(3, "phone", path);
+    return;
+  }
+  if (path === "/signup/account-type") {
+    publishAnalytics("signup_funnel", { step: 4, step_name: "account_type", path });
+    return;
+  }
+  if (path === "/signup/job-info") {
+    publishAnalytics("signup_funnel", { step: 5, step_name: "job_info", path });
     return;
   }
 
