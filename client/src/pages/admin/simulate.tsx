@@ -189,11 +189,11 @@ export default function AdminSimulatePage() {
             <p className="font-medium text-gray-800">UTM 유입 채널</p>
             <div className="space-y-2">
               {[
-                { key: "google",   label: "Google",   color: "bg-blue-400",   pct: 35 },
-                { key: "naver",    label: "Naver",    color: "bg-green-500",  pct: 30 },
-                { key: "kakao",    label: "Kakao",    color: "bg-yellow-400", pct: 15 },
-                { key: "referral", label: "Referral", color: "bg-purple-400", pct: 10 },
-                { key: "organic",  label: "Organic",  color: "bg-gray-400",   pct: 10 },
+                { key: "tvcf",    label: "tvcf.co.kr", color: "bg-pink-500",   pct: 85 },
+                { key: "google",  label: "Google",     color: "bg-blue-400",   pct: 5  },
+                { key: "naver",   label: "Naver",      color: "bg-green-500",  pct: 5  },
+                { key: "kakao",   label: "Kakao",      color: "bg-yellow-400", pct: 3  },
+                { key: "organic", label: "Organic",    color: "bg-gray-400",   pct: 2  },
               ].map(({ key, label, color, pct }) => {
                 const count = utmBreakdown[key] ?? Math.round((job.totalUsers * pct) / 100);
                 const total = job.totalUsers;
