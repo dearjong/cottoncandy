@@ -36,7 +36,7 @@ export default function Signup() {
     localStorage.setItem('signupEmail', email);
     localStorage.setItem('signupCustomerType', customerType);
     // 다음 단계로 이동 (휴대폰 인증)
-    setLocation('/signup/phone');
+    setLocation('/signup/email');
   };
 
   return (

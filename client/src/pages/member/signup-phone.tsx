@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
+import { trackSignupComplete, identifyUser, getReferralCode, trackReferralSignedUp } from "@/lib/analytics";
 import Layout from "@/components/layout/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,8 +14,17 @@ export default function SignupPhone() {
 
   const handleVerify = () => {
     console.log('휴대폰 인증:', `${phone1}-${phone2}-${phone3}`);
-    // 다음 단계로 이동 (이메일 인증)
-    setLocation('/signup/email');
+    const refCode = getReferralCode();
+    if (refCode) {
+      trackReferralSignedUp({ referrer_code: refCode });
+    }
+    trackSignupComplete();
+    identifyUser({ userId: "user-이꽃별", userName: "이꽃별", userType: "advertiser", email: "kkotbyul@example.com" });
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('userName', '이꽃별');
+    localStorage.setItem('userType', '의뢰');
+    // 휴대폰 인증 완료 → 계정 유형 선택으로 이동
+    setLocation('/signup/account-type');
   };
 
   return (

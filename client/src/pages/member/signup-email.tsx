@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { trackSignupComplete, identifyUser, getReferralCode, trackReferralSignedUp } from "@/lib/analytics";
 import Layout from "@/components/layout/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,17 +65,8 @@ export default function SignupEmail() {
       return;
     }
     
-    const refCode = getReferralCode();
-    if (refCode) {
-      trackReferralSignedUp({ referrer_code: refCode });
-    }
-    trackSignupComplete();
-    identifyUser({ userId: "user-이꽃별", userName: "이꽃별", userType: "advertiser", email: "kkotbyul@example.com" });
-    // 인증 완료 후 로그인 상태로 전환하고 계정 유형 선택으로 이동
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userName', '이꽃별');
-    localStorage.setItem('userType', '의뢰');
-    setLocation('/signup/account-type');
+    // 이메일 인증 완료 → 휴대폰 인증으로 이동
+    setLocation('/signup/phone');
   };
 
   return (
