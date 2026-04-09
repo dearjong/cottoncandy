@@ -312,20 +312,9 @@ export default function Home() {
       {/* FAQ */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4" data-testid="faq-title">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-12" data-testid="faq-title">
             자주 묻는 질문
           </h2>
-          <div className="flex justify-end mb-6">
-            <button
-              className="text-sm text-gray-500 hover:text-pink-600 transition-colors"
-              onClick={() => {
-                publishAnalytics("home_faq_more_click", {});
-                navigate("/guide/faq");
-              }}
-            >
-              전체보기
-            </button>
-          </div>
           <div className="space-y-4">
             {faqs.map((faq, index) => (
               <div key={index} className="bg-white rounded-lg overflow-hidden" data-testid={`faq-${index}`}>
@@ -346,6 +335,17 @@ export default function Home() {
                 )}
               </div>
             ))}
+          </div>
+          <div className="flex justify-end mt-6">
+            <button
+              className="text-sm text-gray-500 hover:text-pink-600 transition-colors"
+              onClick={() => {
+                publishAnalytics("home_faq_more_click", {});
+                navigate("/guide/faq");
+              }}
+            >
+              전체보기
+            </button>
           </div>
         </div>
       </section>
