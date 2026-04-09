@@ -115,18 +115,105 @@ function describeEvent(name: string, props: Record<string, unknown>): { label: s
     case "member_role_changed":
       return { label: "권한 변경", detail: `${p.member_name ?? p.member_id ?? ""} · ${p.prev_role ?? ""} → ${p.new_role ?? ""}`, badge: "구성원" };
 
+    // ── 로그인
+    case "user_login":
+      return { label: "로그인", detail: `${p.method ?? ""} · ${p.user_type ?? ""}`, badge: "로그인" };
+
+    // ── 가입 퍼널
+    case "signup_funnel":
+      return { label: `가입 퍼널 ${p.step}단계`, detail: `${p.step_name ?? ""} · ${p.path ?? ""}`, badge: "가입" };
+
+    // ── 탐색 / 참여신청
+    case "project_viewed":
+      return { label: "공고 상세 조회", detail: `${p.project_id ?? ""} · ${p.project_type ?? ""}`, badge: "탐색" };
+    case "partner_searched":
+      return { label: "파트너 검색", detail: `${p.query ?? ""} · 결과 ${p.result_count ?? 0}건`, badge: "탐색" };
+    case "agency_favorited":
+      return { label: `대행사 즐겨찾기 ${p.is_favorited ? "추가" : "해제"}`, detail: `${p.agency_name ?? p.agency_id ?? ""}`, badge: "탐색" };
+
+    // ── 참여 플로우
+    case "participation_invite_toggled":
+      return { label: `초대 ${p.is_invited ? "ON" : "OFF"}`, detail: `${p.partner_name ?? p.partner_id ?? ""}`, badge: "참여" };
+    case "participation_ot_confirmed":
+      return { label: "OT참석 확정", detail: `${p.partner_name ?? p.partner_id ?? ""}`, badge: "참여" };
+    case "participation_ot_completed":
+      return { label: "OT참석 완료", detail: `${p.partner_name ?? p.partner_id ?? ""}`, badge: "참여" };
+    case "participation_pt_confirmed":
+      return { label: "PT참석 확정", detail: `${p.partner_name ?? p.partner_id ?? ""}`, badge: "참여" };
+    case "participation_pt_completed":
+      return { label: "PT 완료", detail: `${p.partner_name ?? p.partner_id ?? ""}`, badge: "참여" };
+    case "participation_final_selected":
+      return { label: "최종선정 ✓", detail: `${p.partner_name ?? p.partner_id ?? ""}`, badge: "참여" };
+
+    // ── 전환
     case "activation_achieved":
-      return { label: "핵심행동 달성", detail: `${p.action ?? ""}`, badge: "전환" };
+      return { label: "핵심행동 달성 🎯", detail: `트리거: ${p.trigger_event ?? p.action ?? ""} · ${p.user_type ?? ""}`, badge: "전환" };
     case "project_submitted":
-      return { label: "프로젝트 등록", detail: "", badge: "전환" };
+      return { label: "프로젝트 등록", detail: `첫등록: ${p.is_first_time ? "Y" : "N"}`, badge: "전환" };
     case "partner_applied":
-      return { label: "공고 지원", detail: "", badge: "전환" };
+      return { label: "공고 지원", detail: `${p.project_id ?? ""} · 첫지원: ${p.is_first_time ? "Y" : "N"}`, badge: "전환" };
+    case "proposal_submitted":
+      return { label: "제안서 제출", detail: `${p.project_id ?? ""}`, badge: "전환" };
+    case "partner_selected":
+      return { label: "파트너 선정", detail: `${p.partner_name ?? ""}`, badge: "전환" };
+
+    // ── 계약
+    case "contract_saved":
+      return { label: "계약 임시저장", detail: `${p.partner_name ?? ""}`, badge: "계약" };
+    case "contract_request_sent":
+      return { label: "계약 협의 요청", detail: `${p.partner_name ?? ""} · ${p.request_type ?? ""}`, badge: "계약" };
     case "contract_signed":
-      return { label: "계약 체결", detail: "", badge: "수익" };
+      return { label: "계약 체결 💰", detail: `${p.partner_name ?? ""}${p.contract_value_krw ? ` · ${Number(p.contract_value_krw).toLocaleString()}원` : ""}`, badge: "계약" };
+    case "contract_cancelled":
+      return { label: "계약 취소", detail: `${p.partner_name ?? ""}`, badge: "계약" };
+
+    // ── 리뷰
+    case "review_saved":
+      return { label: "리뷰 임시저장", detail: `${p.partner_name ?? ""}`, badge: "리텐션" };
     case "review_submitted":
-      return { label: "리뷰 등록", detail: "", badge: "리텐션" };
+      return { label: "리뷰 등록 ✓", detail: `${p.partner_name ?? ""} · 별점 ${p.rating ?? "-"}`, badge: "리텐션" };
+    case "review_edited":
+      return { label: "리뷰 수정", detail: `${p.partner_name ?? ""}`, badge: "리텐션" };
+    case "review_completed":
+      return { label: "리뷰 완료", detail: `${p.partner_name ?? ""}`, badge: "리텐션" };
+
+    // ── 컨설팅
+    case "consulting_inquiry_submitted":
+      return { label: "컨설팅 문의 접수", detail: `${p.company_name ?? ""} · ${p.inquiry_type ?? ""}`, badge: "컨설팅" };
+    case "consulting_message_sent":
+      return { label: "컨설팅 메시지 발송", detail: `${p.channel ?? ""} · ${p.case_id ?? ""}`, badge: "컨설팅" };
+    case "consulting_responded":
+      return { label: "컨설팅 케이스 종결", detail: `${p.case_id ?? ""}`, badge: "컨설팅" };
+    case "consulting_project_linked":
+      return { label: "컨설팅 프로젝트 연결", detail: `${p.project_type ?? ""} · ${p.case_id ?? ""}`, badge: "컨설팅" };
+
+    // ── 관리자 회원 관리
+    case "admin_member_warned":
+      return { label: "회원 경고", detail: `id: ${p.member_id ?? ""}`, badge: "관리자" };
+    case "admin_member_suspended":
+      return { label: "회원 활동정지", detail: `id: ${p.member_id ?? ""}`, badge: "관리자" };
+    case "admin_member_resumed":
+      return { label: "회원 정지해제", detail: `id: ${p.member_id ?? ""}`, badge: "관리자" };
+    case "admin_member_banned":
+      return { label: "회원 강제탈퇴", detail: `id: ${p.member_id ?? ""}`, badge: "관리자" };
+
+    // ── 내정보
+    case "mypage_viewed":
+      return { label: "내정보 페이지 조회", detail: `${p.page ?? ""}`, badge: "내정보" };
+    case "mypage_profile_saved":
+      return { label: "프로필 저장", detail: "", badge: "내정보" };
+    case "mypage_withdraw_attempted":
+      return { label: "탈퇴 시도", detail: `사유 ${p.reason_count ?? 0}개 선택`, badge: "내정보" };
+    case "mypage_inquiry_submitted":
+      return { label: "1:1 문의 제출", detail: `탭: ${p.tab ?? ""} · 첨부: ${p.has_attachment ? "Y" : "N"}`, badge: "내정보" };
+    case "mypage_notification_settings_saved":
+      return { label: "알림 설정 저장", detail: `앱 ${p.app_on_count ?? 0}개 ON`, badge: "내정보" };
+
+    // ── 추천
     case "referral_sent":
-      return { label: "추천 공유", detail: "", badge: "추천" };
+      return { label: "추천 링크 공유", detail: `${p.method ?? ""}`, badge: "추천" };
+    case "referral_signed_up":
+      return { label: "추천 가입 완료", detail: `코드: ${p.referrer_code ?? ""}`, badge: "추천" };
 
     default:
       return { label: name, detail: JSON.stringify(props).slice(0, 80), badge: "기타" };
@@ -140,28 +227,43 @@ const BADGE_COLORS: Record<string, string> = {
   "UX": "bg-amber-100 text-amber-700",
   "실험": "bg-purple-100 text-purple-700",
   "유입": "bg-gray-100 text-gray-700",
+  "로그인": "bg-slate-100 text-slate-700",
   "가입": "bg-sky-100 text-sky-700",
   "기업": "bg-violet-100 text-violet-700",
   "구성원": "bg-rose-100 text-rose-700",
+  "탐색": "bg-cyan-100 text-cyan-700",
+  "참여": "bg-lime-100 text-lime-700",
   "전환": "bg-orange-100 text-orange-700",
-  "수익": "bg-green-100 text-green-700",
+  "계약": "bg-green-100 text-green-700",
   "리텐션": "bg-teal-100 text-teal-700",
-  "추천": "bg-indigo-100 text-indigo-700",
+  "컨설팅": "bg-fuchsia-100 text-fuchsia-700",
+  "관리자": "bg-red-100 text-red-700",
+  "내정보": "bg-indigo-100 text-indigo-700",
+  "추천": "bg-yellow-100 text-yellow-700",
   "기타": "bg-gray-100 text-gray-500",
 };
 
 const FILTER_OPTIONS = [
   { value: "all", label: "전체" },
-  { value: "홈", label: "홈 클릭" },
-  { value: "헤더", label: "GNB / 헤더" },
-  { value: "채팅", label: "AI 채팅" },
-  { value: "UX", label: "스크롤 / 체류 / 맨위로" },
-  { value: "실험", label: "A/B 실험" },
   { value: "유입", label: "유입" },
+  { value: "로그인", label: "로그인" },
   { value: "가입", label: "가입 퍼널" },
   { value: "기업", label: "기업 인증" },
   { value: "구성원", label: "구성원 관리" },
+  { value: "탐색", label: "탐색" },
+  { value: "참여", label: "참여 플로우" },
   { value: "전환", label: "전환" },
+  { value: "계약", label: "계약" },
+  { value: "리텐션", label: "리뷰" },
+  { value: "컨설팅", label: "컨설팅" },
+  { value: "관리자", label: "관리자 조치" },
+  { value: "내정보", label: "내정보" },
+  { value: "추천", label: "추천" },
+  { value: "홈", label: "홈 클릭" },
+  { value: "헤더", label: "GNB / 헤더" },
+  { value: "채팅", label: "AI 채팅" },
+  { value: "UX", label: "스크롤 / 체류" },
+  { value: "실험", label: "A/B 실험" },
 ];
 
 const USER_TYPE_OPTIONS = [
