@@ -143,24 +143,30 @@ async function sendGa4UserBatch(entry: Ga4UserEvents): Promise<string | null> {
 
 export interface SimConfig {
   userCount: number;
-  pctAdvertiser: number;
-  pctAgency: number;
-  pctProduction: number;
-  pctTvcf: number;
-  pctGoogle: number;
-  pctNaver: number;
-  pctKakao: number;
-  pctOrganic: number;
-  tvcfSsoRate: number;
-  tvcfManualLoginRate: number;
-  signupRate: number;
+  // 로그인 유저 내 구성 (합계 100%)
+  pctAdvertiser: number; pctAgency: number; pctProduction: number;
+  // UTM 유입 (합계 100%)
+  pctTvcf: number; pctGoogle: number; pctNaver: number; pctKakao: number; pctOrganic: number;
+  // 인증 방식 (전체 유저 기준 %, 합계 ≤ 100 → 나머지는 미로그인)
+  pctSsoLogin: number; pctManualLogin: number; pctSignup: number;
+  // 성별 (합계 100%)
+  pctMale: number; pctFemale: number;
+  // 연령대 (합계 100%)
+  pct20s: number; pct30s: number; pct40s: number; pct50s: number;
+  // 접속 지역 (합계 100%)
+  pctSeoul: number; pctGyeonggi: number; pctBusan: number; pctIncheon: number;
+  pctDaegu: number; pctDaejeon: number; pctGwangju: number; pctOtherRegion: number; pctAbroad: number;
 }
 
 export const DEFAULT_CONFIG: SimConfig = {
   userCount: 1000,
   pctAdvertiser: 5, pctAgency: 30, pctProduction: 65,
   pctTvcf: 85, pctGoogle: 5, pctNaver: 5, pctKakao: 3, pctOrganic: 2,
-  tvcfSsoRate: 20, tvcfManualLoginRate: 25, signupRate: 3,
+  pctSsoLogin: 17, pctManualLogin: 17, pctSignup: 3,
+  pctMale: 60, pctFemale: 40,
+  pct20s: 10, pct30s: 35, pct40s: 35, pct50s: 20,
+  pctSeoul: 35, pctGyeonggi: 20, pctBusan: 8, pctIncheon: 5,
+  pctDaegu: 4, pctDaejeon: 3, pctGwangju: 3, pctOtherRegion: 17, pctAbroad: 5,
 };
 
 export async function startSimulation(cfg: SimConfig): Promise<string> {
@@ -248,8 +254,13 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     { value: "agency",     weight: cfg.pctAgency     },
     { value: "production", weight: cfg.pctProduction  },
   ];
-  const GENDERS    = [{ value: "male", weight: 50 }, { value: "female", weight: 50 }];
-  const AGE_GROUPS = [{ value: "20s", weight: 10 }, { value: "30s", weight: 35 }, { value: "40s", weight: 35 }, { value: "50s", weight: 20 }];
+  const GENDERS    = [{ value: "male", weight: cfg.pctMale }, { value: "female", weight: cfg.pctFemale }];
+  const AGE_GROUPS = [
+    { value: "20s", weight: cfg.pct20s },
+    { value: "30s", weight: cfg.pct30s },
+    { value: "40s", weight: cfg.pct40s },
+    { value: "50s", weight: cfg.pct50s },
+  ];
 
   const UTM_LIST = [
     { value: { utm_source: "tvcf",    utm_medium: "banner",   channel: "referral", utm_campaign: "admarket_launch" }, weight: cfg.pctTvcf    },
@@ -260,15 +271,15 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   ];
 
   const GEO_LIST = [
-    { value: { geo_region: "서울" },   weight: 35 },
-    { value: { geo_region: "경기도" }, weight: 20 },
-    { value: { geo_region: "부산" },   weight: 8  },
-    { value: { geo_region: "인천" },   weight: 5  },
-    { value: { geo_region: "대구" },   weight: 4  },
-    { value: { geo_region: "대전" },   weight: 3  },
-    { value: { geo_region: "광주" },   weight: 3  },
-    { value: { geo_region: "기타지방"},weight: 17 },
-    { value: { geo_region: "해외" },   weight: 5  },
+    { value: { geo_region: "서울" },    weight: cfg.pctSeoul       },
+    { value: { geo_region: "경기도" },  weight: cfg.pctGyeonggi    },
+    { value: { geo_region: "부산" },    weight: cfg.pctBusan       },
+    { value: { geo_region: "인천" },    weight: cfg.pctIncheon     },
+    { value: { geo_region: "대구" },    weight: cfg.pctDaegu       },
+    { value: { geo_region: "대전" },    weight: cfg.pctDaejeon     },
+    { value: { geo_region: "광주" },    weight: cfg.pctGwangju     },
+    { value: { geo_region: "기타지방"}, weight: cfg.pctOtherRegion },
+    { value: { geo_region: "해외" },    weight: cfg.pctAbroad      },
   ];
 
   const CATEGORIES   = [
@@ -313,45 +324,36 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     // ── Acquisition ──────────────────────────────────
     add("site_visit", uid, baseTs, { path: "/", ...common });
 
-    // ── 인증 결정 ─────────────────────────────────────
+    // ── 인증 결정 (직접 % 기반) ───────────────────────────
     let isAuthenticated = false;
-    const isTvcf = utm.utm_source === "tvcf";
+    const roll = Math.random() * 100;
+    const ssoThreshold     = cfg.pctSsoLogin;
+    const manualThreshold  = ssoThreshold + cfg.pctManualLogin;
+    const signupThreshold  = manualThreshold + cfg.pctSignup;
 
-    // SSO: tvcf 유입 유저 중 50%는 이미 로그인 상태
-    if (isTvcf && chance(cfg.tvcfSsoRate / 100)) {
+    if (roll < ssoThreshold) {
+      // SSO 자동 로그인
       add("sso_login", uid, baseTs + 30, { source: "tvcf.co.kr", method: "sso", ...common });
       isAuthenticated = true;
-    }
-
-    // 수동 로그인: tvcf 비SSO 유저 중 60% (기존 tvcf 유저가 직접 로그인)
-    if (!isAuthenticated && isTvcf && chance(cfg.tvcfManualLoginRate / 100)) {
-      add("login", uid, baseTs + 120, { method: "email", source: "tvcf.co.kr", ...common });
+    } else if (roll < manualThreshold) {
+      // 수동 로그인
+      add("login", uid, baseTs + 120, { method: "email", source: "direct", ...common });
       isAuthenticated = true;
-    }
-
-    // 일반 가입 (비로그인 유저 중 5%)
-    if (!isAuthenticated && chance(cfg.signupRate / 100)) {
+    } else if (roll < signupThreshold) {
+      // 신규 가입 (퍼널 이벤트 발생)
       add("signup_started", uid, baseTs + 30,  { method: "email", ...common });
       add("signup_funnel",  uid, baseTs + 35,  { step: 1, step_name: "account", path: "/signup", ...common });
-
-      if (chance(0.88)) {
-        add("signup_funnel", uid, baseTs + 120, { step: 2, step_name: "email", path: "/signup/email", ...common });
-
-        if (chance(0.82)) {
-          add("signup_funnel",  uid, baseTs + 200, { step: 3, step_name: "phone", path: "/signup/phone", ...common });
-          add("signup_complete", uid, baseTs + 250, { ...common });
-
-          if (chance(0.78)) {
-            const accountType = chance(0.68) ? "personal" : "corporate";
-            add("signup_funnel", uid, baseTs + 300, { step: 4, step_name: "account_type", path: "/signup/account-type", ...common });
-            if (accountType === "corporate" && chance(0.62)) {
-              add("signup_funnel", uid, baseTs + 400, { step: 5, step_name: "job_info", path: "/signup/job-info", ...common });
-            }
-            isAuthenticated = true;
-          }
-        }
+      add("signup_funnel",  uid, baseTs + 120, { step: 2, step_name: "email",   path: "/signup/email", ...common });
+      add("signup_funnel",  uid, baseTs + 200, { step: 3, step_name: "phone",   path: "/signup/phone", ...common });
+      add("signup_complete", uid, baseTs + 250, { ...common });
+      const accountType = chance(0.68) ? "personal" : "corporate";
+      add("signup_funnel",  uid, baseTs + 300, { step: 4, step_name: "account_type", path: "/signup/account-type", ...common });
+      if (accountType === "corporate" && chance(0.62)) {
+        add("signup_funnel", uid, baseTs + 400, { step: 5, step_name: "job_info", path: "/signup/job-info", ...common });
       }
+      isAuthenticated = true;
     }
+    // else: 미로그인 (roll >= signupThreshold)
 
     // ── 핵심행동: 인증 완료 유저만 ─────────────────────
     if (!isAuthenticated) continue;

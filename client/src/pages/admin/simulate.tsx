@@ -29,14 +29,22 @@ interface SimConfig {
   userCount: number;
   pctAdvertiser: number; pctAgency: number; pctProduction: number;
   pctTvcf: number; pctGoogle: number; pctNaver: number; pctKakao: number; pctOrganic: number;
-  tvcfSsoRate: number; tvcfManualLoginRate: number; signupRate: number;
+  pctSsoLogin: number; pctManualLogin: number; pctSignup: number;
+  pctMale: number; pctFemale: number;
+  pct20s: number; pct30s: number; pct40s: number; pct50s: number;
+  pctSeoul: number; pctGyeonggi: number; pctBusan: number; pctIncheon: number;
+  pctDaegu: number; pctDaejeon: number; pctGwangju: number; pctOtherRegion: number; pctAbroad: number;
 }
 
 const DEFAULTS: SimConfig = {
   userCount: 1000,
   pctAdvertiser: 5, pctAgency: 30, pctProduction: 65,
   pctTvcf: 85, pctGoogle: 5, pctNaver: 5, pctKakao: 3, pctOrganic: 2,
-  tvcfSsoRate: 20, tvcfManualLoginRate: 25, signupRate: 3,
+  pctSsoLogin: 17, pctManualLogin: 17, pctSignup: 3,
+  pctMale: 60, pctFemale: 40,
+  pct20s: 10, pct30s: 35, pct40s: 35, pct50s: 20,
+  pctSeoul: 35, pctGyeonggi: 20, pctBusan: 8, pctIncheon: 5,
+  pctDaegu: 4, pctDaejeon: 3, pctGwangju: 3, pctOtherRegion: 17, pctAbroad: 5,
 };
 
 const FUNNEL_ORDER = [
@@ -136,8 +144,13 @@ export default function AdminSimulatePage() {
   const userTypeBreakdown = job?.userTypeBreakdown ?? {} as Record<string, number>;
   const geoBreakdown = job?.geoBreakdown ?? {} as Record<string, number>;
 
-  const utmSum = cfg.pctTvcf + cfg.pctGoogle + cfg.pctNaver + cfg.pctKakao + cfg.pctOrganic;
-  const userSum = cfg.pctAdvertiser + cfg.pctAgency + cfg.pctProduction;
+  const utmSum     = cfg.pctTvcf + cfg.pctGoogle + cfg.pctNaver + cfg.pctKakao + cfg.pctOrganic;
+  const userSum    = cfg.pctAdvertiser + cfg.pctAgency + cfg.pctProduction;
+  const loginSum   = cfg.pctSsoLogin + cfg.pctManualLogin + cfg.pctSignup;
+  const genderSum  = cfg.pctMale + cfg.pctFemale;
+  const ageSum     = cfg.pct20s + cfg.pct30s + cfg.pct40s + cfg.pct50s;
+  const geoSum     = cfg.pctSeoul + cfg.pctGyeonggi + cfg.pctBusan + cfg.pctIncheon
+                   + cfg.pctDaegu + cfg.pctDaejeon + cfg.pctGwangju + cfg.pctOtherRegion + cfg.pctAbroad;
 
   return (
     <div className="space-y-6 p-6">
@@ -162,11 +175,30 @@ export default function AdminSimulatePage() {
 
         <hr className="border-gray-100" />
 
-        {/* 유저 타입 비율 */}
+        {/* 인증 현황 (전체 방문자 기준 %) */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-medium text-gray-600">인증 현황</span>
+            <span className="text-[10px] text-gray-400">전체 방문자 기준 % — 나머지는 미로그인</span>
+            {loginSum > 100 && <span className="text-[10px] text-red-500">합계 {loginSum}% (100% 초과)</span>}
+          </div>
+          <div className="flex flex-wrap gap-4 items-end">
+            <NumInput label="SSO 로그인"  value={cfg.pctSsoLogin}    onChange={(v) => set("pctSsoLogin", v)} />
+            <NumInput label="수동 로그인"  value={cfg.pctManualLogin} onChange={(v) => set("pctManualLogin", v)} />
+            <NumInput label="신규 가입"    value={cfg.pctSignup}      onChange={(v) => set("pctSignup", v)} />
+            <div className="flex flex-col gap-0.5 pb-1">
+              <span className="text-[10px] text-gray-400">미로그인</span>
+              <span className="text-sm font-semibold text-gray-700">{Math.max(0, 100 - loginSum)}%</span>
+            </div>
+          </div>
+        </div>
+
+        <hr className="border-gray-100" />
+
+        {/* 로그인 유저 내 구성 */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-medium text-gray-600">로그인 유저 내 구성</span>
-            <span className="text-[10px] text-gray-400">미로그인 유저는 인증 전환율에 따라 자동 계산</span>
             {sumWarn([cfg.pctAdvertiser, cfg.pctAgency, cfg.pctProduction], "유저 타입")}
           </div>
           <div className="flex flex-wrap gap-4">
@@ -174,19 +206,18 @@ export default function AdminSimulatePage() {
             <NumInput label="대행사" value={cfg.pctAgency}     onChange={(v) => set("pctAgency", v)} />
             <NumInput label="제작사" value={cfg.pctProduction} onChange={(v) => set("pctProduction", v)} />
             <div className="flex items-end pb-1">
-              <span className={`text-xs font-semibold ${userSum === 100 ? "text-green-600" : "text-amber-500"}`}>
-                합계 {userSum}%
-              </span>
+              <span className={`text-xs font-semibold ${userSum === 100 ? "text-green-600" : "text-amber-500"}`}>합계 {userSum}%</span>
             </div>
           </div>
         </div>
 
         <hr className="border-gray-100" />
 
-        {/* UTM 비율 */}
+        {/* UTM 유입 비율 */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-medium text-gray-600">UTM 유입 비율</span>
+            {sumWarn([cfg.pctTvcf, cfg.pctGoogle, cfg.pctNaver, cfg.pctKakao, cfg.pctOrganic], "UTM")}
           </div>
           <div className="flex flex-wrap gap-4">
             <NumInput label="tvcf.co.kr" value={cfg.pctTvcf}    onChange={(v) => set("pctTvcf", v)} />
@@ -195,25 +226,65 @@ export default function AdminSimulatePage() {
             <NumInput label="Kakao"      value={cfg.pctKakao}    onChange={(v) => set("pctKakao", v)} />
             <NumInput label="Organic"    value={cfg.pctOrganic}  onChange={(v) => set("pctOrganic", v)} />
             <div className="flex items-end pb-1">
-              <span className={`text-xs font-semibold ${utmSum === 100 ? "text-green-600" : "text-amber-500"}`}>
-                합계 {utmSum}%
-              </span>
+              <span className={`text-xs font-semibold ${utmSum === 100 ? "text-green-600" : "text-amber-500"}`}>합계 {utmSum}%</span>
             </div>
           </div>
         </div>
 
         <hr className="border-gray-100" />
 
-        {/* 인증 전환율 */}
+        {/* 성별 + 연령대 (가로 2열) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-medium text-gray-600">성별</span>
+              {sumWarn([cfg.pctMale, cfg.pctFemale], "성별")}
+            </div>
+            <div className="flex flex-wrap gap-4">
+              <NumInput label="남성" value={cfg.pctMale}   onChange={(v) => set("pctMale", v)} />
+              <NumInput label="여성" value={cfg.pctFemale} onChange={(v) => set("pctFemale", v)} />
+              <div className="flex items-end pb-1">
+                <span className={`text-xs font-semibold ${genderSum === 100 ? "text-green-600" : "text-amber-500"}`}>합계 {genderSum}%</span>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-medium text-gray-600">연령대</span>
+              {sumWarn([cfg.pct20s, cfg.pct30s, cfg.pct40s, cfg.pct50s], "연령대")}
+            </div>
+            <div className="flex flex-wrap gap-4">
+              <NumInput label="20대" value={cfg.pct20s} onChange={(v) => set("pct20s", v)} />
+              <NumInput label="30대" value={cfg.pct30s} onChange={(v) => set("pct30s", v)} />
+              <NumInput label="40대" value={cfg.pct40s} onChange={(v) => set("pct40s", v)} />
+              <NumInput label="50대" value={cfg.pct50s} onChange={(v) => set("pct50s", v)} />
+              <div className="flex items-end pb-1">
+                <span className={`text-xs font-semibold ${ageSum === 100 ? "text-green-600" : "text-amber-500"}`}>합계 {ageSum}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr className="border-gray-100" />
+
+        {/* 접속 지역 */}
         <div className="space-y-2">
-          <span className="text-xs font-medium text-gray-600">인증 전환율</span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-medium text-gray-600">접속 지역</span>
+            {sumWarn([cfg.pctSeoul,cfg.pctGyeonggi,cfg.pctBusan,cfg.pctIncheon,cfg.pctDaegu,cfg.pctDaejeon,cfg.pctGwangju,cfg.pctOtherRegion,cfg.pctAbroad], "지역")}
+          </div>
           <div className="flex flex-wrap gap-4">
-            <NumInput label="tvcf SSO 자동 로그인율"   value={cfg.tvcfSsoRate}         onChange={(v) => set("tvcfSsoRate", v)} />
-            <NumInput label="비SSO 수동 로그인율"       value={cfg.tvcfManualLoginRate} onChange={(v) => set("tvcfManualLoginRate", v)} />
-            <NumInput label="신규 가입 전환율"           value={cfg.signupRate}          onChange={(v) => set("signupRate", v)} />
-            <div className="flex items-end pb-1 text-[10px] text-gray-400 max-w-xs leading-tight">
-              SSO → tvcf 유입 중 자동 로그인 비율<br />
-              수동 → 비SSO tvcf 유저 중 직접 로그인 비율
+            <NumInput label="서울"    value={cfg.pctSeoul}       onChange={(v) => set("pctSeoul", v)} />
+            <NumInput label="경기도"  value={cfg.pctGyeonggi}    onChange={(v) => set("pctGyeonggi", v)} />
+            <NumInput label="부산"    value={cfg.pctBusan}       onChange={(v) => set("pctBusan", v)} />
+            <NumInput label="인천"    value={cfg.pctIncheon}     onChange={(v) => set("pctIncheon", v)} />
+            <NumInput label="대구"    value={cfg.pctDaegu}       onChange={(v) => set("pctDaegu", v)} />
+            <NumInput label="대전"    value={cfg.pctDaejeon}     onChange={(v) => set("pctDaejeon", v)} />
+            <NumInput label="광주"    value={cfg.pctGwangju}     onChange={(v) => set("pctGwangju", v)} />
+            <NumInput label="기타지방" value={cfg.pctOtherRegion} onChange={(v) => set("pctOtherRegion", v)} />
+            <NumInput label="해외"    value={cfg.pctAbroad}      onChange={(v) => set("pctAbroad", v)} />
+            <div className="flex items-end pb-1">
+              <span className={`text-xs font-semibold ${geoSum === 100 ? "text-green-600" : "text-amber-500"}`}>합계 {geoSum}%</span>
             </div>
           </div>
         </div>
