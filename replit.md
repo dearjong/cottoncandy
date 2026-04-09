@@ -175,6 +175,7 @@ client/src/types/project-status.ts
 - 2026-03-27: Next.js 제거 → Vite 단독, 계약&정산·리뷰관리·컨설팅·회사소개서 페이지 추가
 - 2026-04-06: 운영 센터 분리 — 1:1 문의·신고·알림발송·AI채팅·공지사항·배너 각각 독립 서브메뉴
 - 2026-04-08: 내정보 섹션 추가 — /my/profile·/my/withdraw·/my/inquiry·/my/notification-settings 4페이지 + MySidebar 공통 컴포넌트; 헤더 드롭다운 내정보 링크 /my/profile 연결
+- 2026-04-09: 레거시 폴더 정리 — create-project/ guides/ mypage/ admin_v2/ work/company-portfolio/ 등 미사용 폴더 삭제. pages/ 구조: home.tsx + admin/ member/ service/ work/ company/ my/ 로 정리
 
 ## User Preferences
 - 커뮤니케이션: 간결한 한국어, 기술 용어 최소화
