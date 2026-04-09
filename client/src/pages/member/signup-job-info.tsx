@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import Layout from "@/components/layout/layout";
 import { Input } from "@/components/ui/input";
-import { Building2, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { trackCompanyRegistered, trackCompanyVerificationRequested } from "@/lib/analytics";
 
 const MOCK_COMPANIES = [
@@ -61,14 +61,14 @@ export default function SignupJobInfo() {
   return (
     <Layout>
       <div className="py-10 sm:py-14 bg-white min-h-screen">
-        <div className="page-content max-w-2xl mx-auto">
+        <div className="page-content">
 
           {/* 헤더 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-10"
+            className="text-center mb-10 sm:mb-12"
           >
             <h1 className="page-title">"소속 기업 정보를 등록해 주세요."</h1>
             <p className="page-subtitle mt-3">
@@ -76,31 +76,25 @@ export default function SignupJobInfo() {
             </p>
           </motion.div>
 
-          {/* 안내 배너 */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 text-sm text-blue-700"
+            className="options-container"
           >
-            <Info className="w-4 h-4 mt-0.5 shrink-0" />
-            <span>
-              기업 소속으로 활동한 프로젝트·계약 내역은 기업 admin도 볼 수 있어요.
-              <strong className="ml-1">내 개인 기록은 별도로 보관되며, 기업을 나가도 사라지지 않아요.</strong>
-            </span>
-          </motion.div>
+            {/* 안내 배너 */}
+            <div className="flex items-start gap-2.5 border border-blue-200 bg-blue-50 rounded-lg px-4 py-3 mb-8">
+              <Info className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+              <p className="text-sm text-blue-700 leading-relaxed">
+                기업 소속으로 활동한 프로젝트·계약 내역은 기업 admin도 볼 수 있어요.{" "}
+                <strong>내 개인 기록은 별도로 보관되며, 기업을 나가도 사라지지 않아요.</strong>
+              </p>
+            </div>
 
-          {/* 폼 */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="options-container space-y-5"
-          >
             {/* 기업명 검색 */}
             <div className="project-section project-section-horizontal">
               <span className="project-section-title">
-                <span className="text-pink-500 mr-0.5">*</span> 기업명
+                <span className="cotton-candy-pink">*</span> 기업명
               </span>
               <div className="flex-1 relative">
                 <Input
@@ -114,48 +108,37 @@ export default function SignupJobInfo() {
                   }}
                   onFocus={() => companySearch && setShowDropdown(true)}
                   onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
-                  className="w-full"
                   data-testid="input-company-search"
                 />
                 {showDropdown && companySearch && (
-                  <div className="absolute top-full left-0 right-0 z-10 bg-white border border-gray-200 rounded-b-md shadow-md mt-0">
-                    {filteredCompanies.length > 0 && filteredCompanies.map((company) => (
+                  <div className="absolute top-full left-0 right-0 z-10 bg-white border border-gray-200 rounded-b-md shadow-md">
+                    {filteredCompanies.map((company) => (
                       <button
                         key={company.id}
                         onMouseDown={() => handleCompanySelect(company)}
-                        className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 border-b border-gray-100 last:border-0"
                         data-testid={`company-option-${company.id}`}
                       >
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-gray-400 shrink-0" />
-                          <div>
-                            <span className="font-medium text-gray-900">{company.name}</span>
-                            <span className="ml-2 text-xs text-gray-400">{company.address}</span>
-                          </div>
-                        </div>
+                        <span className="font-medium text-gray-900">{company.name}</span>
+                        <span className="ml-2 text-xs text-gray-400">{company.address}</span>
                       </button>
                     ))}
                     <button
                       onMouseDown={handleNewCompany}
-                      className="w-full text-left px-4 py-3 text-sm text-pink-600 hover:bg-pink-50 flex items-center gap-2"
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-pink-50"
                       data-testid="company-new"
                     >
-                      <span className="font-medium">+ "{companySearch}" 신규 등록</span>
-                      <span className="text-xs text-pink-400">기업이 존재하지 않으면 새로 만들어요</span>
+                      <span className="cotton-candy-pink font-medium">+ "{companySearch}" 신규 등록</span>
+                      <span className="ml-2 text-xs text-gray-400">기업이 없으면 새로 만들어요</span>
                     </button>
                   </div>
                 )}
-
-                {/* 선택된 기업 표시 */}
                 {selectedCompany && !showDropdown && (
-                  <div className={`mt-2 flex items-center gap-2 text-xs px-3 py-2 rounded-md ${isNewCompany ? "bg-pink-50 text-pink-700" : "bg-green-50 text-green-700"}`}>
-                    <Building2 className="w-3.5 h-3.5 shrink-0" />
-                    <span>
-                      {isNewCompany
-                        ? `"${selectedCompany.name}" 신규 등록 — 기업 정보 검토 후 활성화돼요`
-                        : `${selectedCompany.name} · ${selectedCompany.address} — 기업 admin 승인 후 활성화돼요`}
-                    </span>
-                  </div>
+                  <p className={`project-description mt-2 flex items-center gap-1.5 ${isNewCompany ? "text-[#EA4C89]" : "text-green-600"}`}>
+                    {isNewCompany
+                      ? `"${selectedCompany.name}" 신규 등록 — 검토 후 활성화돼요`
+                      : `${selectedCompany.name} · ${selectedCompany.address} — 기업 admin 승인 후 활성화돼요`}
+                  </p>
                 )}
               </div>
             </div>
@@ -163,14 +146,13 @@ export default function SignupJobInfo() {
             {/* 직무 */}
             <div className="project-section project-section-horizontal">
               <span className="project-section-title">
-                <span className="text-pink-500 mr-0.5">*</span> 직무
+                <span className="cotton-candy-pink">*</span> 직무
               </span>
               <div className="flex-1">
                 <Input
                   placeholder="ex) 기획자"
                   value={job}
                   onChange={(e) => setJob(e.target.value)}
-                  className="w-full"
                   data-testid="input-job"
                 />
               </div>
@@ -184,7 +166,6 @@ export default function SignupJobInfo() {
                   placeholder="ex) 기획팀"
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  className="w-full"
                   data-testid="input-department"
                 />
               </div>
@@ -198,17 +179,16 @@ export default function SignupJobInfo() {
                   placeholder="ex) 신입연구원"
                   value={position}
                   onChange={(e) => setPosition(e.target.value)}
-                  className="w-full"
                   data-testid="input-position"
                 />
               </div>
             </div>
 
             {/* 버튼 */}
-            <div className="flex gap-3 pt-4">
+            <div className="btn-group pt-2">
               <button
                 onClick={() => setLocation("/")}
-                className="btn-white flex-1 py-3 text-sm"
+                className="btn-white"
                 data-testid="button-skip"
               >
                 나중에 등록할게요
@@ -216,18 +196,14 @@ export default function SignupJobInfo() {
               <button
                 onClick={handleSubmit}
                 disabled={!isValid}
-                className={`flex-1 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  isValid
-                    ? "bg-pink-500 hover:bg-pink-600 text-white"
-                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                }`}
+                className="btn-pink"
                 data-testid="button-submit"
               >
                 등록 신청하기
               </button>
             </div>
-          </motion.div>
 
+          </motion.div>
         </div>
       </div>
     </Layout>
