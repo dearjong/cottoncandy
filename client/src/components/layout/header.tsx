@@ -559,7 +559,8 @@ export default function Header() {
                   <DropdownMenuItem
                     className="px-6 py-2 cursor-pointer"
                     onClick={() => {
-                      trackHeaderInteraction({ target: "dropdown_item", item: "기업 정보" });
+                      trackHeaderInteraction({ target: "dropdown_item", item: "기업 정보", path: "/work/settings/company-info" });
+                      setLocation("/work/settings/company-info");
                     }}
                   >
                     <span className="whitespace-nowrap">기업 정보</span>
