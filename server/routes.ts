@@ -317,6 +317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         Math.min(max, Math.max(min, parseInt(String(b[key] ?? DEFAULT_CONFIG[key]), 10) || DEFAULT_CONFIG[key] as number));
       const cfg: SimConfig = {
         userCount:        num("userCount", 10, 10000),
+        periodDays:       num("periodDays", 1, 90),
         pctAdvertiser:    num("pctAdvertiser", 0, 100),
         pctAgency:        num("pctAgency", 0, 100),
         pctProduction:    num("pctProduction", 0, 100),
