@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
@@ -165,8 +168,19 @@ export default function AdminSimulatePage() {
 
         {/* 유저 수 */}
         <div className="flex items-center gap-4 flex-wrap">
-          <NumInput label="가상 사용자 수" value={cfg.userCount} unit="명"
-            min={10} max={10000} onChange={(v) => set("userCount", v)} />
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[10px] text-gray-400 leading-tight">가상 사용자 수</span>
+            <Select value={String(cfg.userCount)} onValueChange={(v) => set("userCount", Number(v))}>
+              <SelectTrigger className="w-32 h-8 text-xs border-gray-200">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[100, 300, 500, 1000, 2000, 3000, 5000, 10000].map((n) => (
+                  <SelectItem key={n} value={String(n)}>{n.toLocaleString()}명</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <Button className="btn-pink ml-auto" onClick={() => setConfirmOpen(true)}
             disabled={!!isRunning || loading}>
             {loading ? "시작 중..." : isRunning ? "실행 중..." : "▶ 시뮬레이션 시작"}
