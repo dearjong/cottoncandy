@@ -104,6 +104,17 @@ function describeEvent(name: string, props: Record<string, unknown>): { label: s
       return { label: "기업 인증 반려", detail: `${p.company_name ?? ""} · 사유: ${p.reject_reason ?? "-"}`, badge: "기업" };
     case "corporate_member_activated":
       return { label: "기업 회원 활성화 🎉", detail: `${p.company_name ?? ""} · ${p.verification_type ?? ""}`, badge: "기업" };
+
+    // ── 기업 구성원 관리
+    case "member_approved":
+      return { label: "구성원 승인", detail: `${p.member_name ?? p.member_id ?? ""}`, badge: "구성원" };
+    case "member_activity_toggled":
+      return { label: p.is_active ? "활동승인 ON" : "활동승인 OFF", detail: `${p.member_name ?? p.member_id ?? ""}`, badge: "구성원" };
+    case "member_removed":
+      return { label: "구성원 탈퇴", detail: `${p.member_name ?? p.member_id ?? ""} · ${p.section ?? ""}`, badge: "구성원" };
+    case "member_role_changed":
+      return { label: "권한 변경", detail: `${p.member_name ?? p.member_id ?? ""} · ${p.prev_role ?? ""} → ${p.new_role ?? ""}`, badge: "구성원" };
+
     case "activation_achieved":
       return { label: "핵심행동 달성", detail: `${p.action ?? ""}`, badge: "전환" };
     case "project_submitted":
@@ -131,6 +142,7 @@ const BADGE_COLORS: Record<string, string> = {
   "유입": "bg-gray-100 text-gray-700",
   "가입": "bg-sky-100 text-sky-700",
   "기업": "bg-violet-100 text-violet-700",
+  "구성원": "bg-rose-100 text-rose-700",
   "전환": "bg-orange-100 text-orange-700",
   "수익": "bg-green-100 text-green-700",
   "리텐션": "bg-teal-100 text-teal-700",
@@ -148,6 +160,7 @@ const FILTER_OPTIONS = [
   { value: "유입", label: "유입" },
   { value: "가입", label: "가입 퍼널" },
   { value: "기업", label: "기업 인증" },
+  { value: "구성원", label: "구성원 관리" },
   { value: "전환", label: "전환" },
 ];
 

@@ -894,7 +894,27 @@ function trackGA4PageView(path: string) {
   });
 }
 
-/** 라우트 변경 시 퍼널 관련 경로만 전송 */
+// ── 기업 구성원 관리 ──────────────────────────────────────────────────
+/** 대기 중인 구성원 소속 승인 */
+export function trackMemberApproved(props: { member_id: string; member_name?: string; company_id?: string }) {
+  publishAnalytics("member_approved", { ...props });
+}
+
+/** 활동승인 토글 (활성 ↔ 비활성) */
+export function trackMemberActivityToggled(props: { member_id: string; is_active: boolean; member_name?: string }) {
+  publishAnalytics("member_activity_toggled", { ...props });
+}
+
+/** 구성원 탈퇴/삭제 */
+export function trackMemberRemoved(props: { member_id: string; member_name?: string; section: "approved" | "active" | "pending" }) {
+  publishAnalytics("member_removed", { ...props });
+}
+
+/** 권한 변경 */
+export function trackMemberRoleChanged(props: { member_id: string; member_name?: string; prev_role: string; new_role: string }) {
+  publishAnalytics("member_role_changed", { ...props });
+}
+
 export function trackFunnelRoute(path: string) {
   trackSiteVisitOnce(path);
 
