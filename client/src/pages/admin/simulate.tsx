@@ -124,7 +124,7 @@ export default function AdminSimulatePage() {
           <div className="flex items-center gap-3 text-xs text-gray-400 border rounded px-3 py-1.5">
             <span>광고주 5% / 대행사 30% / 제작사 55% / 뜨내기 10%</span>
             <span>·</span>
-            <span>UTM: google/naver/kakao/referral/organic</span>
+            <span>유입: tvcf.co.kr 배너 85% (SSO 50%) / 기타 15%</span>
             <span>·</span>
             <span>남 50% / 여 50% · 30~40대 중심</span>
           </div>
@@ -249,7 +249,7 @@ export default function AdminSimulatePage() {
           <p className="font-medium text-gray-700">시뮬레이션 동작 방식</p>
           <ul className="space-y-1 list-disc list-inside text-xs text-gray-400">
             <li>광고주 5% / 대행사 30% / 제작사 55% / 뜨내기(이탈) 10% · 남 50% / 여 50% · 30~40대 중심</li>
-            <li>UTM: google 35% / naver 30% / kakao 15% / referral 10% / organic 10%</li>
+            <li>유입: tvcf.co.kr 배너 85% (그 중 50%는 SSO 자동 로그인) / google·naver·kakao·organic 15%</li>
             <li>유입 → 가입 → 핵심행동 → 포트폴리오/프로젝트 → 계약 → 시안 → 산출물 → 완료 → 리뷰</li>
             <li>GA4 + Mixpanel 동시 전송 — 완료 후 Mixpanel Funnels / GA4 탐색 분석에서 확인</li>
           </ul>
