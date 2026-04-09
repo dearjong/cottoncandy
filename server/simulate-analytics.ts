@@ -2,6 +2,10 @@ const MIXPANEL_TOKEN = "B32D8265A148455CB07F704BE7A648AA";
 const MIXPANEL_URL = "https://api.mixpanel.com/track";
 const BATCH_SIZE = 50;
 
+const GA4_MEASUREMENT_ID = "G-MG1WSR89E1";
+const GA4_API_SECRET = "yEU6R3P9SWe5z9_Foa7XWA";
+const GA4_ENDPOINT = `https://www.google-analytics.com/mp/collect?measurement_id=${GA4_MEASUREMENT_ID}&api_secret=${GA4_API_SECRET}`;
+
 export type JobStatus = "pending" | "generating" | "sending" | "done" | "error";
 
 export interface SimJob {
@@ -62,6 +66,44 @@ async function sendBatch(batch: MpEvent[]): Promise<string | null> {
   }
 }
 
+interface Ga4UserEvents {
+  clientId: string;
+  userId: string;
+  userProperties: Record<string, { value: unknown }>;
+  events: Array<{ name: string; params: Record<string, unknown> }>;
+}
+
+// GA4 키 이벤트만 전송 (real-time 가시성을 위해 timestamp_micros 생략)
+const GA4_KEY_EVENTS = new Set([
+  "site_visit", "first_visit", "sso_login", "login",
+  "signup_started", "signup_complete",
+  "project_submitted", "partner_applied", "contract_signed",
+  "review_submitted", "project_completed", "activation_achieved",
+]);
+
+async function sendGa4UserBatch(entry: Ga4UserEvents): Promise<string | null> {
+  const GA4_MAX = 25;
+  for (let i = 0; i < entry.events.length; i += GA4_MAX) {
+    const slice = entry.events.slice(i, i + GA4_MAX);
+    try {
+      const res = await fetch(GA4_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_id: entry.clientId,
+          user_id: entry.userId,
+          user_properties: entry.userProperties,
+          events: slice,
+        }),
+      });
+      if (!res.ok && res.status !== 204) return await res.text();
+    } catch (e) {
+      return String(e);
+    }
+  }
+  return null;
+}
+
 export async function startSimulation(userCount: number): Promise<string> {
   const jobId = crypto.randomUUID();
   const job: SimJob = {
@@ -92,6 +134,7 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
   job.message = "가상 사용자 이벤트 생성 중...";
 
   const events: MpEvent[] = [];
+  const ga4Map = new Map<string, Ga4UserEvents>();
   const funnel = job.funnelBreakdown;
   const utmCount = job.utmBreakdown;
 
@@ -101,6 +144,25 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
       properties: { token: MIXPANEL_TOKEN, distinct_id: distinctId, time: ts, simulation: true, ...props },
     });
     funnel[event] = (funnel[event] ?? 0) + 1;
+
+    // GA4: 키 이벤트만 수집 (timestamp_micros 생략 → 실시간 개요 반영)
+    if (GA4_KEY_EVENTS.has(event)) {
+      const entry = ga4Map.get(distinctId);
+      if (entry) {
+        entry.events.push({ name: event, params: { simulation: "true", ...props } });
+      }
+    }
+  }
+
+  function initGa4User(distinctId: string, userId: string, userProps: Record<string, unknown>) {
+    ga4Map.set(distinctId, {
+      clientId: `${Date.now()}.${Math.floor(Math.random() * 1e9)}`,
+      userId,
+      userProperties: Object.fromEntries(
+        Object.entries(userProps).map(([k, v]) => [k, { value: v }])
+      ),
+      events: [],
+    });
   }
 
   // ── 유저 속성 풀 ──────────────────────────────────────
@@ -168,6 +230,9 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
       ...utm,
       ...geo,
     };
+
+    // GA4 유저 초기화
+    initGa4User(uid, uid, { user_type: userType, gender, age_group: ageGroup });
 
     // ── Acquisition ──────────────────────────────────
     add("site_visit",  uid, baseTs,     { path: "/", ...common });
@@ -300,6 +365,7 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
     }
   }
 
+  // ── Mixpanel 전송 ─────────────────────────────────
   job.totalEvents = events.length;
   job.totalBatches = Math.ceil(events.length / BATCH_SIZE);
   job.status = "sending";
@@ -308,11 +374,25 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
   for (let i = 0; i < events.length; i += BATCH_SIZE) {
     const batch = events.slice(i, i + BATCH_SIZE);
     const err = await sendBatch(batch);
-    if (err) job.errors.push(`배치 ${job.batchesSent + 1}: ${err}`);
+    if (err) job.errors.push(`MP 배치 ${job.batchesSent + 1}: ${err}`);
     job.batchesSent += 1;
-    job.progress = Math.round((job.batchesSent / job.totalBatches) * 100);
+    job.progress = Math.round((job.batchesSent / job.totalBatches) * 50); // 0~50%
     job.message = `Mixpanel 전송 중... (${job.batchesSent}/${job.totalBatches} 배치)`;
     await new Promise((r) => setTimeout(r, 15));
+  }
+
+  // ── GA4 Measurement Protocol 전송 (실시간 개요 반영) ──
+  job.message = "GA4 전송 중...";
+  const ga4Users = Array.from(ga4Map.values()).filter((u) => u.events.length > 0);
+  let ga4Done = 0;
+  for (const userEntry of ga4Users) {
+    const err = await sendGa4UserBatch(userEntry);
+    if (err) job.errors.push(`GA4 ${userEntry.userId}: ${err}`);
+    ga4Done += 1;
+    job.progress = 50 + Math.round((ga4Done / ga4Users.length) * 50); // 50~100%
+    job.message = `GA4 전송 중... (${ga4Done}/${ga4Users.length} 유저)`;
+    // GA4 rate limit 방지: 10명마다 잠깐 대기
+    if (ga4Done % 10 === 0) await new Promise((r) => setTimeout(r, 30));
   }
 
   job.status = "done";

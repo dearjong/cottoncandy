@@ -99,7 +99,7 @@ export default function AdminSimulatePage() {
     <div className="space-y-6 p-6">
       <PageHeader
         title="Analytics 시뮬레이션"
-        description="가상 사용자를 생성해 Mixpanel에 AARRR 이벤트를 전송합니다."
+        description="가상 사용자를 생성해 GA4 + Mixpanel에 AARRR 이벤트를 전송합니다."
         hidePeriodFilter
       />
 
@@ -236,7 +236,7 @@ export default function AdminSimulatePage() {
             </div>
             {isDone && (
               <div className="bg-blue-50 rounded-lg px-3 py-2 text-xs text-blue-700">
-                ✅ Mixpanel 전송 완료 — Funnels / Insights / A/B Tests 에서 확인하세요.
+                ✅ GA4 + Mixpanel 전송 완료 — GA4 실시간 개요 / Mixpanel Funnels에서 확인하세요.
               </div>
             )}
           </div>
