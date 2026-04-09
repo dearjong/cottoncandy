@@ -6,7 +6,6 @@ import {
   Home,
   Mail,
   FolderOpen,
-  Heart,
   HelpCircle,
   LogOut,
   FileText,
@@ -514,16 +513,12 @@ export default function Header() {
                   </div>
                 </div>
 
-                {/* Work 홈 Section */}
+                {/* 그룹1: Work */}
                 <div className="py-1">
                   <DropdownMenuItem
                     className="px-6 py-2 cursor-pointer"
                     onClick={() => {
-                      trackHeaderInteraction({
-                        target: "dropdown_item",
-                        item: "Work 홈",
-                        path: "/work/home",
-                      });
+                      trackHeaderInteraction({ target: "dropdown_item", item: "Work 홈", path: "/work/home" });
                       setLocation("/work/home");
                     }}
                   >
@@ -532,24 +527,7 @@ export default function Header() {
                   <DropdownMenuItem
                     className="px-6 py-2 cursor-pointer"
                     onClick={() => {
-                      trackHeaderInteraction({
-                        target: "dropdown_item",
-                        item: "메세지·알림",
-                        path: "/work/message/received",
-                      });
-                      setLocation("/work/message/received");
-                    }}
-                  >
-                    <span className="whitespace-nowrap">메세지·알림</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="px-6 py-2 cursor-pointer"
-                    onClick={() => {
-                      trackHeaderInteraction({
-                        target: "dropdown_item",
-                        item: "프로젝트 관리",
-                        path: "/work/home",
-                      });
+                      trackHeaderInteraction({ target: "dropdown_item", item: "프로젝트 관리", path: "/work/home" });
                       setLocation("/work/home");
                     }}
                   >
@@ -558,81 +536,44 @@ export default function Header() {
                   <DropdownMenuItem
                     className="px-6 py-2 cursor-pointer"
                     onClick={() => {
-                      trackHeaderInteraction({
-                        target: "dropdown_item",
-                        item: "회사소개서 & 포트폴리오",
-                        path: "/portfolio",
-                      });
-                      setLocation("/portfolio");
+                      trackHeaderInteraction({ target: "dropdown_item", item: "문서함" });
                     }}
                   >
-                    <span className="whitespace-nowrap">회사소개서 & 포트폴리오</span>
-                  </DropdownMenuItem>
-                  {userMode === 'participate' && (
-                    <>
-                      <div className="my-1 border-t border-gray-100"></div>
-                      <DropdownMenuItem
-                        className="px-6 py-2 cursor-pointer"
-                        onClick={() =>
-                          trackHeaderInteraction({
-                            target: "dropdown_item",
-                            item: "기업 정보",
-                          })
-                        }
-                      >
-                        <span className="whitespace-nowrap">기업 정보</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="px-6 py-2 cursor-pointer"
-                        onClick={() =>
-                          trackHeaderInteraction({
-                            target: "dropdown_item",
-                            item: "사업자 정보·인증",
-                          })
-                        }
-                      >
-                        <span className="whitespace-nowrap">사업자 정보·인증</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="px-6 py-2 cursor-pointer"
-                        onClick={() => {
-                          trackHeaderInteraction({
-                            target: "dropdown_item",
-                            item: "구성원 관리",
-                            path: "/mypage/members",
-                          });
-                          setLocation("/mypage/members");
-                        }}
-                      >
-                        <span className="whitespace-nowrap">구성원 관리</span>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                  <DropdownMenuItem
-                    className="px-6 py-2 cursor-pointer"
-                    onClick={() =>
-                      trackHeaderInteraction({
-                        target: "dropdown_item",
-                        item: "파일함",
-                      })
-                    }
-                  >
-                    <span className="whitespace-nowrap">파일함</span>
+                    <span className="whitespace-nowrap">문서함</span>
                   </DropdownMenuItem>
                 </div>
 
                 <DropdownMenuSeparator />
 
-                {/* 내정보 Section */}
+                {/* 그룹2: 기업 */}
                 <div className="py-1">
                   <DropdownMenuItem
                     className="px-6 py-2 cursor-pointer"
                     onClick={() => {
-                      trackHeaderInteraction({
-                        target: "dropdown_item",
-                        item: "내정보",
-                        path: "/my/profile",
-                      });
+                      trackHeaderInteraction({ target: "dropdown_item", item: "회사소개서 & 포트폴리오", path: "/portfolio" });
+                      setLocation("/portfolio");
+                    }}
+                  >
+                    <span className="whitespace-nowrap">회사소개서 & 포트폴리오</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="px-6 py-2 cursor-pointer"
+                    onClick={() => {
+                      trackHeaderInteraction({ target: "dropdown_item", item: "기업 정보" });
+                    }}
+                  >
+                    <span className="whitespace-nowrap">기업 정보</span>
+                  </DropdownMenuItem>
+                </div>
+
+                <DropdownMenuSeparator />
+
+                {/* 그룹3: 내정보 & 기타 */}
+                <div className="py-1">
+                  <DropdownMenuItem
+                    className="px-6 py-2 cursor-pointer"
+                    onClick={() => {
+                      trackHeaderInteraction({ target: "dropdown_item", item: "내정보", path: "/my/profile" });
                       setLocation("/my/profile");
                     }}
                   >
@@ -640,25 +581,9 @@ export default function Header() {
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="px-6 py-2 cursor-pointer"
-                    onClick={() =>
-                      trackHeaderInteraction({
-                        target: "dropdown_item",
-                        item: "즐겨찾기",
-                      })
-                    }
-                  >
-                    <Heart className="w-4 h-4" />
-                    <span className="whitespace-nowrap">즐겨찾기</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="px-6 py-2 cursor-pointer"
                     onClick={() => {
-                      trackHeaderInteraction({
-                        target: "dropdown_item",
-                        item: "1:1 문의",
-                        path: "/guide/inquiry",
-                      });
-                      setLocation("/guide/inquiry");
+                      trackHeaderInteraction({ target: "dropdown_item", item: "1:1 문의", path: "/my/inquiry" });
+                      setLocation("/my/inquiry");
                     }}
                   >
                     <span className="whitespace-nowrap">1:1 문의</span>
@@ -666,11 +591,7 @@ export default function Header() {
                   <DropdownMenuItem
                     className="px-6 py-2 cursor-pointer"
                     onClick={() => {
-                      trackHeaderInteraction({
-                        target: "dropdown_item",
-                        item: "운영자 화면",
-                        path: "/admin",
-                      });
+                      trackHeaderInteraction({ target: "dropdown_item", item: "운영자 화면", path: "/admin" });
                       setLocation("/admin");
                     }}
                   >

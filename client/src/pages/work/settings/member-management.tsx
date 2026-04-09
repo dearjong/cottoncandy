@@ -2,7 +2,8 @@ import { useState } from "react";
 import Layout from "@/components/layout/layout";
 import WorkSidebar from "@/components/work/sidebar";
 import { Search, X, ChevronDown } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
   trackMemberApproved,
   trackMemberActivityToggled,
@@ -320,6 +321,7 @@ export default function SettingsMemberManagement() {
       {/* ── 권한 변경 확인 팝업 ── */}
       <Dialog open={popup.type === "role_confirm"} onOpenChange={closePopup}>
         <DialogContent className="sm:max-w-[280px] p-6">
+          <VisuallyHidden><DialogTitle>권한 변경 확인</DialogTitle></VisuallyHidden>
           <p className="text-[16px] font-bold text-gray-900 mb-6">권한을 변경하시겠습니까?</p>
           <div className="popup-buttons">
             <button onClick={closePopup} className="btn-white">취소</button>
@@ -331,6 +333,7 @@ export default function SettingsMemberManagement() {
       {/* ── 권한 변경 완료 팝업 ── */}
       <Dialog open={popup.type === "role_done"} onOpenChange={closePopup}>
         <DialogContent className="sm:max-w-[280px] p-6">
+          <VisuallyHidden><DialogTitle>권한 변경 완료</DialogTitle></VisuallyHidden>
           <p className="text-[16px] font-bold text-gray-900 mb-6">변경이 완료되었어요.</p>
           <button onClick={closePopup} className="btn-pink w-full">확인</button>
         </DialogContent>
@@ -339,6 +342,7 @@ export default function SettingsMemberManagement() {
       {/* ── 구성원 승인 확인 팝업 ── */}
       <Dialog open={popup.type === "approve_confirm"} onOpenChange={closePopup}>
         <DialogContent className="sm:max-w-[280px] p-6">
+          <VisuallyHidden><DialogTitle>구성원 승인 확인</DialogTitle></VisuallyHidden>
           <p className="text-[16px] font-bold text-gray-900 mb-6">구성원으로 승인하시겠습니까?</p>
           <div className="popup-buttons">
             <button onClick={closePopup} className="btn-white">취소</button>
@@ -350,6 +354,7 @@ export default function SettingsMemberManagement() {
       {/* ── 구성원 승인 완료 팝업 ── */}
       <Dialog open={popup.type === "approve_done"} onOpenChange={closePopup}>
         <DialogContent className="sm:max-w-[280px] p-6">
+          <VisuallyHidden><DialogTitle>구성원 승인 완료</DialogTitle></VisuallyHidden>
           <p className="text-[16px] font-bold text-gray-900 mb-6">승인되었어요.</p>
           <button onClick={closePopup} className="btn-pink w-full">확인</button>
         </DialogContent>
@@ -358,6 +363,7 @@ export default function SettingsMemberManagement() {
       {/* ── 구성원 제외 확인 팝업 ── */}
       <Dialog open={popup.type === "remove_confirm"} onOpenChange={closePopup}>
         <DialogContent className="sm:max-w-[280px] p-6">
+          <VisuallyHidden><DialogTitle>구성원 제외 확인</DialogTitle></VisuallyHidden>
           <p className="text-[16px] font-bold text-gray-900 mb-3">구성원을 제외하시겠습니까?</p>
           <label className="flex items-center gap-2 text-[12px] text-gray-500 mb-6 cursor-pointer">
             <input
@@ -378,6 +384,7 @@ export default function SettingsMemberManagement() {
       {/* ── 구성원 제외 완료 팝업 ── */}
       <Dialog open={popup.type === "remove_done"} onOpenChange={closePopup}>
         <DialogContent className="sm:max-w-[280px] p-6">
+          <VisuallyHidden><DialogTitle>구성원 제외 완료</DialogTitle></VisuallyHidden>
           <p className="text-[16px] font-bold text-gray-900 mb-6">제외되었어요.</p>
           <button onClick={closePopup} className="btn-pink w-full">확인</button>
         </DialogContent>
@@ -386,6 +393,7 @@ export default function SettingsMemberManagement() {
       {/* ── 제외 불가 (담당 프로젝트 있음) 팝업 ── */}
       <Dialog open={popup.type === "remove_blocked"} onOpenChange={closePopup}>
         <DialogContent className="sm:max-w-[280px] p-6">
+          <VisuallyHidden><DialogTitle>구성원 제외 불가</DialogTitle></VisuallyHidden>
           <p className="text-[16px] font-bold text-gray-900 text-center mb-6 leading-snug">
             담당프로젝트를 모두 이관하신 후<br />제외가 가능합니다.
           </p>
