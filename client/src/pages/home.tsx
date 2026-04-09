@@ -72,21 +72,24 @@ export default function Home() {
       company: "대한산업안전협회",
       dDay: "D-120",
       period: "2025-04-14 ~ 2025-06-08",
-      status: "접수예정"
+      status: "접수예정",
+      type: "contest" as const
     },
     {
       title: "[KUDAF] 대한민국 대학생 디",
       company: "(사)한국디지털광고협회",
       dDay: "D-50",
       period: "2025-06-02 ~ 2025-09-26",
-      status: "접수중"
+      status: "접수중",
+      type: "contest" as const
     },
     {
       title: "제12회 청소년 통일문화 경연",
       company: "통일부 국립통일교육원",
       dDay: "D-30",
       period: "2025-03-27 ~ 2025-04-23",
-      status: "접수중"
+      status: "접수중",
+      type: "project" as const
     }
   ];
 
@@ -199,8 +202,8 @@ export default function Home() {
                 className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer"
                 data-testid={`project-${index}`}
                 onClick={() => {
-                  publishAnalytics("home_project_card_click", { title: project.title, index });
-                  navigate("/project-list");
+                  publishAnalytics("home_project_card_click", { title: project.title, type: project.type, index });
+                  navigate(project.type === "contest" ? "/contest" : "/project-list");
                 }}
               >
                 <h3 className="font-bold text-lg mb-2">{project.title}</h3>
