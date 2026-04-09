@@ -20,6 +20,42 @@ function randInt(min, max) { return Math.floor(rand(min, max + 1)); }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function chance(p) { return Math.random() < p; }
 
+// ── 위치 데이터 (가중치 배열 — 많이 넣을수록 비율 높음) ──────────
+const LOCATIONS = [
+  // 서울 (35%)
+  ...Array(12).fill({ $country_code: "KR", $region: "Seoul", $city: "Seoul", geo_region: "서울" }),
+  // 경기도 (20%)
+  { $country_code: "KR", $region: "Gyeonggi-do", $city: "Suwon", geo_region: "경기도" },
+  { $country_code: "KR", $region: "Gyeonggi-do", $city: "Seongnam", geo_region: "경기도" },
+  { $country_code: "KR", $region: "Gyeonggi-do", $city: "Goyang", geo_region: "경기도" },
+  { $country_code: "KR", $region: "Gyeonggi-do", $city: "Yongin", geo_region: "경기도" },
+  { $country_code: "KR", $region: "Gyeonggi-do", $city: "Bucheon", geo_region: "경기도" },
+  { $country_code: "KR", $region: "Gyeonggi-do", $city: "Anyang", geo_region: "경기도" },
+  // 부산 (8%)
+  { $country_code: "KR", $region: "Busan", $city: "Busan", geo_region: "부산" },
+  { $country_code: "KR", $region: "Busan", $city: "Busan", geo_region: "부산" },
+  // 인천 (5%)
+  { $country_code: "KR", $region: "Incheon", $city: "Incheon", geo_region: "인천" },
+  // 대구 (4%)
+  { $country_code: "KR", $region: "Daegu", $city: "Daegu", geo_region: "대구" },
+  // 대전 (3%)
+  { $country_code: "KR", $region: "Daejeon", $city: "Daejeon", geo_region: "대전" },
+  // 광주 (3%)
+  { $country_code: "KR", $region: "Gwangju", $city: "Gwangju", geo_region: "광주" },
+  // 기타 지방 (7%)
+  { $country_code: "KR", $region: "Gyeongsangnam-do", $city: "Changwon", geo_region: "경남" },
+  { $country_code: "KR", $region: "Gyeongsangbuk-do", $city: "Pohang", geo_region: "경북" },
+  { $country_code: "KR", $region: "Chungcheongnam-do", $city: "Cheonan", geo_region: "충남" },
+  { $country_code: "KR", $region: "Jeollabuk-do", $city: "Jeonju", geo_region: "전북" },
+  { $country_code: "KR", $region: "Jeju", $city: "Jeju", geo_region: "제주" },
+  // 해외 (5%)
+  { $country_code: "US", $region: "California", $city: "Los Angeles", geo_region: "해외" },
+  { $country_code: "JP", $region: "Tokyo", $city: "Tokyo", geo_region: "해외" },
+  { $country_code: "SG", $region: "Singapore", $city: "Singapore", geo_region: "해외" },
+  { $country_code: "AU", $region: "New South Wales", $city: "Sydney", geo_region: "해외" },
+  { $country_code: "VN", $region: "Hanoi", $city: "Hanoi", geo_region: "해외" },
+];
+
 // 비즈니스 시간대 가중치 반영 타임스탬프
 function genTimestamp(baseMs = 0) {
   const hoursBack = rand(0, MAX_HOURS_BACK);
@@ -92,10 +128,11 @@ async function simulateUser(i) {
   const userId = genUserId(i);
   const clientId = genClientId();
   const userType = pick(USER_TYPES);
+  const location = pick(LOCATIONS);
   const sessionStart = genTimestamp();
   let t = sessionStart;
   const next = (minMs = 2000, maxMs = 25000) => { t += randInt(minMs, maxMs); return t; };
-  const base = { user_type: userType };
+  const base = { user_type: userType, ...location };
 
   // 1. 홈 방문 (100%)
   await emit(clientId, userId, "page_view", { page_location: "/", page_title: "홈", ...base }, t);
