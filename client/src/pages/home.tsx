@@ -47,8 +47,9 @@ export default function Home() {
   const ctaText   = TITLE_COPY[titleVariant]?.cta   ?? TITLE_COPY.control.cta;
 
   const handleCtaClick = () => {
-    publishAnalytics("home_cta_clicked", {
-      section: "home",
+    publishAnalytics("home_click", {
+      element: "cta",
+      label: ctaText,
       experiment_id: EXP_ID_TITLE,
       variant: titleVariant,
       destination: "/create-project/step1",
@@ -179,7 +180,7 @@ export default function Home() {
                 className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-white hover:shadow-md transition-all"
                 data-testid={`category-${index}`}
                 onClick={() => {
-                  publishAnalytics("home_category_click", { section: "home", category: category.name, index, destination: "/agency-search" });
+                  publishAnalytics("home_click", { element: "category", label: category.name, index, destination: "/agency-search" });
                   navigate(`/agency-search?category=${encodeURIComponent(category.name)}`);
                 }}
               >
@@ -205,7 +206,7 @@ export default function Home() {
                 data-testid={`project-${index}`}
                 onClick={() => {
                   const dest = project.type === "contest" ? "/contest" : "/project-list";
-                  publishAnalytics("home_project_card_click", { section: "home", title: project.title, type: project.type, index, destination: dest });
+                  publishAnalytics("home_click", { element: "project_card", label: project.title, type: project.type, index, destination: dest });
                   navigate(dest);
                 }}
               >
@@ -237,7 +238,7 @@ export default function Home() {
                 className="bg-white rounded-xl p-8 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
                 data-testid={`feature-${index}`}
                 onClick={() => {
-                  publishAnalytics("home_feature_card_click", { section: "home", title: feature.title, index, destination: "/guide/features" });
+                  publishAnalytics("home_click", { element: "feature_card", label: feature.title, index, destination: "/guide/features" });
                   navigate("/guide/features");
                 }}
               >
@@ -262,7 +263,7 @@ export default function Home() {
                 className="border border-gray-200 rounded-lg p-4 text-center hover:shadow-md transition-shadow cursor-pointer"
                 data-testid={`partner-${index}`}
                 onClick={() => {
-                  publishAnalytics("home_partner_click", { section: "home", partner, index, destination: "/agency-search" });
+                  publishAnalytics("home_click", { element: "partner", label: partner, index, destination: "/agency-search" });
                   navigate("/agency-search");
                 }}
               >
@@ -285,7 +286,7 @@ export default function Home() {
                 <div
                   className="bg-white border border-gray-200 rounded-lg px-6 py-3 cursor-pointer hover:shadow-sm hover:border-pink-300 transition-all"
                   onClick={() => {
-                    publishAnalytics("home_flow_step_click", { section: "home", step, index, destination: "/guide/how-to-use" });
+                    publishAnalytics("home_click", { element: "flow_step", label: step, index, destination: "/guide/how-to-use" });
                     navigate("/guide/how-to-use");
                   }}
                 >
@@ -323,7 +324,7 @@ export default function Home() {
               <div key={index} className="bg-white rounded-lg overflow-hidden" data-testid={`faq-${index}`}>
                 <button
                   onClick={() => {
-                    publishAnalytics("home_faq_click", { section: "home", question: faq.question, index });
+                    publishAnalytics("home_click", { element: "faq", label: faq.question, index });
                     setOpenFaqIndex(openFaqIndex === index ? null : index);
                   }}
                   className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
@@ -343,7 +344,7 @@ export default function Home() {
             <button
               className="text-sm text-gray-500 hover:text-pink-600 transition-colors"
               onClick={() => {
-                publishAnalytics("home_faq_more_click", { section: "home", destination: "/guide/faq" });
+                publishAnalytics("home_click", { element: "faq_more", label: "전체보기", destination: "/guide/faq" });
                 navigate("/guide/faq");
               }}
             >

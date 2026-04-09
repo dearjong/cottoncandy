@@ -27,24 +27,22 @@ function describeEvent(name: string, props: Record<string, unknown>): { label: s
 
   switch (name) {
     // ── 홈 화면
-    case "home_cta_clicked":
-      return { label: "홈 CTA 클릭", detail: `variant: ${p.variant ?? "-"}`, badge: "홈" };
-    case "home_category_click":
-      return { label: "홈 카테고리 클릭", detail: `${p.category ?? ""}`, badge: "홈" };
-    case "home_project_card_click":
-      return { label: "홈 프로젝트 카드 클릭", detail: `${p.title ?? ""} (${p.type ?? ""})`, badge: "홈" };
-    case "home_feature_card_click":
-      return { label: "홈 특장점 카드 클릭", detail: `${p.title ?? ""}`, badge: "홈" };
-    case "home_partner_click":
-      return { label: "홈 파트너 클릭", detail: `${p.partner ?? ""}`, badge: "홈" };
-    case "home_flow_step_click":
-      return { label: "홈 이용흐름 클릭", detail: `${p.step ?? ""}`, badge: "홈" };
-    case "home_faq_click": {
-      const num = typeof p.index === "number" ? p.index + 1 : p.index;
-      return { label: `홈 FAQ ${num}번 클릭`, detail: `${p.question ?? ""}`, badge: "홈" };
+    case "home_click": {
+      const elementLabels: Record<string, string> = {
+        cta: "CTA 버튼",
+        category: "카테고리 아이콘",
+        project_card: "프로젝트 카드",
+        feature_card: "특장점 카드",
+        partner: "파트너사",
+        flow_step: "이용 흐름 단계",
+        faq: "FAQ",
+        faq_more: "FAQ 전체보기",
+      };
+      const elem = String(p.element ?? "");
+      const elemLabel = elementLabels[elem] ?? elem;
+      const num = typeof p.index === "number" ? ` #${(p.index as number) + 1}` : "";
+      return { label: `홈 클릭 · ${elemLabel}${num}`, detail: `${p.label ?? ""}${p.destination ? ` → ${p.destination}` : ""}`, badge: "홈" };
     }
-    case "home_faq_more_click":
-      return { label: "홈 FAQ 전체보기 클릭", detail: "", badge: "홈" };
 
     // ── 채팅 / 맨위로
     case "chat_opened":
