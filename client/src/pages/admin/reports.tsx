@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useSearch } from "wouter";
 import { StatisticsDashboard } from "@/components/admin/statistics-dashboard";
 import { PageHeader } from "@/components/admin/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -110,7 +111,7 @@ const FUNNEL_ORDER = [
   { key: "referral_sent",         label: "추천 공유",       color: "bg-indigo-400",  aarrr: "Referral" },
 ];
 
-function ActivityTab() {
+function ActivityTab({ autoOpen }: { autoOpen?: boolean }) {
   const [data, setData] = useState<{ jobId: string; job: SimJob } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -125,6 +126,13 @@ function ActivityTab() {
   function stopPolling() {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
   }
+
+  useEffect(() => {
+    if (autoOpen) {
+      setDialogCfg(cfg);
+      setDialogOpen(true);
+    }
+  }, [autoOpen]);
 
   async function startSim(runCfg: SimConfig) {
     setCfg(runCfg);
@@ -658,22 +666,25 @@ function ActivityTab() {
 }
 
 export default function ReportsPage() {
+  const search = useSearch();
+  const autoOpenSim = new URLSearchParams(search).get("simulate") === "1";
+
   return (
     <div className="space-y-6 p-6">
       <PageHeader title="통계/리포트" description="플랫폼 성과 데이터와 상세 리포트를 확인하세요" hidePeriodFilter />
 
-      <Tabs defaultValue="platform">
+      <Tabs defaultValue="activity">
         <TabsList className="bg-gray-100">
-          <TabsTrigger value="platform">플랫폼 현황</TabsTrigger>
           <TabsTrigger value="activity">활동현황</TabsTrigger>
+          <TabsTrigger value="platform">플랫폼 현황</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="activity" className="mt-6">
+          <ActivityTab autoOpen={autoOpenSim} />
+        </TabsContent>
 
         <TabsContent value="platform" className="mt-6">
           <StatisticsDashboard />
-        </TabsContent>
-
-        <TabsContent value="activity" className="mt-6">
-          <ActivityTab />
         </TabsContent>
       </Tabs>
     </div>

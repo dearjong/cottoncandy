@@ -27,7 +27,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <header className="flex items-center justify-between p-4 border-b border-sidebar-border bg-background">
                 <SidebarTrigger data-testid="button-sidebar-toggle" />
                 <div className="flex items-center gap-4">
-                  <Link href="/admin/simulate">
+                  <Link href="/admin/reports?simulate=1">
                     <Button variant="outline" size="sm">
                       <FlaskConical className="h-4 w-4 mr-2" />
                       시뮬레이션
