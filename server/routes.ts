@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { startSimulation, getSimJob, DEFAULT_CONFIG, type SimConfig } from "./simulate-analytics";
+import { startSimulation, getSimJob, getLatestSimJob, DEFAULT_CONFIG, type SimConfig } from "./simulate-analytics";
 import {
   projectDataSchema,
   type ProjectData,
@@ -358,6 +358,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const job = getSimJob(req.params.jobId);
     if (!job) return res.status(404).json({ error: "Job not found" });
     res.json(job);
+  });
+
+  // GET /api/admin/simulate/latest — 최근 시뮬레이션 결과 조회
+  app.get("/api/admin/simulate/latest", (req, res) => {
+    const latest = getLatestSimJob();
+    if (!latest) return res.json(null);
+    res.json(latest);
   });
 
   const httpServer = createServer(app);

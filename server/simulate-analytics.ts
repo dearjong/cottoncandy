@@ -84,9 +84,17 @@ const DIRECT_LANDING_PAGES = [
 ];
 
 const jobs = new Map<string, SimJob>();
+let latestJobId: string | null = null;
 
 export function getSimJob(jobId: string): SimJob | undefined {
   return jobs.get(jobId);
+}
+
+export function getLatestSimJob(): { jobId: string; job: SimJob } | null {
+  if (!latestJobId) return null;
+  const job = jobs.get(latestJobId);
+  if (!job) return null;
+  return { jobId: latestJobId, job };
 }
 
 function weightedPick<T>(items: Array<{ value: T; weight: number }>): T {
@@ -254,6 +262,7 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     startedAt: Date.now(),
   };
   jobs.set(jobId, job);
+  latestJobId = jobId;
 
   runJob(jobId, job, cfg).catch((e) => {
     job.status = "error";
