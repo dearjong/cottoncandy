@@ -104,11 +104,12 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
   }
 
   // ── 유저 속성 풀 ──────────────────────────────────────
-  // 광고주 50% / 대행사 30% / 제작사 20%
+  // 광고주 5% / 대행사 30% / 제작사 55% / 뜨내기 10%
   const USER_TYPE_LIST = [
-    { value: "advertiser", weight: 50 },
+    { value: "advertiser", weight:  5 },
     { value: "agency",     weight: 30 },
-    { value: "production", weight: 20 },
+    { value: "production", weight: 55 },
+    { value: "visitor",    weight: 10 },
   ];
   const GENDERS    = [{ value: "male", weight: 60 }, { value: "female", weight: 40 }];
   const AGE_GROUPS = [{ value: "20s", weight: 10 }, { value: "30s", weight: 35 }, { value: "40s", weight: 35 }, { value: "50s", weight: 20 }];
@@ -164,6 +165,9 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
     // ── Acquisition ──────────────────────────────────
     add("site_visit",  uid, baseTs,     { path: "/", ...common });
     add("first_visit", uid, baseTs + 1, { path: "/", ...common });
+
+    // 뜨내기: 홈만 보다 이탈
+    if (userType === "visitor") continue;
 
     // ── 회원가입 (40%) ────────────────────────────────
     if (chance(0.40)) {

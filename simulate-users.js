@@ -146,11 +146,12 @@ async function setMixpanelProfile(userId, profileProps) {
 }
 
 // ── 유저 행동 시뮬레이션 ─────────────────────────────
-// 광고주 50% / 대행사 30% / 제작사 20%
+// 광고주 5% / 대행사 30% / 제작사 55% / 뜨내기 10%
 const USER_TYPES = [
-  "advertiser","advertiser","advertiser","advertiser","advertiser",
-  "agency","agency","agency",
-  "production","production",
+  "advertiser",
+  "agency","agency","agency","agency","agency","agency",
+  "production","production","production","production","production","production","production","production","production","production","production",
+  "visitor","visitor",
 ];
 const GENDERS    = ["male","male","male","female","female"]; // 남 60% / 여 40%
 const AGE_GROUPS = ["20s","30s","30s","30s","40s","40s","50s"]; // 30-40대 중심
@@ -202,6 +203,9 @@ async function simulateUser(i) {
   if (chance(0.35)) {
     await emit(clientId, userId, "category_viewed", { category: pick(CATEGORIES), ...base }, next());
   }
+
+  // 뜨내기는 여기서 종료 — 둘러보다 이탈
+  if (userType === "visitor") return;
 
   // 5. 회원가입 플로우 (22%) — 실제 앱 이벤트명 사용
   if (chance(0.22)) {
