@@ -68,7 +68,7 @@ export default function Home() {
 
   const projects = [
     {
-      title: "제1회 안전한 대한민국 영상 공",
+      title: "제1회 안전한 대한민국 영상 공모전",
       company: "대한산업안전협회",
       dDay: "D-120",
       period: "2025-04-14 ~ 2025-06-08",
@@ -76,7 +76,7 @@ export default function Home() {
       type: "contest" as const
     },
     {
-      title: "[KUDAF] 대한민국 대학생 디",
+      title: "[KUDAF] 대한민국 대학생 디지털 광고 공모전",
       company: "(사)한국디지털광고협회",
       dDay: "D-50",
       period: "2025-06-02 ~ 2025-09-26",
@@ -84,7 +84,7 @@ export default function Home() {
       type: "contest" as const
     },
     {
-      title: "제12회 청소년 통일문화 경연",
+      title: "제12회 청소년 통일문화 경연대회",
       company: "통일부 국립통일교육원",
       dDay: "D-30",
       period: "2025-03-27 ~ 2025-04-23",
