@@ -186,7 +186,13 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
       isAuthenticated = true;
     }
 
-    // 일반 가입 (비SSO 중 5%)
+    // 수동 로그인: tvcf 비SSO 유저 중 60% (기존 tvcf 유저가 직접 로그인)
+    if (!isAuthenticated && isTvcf && chance(0.60)) {
+      add("login", uid, baseTs + 120, { method: "email", source: "tvcf.co.kr", ...common });
+      isAuthenticated = true;
+    }
+
+    // 일반 가입 (비로그인 유저 중 5%)
     if (!isAuthenticated && chance(0.05)) {
       add("signup_started", uid, baseTs + 30,  { method: "email", ...common });
       add("signup_funnel",  uid, baseTs + 35,  { step: 1, step_name: "account", path: "/signup", ...common });

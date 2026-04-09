@@ -224,7 +224,13 @@ async function simulateUser(i) {
     isAuthenticated = true;
   }
 
-  // 일반 회원가입 (비SSO 유저 중 5%)
+  // 수동 로그인: tvcf 비SSO 유저 중 60% (기존 tvcf 유저가 직접 로그인)
+  if (!isAuthenticated && isTvcf && chance(0.60)) {
+    await emit(clientId, userId, "login", { method: "email", source: "tvcf.co.kr", ...base }, next(2000, 8000));
+    isAuthenticated = true;
+  }
+
+  // 일반 회원가입 (비로그인 유저 중 5%)
   if (!isAuthenticated && chance(0.05)) {
     await emit(clientId, userId, "signup_started", { method: "email", ...base }, next());
     await emit(clientId, userId, "signup_funnel", { step: 1, step_name: "account", path: "/signup", ...base }, next(1000, 5000));
