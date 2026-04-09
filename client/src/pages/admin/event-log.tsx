@@ -146,25 +146,32 @@ function fmt(dateStr?: string) {
   return `${mm}/${dd} ${hh}:${min}:${ss}`;
 }
 
+const PAGE_SIZE_OPTIONS = [20, 50, 100];
+
 export default function EventLogPage() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [data, setData] = useState<LocalEventRow[]>([]);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   const loadData = useCallback(() => {
     setData(getLocalEventLog());
   }, []);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  useEffect(() => { loadData(); }, [loadData]);
 
   useEffect(() => {
     if (!autoRefresh) return;
     const id = setInterval(loadData, 5000);
     return () => clearInterval(id);
   }, [autoRefresh, loadData]);
+
+  // 필터 바뀌면 1페이지로
+  useEffect(() => { setPage(1); }, [filter, search, dateFrom, dateTo]);
 
   const handleRefresh = useCallback(() => { loadData(); }, [loadData]);
 
@@ -175,13 +182,21 @@ export default function EventLogPage() {
     }
   }, []);
 
-  // 필터 + 검색
-  const rows = data
+  // 필터 + 검색 + 날짜 범위
+  const filtered = data
     .slice()
     .reverse()
     .map((ev) => ({ ...ev, parsed: describeEvent(ev.eventName, ev.properties) }))
     .filter((ev) => {
       if (filter !== "all" && ev.parsed.badge !== filter) return false;
+      if (dateFrom) {
+        const from = new Date(dateFrom + "T00:00:00");
+        if (new Date(ev.createdAt) < from) return false;
+      }
+      if (dateTo) {
+        const to = new Date(dateTo + "T23:59:59");
+        if (new Date(ev.createdAt) > to) return false;
+      }
       if (search) {
         const q = search.toLowerCase();
         return (
@@ -193,6 +208,9 @@ export default function EventLogPage() {
       return true;
     });
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const rows = filtered.slice((page - 1) * pageSize, page * pageSize);
+
   return (
     <div className="space-y-6 p-6">
       <PageHeader
@@ -202,7 +220,8 @@ export default function EventLogPage() {
       />
 
       {/* 컨트롤 바 */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
+        {/* 1행: 카테고리 + 검색 + 버튼들 */}
         <div className="flex flex-wrap items-center gap-3">
           <Select value={filter} onValueChange={setFilter}>
             <SelectTrigger className="w-36">
@@ -225,12 +244,7 @@ export default function EventLogPage() {
             />
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={handleRefresh}
-          >
+          <Button variant="outline" size="sm" className="gap-2" onClick={handleRefresh}>
             <RefreshCw className="h-4 w-4" />
             새로고침
           </Button>
@@ -253,10 +267,47 @@ export default function EventLogPage() {
             <Trash2 className="h-4 w-4" />
             로그 초기화
           </Button>
+        </div>
 
-          <span className="text-xs text-gray-400 ml-auto">
-            총 {rows.length}건
-          </span>
+        {/* 2행: 날짜 범위 + 건수/페이지 */}
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-sm text-gray-500">기간</span>
+          <Input
+            type="date"
+            className="w-40 text-sm"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+          />
+          <span className="text-gray-400">~</span>
+          <Input
+            type="date"
+            className="w-40 text-sm"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+          />
+          {(dateFrom || dateTo) && (
+            <button
+              className="text-xs text-gray-400 hover:text-gray-600 underline"
+              onClick={() => { setDateFrom(""); setDateTo(""); }}
+            >
+              초기화
+            </button>
+          )}
+
+          <div className="ml-auto flex items-center gap-2">
+            <span className="text-xs text-gray-400">페이지당</span>
+            <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
+              <SelectTrigger className="w-20 h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PAGE_SIZE_OPTIONS.map((n) => (
+                  <SelectItem key={n} value={String(n)}>{n}건</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-xs text-gray-400">총 {filtered.length}건</span>
+          </div>
         </div>
       </div>
 
@@ -300,6 +351,68 @@ export default function EventLogPage() {
             )}
           </TableBody>
         </Table>
+
+        {/* 페이지네이션 */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+            <span className="text-xs text-gray-400">
+              {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} / {filtered.length}건
+            </span>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-3 text-xs"
+                disabled={page === 1}
+                onClick={() => setPage(1)}
+              >
+                처음
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-3 text-xs"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                이전
+              </Button>
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const start = Math.max(1, Math.min(page - 2, totalPages - 4));
+                const p = start + i;
+                return (
+                  <Button
+                    key={p}
+                    variant={p === page ? "default" : "outline"}
+                    size="sm"
+                    className={`h-8 w-8 text-xs p-0 ${p === page ? "bg-pink-600 hover:bg-pink-700" : ""}`}
+                    onClick={() => setPage(p)}
+                  >
+                    {p}
+                  </Button>
+                );
+              })}
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-3 text-xs"
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                다음
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-3 text-xs"
+                disabled={page === totalPages}
+                onClick={() => setPage(totalPages)}
+              >
+                마지막
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
