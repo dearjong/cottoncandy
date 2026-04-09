@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { getSubtitle } from "@/config/global-events";
 import memberImage from "@assets/로그인 회원_1759381986859.png";
 import nonMemberImage from "@assets/로그인 비회원_1759381986859.png";
@@ -18,6 +19,7 @@ export default function Signup() {
   const [email, setEmail] = useState("test@cottoncandy.kr");
   const [password, setPassword] = useState("test1234!");
   const [passwordConfirm, setPasswordConfirm] = useState("test1234!");
+  const [agreed, setAgreed] = useState(true);
   
   // 메뉴별 서브타이틀 가져오기 (광고제작 의뢰하기 메뉴)
   const eventInfo = getSubtitle(undefined, 'request');
@@ -190,11 +192,27 @@ export default function Signup() {
                   />
                 </div>
 
+                {/* 약관 동의 */}
+                <div className="flex items-start gap-2 pt-2">
+                  <Checkbox
+                    id="agree"
+                    checked={agreed}
+                    onCheckedChange={(v) => setAgreed(!!v)}
+                    className="mt-0.5 data-[state=checked]:bg-pink-500 data-[state=checked]:border-pink-500"
+                    data-testid="checkbox-agree"
+                  />
+                  <label htmlFor="agree" className="text-xs text-gray-600 cursor-pointer leading-relaxed">
+                    Cotton Candy TVCF 통합회원 가입 및 이용약관과 개인정보 수집·이용,{" "}
+                    <a href="/login#terms" className="text-pink-500 underline">개인정보 취급방침</a>에 동의합니다.
+                  </label>
+                </div>
+
                 {/* 다음 버튼 */}
                 <div className="text-center pt-4">
                   <Button
                     onClick={handleNext}
-                    className="btn-pink"
+                    disabled={!agreed}
+                    className={agreed ? "btn-pink" : "btn-pink opacity-40 cursor-not-allowed"}
                     data-testid="button-next"
                   >
                     다음
