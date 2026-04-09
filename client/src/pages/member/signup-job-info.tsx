@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { useLocation } from "wouter";
 import Layout from "@/components/layout/layout";
 import { Input } from "@/components/ui/input";
-import { Info } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Info, Building2, CheckCircle2 } from "lucide-react";
 import { trackCompanyRegistered, trackCompanyVerificationRequested } from "@/lib/analytics";
 
 const MOCK_COMPANIES = [
@@ -21,6 +22,7 @@ export default function SignupJobInfo() {
   );
   const [showDropdown, setShowDropdown] = useState(false);
   const [isNewCompany, setIsNewCompany] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [job, setJob] = useState("기획자");
   const [department, setDepartment] = useState("기획팀");
   const [position, setPosition] = useState("선임연구원");
@@ -45,7 +47,12 @@ export default function SignupJobInfo() {
   };
 
   const handleSubmit = () => {
-    if (!isValid || !selectedCompany) return;
+    if (!isValid) return;
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = () => {
+    if (!selectedCompany) return;
     if (isNewCompany) {
       trackCompanyRegistered({ company_name: selectedCompany.name, company_type: "agency" });
     } else {
@@ -55,6 +62,7 @@ export default function SignupJobInfo() {
         company_id: String(selectedCompany.id),
       });
     }
+    setConfirmOpen(false);
     setLocation("/");
   };
 
@@ -206,6 +214,59 @@ export default function SignupJobInfo() {
           </motion.div>
         </div>
       </div>
+      {/* 등록 신청 확인 팝업 */}
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="popup-title">기업 소속 등록을 신청할게요</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            {/* 입력 내용 요약 */}
+            <div className="bg-gray-50 rounded-xl p-4 space-y-2.5 text-sm">
+              <div className="flex items-start gap-2">
+                <Building2 className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                <div>
+                  <span className="font-medium text-gray-900">{selectedCompany?.name}</span>
+                  {selectedCompany?.address && (
+                    <p className="text-xs text-gray-400 mt-0.5">{selectedCompany.address}</p>
+                  )}
+                </div>
+              </div>
+              {job && (
+                <div className="flex items-center gap-2 text-gray-600">
+                  <span className="text-gray-400 text-xs w-8 shrink-0">직무</span>
+                  <span>{job}{department ? ` · ${department}` : ""}{position ? ` · ${position}` : ""}</span>
+                </div>
+              )}
+            </div>
+            {/* 안내 문구 */}
+            <div className="flex items-start gap-2 text-xs text-gray-500">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#EA4C89] mt-0.5 shrink-0" />
+              <span>
+                {isNewCompany
+                  ? "신규 기업으로 등록되며, 관리자 검토 후 활성화됩니다."
+                  : "기업 admin에게 소속 신청이 전달돼요. 승인 전까지는 개인으로 활동할 수 있어요."}
+              </span>
+            </div>
+          </div>
+          <div className="popup-buttons">
+            <button
+              onClick={() => setConfirmOpen(false)}
+              className="btn-white"
+              data-testid="button-cancel"
+            >
+              취소
+            </button>
+            <button
+              onClick={handleConfirm}
+              className="btn-pink"
+              data-testid="button-confirm"
+            >
+              신청하기
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
