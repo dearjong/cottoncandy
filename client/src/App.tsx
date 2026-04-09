@@ -420,6 +420,9 @@ function Router() {
       <Route path="/admin/bidding">
         <AdminLayout><AdminBiddingProjects /></AdminLayout>
       </Route>
+      <Route path="/admin/private">
+        <AdminLayout><AdminOneOnOneProjects /></AdminLayout>
+      </Route>
       <Route path="/admin/one-on-one">
         <AdminLayout><AdminOneOnOneProjects /></AdminLayout>
       </Route>

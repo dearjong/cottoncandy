@@ -61,7 +61,7 @@ const projectParentItem = {
 
 const projectCoreItems = [
   { title: "공고 프로젝트", url: "/admin/project_list", icon: Briefcase },
-  { title: "1:1 프로젝트", url: "/admin/one-on-one", icon: HandHeart },
+  { title: "1:1 프로젝트", url: "/admin/private", icon: HandHeart },
 ]
 const projectFilterItems = [
   { title: "승인 대기", url: "/admin/pending-approval", icon: ClipboardCheck, alert: true },
@@ -171,7 +171,7 @@ export function AppSidebar() {
 
   const projectCounts = useMemo(() => ({
     "/admin/project_list": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.type === "공고").length,
-    "/admin/one-on-one": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.type === "1:1").length,
+    "/admin/private": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.type === "1:1").length,
     "/admin/pending-approval": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.status === "REQUESTED").length,
     "/admin/stop-cancel": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.status === "STOPPED" || p.status === "CANCELLED").length,
     "/admin/participation": MOCK_ADMIN_PROJECTS_V1.filter(
