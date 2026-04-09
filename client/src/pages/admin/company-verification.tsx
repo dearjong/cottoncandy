@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { trackCompanyVerificationApproved, trackCompanyVerificationRejected, trackCorporateMemberActivated } from "@/lib/analytics"
 import { PageHeader } from "@/components/admin/page-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -240,6 +241,16 @@ export default function CompanyVerificationPage() {
 
   const handleApprove = (verification: CompanyVerification) => {
     const typeLabel = verificationTypeLabels[verification.verificationType].label
+    trackCompanyVerificationApproved({
+      company_name: verification.companyName,
+      verification_type: verification.verificationType,
+      company_id: verification.id,
+    })
+    trackCorporateMemberActivated({
+      company_name: verification.companyName,
+      company_type: "agency",
+      verification_type: verification.verificationType,
+    })
     alert(`"${verification.companyName}"의 ${typeLabel}이(가) 승인되었습니다.`)
     setSelectedVerification(null)
   }
@@ -247,6 +258,11 @@ export default function CompanyVerificationPage() {
   const handleReject = () => {
     if (selectedVerification && rejectReason) {
       const typeLabel = verificationTypeLabels[selectedVerification.verificationType].label
+      trackCompanyVerificationRejected({
+        company_name: selectedVerification.companyName,
+        verification_type: selectedVerification.verificationType,
+        reject_reason: rejectReason,
+      })
       alert(`"${selectedVerification.companyName}"의 ${typeLabel}이(가) 반려되었습니다.\n사유: ${rejectReason}`)
       setRejectDialogOpen(false)
       setRejectReason("")

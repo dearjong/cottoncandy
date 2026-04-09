@@ -90,8 +90,20 @@ function describeEvent(name: string, props: Record<string, unknown>): { label: s
     // ── 퍼널 이벤트
     case "site_visit":
       return { label: "사이트 방문", detail: `${p.landing_path ?? ""}`, badge: "유입" };
+    case "signup_type_selected":
+      return { label: "가입 유형 선택", detail: `${p.user_type === "advertiser" ? "광고주" : "파트너사"}${p.partner_type ? ` (${p.partner_type === "agency" ? "대행사" : "제작사"})` : ""}`, badge: "가입" };
     case "signup_complete":
-      return { label: "가입 완료", detail: `${p.user_type ?? ""}`, badge: "전환" };
+      return { label: "가입 완료", detail: `${p.user_type ?? ""}`, badge: "가입" };
+    case "company_registered":
+      return { label: "기업 정보 등록", detail: `${p.company_type ?? ""}`, badge: "기업" };
+    case "company_verification_requested":
+      return { label: "기업 인증 신청", detail: `${p.company_name ?? ""} · ${p.verification_type ?? ""}`, badge: "기업" };
+    case "company_verification_approved":
+      return { label: "기업 인증 승인 ✓", detail: `${p.company_name ?? ""} · ${p.verification_type ?? ""}`, badge: "기업" };
+    case "company_verification_rejected":
+      return { label: "기업 인증 반려", detail: `${p.company_name ?? ""} · 사유: ${p.reject_reason ?? "-"}`, badge: "기업" };
+    case "corporate_member_activated":
+      return { label: "기업 회원 활성화 🎉", detail: `${p.company_name ?? ""} · ${p.verification_type ?? ""}`, badge: "기업" };
     case "activation_achieved":
       return { label: "핵심행동 달성", detail: `${p.action ?? ""}`, badge: "전환" };
     case "project_submitted":
@@ -117,6 +129,8 @@ const BADGE_COLORS: Record<string, string> = {
   "UX": "bg-amber-100 text-amber-700",
   "실험": "bg-purple-100 text-purple-700",
   "유입": "bg-gray-100 text-gray-700",
+  "가입": "bg-sky-100 text-sky-700",
+  "기업": "bg-violet-100 text-violet-700",
   "전환": "bg-orange-100 text-orange-700",
   "수익": "bg-green-100 text-green-700",
   "리텐션": "bg-teal-100 text-teal-700",
@@ -132,6 +146,8 @@ const FILTER_OPTIONS = [
   { value: "UX", label: "스크롤 / 체류 / 맨위로" },
   { value: "실험", label: "A/B 실험" },
   { value: "유입", label: "유입" },
+  { value: "가입", label: "가입 퍼널" },
+  { value: "기업", label: "기업 인증" },
   { value: "전환", label: "전환" },
 ];
 

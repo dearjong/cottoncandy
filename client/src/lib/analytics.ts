@@ -701,6 +701,92 @@ export function trackConsultingProjectLinked(props: {
   publishAnalytics("consulting_project_linked", { ...props, user_type: "admin" });
 }
 
+// ─── 기업 회원 가입 & 인증 이벤트 ────────────────────────────
+
+/**
+ * 가입 유형 선택 완료 (광고주 / 파트너사 선택 시).
+ * 회원가입 초기 화면에서 유형을 결정하는 순간 호출.
+ */
+export function trackSignupTypeSelected(props: {
+  user_type: "advertiser" | "partner";
+  partner_type?: "agency" | "production";
+}) {
+  publishAnalytics("signup_type_selected", props);
+}
+
+/**
+ * 기업 정보 등록 완료 — 사업자등록번호·회사명 등 기업 정보를 제출한 순간.
+ * 기업 등록 폼의 "제출" 버튼 클릭 시 호출.
+ */
+export function trackCompanyRegistered(props: {
+  company_type: "advertiser" | "agency" | "production";
+  has_business_number?: boolean;
+}) {
+  publishAnalytics("company_registered", {
+    ...props,
+    user_type: props.company_type === "advertiser" ? "advertiser" : "partner",
+  });
+}
+
+/**
+ * 기업 인증 신청 제출 — 사업자 인증·진정성 인증·수행 인증 신청 시.
+ * 인증 신청 완료 버튼 클릭 후 호출.
+ */
+export function trackCompanyVerificationRequested(props: {
+  company_name: string;
+  verification_type: "BUSINESS" | "PROJECT_AUTHENTICITY" | "PROJECT_COMPLETION";
+}) {
+  publishAnalytics("company_verification_requested", {
+    ...props,
+    user_type: "partner",
+  });
+}
+
+/**
+ * 기업 인증 승인 (관리자 액션).
+ * 관리자 → 기업 인증 관리 → 승인 버튼 클릭 후 호출.
+ */
+export function trackCompanyVerificationApproved(props: {
+  company_name: string;
+  verification_type: string;
+  company_id?: string;
+}) {
+  publishAnalytics("company_verification_approved", {
+    ...props,
+    user_type: "admin",
+  });
+}
+
+/**
+ * 기업 인증 반려 (관리자 액션).
+ * 관리자 → 기업 인증 관리 → 반려 버튼 클릭 후 호출.
+ */
+export function trackCompanyVerificationRejected(props: {
+  company_name: string;
+  verification_type: string;
+  reject_reason?: string;
+}) {
+  publishAnalytics("company_verification_rejected", {
+    ...props,
+    user_type: "admin",
+  });
+}
+
+/**
+ * 기업 회원 활성화 완료 — 인증 승인 이후 기업 회원 등급 부여 시.
+ * trackCompanyVerificationApproved() 직후 자동 호출.
+ */
+export function trackCorporateMemberActivated(props: {
+  company_name: string;
+  company_type: "advertiser" | "agency" | "production";
+  verification_type: string;
+}) {
+  publishAnalytics("corporate_member_activated", {
+    ...props,
+    user_type: "admin",
+  });
+}
+
 // ─── 관리자 회원 제재 이벤트 ─────────────────────────────────
 
 /** 회원 경고 */
