@@ -157,7 +157,10 @@ async function simulateUser(i) {
   const next = (minMs = 2000, maxMs = 25000) => { t += randInt(minMs, maxMs); return t; };
   const base = { user_type: userType, gender, age_group: ageGroup, session_id: sessionId, ...location };
 
-  // 1. 홈 방문 (100%)
+  // 1-a. 최초 방문 — GA4 코호트 집단 기준 이벤트 (100%)
+  await emit(clientId, userId, "first_visit", { page_location: "/", page_title: "홈", ...base }, t);
+
+  // 1-b. 홈 방문 (100%)
   await emit(clientId, userId, "page_view", { page_location: "/", page_title: "홈", ...base }, t);
 
   // 2. 홈 클릭 (72%)

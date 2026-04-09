@@ -284,10 +284,12 @@ export function identifyUser(props: {
     last_login: new Date().toISOString(),
   });
 
-  // GA4: user_id 설정 (세션 전체에 자동 첨부)
+  // GA4: User-ID 기능 활성화 — config 방식으로 설정해야 User Explorer·Cohort 탐색 가능
   if (typeof gtag !== "undefined") {
-    gtag("set", "user_properties", {
+    gtag("config", "G-MG1WSR89E1", {
       user_id: userId,
+    });
+    gtag("set", "user_properties", {
       user_type: userType ?? "unknown",
     });
   }
@@ -310,10 +312,8 @@ export function reIdentifyIfLoggedIn() {
     if (userId) {
       mixpanel.identify(userId);
       if (typeof gtag !== "undefined") {
-        gtag("set", "user_properties", {
-          user_id: userId,
-          user_type: userType ?? "unknown",
-        });
+        gtag("config", "G-MG1WSR89E1", { user_id: userId });
+        gtag("set", "user_properties", { user_type: userType ?? "unknown" });
       }
     }
   } catch {/* ignore */}
