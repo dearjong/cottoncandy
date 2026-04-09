@@ -169,140 +169,111 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
     // 뜨내기: 홈만 보다 이탈
     if (userType === "visitor") continue;
 
-    // ── 회원가입 (40%) ────────────────────────────────
-    if (chance(0.40)) {
-      add("signup_started", uid, baseTs + 30, { method: "email", ...common });
-      add("signup_funnel",  uid, baseTs + 35, { step: 1, step_name: "account",  path: "/signup",              ...common });
+    // ── 회원가입 (5%) — 가입해야 이후 핵심행동 가능 ──
+    if (chance(0.05)) {
+      add("signup_started", uid, baseTs + 30,  { method: "email", ...common });
+      add("signup_funnel",  uid, baseTs + 35,  { step: 1, step_name: "account", path: "/signup", ...common });
 
       if (chance(0.88)) {
         add("signup_funnel", uid, baseTs + 120, { step: 2, step_name: "email", path: "/signup/email", ...common });
 
         if (chance(0.82)) {
-          add("signup_funnel", uid, baseTs + 200, { step: 3, step_name: "phone", path: "/signup/phone", ...common });
+          add("signup_funnel",  uid, baseTs + 200, { step: 3, step_name: "phone", path: "/signup/phone", ...common });
           add("signup_complete", uid, baseTs + 250, { ...common });
 
           if (chance(0.78)) {
             const accountType = chance(0.68) ? "personal" : "corporate";
             add("signup_funnel", uid, baseTs + 300, { step: 4, step_name: "account_type", path: "/signup/account-type", ...common });
-
             if (accountType === "corporate" && chance(0.62)) {
               add("signup_funnel", uid, baseTs + 400, { step: 5, step_name: "job_info", path: "/signup/job-info", ...common });
             }
           }
 
-          if (chance(0.38)) {
-            add("activation_achieved", uid, baseTs + 500, { trigger_event: "signup_complete", ...common });
-          }
-        }
-      }
-    }
+          // ── 가입 완료 후에만 가능한 핵심행동 ──────────
+          const partnerType = userType === "agency" ? "대행사" : "제작사";
 
-    // ── 프로젝트 등록 (광고주 12%) ────────────────────
-    if (userType === "advertiser" && chance(0.12)) {
-      const projTs = baseTs + 600;
-      const category  = pick(CATEGORIES);
-      const budget    = pick(BUDGET_RANGES);
-      const projectId = `proj_${randInt(100, 999)}`;
-      const pType     = pick(["공고", "1:1"] as const);
+          // 광고주: 프로젝트 등록 (가입 후 12%)
+          if (userType === "advertiser" && chance(0.12)) {
+            const projTs    = baseTs + 600;
+            const category  = pick(CATEGORIES);
+            const budget    = pick(BUDGET_RANGES);
+            const projectId = `proj_${randInt(100, 999)}`;
+            const pType     = pick(["공고", "1:1"] as const);
 
-      add("step1_cta_click", uid, projTs, { selected_option: pType === "공고" ? "public" : "private", ...common });
+            add("step1_cta_click", uid, projTs, { selected_option: pType === "공고" ? "public" : "private", ...common });
 
-      if (chance(0.68)) {
-        add("project_submitted", uid, projTs + 1200, {
-          project_id: projectId, project_type: pType, category, budget_range: budget,
-          is_first_time: true, ...common,
-        });
-        add("activation_achieved", uid, projTs + 1201, { trigger_event: "project_submitted", ...common });
-
-        // Revenue
-        if (chance(0.30)) {
-          add("contract_signed", uid, projTs + 7 * 86400, {
-            project_id: projectId,
-            partner_name: pick(PARTNERS),
-            budget_range: budget,
-            contract_value_krw: (randInt(5, 30)) * 10_000_000,
-            ...common,
-          });
-
-          if (chance(0.70)) {
-            add("review_submitted", uid, projTs + 30 * 86400, {
-              project_id: projectId, has_client_rating: true,
-              has_partner_rating: chance(0.8), has_text: chance(0.6), ...common,
-            });
-          }
-        }
-      }
-    }
-
-    // ── 파트너 지원 흐름 ──────────────────────────────
-    if (isPartner && chance(0.22)) {
-      const projectId  = `proj_${randInt(100, 999)}`;
-      const partnerTs  = baseTs + 400;
-      const partnerType = userType === "agency" ? "대행사" : "제작사";
-
-      add("partner_applied", uid, partnerTs, {
-        project_id: projectId, project_type: pick(["공고","1:1"]),
-        partner_type: partnerType, is_first_time: true, ...common,
-      });
-      add("activation_achieved", uid, partnerTs + 1, { trigger_event: "partner_applied", ...common });
-
-      // 포트폴리오 등록 (55%)
-      if (chance(0.55)) {
-        add("portfolio_registered", uid, partnerTs + 100, {
-          portfolio_id: `pf_${randInt(1000, 9999)}`,
-          category: pick(CATEGORIES), partner_type: partnerType, ...common,
-        });
-      }
-
-      // 계약 → 시안 → 산출물 → 완료 (40%)
-      if (chance(0.40)) {
-        add("contract_signed", uid, partnerTs + 7 * 86400, {
-          project_id: projectId, partner_type: partnerType, ...common,
-        });
-
-        add("draft_submitted", uid, partnerTs + 14 * 86400, {
-          project_id: projectId, draft_round: 1,
-          category: pick(CATEGORIES), ...common,
-        });
-
-        if (chance(0.70)) {
-          add("draft_confirmed", uid, partnerTs + 16 * 86400, {
-            project_id: projectId, draft_round: 1, ...common,
-          });
-
-          if (chance(0.80)) {
-            add("deliverable_submitted", uid, partnerTs + 25 * 86400, {
-              project_id: projectId, category: pick(CATEGORIES), ...common,
-            });
-
-            if (chance(0.85)) {
-              add("deliverable_confirmed", uid, partnerTs + 27 * 86400, {
-                project_id: projectId, ...common,
+            if (chance(0.68)) {
+              add("project_submitted", uid, projTs + 1200, {
+                project_id: projectId, project_type: pType,
+                category, budget_range: budget, is_first_time: true, ...common,
               });
-              add("project_completed", uid, partnerTs + 28 * 86400, {
-                project_id: projectId, partner_type: partnerType,
-                category: pick(CATEGORIES), ...common,
-              });
+              add("activation_achieved", uid, projTs + 1201, { trigger_event: "project_submitted", ...common });
+
+              if (chance(0.30)) {
+                add("contract_signed", uid, projTs + 7 * 86400, {
+                  project_id: projectId, partner_name: pick(PARTNERS),
+                  budget_range: budget, contract_value_krw: randInt(5, 30) * 10_000_000, ...common,
+                });
+                if (chance(0.70)) {
+                  add("review_submitted", uid, projTs + 30 * 86400, {
+                    project_id: projectId, has_client_rating: true,
+                    has_partner_rating: chance(0.8), has_text: chance(0.6), ...common,
+                  });
+                }
+              }
             }
           }
+
+          // 파트너: 공고 지원 흐름 (가입 후 22%)
+          if (isPartner && chance(0.22)) {
+            const projectId  = `proj_${randInt(100, 999)}`;
+            const partnerTs  = baseTs + 400;
+
+            add("partner_applied", uid, partnerTs, {
+              project_id: projectId, project_type: pick(["공고","1:1"]),
+              partner_type: partnerType, is_first_time: true, ...common,
+            });
+            add("activation_achieved", uid, partnerTs + 1, { trigger_event: "partner_applied", ...common });
+
+            if (chance(0.55)) {
+              add("portfolio_registered", uid, partnerTs + 100, {
+                portfolio_id: `pf_${randInt(1000, 9999)}`,
+                category: pick(CATEGORIES), partner_type: partnerType, ...common,
+              });
+            }
+
+            if (chance(0.40)) {
+              add("contract_signed",       uid, partnerTs +  7 * 86400, { project_id: projectId, partner_type: partnerType, ...common });
+              add("draft_submitted",       uid, partnerTs + 14 * 86400, { project_id: projectId, draft_round: 1, category: pick(CATEGORIES), ...common });
+              if (chance(0.70)) {
+                add("draft_confirmed",     uid, partnerTs + 16 * 86400, { project_id: projectId, draft_round: 1, ...common });
+                if (chance(0.80)) {
+                  add("deliverable_submitted", uid, partnerTs + 25 * 86400, { project_id: projectId, category: pick(CATEGORIES), ...common });
+                  if (chance(0.85)) {
+                    add("deliverable_confirmed", uid, partnerTs + 27 * 86400, { project_id: projectId, ...common });
+                    add("project_completed",     uid, partnerTs + 28 * 86400, { project_id: projectId, partner_type: partnerType, category: pick(CATEGORIES), ...common });
+                  }
+                }
+              }
+            }
+          }
+
+          // 파트너: 포트폴리오만 등록 (가입 후 20%)
+          if (isPartner && chance(0.20)) {
+            add("portfolio_registered", uid, baseTs + 500, {
+              portfolio_id: `pf_${randInt(1000, 9999)}`,
+              category: pick(CATEGORIES), partner_type: partnerType, ...common,
+            });
+          }
+
+          // Referral (가입 후 8%)
+          if (chance(0.08)) {
+            add("referral_sent", uid, baseTs + 3 * 86400, {
+              method: chance(0.7) ? "copy" : "share", referrer_id: uid, ...common,
+            });
+          }
         }
       }
-    }
-
-    // 포트폴리오만 등록 (파트너 신규 20%)
-    if (isPartner && chance(0.20)) {
-      add("portfolio_registered", uid, baseTs + 200, {
-        portfolio_id: `pf_${randInt(1000, 9999)}`,
-        category: pick(CATEGORIES),
-        partner_type: userType === "agency" ? "대행사" : "제작사", ...common,
-      });
-    }
-
-    // ── Referral (8%) ─────────────────────────────────
-    if (chance(0.08)) {
-      add("referral_sent", uid, baseTs + 3 * 86400, {
-        method: chance(0.7) ? "copy" : "share", referrer_id: uid, ...common,
-      });
     }
   }
 

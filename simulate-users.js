@@ -247,126 +247,92 @@ async function simulateUser(i) {
             }, next());
           }
 
-          if (chance(0.38)) { // 핵심행동 달성
-            await emit(clientId, userId, "activation_achieved", {
-              trigger_event: "signup_complete",
-              user_type: userType,
-            }, next(1000, 5000));
+          // ── 가입 완료 후에만 가능한 행동 ──────────────
+          const isPartner = userType === "agency" || userType === "production";
+          const partnerType = userType === "agency" ? "대행사" : "제작사";
+
+          // 6. 광고주: 프로젝트 등록 (가입 후 12%)
+          if (userType === "advertiser" && chance(0.12)) {
+            const optionWeights = ["public","public","public","private","private","consulting"];
+            const selectedOption = pick(optionWeights);
+            const destination = selectedOption === "consulting"
+              ? "/create-project/consulting-inquiry"
+              : "/create-project/step2";
+
+            await emit(clientId, userId, "page_view", { page_location: "/create-project/step1", page_title: "프로젝트등록", ...base }, next());
+            await emit(clientId, userId, "step1_cta_click", { selected_option: selectedOption, destination, ...base }, next());
+
+            if (chance(0.68)) {
+              await emit(clientId, userId, "project_submitted", {
+                project_type: selectedOption,
+                is_first_time: true,
+                category: pick(CATEGORIES),
+                ...base,
+              }, next());
+              await emit(clientId, userId, "activation_achieved", { trigger_event: "project_submitted", user_type: userType, ...base }, next(500, 2000));
+            }
           }
-        }
-      }
-    }
-  }
 
-  // 6. 프로젝트 등록 시작 (12%)
-  if (chance(0.12)) {
-    await emit(clientId, userId, "page_view", { page_location: "/create-project/step1", page_title: "프로젝트등록", ...base }, next());
+          // 7. 파트너: 공고 지원 → 포트폴리오 → 계약 → 시안 → 산출물 → 완료 (가입 후 22%)
+          if (isPartner && chance(0.22)) {
+            const projectId = `proj_${randInt(100, 999)}`;
 
-    const optionWeights = ["public","public","public","private","private","consulting"];
-    const selectedOption = pick(optionWeights);
-    const destination = selectedOption === "consulting"
-      ? "/create-project/consulting-inquiry"
-      : "/create-project/step2";
-
-    await emit(clientId, userId, "step1_cta_click", { selected_option: selectedOption, destination, ...base }, next());
-
-    if (chance(0.68)) { // 프로젝트 제출 (68%)
-      await emit(clientId, userId, "project_submitted", {
-        project_type: selectedOption,
-        is_first_time: chance(0.75),
-        category: pick(CATEGORIES),
-        ...base,
-      }, next());
-    }
-  }
-
-  // 7. 파트너 신청 (파트너 유저 중 22%)
-  const isPartner = userType === "agency" || userType === "production";
-  if (isPartner && chance(0.22)) {
-    const projectId = `proj_${randInt(100, 999)}`;
-    await emit(clientId, userId, "partner_applied", {
-      project_id: projectId,
-      project_type: pick(["public","private"]),
-      partner_type: userType === "agency" ? "대행사" : "제작사",
-      ...base,
-    }, next());
-
-    // 7-a. 포트폴리오 등록 (지원한 파트너의 55%)
-    if (chance(0.55)) {
-      await emit(clientId, userId, "portfolio_registered", {
-        portfolio_id: `pf_${randInt(1000, 9999)}`,
-        category: pick(CATEGORIES),
-        partner_type: userType === "agency" ? "대행사" : "제작사",
-        ...base,
-      }, next());
-    }
-
-    // 7-b. 계약 후 시안 등록 (지원자의 40%)
-    if (chance(0.40)) {
-      await emit(clientId, userId, "contract_signed", {
-        project_id: projectId,
-        partner_type: userType === "agency" ? "대행사" : "제작사",
-        ...base,
-      }, next());
-
-      await emit(clientId, userId, "draft_submitted", {
-        project_id: projectId,
-        draft_round: 1,
-        category: pick(CATEGORIES),
-        ...base,
-      }, next());
-
-      // 7-c. 시안 확정 (시안 제출의 70%)
-      if (chance(0.70)) {
-        await emit(clientId, userId, "draft_confirmed", {
-          project_id: projectId,
-          draft_round: 1,
-          ...base,
-        }, next());
-
-        // 7-d. 산출물 등록 (확정된 것의 80%)
-        if (chance(0.80)) {
-          await emit(clientId, userId, "deliverable_submitted", {
-            project_id: projectId,
-            category: pick(CATEGORIES),
-            ...base,
-          }, next());
-
-          // 7-e. 산출물 확정 = 프로젝트 완료 (산출물의 85%)
-          if (chance(0.85)) {
-            await emit(clientId, userId, "deliverable_confirmed", {
+            await emit(clientId, userId, "partner_applied", {
               project_id: projectId,
+              project_type: pick(["public","private"]),
+              partner_type: partnerType,
+              is_first_time: true,
               ...base,
             }, next());
+            await emit(clientId, userId, "activation_achieved", { trigger_event: "partner_applied", user_type: userType, ...base }, next(500, 2000));
 
-            await emit(clientId, userId, "project_completed", {
-              project_id: projectId,
-              partner_type: userType === "agency" ? "대행사" : "제작사",
+            // 포트폴리오 등록 (55%)
+            if (chance(0.55)) {
+              await emit(clientId, userId, "portfolio_registered", {
+                portfolio_id: `pf_${randInt(1000, 9999)}`,
+                category: pick(CATEGORIES),
+                partner_type: partnerType,
+                ...base,
+              }, next());
+            }
+
+            // 계약 → 시안 → 산출물 흐름 (40%)
+            if (chance(0.40)) {
+              await emit(clientId, userId, "contract_signed", { project_id: projectId, partner_type: partnerType, ...base }, next());
+              await emit(clientId, userId, "draft_submitted", { project_id: projectId, draft_round: 1, category: pick(CATEGORIES), ...base }, next());
+
+              if (chance(0.70)) {
+                await emit(clientId, userId, "draft_confirmed", { project_id: projectId, draft_round: 1, ...base }, next());
+
+                if (chance(0.80)) {
+                  await emit(clientId, userId, "deliverable_submitted", { project_id: projectId, category: pick(CATEGORIES), ...base }, next());
+
+                  if (chance(0.85)) {
+                    await emit(clientId, userId, "deliverable_confirmed", { project_id: projectId, ...base }, next());
+                    await emit(clientId, userId, "project_completed", { project_id: projectId, partner_type: partnerType, category: pick(CATEGORIES), ...base }, next());
+                  }
+                }
+              }
+            }
+          }
+
+          // 8. 파트너: 포트폴리오만 등록 (지원 안 한 신규 파트너 20%)
+          if (isPartner && chance(0.20)) {
+            await emit(clientId, userId, "portfolio_registered", {
+              portfolio_id: `pf_${randInt(1000, 9999)}`,
               category: pick(CATEGORIES),
+              partner_type: partnerType,
               ...base,
             }, next());
+          }
+
+          // 9. 컨설팅 신청 (가입 후 3%)
+          if (chance(0.03)) {
+            await emit(clientId, userId, "consulting_requested", { consultant_id: `consul_${randInt(1, 20)}`, ...base }, next());
           }
         }
       }
     }
-  }
-
-  // 8. 컨설팅 신청 (3%)
-  if (chance(0.03)) {
-    await emit(clientId, userId, "consulting_requested", {
-      consultant_id: `consul_${randInt(1, 20)}`,
-      ...base,
-    }, next());
-  }
-
-  // 9. 포트폴리오 등록 — 신규 파트너 (가입만 하고 아직 지원 안 한 파트너 20%)
-  if (isPartner && chance(0.20)) {
-    await emit(clientId, userId, "portfolio_registered", {
-      portfolio_id: `pf_${randInt(1000, 9999)}`,
-      category: pick(CATEGORIES),
-      partner_type: userType === "agency" ? "대행사" : "제작사",
-      ...base,
-    }, next());
   }
 }
 
