@@ -28,6 +28,8 @@ interface SimJob {
   draftSavedCount: number;
   draftResumedCount: number;
   directEntryBreakdown: Record<string, number>;
+  portfolioFunnelBreakdown: Record<number, number>;
+  portfolioDropoffBreakdown: Record<number, number>;
   errors: string[];
   startedAt: number;
   completedAt?: number;
@@ -605,6 +607,60 @@ export default function AdminSimulatePage() {
           <div className="flex items-center gap-3 text-[10px] text-gray-400 pt-1">
             <span className="flex items-center gap-1"><span className="text-red-500 font-semibold">빨간색</span> = 이탈률 15% 이상 (주요 이탈 구간)</span>
             <span className="flex items-center gap-1"><span className="text-amber-500">주황색</span> = 일부 이탈</span>
+          </div>
+        </div>
+      )}
+
+      {/* 포트폴리오 등록 섹션별 퍼널 */}
+      {job && Object.keys(job.portfolioFunnelBreakdown ?? {}).length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+          <div>
+            <p className="font-medium text-gray-800">포트폴리오 등록 섹션별 퍼널</p>
+            <p className="text-[10px] text-gray-400">파트너가 어느 섹션에서 포트폴리오 작성을 멈추는지 확인합니다</p>
+          </div>
+          <div className="space-y-1.5">
+            {(() => {
+              const pfFunnel = job.portfolioFunnelBreakdown ?? {};
+              const pfDropoff = job.portfolioDropoffBreakdown ?? {};
+              const PORTFOLIO_LABELS: Record<number, string> = {
+                1: "기업 정보",           2: "담당자 정보",         3: "경험·특화 분야",
+                4: "광고 목적별 분야",    5: "제작 기법별 분야",    6: "대표 광고주",
+                7: "대표 수상내역",       8: "대표 포트폴리오",     9: "대표 스태프",
+                10: "최근 참여 프로젝트", 11: "Cotton Candy 활동",  12: "파일 업로드",
+                13: "기업 소개글",
+              };
+              const maxCount = Math.max(...Object.values(pfFunnel), 1);
+              return Array.from({ length: 13 }, (_, i) => i + 1).map((sec) => {
+                const reached = pfFunnel[sec] ?? 0;
+                const dropped = pfDropoff[sec] ?? 0;
+                const barPct = Math.round((reached / maxCount) * 100);
+                const dropPct = reached > 0 ? Math.round((dropped / reached) * 100) : 0;
+                const isHighDropoff = dropPct >= 20;
+                return (
+                  <div key={sec} className="flex items-center gap-2">
+                    <div className="w-4 text-[10px] text-gray-400 text-right shrink-0">{sec}</div>
+                    <div className="w-32 text-xs text-gray-600 truncate shrink-0">{PORTFOLIO_LABELS[sec]}</div>
+                    <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                      <div className="bg-purple-400 h-3 rounded-full transition-all duration-500"
+                        style={{ width: `${Math.max(barPct, reached > 0 ? 2 : 0)}%` }} />
+                    </div>
+                    <div className="w-12 text-right text-xs font-medium text-gray-700">{reached.toLocaleString()}</div>
+                    {dropped > 0 ? (
+                      <div className={`w-20 text-right text-xs ${isHighDropoff ? "text-red-500 font-semibold" : "text-amber-500"}`}>
+                        -{dropped} ({dropPct}%)
+                      </div>
+                    ) : (
+                      <div className="w-20 text-right text-xs text-gray-300">—</div>
+                    )}
+                  </div>
+                );
+              });
+            })()}
+          </div>
+          <div className="text-[10px] text-gray-400">
+            <span className="text-red-500 font-semibold">빨간색</span> = 이탈률 20% 이상 &nbsp;|&nbsp;
+            <span className="text-amber-500">주황색</span> = 일부 이탈 &nbsp;|&nbsp;
+            섹션 13 완료 시 <code className="bg-gray-100 px-1 rounded">portfolio_registered</code> 이벤트 전송
           </div>
         </div>
       )}

@@ -25,6 +25,8 @@ export interface SimJob {
   draftSavedCount: number;
   draftResumedCount: number;
   directEntryBreakdown: Record<string, number>;
+  portfolioFunnelBreakdown: Record<number, number>;
+  portfolioDropoffBreakdown: Record<number, number>;
   errors: string[];
   startedAt: number;
   completedAt?: number;
@@ -50,6 +52,23 @@ const PROJECT_STEPS = [
   { step: 16, screen: "company_info",           title: "기업정보",             passRate: 0.85 },
   { step: 17, screen: "additional_description", title: "상세설명",             passRate: 0.88 },
   { step: 18, screen: "project_details",        title: "최종 확인 & 등록",    passRate: 1.00 },
+] as const;
+
+// 포트폴리오 등록 13개 섹션
+const PORTFOLIO_SECTIONS = [
+  { step: 1,  id: "company_info",       title: "기업 정보",               passRate: 0.90 },
+  { step: 2,  id: "manager_info",       title: "담당자 정보",             passRate: 0.85 },
+  { step: 3,  id: "experience",         title: "경험·특화 분야/광고매체",  passRate: 0.80 },
+  { step: 4,  id: "purpose",            title: "광고 목적별 전문 분야",    passRate: 0.78 },
+  { step: 5,  id: "technique",          title: "제작 기법별 전문분야",     passRate: 0.82 },
+  { step: 6,  id: "clients",            title: "대표 광고주",              passRate: 0.75 },
+  { step: 7,  id: "awards",             title: "대표 수상내역",            passRate: 0.70 },
+  { step: 8,  id: "portfolio",          title: "대표 포트폴리오",          passRate: 0.85 },
+  { step: 9,  id: "staff",              title: "대표 스태프",              passRate: 0.65 },
+  { step: 10, id: "recent_projects",    title: "최근 참여 프로젝트",       passRate: 0.72 },
+  { step: 11, id: "cotton_candy",       title: "Cotton Candy 활동",        passRate: 0.80 },
+  { step: 12, id: "file_upload",        title: "파일 업로드",              passRate: 0.78 },
+  { step: 13, id: "intro",              title: "기업 소개글",              passRate: 0.85 },
 ] as const;
 
 // 북마크 / 직접 유입 랜딩 페이지 (weight = 상대적 비율)
@@ -227,6 +246,8 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     draftSavedCount: 0,
     draftResumedCount: 0,
     directEntryBreakdown: {},
+    portfolioFunnelBreakdown: {},
+    portfolioDropoffBreakdown: {},
     errors: [],
     startedAt: Date.now(),
   };
@@ -255,6 +276,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   const stepFunnel = job.stepFunnelBreakdown;
   const stepDropoff = job.stepDropoffBreakdown;
   const directCount = job.directEntryBreakdown;
+  const pfFunnel = job.portfolioFunnelBreakdown;
+  const pfDropoff = job.portfolioDropoffBreakdown;
 
   function add(event: string, distinctId: string, ts: number, props: Record<string, unknown>) {
     events.push({
@@ -510,11 +533,34 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       });
       add("activation_achieved", uid, partnerTs + 1, { trigger_event: "partner_applied", ...common });
 
+      // 포트폴리오 등록 퍼널 (55%)
       if (chance(0.55)) {
-        add("portfolio_registered", uid, partnerTs + 100, {
-          portfolio_id: `pf_${randInt(1000, 9999)}`,
-          category: weightedPick(CATEGORIES), partner_type: partnerType, ...common,
-        });
+        const pfTs = partnerTs + 100;
+        let pfLastSection = 0;
+        for (const sec of PORTFOLIO_SECTIONS) {
+          pfFunnel[sec.step] = (pfFunnel[sec.step] ?? 0) + 1;
+          add(`portfolio_section_${sec.id}`, uid, pfTs + sec.step * 40, {
+            section: sec.step, section_id: sec.id, partner_type: partnerType, ...common,
+          });
+          if (sec.step < 13 && !chance(sec.passRate)) {
+            pfDropoff[sec.step] = (pfDropoff[sec.step] ?? 0) + 1;
+            add("portfolio_section_abandoned", uid, pfTs + sec.step * 40 + 20, {
+              section: sec.step, section_id: sec.id, partner_type: partnerType, ...common,
+            });
+            add("page_exit", uid, pfTs + sec.step * 40 + 25, {
+              path: "/work/portfolio", exit_section: sec.step, exit_section_id: sec.id, ...common,
+            });
+            pfLastSection = sec.step;
+            break;
+          }
+          pfLastSection = sec.step;
+        }
+        if (pfLastSection === 13) {
+          add("portfolio_registered", uid, pfTs + 13 * 40 + 10, {
+            portfolio_id: `pf_${randInt(1000, 9999)}`,
+            category: weightedPick(CATEGORIES), partner_type: partnerType, ...common,
+          });
+        }
       }
       if (chance(0.40)) {
         add("contract_signed",       uid, partnerTs +  7 * 86400, { project_id: projectId, partner_type: partnerType, ...common });
@@ -532,12 +578,34 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       }
     }
 
-    // 파트너: 포트폴리오만 등록 (20%)
+    // 파트너: 포트폴리오만 등록 (20%) — 섹션별 퍼널
     if (isPartner && chance(0.20)) {
-      add("portfolio_registered", uid, baseTs + 500, {
-        portfolio_id: `pf_${randInt(1000, 9999)}`,
-        category: weightedPick(CATEGORIES), partner_type: partnerType, ...common,
-      });
+      const pfTs2 = baseTs + 500;
+      let pfLastSection2 = 0;
+      for (const sec of PORTFOLIO_SECTIONS) {
+        pfFunnel[sec.step] = (pfFunnel[sec.step] ?? 0) + 1;
+        add(`portfolio_section_${sec.id}`, uid, pfTs2 + sec.step * 40, {
+          section: sec.step, section_id: sec.id, partner_type: partnerType, ...common,
+        });
+        if (sec.step < 13 && !chance(sec.passRate)) {
+          pfDropoff[sec.step] = (pfDropoff[sec.step] ?? 0) + 1;
+          add("portfolio_section_abandoned", uid, pfTs2 + sec.step * 40 + 20, {
+            section: sec.step, section_id: sec.id, partner_type: partnerType, ...common,
+          });
+          add("page_exit", uid, pfTs2 + sec.step * 40 + 25, {
+            path: "/work/portfolio", exit_section: sec.step, exit_section_id: sec.id, ...common,
+          });
+          pfLastSection2 = sec.step;
+          break;
+        }
+        pfLastSection2 = sec.step;
+      }
+      if (pfLastSection2 === 13) {
+        add("portfolio_registered", uid, pfTs2 + 13 * 40 + 10, {
+          portfolio_id: `pf_${randInt(1000, 9999)}`,
+          category: weightedPick(CATEGORIES), partner_type: partnerType, ...common,
+        });
+      }
     }
 
     // Referral (8%)
