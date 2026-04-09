@@ -206,7 +206,7 @@ export default function Home() {
                   navigate(project.type === "contest" ? "/contest" : "/project-list");
                 }}
               >
-                <h3 className="font-bold text-lg mb-2">{project.title}</h3>
+                <h3 className="font-bold text-lg mb-2 truncate">{project.title}</h3>
                 <p className="text-gray-600 text-sm mb-3">{project.company}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold text-pink-600">{project.dDay}</span>
