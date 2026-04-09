@@ -135,6 +135,20 @@ const FILTER_OPTIONS = [
   { value: "전환", label: "전환" },
 ];
 
+const USER_TYPE_OPTIONS = [
+  { value: "all", label: "전체 유저" },
+  { value: "advertiser", label: "광고주" },
+  { value: "partner", label: "파트너사" },
+  { value: "admin", label: "관리자" },
+  { value: "none", label: "비회원" },
+];
+
+const USER_TYPE_LABEL: Record<string, { label: string; cls: string }> = {
+  advertiser: { label: "광고주", cls: "bg-blue-100 text-blue-700" },
+  partner:    { label: "파트너사", cls: "bg-emerald-100 text-emerald-700" },
+  admin:      { label: "관리자", cls: "bg-gray-100 text-gray-600" },
+};
+
 function fmt(dateStr?: string) {
   if (!dateStr) return "-";
   const d = new Date(dateStr);
@@ -150,6 +164,7 @@ const PAGE_SIZE_OPTIONS = [20, 50, 100];
 
 export default function EventLogPage() {
   const [filter, setFilter] = useState("all");
+  const [userTypeFilter, setUserTypeFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [data, setData] = useState<LocalEventRow[]>([]);
@@ -171,7 +186,7 @@ export default function EventLogPage() {
   }, [autoRefresh, loadData]);
 
   // 필터 바뀌면 1페이지로
-  useEffect(() => { setPage(1); }, [filter, search, dateFrom, dateTo]);
+  useEffect(() => { setPage(1); }, [filter, userTypeFilter, search, dateFrom, dateTo]);
 
   const handleRefresh = useCallback(() => { loadData(); }, [loadData]);
 
@@ -186,9 +201,16 @@ export default function EventLogPage() {
   const filtered = data
     .slice()
     .reverse()
-    .map((ev) => ({ ...ev, parsed: describeEvent(ev.eventName, ev.properties) }))
+    .map((ev) => {
+      const ut = (ev.properties?.user_type as string | undefined) ?? "";
+      return { ...ev, parsed: describeEvent(ev.eventName, ev.properties), userType: ut };
+    })
     .filter((ev) => {
       if (filter !== "all" && ev.parsed.badge !== filter) return false;
+      if (userTypeFilter !== "all") {
+        if (userTypeFilter === "none" && ev.userType) return false;
+        if (userTypeFilter !== "none" && ev.userType !== userTypeFilter) return false;
+      }
       if (dateFrom) {
         const from = new Date(dateFrom + "T00:00:00");
         if (new Date(ev.createdAt) < from) return false;
@@ -202,7 +224,8 @@ export default function EventLogPage() {
         return (
           ev.parsed.label.toLowerCase().includes(q) ||
           ev.parsed.detail.toLowerCase().includes(q) ||
-          ev.eventName.toLowerCase().includes(q)
+          ev.eventName.toLowerCase().includes(q) ||
+          (ev.userId ?? "").toLowerCase().includes(q)
         );
       }
       return true;
@@ -221,7 +244,7 @@ export default function EventLogPage() {
 
       {/* 컨트롤 바 */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
-        {/* 1행: 카테고리 + 검색 + 버튼들 */}
+        {/* 1행: 카테고리 + 유저타입 + 검색 + 버튼들 */}
         <div className="flex flex-wrap items-center gap-3">
           <Select value={filter} onValueChange={setFilter}>
             <SelectTrigger className="w-36">
@@ -229,6 +252,17 @@ export default function EventLogPage() {
             </SelectTrigger>
             <SelectContent>
               {FILTER_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={userTypeFilter} onValueChange={setUserTypeFilter}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {USER_TYPE_OPTIONS.map((o) => (
                 <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
               ))}
             </SelectContent>
@@ -318,36 +352,49 @@ export default function EventLogPage() {
             <TableRow className="bg-gray-50">
               <TableHead className="w-36">시간</TableHead>
               <TableHead className="w-20">구분</TableHead>
-              <TableHead className="w-48">이벤트</TableHead>
+              <TableHead className="w-20">유저</TableHead>
+              <TableHead className="w-44">이벤트</TableHead>
               <TableHead>세부 내용</TableHead>
-              <TableHead className="w-28 text-right">세션 ID</TableHead>
+              <TableHead className="w-28 text-right">유저 ID</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-gray-400 py-16">
+                <TableCell colSpan={6} className="text-center text-gray-400 py-16">
                   이벤트가 없습니다. 홈 화면에서 버튼을 눌러보세요.
                 </TableCell>
               </TableRow>
             ) : (
-              rows.map((ev) => (
-                <TableRow key={ev.id} className="hover:bg-gray-50 transition-colors">
-                  <TableCell className="text-xs text-gray-500 font-mono">{fmt(ev.createdAt)}</TableCell>
-                  <TableCell>
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${BADGE_COLORS[ev.parsed.badge] ?? BADGE_COLORS["기타"]}`}
-                    >
-                      {ev.parsed.badge}
-                    </span>
-                  </TableCell>
-                  <TableCell className="font-medium text-sm">{ev.parsed.label}</TableCell>
-                  <TableCell className="text-sm text-gray-600">{ev.parsed.detail || "—"}</TableCell>
-                  <TableCell className="text-right text-xs text-gray-400 font-mono truncate max-w-28">
-                    {ev.sessionId?.slice(0, 8) ?? "—"}
-                  </TableCell>
-                </TableRow>
-              ))
+              rows.map((ev) => {
+                const ut = USER_TYPE_LABEL[ev.userType];
+                return (
+                  <TableRow key={ev.id} className="hover:bg-gray-50 transition-colors">
+                    <TableCell className="text-xs text-gray-500 font-mono">{fmt(ev.createdAt)}</TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${BADGE_COLORS[ev.parsed.badge] ?? BADGE_COLORS["기타"]}`}>
+                        {ev.parsed.badge}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {ut ? (
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${ut.cls}`}>
+                          {ut.label}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-300">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-medium text-sm">{ev.parsed.label}</TableCell>
+                    <TableCell className="text-sm text-gray-600">{ev.parsed.detail || "—"}</TableCell>
+                    <TableCell className="text-right text-xs text-gray-400 font-mono truncate max-w-28">
+                      {ev.userId ? (
+                        <span title={ev.userId}>{ev.userId.slice(0, 12)}</span>
+                      ) : "—"}
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
