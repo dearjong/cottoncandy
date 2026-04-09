@@ -375,7 +375,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       if (chance(0.68)) {
         add("project_submitted", uid, projTs + 1200, {
           project_id: projectId, project_type: pType,
-          category, budget_range: budget, is_first_time: !isTvcf, ...common,
+          category, budget_range: budget, is_first_time: utm.utm_source !== "tvcf", ...common,
         });
         add("activation_achieved", uid, projTs + 1201, { trigger_event: "project_submitted", ...common });
         if (chance(0.30)) {
@@ -400,7 +400,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
       add("partner_applied", uid, partnerTs, {
         project_id: projectId, project_type: pick(["공고","1:1"]),
-        partner_type: partnerType, is_first_time: !isTvcf, ...common,
+        partner_type: partnerType, is_first_time: utm.utm_source !== "tvcf", ...common,
       });
       add("activation_achieved", uid, partnerTs + 1, { trigger_event: "partner_applied", ...common });
 
