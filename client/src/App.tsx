@@ -403,6 +403,18 @@ function Router() {
       <Route path="/admin/calendar">
         <AdminLayout><AdminCalendar /></AdminLayout>
       </Route>
+      <Route path="/admin/project_list">
+        <AdminLayout><AdminProjects /></AdminLayout>
+      </Route>
+      <Route path="/admin/project_list/public">
+        <AdminLayout><AdminBiddingProjects /></AdminLayout>
+      </Route>
+      <Route path="/admin/project_list/private">
+        <AdminLayout><AdminOneOnOneProjects /></AdminLayout>
+      </Route>
+      <Route path="/admin/project-detail/:id">
+        <AdminLayout><AdminProjectDetail /></AdminLayout>
+      </Route>
       <Route path="/admin/projects">
         <AdminLayout><AdminProjects /></AdminLayout>
       </Route>
@@ -411,19 +423,13 @@ function Router() {
           <AdminLayout><AdminProjects initialProjectId={params.id} /></AdminLayout>
         )}
       </Route>
-      <Route path="/admin/project-detail/:id">
-        <AdminLayout><AdminProjectDetail /></AdminLayout>
-      </Route>
-      <Route path="/admin/project_list">
-        <AdminLayout><AdminBiddingProjects /></AdminLayout>
-      </Route>
       <Route path="/admin/bidding">
         <AdminLayout><AdminBiddingProjects /></AdminLayout>
       </Route>
-      <Route path="/admin/private">
+      <Route path="/admin/one-on-one">
         <AdminLayout><AdminOneOnOneProjects /></AdminLayout>
       </Route>
-      <Route path="/admin/one-on-one">
+      <Route path="/admin/private">
         <AdminLayout><AdminOneOnOneProjects /></AdminLayout>
       </Route>
       <Route path="/admin/consulting/related-projects">

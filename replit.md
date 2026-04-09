@@ -34,11 +34,11 @@ React + Vite 기반 풀스택 앱으로, 관리자 패널이 핵심 기능입니
 ├── 관리자 캘린더              /admin/calendar
 └── 진행 현황                 /admin/progress
 
-[전체 프로젝트]              /admin/projects
+[전체 프로젝트]              /admin/project_list
+├── 공고 프로젝트              /admin/project_list/public
+├── 1:1 프로젝트              /admin/project_list/private
 ├── 승인 대기                 /admin/pending-approval
 ├── 중단/취소 요청             /admin/stop-cancel
-├── 공고 프로젝트              /admin/project_list
-├── 1:1 프로젝트              /admin/private
 └── 참여현황                  /admin/participation
 
 [계약 & 정산]                /admin/contracts
