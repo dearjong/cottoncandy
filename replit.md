@@ -61,3 +61,56 @@ ADMarket는 광고주(의뢰사)와 광고 제작사(파트너)를 연결하는 
 - **PostgreSQL**: Used with Drizzle ORM for database management (via Neon serverless).
 - **Google Analytics 4 (GA4)**: `G-MG1WSR89E1` for website analytics.
 - **Mixpanel**: `B32D8265A148455CB07F704BE7A648AA` for detailed event tracking and user behavior analysis.
+- **GTM**: `GTM-T2QRR8N7` — head script + body noscript 삽입, `publishAnalytics` 호출마다 `window.dataLayer.push` 연동.
+- **GA4 Measurement Protocol API Secret**: 환경변수 아닌 `simulate-users.js` 내 하드코딩 (시뮬레이션 전용).
+
+## Analytics Architecture
+
+### 핵심 파일
+- `client/src/lib/analytics.ts` — 모든 이벤트 발송 함수 + `FunnelRouteListener` 훅
+- `client/src/pages/admin/event-log.tsx` — 어드민 이벤트 로그 파서
+- `simulate-users.js` — 1000명 가상 유저 시뮬레이션 스크립트 (루트)
+
+### FunnelRouteListener (App.tsx에 마운트)
+URL 변경 감지 → 자동으로 아래 이벤트 발송:
+- `site_visit` (세션 최초 1회)
+- `signup_funnel` (step 1~5, 각 가입 단계 URL 진입 시)
+- `step_{N}_{파일명}` (프로젝트 등록 1~18단계 각 URL 진입 시)
+- `time_on_page` + `scroll_depth` (페이지 이탈/스크롤 자동)
+- `page_exit` (브라우저 이탈 시)
+
+### 회원가입 퍼널 이벤트 (올바른 순서)
+| Step | URL | 이벤트 |
+|------|-----|--------|
+| 1 | `/signup` | `signup_funnel` step=1, `signup_started` |
+| 2 | `/signup/email` | `signup_funnel` step=2 |
+| 3 | `/signup/phone` | `signup_funnel` step=3, `signup_complete` |
+| 4 | `/signup/account-type` | `signup_funnel` step=4 |
+| 5 | `/signup/job-info` | `signup_funnel` step=5 (기업 가입 시) |
+
+### 핵심 전환 이벤트 (GA4 전환 등록 대상)
+| 이벤트 | 발생 위치 | 의미 |
+|--------|-----------|------|
+| `signup_complete` | `signup-phone.tsx` | 가입 완료 |
+| `project_submitted` | `project-details.tsx` handleConfirm | 프로젝트 등록 확정 |
+| `partner_applied` | `detail.tsx` | 파트너 공고 지원 |
+| `contract_signed` | `contract.tsx` | 계약 체결 |
+| `review_submitted` | `review.tsx` | 리뷰 등록 |
+| `activation_achieved` | 첫 project_submitted / partner_applied 시 | 핵심행동 달성 |
+| `step1_cta_click` | `step1-partner-selection.tsx` | 프로젝트 등록 시작 + 유형 선택 |
+
+### 참여현황 이벤트 (participation.tsx)
+`participation_invite_toggled`, `participation_ot_confirmed`, `participation_ot_completed`,
+`participation_pt_confirmed`, `participation_pt_completed`, `participation_final_selected`
+
+### 홈 이벤트
+`home_click` + `element` 파라미터 (cta / category / feature_card / partner / faq / flow_step / partner_more / faq_more)
+
+### 시뮬레이션 스크립트 (`simulate-users.js`)
+- 루트에서 `node simulate-users.js` 실행
+- GA4 Measurement Protocol + Mixpanel HTTP API 직접 전송
+- 1000명 × 최근 69시간 분산 (GA4 72시간 제한 준수)
+- 유저 속성: `user_type` (advertiser 50% / agency 30% / production 20%), `gender` (male 60% / female 40%), `age_group` (20s~50s, 30-40대 중심)
+- 위치: 서울 35% / 경기도 20% / 부산·인천·대구·대전·광주 등 / 해외 5%
+- 가입 완료 유저는 Mixpanel People 프로필 (`/engage`) 자동 등록
+- 이벤트명은 실제 앱과 동일 (`signup_funnel` + step 파라미터 방식)
