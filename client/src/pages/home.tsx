@@ -8,7 +8,6 @@ import SearchBar from "@/components/common/search-bar";
 import {
   assignExperiment,
   getExperimentVariant,
-  trackExperimentViewed,
   publishAnalytics,
 } from "@/lib/analytics";
 
@@ -31,13 +30,10 @@ export default function Home() {
   });
 
   useEffect(() => {
-    trackExperimentViewed(EXP_ID_TITLE, titleVariant);
     let idx = VARIANTS.indexOf(titleVariant);
     const timer = setInterval(() => {
       idx = (idx + 1) % VARIANTS.length;
-      const next = VARIANTS[idx];
-      setTitleVariant(next);
-      trackExperimentViewed(EXP_ID_TITLE, next);
+      setTitleVariant(VARIANTS[idx]);
     }, 10000);
     return () => clearInterval(timer);
   }, []);
