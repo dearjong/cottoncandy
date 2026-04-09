@@ -277,7 +277,9 @@ async function main() {
   console.log(`📊 Mixpanel: ${MIXPANEL_TOKEN}`);
   console.log(`⏱️  최근 ${MAX_HOURS_BACK}시간 데이터 분산\n`);
 
-  const BATCH = 20;
+  const BATCH = 5;                 // 동시 처리 수 줄여서 몰림 방지
+  const DELAY_MIN_MS = 300;        // 배치 간 최소 딜레이
+  const DELAY_MAX_MS = 900;        // 배치 간 최대 딜레이 (자연스러운 유입처럼)
   let done = 0;
 
   for (let i = 0; i < TOTAL_USERS; i += BATCH) {
@@ -291,8 +293,9 @@ async function main() {
     const bar = "█".repeat(Math.floor(pct / 5)) + "░".repeat(20 - Math.floor(pct / 5));
     process.stdout.write(`\r[${bar}] ${pct}% (${done}/${TOTAL_USERS}명)`);
 
-    // API 레이트 리밋 방지
-    await new Promise(r => setTimeout(r, 150));
+    // 배치 간 랜덤 딜레이 — 전송이 자연스럽게 분산
+    const delay = randInt(DELAY_MIN_MS, DELAY_MAX_MS);
+    await new Promise(r => setTimeout(r, delay));
   }
 
   console.log("\n\n✅ 시뮬레이션 완료!");
