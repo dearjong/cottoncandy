@@ -1,7 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/admin/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,16 +17,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { RefreshCw, Search } from "lucide-react";
+import { RefreshCw, Search, Trash2 } from "lucide-react";
+import { getLocalEventLog, clearLocalEventLog, type LocalEventRow } from "@/lib/analytics";
 
-interface AnalyticsEventRow {
-  id: number;
-  eventName: string;
-  properties: Record<string, unknown>;
-  sessionId?: string;
-  userId?: string;
-  createdAt?: string;
-}
 
 // 이벤트명 + properties → 한국어 설명
 function describeEvent(name: string, props: Record<string, unknown>): { label: string; detail: string; badge: string } {
@@ -159,13 +150,30 @@ export default function EventLogPage() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [data, setData] = useState<LocalEventRow[]>([]);
 
-  const { data = [], refetch, isFetching } = useQuery<AnalyticsEventRow[]>({
-    queryKey: ["/api/analytics/events"],
-    refetchInterval: autoRefresh ? 10000 : false,
-  });
+  const loadData = useCallback(() => {
+    setData(getLocalEventLog());
+  }, []);
 
-  const handleRefresh = useCallback(() => { void refetch(); }, [refetch]);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const id = setInterval(loadData, 5000);
+    return () => clearInterval(id);
+  }, [autoRefresh, loadData]);
+
+  const handleRefresh = useCallback(() => { loadData(); }, [loadData]);
+
+  const handleClear = useCallback(() => {
+    if (confirm("이벤트 로그를 전부 삭제할까요?")) {
+      clearLocalEventLog();
+      setData([]);
+    }
+  }, []);
 
   // 필터 + 검색
   const rows = data
@@ -222,9 +230,8 @@ export default function EventLogPage() {
             size="sm"
             className="gap-2"
             onClick={handleRefresh}
-            disabled={isFetching}
           >
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+            <RefreshCw className="h-4 w-4" />
             새로고침
           </Button>
 
@@ -235,6 +242,16 @@ export default function EventLogPage() {
             onClick={() => setAutoRefresh((v) => !v)}
           >
             {autoRefresh ? "자동갱신 ON" : "자동갱신 OFF"}
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 text-red-500 hover:text-red-600 hover:border-red-300"
+            onClick={handleClear}
+          >
+            <Trash2 className="h-4 w-4" />
+            로그 초기화
           </Button>
 
           <span className="text-xs text-gray-400 ml-auto">
@@ -259,7 +276,7 @@ export default function EventLogPage() {
             {rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-gray-400 py-16">
-                  {isFetching ? "불러오는 중…" : "이벤트가 없습니다. 홈 화면에서 버튼을 눌러보세요."}
+                  이벤트가 없습니다. 홈 화면에서 버튼을 눌러보세요.
                 </TableCell>
               </TableRow>
             ) : (

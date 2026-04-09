@@ -151,6 +151,57 @@ export function getAnalyticsSessionId(): string {
   }
 }
 
+// ─── 로컬 이벤트 로그 (localStorage 영구 보존) ──────────────────
+
+const LOCAL_EVENT_LOG_KEY = "analytics_event_log";
+const LOCAL_EVENT_LOG_MAX = 500;
+
+export interface LocalEventRow {
+  id: number;
+  eventName: string;
+  properties: Record<string, unknown>;
+  sessionId?: string;
+  userId?: string;
+  createdAt: string;
+}
+
+function saveEventToLocalStorage(
+  eventName: string,
+  properties: Record<string, unknown>,
+  sessionId: string,
+  userId?: string,
+) {
+  try {
+    const raw = localStorage.getItem(LOCAL_EVENT_LOG_KEY);
+    const existing: LocalEventRow[] = raw ? JSON.parse(raw) : [];
+    const nextId = existing.length > 0 ? existing[existing.length - 1].id + 1 : 1;
+    existing.push({
+      id: nextId,
+      eventName,
+      properties,
+      sessionId,
+      userId,
+      createdAt: new Date().toISOString(),
+    });
+    // 최대 500개 유지
+    const trimmed = existing.length > LOCAL_EVENT_LOG_MAX
+      ? existing.slice(existing.length - LOCAL_EVENT_LOG_MAX)
+      : existing;
+    localStorage.setItem(LOCAL_EVENT_LOG_KEY, JSON.stringify(trimmed));
+  } catch {/* ignore */}
+}
+
+export function getLocalEventLog(): LocalEventRow[] {
+  try {
+    const raw = localStorage.getItem(LOCAL_EVENT_LOG_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export function clearLocalEventLog() {
+  try { localStorage.removeItem(LOCAL_EVENT_LOG_KEY); } catch {/* ignore */}
+}
+
 /**
  * Mixpanel 전송 + GA4 전송 + 서버 `analytics_events` 적재 (POST /api/analytics/events).
  * UTM 파라미터·유입경로·user_id·experiment variant를 모든 이벤트에 자동 첨부.
@@ -168,6 +219,10 @@ export function publishAnalytics(
     : {};
 
   const props: Record<string, unknown> = { ...properties, ...utmProps, ...trafficSource, ...experimentProps };
+  const sessionId = getAnalyticsSessionId();
+
+  // localStorage 영구 적재
+  saveEventToLocalStorage(eventName, props, sessionId, userId);
 
   // Mixpanel (제한 없음)
   mixpanel.track(eventName, props);
@@ -192,7 +247,7 @@ export function publishAnalytics(
     body: JSON.stringify({
       eventName,
       properties: props,
-      sessionId: getAnalyticsSessionId(),
+      sessionId,
       userId,
     }),
     keepalive: true,
