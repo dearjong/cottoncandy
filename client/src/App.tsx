@@ -119,6 +119,7 @@ import AdminCompanyVerification from "@/pages/admin/company-verification";
 import AdminCompanyPortfolios from "@/pages/admin/company-portfolios";
 import AdminReportsManagement from "@/pages/admin/reports-management";
 import AdminActivityLogs from "@/pages/admin/activity-logs";
+import AdminEventLog from "@/pages/admin/event-log";
 import AdminCompanies from "@/pages/admin/companies";
 import AdminCompanyDetail from "@/pages/admin/company-detail";
 import AdminParticipation from "@/pages/admin/participation";
@@ -517,6 +518,9 @@ function Router() {
       </Route>
       <Route path="/admin/activity-logs">
         <AdminLayout><AdminActivityLogs /></AdminLayout>
+      </Route>
+      <Route path="/admin/event-log">
+        <AdminLayout><AdminEventLog /></AdminLayout>
       </Route>
       <Route path="/admin/system/notifications">
         <AdminLayout><AdminNotificationSettings /></AdminLayout>

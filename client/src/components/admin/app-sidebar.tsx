@@ -21,6 +21,7 @@ import {
   Flag,
   Activity,
   GitBranch,
+  MousePointerClick,
   ChevronDown,
   ChevronRight,
   Bell,
@@ -108,6 +109,7 @@ const systemSettingsMenuItems = [
   { title: "관리자 계정", url: "/admin/settings", icon: Users },
   { title: "플랫폼 설정", url: "/admin/settings/platform", icon: Settings },
   { title: "사용자 로그", url: "/admin/settings/logs", icon: FileText },
+  { title: "클릭 이벤트 로그", url: "/admin/event-log", icon: MousePointerClick },
 ]
 
 // 보안/감사 메뉴
