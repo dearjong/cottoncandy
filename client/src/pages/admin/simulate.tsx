@@ -23,10 +23,23 @@ interface SimJob {
   utmBreakdown: Record<string, number>;
   userTypeBreakdown: Record<string, number>;
   geoBreakdown: Record<string, number>;
+  stepFunnelBreakdown: Record<number, number>;
+  stepDropoffBreakdown: Record<number, number>;
+  draftSavedCount: number;
+  draftResumedCount: number;
   errors: string[];
   startedAt: number;
   completedAt?: number;
 }
+
+const PROJECT_STEP_LABELS: Record<number, string> = {
+  1:  "파트너 찾기 방식", 2:  "파트너 유형",     3:  "프로젝트명",
+  4:  "광고 목적",         5:  "제작 기법",        6:  "노출 매체",
+  7:  "주요 고객",         8:  "예산",              9:  "대금 지급",
+  10: "일정",              11: "제품정보",          12: "담당자정보",
+  13: "경쟁사 제외",       14: "참여기업 조건",     15: "제출자료",
+  16: "기업정보",          17: "상세설명",           18: "최종 확인 & 등록",
+};
 
 interface SimConfig {
   userCount: number;
@@ -473,6 +486,66 @@ export default function AdminSimulatePage() {
                 ✅ GA4 + Mixpanel 전송 완료 — GA4 실시간 개요 / Mixpanel Funnels에서 확인하세요.
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 프로젝트 등록 단계별 퍼널 */}
+      {job && Object.keys(job.stepFunnelBreakdown ?? {}).length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <p className="font-medium text-gray-800">프로젝트 등록 단계별 퍼널</p>
+              <p className="text-[10px] text-gray-400">광고주가 어느 단계에서 이탈하는지 확인합니다</p>
+            </div>
+            <div className="flex gap-4 text-xs">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-indigo-400 inline-block" />
+                임시저장 <strong>{job.draftSavedCount ?? 0}건</strong>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-green-400 inline-block" />
+                저장 후 재개 <strong>{job.draftResumedCount ?? 0}건</strong>
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            {(() => {
+              const stepFunnel = job.stepFunnelBreakdown ?? {};
+              const stepDropoff = job.stepDropoffBreakdown ?? {};
+              const maxCount = Math.max(...Object.values(stepFunnel), 1);
+              return Array.from({ length: 18 }, (_, i) => i + 1).map((step) => {
+                const reached = stepFunnel[step] ?? 0;
+                const dropped = stepDropoff[step] ?? 0;
+                const pct = Math.round((reached / maxCount) * 100);
+                const dropPct = reached > 0 ? Math.round((dropped / reached) * 100) : 0;
+                const label = PROJECT_STEP_LABELS[step];
+                const isHighDropoff = dropPct >= 15;
+                return (
+                  <div key={step} className="flex items-center gap-2">
+                    <div className="w-5 text-[10px] text-gray-400 text-right shrink-0">{step}</div>
+                    <div className="w-28 text-xs text-gray-600 truncate shrink-0">{label}</div>
+                    <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                      <div className="bg-indigo-400 h-3 rounded-full transition-all duration-500"
+                        style={{ width: `${Math.max(pct, reached > 0 ? 2 : 0)}%` }} />
+                    </div>
+                    <div className="w-12 text-right text-xs font-medium text-gray-700">{reached.toLocaleString()}</div>
+                    {dropped > 0 ? (
+                      <div className={`w-20 text-right text-xs ${isHighDropoff ? "text-red-500 font-semibold" : "text-amber-500"}`}>
+                        -{dropped} ({dropPct}%)
+                      </div>
+                    ) : (
+                      <div className="w-20 text-right text-xs text-gray-300">—</div>
+                    )}
+                  </div>
+                );
+              });
+            })()}
+          </div>
+          <div className="flex items-center gap-3 text-[10px] text-gray-400 pt-1">
+            <span className="flex items-center gap-1"><span className="text-red-500 font-semibold">빨간색</span> = 이탈률 15% 이상 (주요 이탈 구간)</span>
+            <span className="flex items-center gap-1"><span className="text-amber-500">주황색</span> = 일부 이탈</span>
           </div>
         </div>
       )}

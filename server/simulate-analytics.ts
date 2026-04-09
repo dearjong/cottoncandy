@@ -20,10 +20,36 @@ export interface SimJob {
   utmBreakdown: Record<string, number>;
   userTypeBreakdown: Record<string, number>;
   geoBreakdown: Record<string, number>;
+  stepFunnelBreakdown: Record<number, number>;
+  stepDropoffBreakdown: Record<number, number>;
+  draftSavedCount: number;
+  draftResumedCount: number;
   errors: string[];
   startedAt: number;
   completedAt?: number;
 }
+
+// 프로젝트 등록 18단계 정의
+const PROJECT_STEPS = [
+  { step: 1,  screen: "partner_selection",     title: "파트너 찾기 방식",   passRate: 0.85 },
+  { step: 2,  screen: "partner_type",           title: "파트너 유형",         passRate: 0.90 },
+  { step: 3,  screen: "project_name",           title: "프로젝트명",           passRate: 0.88 },
+  { step: 4,  screen: "advertising_objective",  title: "광고 목적",            passRate: 0.85 },
+  { step: 5,  screen: "production_technique",   title: "제작 기법",            passRate: 0.87 },
+  { step: 6,  screen: "media_channel",          title: "노출 매체",            passRate: 0.88 },
+  { step: 7,  screen: "main_client",            title: "주요 고객",            passRate: 0.90 },
+  { step: 8,  screen: "budget",                 title: "예산",                 passRate: 0.73 },
+  { step: 9,  screen: "payment_terms",          title: "대금 지급",            passRate: 0.88 },
+  { step: 10, screen: "schedule",               title: "일정",                 passRate: 0.87 },
+  { step: 11, screen: "product_info",           title: "제품정보",             passRate: 0.86 },
+  { step: 12, screen: "contact_person",         title: "담당자정보",           passRate: 0.90 },
+  { step: 13, screen: "excluded_competitors",   title: "경쟁사 제외",          passRate: 0.92 },
+  { step: 14, screen: "participant_conditions", title: "참여기업 조건",        passRate: 0.90 },
+  { step: 15, screen: "required_files",         title: "제출자료",             passRate: 0.88 },
+  { step: 16, screen: "company_info",           title: "기업정보",             passRate: 0.85 },
+  { step: 17, screen: "additional_description", title: "상세설명",             passRate: 0.88 },
+  { step: 18, screen: "project_details",        title: "최종 확인 & 등록",    passRate: 1.00 },
+] as const;
 
 const jobs = new Map<string, SimJob>();
 
@@ -183,6 +209,10 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     utmBreakdown: {},
     userTypeBreakdown: {},
     geoBreakdown: {},
+    stepFunnelBreakdown: {},
+    stepDropoffBreakdown: {},
+    draftSavedCount: 0,
+    draftResumedCount: 0,
     errors: [],
     startedAt: Date.now(),
   };
@@ -208,6 +238,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   const utmCount = job.utmBreakdown;
   const userTypeCount = job.userTypeBreakdown;
   const geoCount = job.geoBreakdown;
+  const stepFunnel = job.stepFunnelBreakdown;
+  const stepDropoff = job.stepDropoffBreakdown;
 
   function add(event: string, distinctId: string, ts: number, props: Record<string, unknown>) {
     events.push({
@@ -363,7 +395,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
     const partnerType = userType === "agency" ? "대행사" : "제작사";
 
-    // 광고주: 프로젝트 등록 (12%)
+    // 광고주: 프로젝트 등록 — 18단계 퍼널
     if (userType === "advertiser" && chance(0.12)) {
       const projTs    = baseTs + 600;
       const category  = weightedPick(CATEGORIES);
@@ -372,12 +404,57 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       const pType     = pick(["공고", "1:1"] as const);
 
       add("step1_cta_click", uid, projTs, { selected_option: pType === "공고" ? "public" : "private", ...common });
-      if (chance(0.68)) {
-        add("project_submitted", uid, projTs + 1200, {
+
+      let lastStep = 0;
+      let savedDraft = false;
+
+      for (const s of PROJECT_STEPS) {
+        // 단계 도달 집계
+        stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
+        add(`step_${s.step}_${s.screen}`, uid, projTs + s.step * 60, {
+          step: s.step, screen: s.screen, project_type: pType, ...common,
+        });
+
+        // 임시저장 (step 5~15에서 7% 확률)
+        if (s.step >= 5 && s.step <= 15 && !savedDraft && chance(0.07)) {
+          savedDraft = true;
+          job.draftSavedCount += 1;
+          add("project_draft_saved", uid, projTs + s.step * 60 + 30, {
+            step: s.step, screen: s.screen, project_type: pType, ...common,
+          });
+          // 재개 여부 (75%)
+          if (chance(0.75)) {
+            job.draftResumedCount += 1;
+            add("project_draft_resumed", uid, projTs + s.step * 60 + randInt(3600, 86400), {
+              step: s.step, screen: s.screen, project_type: pType, resumed_after_sec: randInt(3600, 86400), ...common,
+            });
+          }
+        }
+
+        // 이탈 판정
+        if (s.step < 18 && !chance(s.passRate)) {
+          stepDropoff[s.step] = (stepDropoff[s.step] ?? 0) + 1;
+          add("project_step_abandoned", uid, projTs + s.step * 60 + 45, {
+            step: s.step, screen: s.screen, project_type: pType,
+            had_draft: savedDraft, ...common,
+          });
+          add("page_exit", uid, projTs + s.step * 60 + 50, {
+            path: `/create-project/step${s.step}`, exit_step: s.step, ...common,
+          });
+          lastStep = s.step;
+          break;
+        }
+
+        lastStep = s.step;
+      }
+
+      // 18단계까지 완주 → 프로젝트 등록 완료
+      if (lastStep === 18) {
+        add("project_submitted", uid, projTs + 18 * 60 + 30, {
           project_id: projectId, project_type: pType,
           category, budget_range: budget, is_first_time: utm.utm_source !== "tvcf", ...common,
         });
-        add("activation_achieved", uid, projTs + 1201, { trigger_event: "project_submitted", ...common });
+        add("activation_achieved", uid, projTs + 18 * 60 + 31, { trigger_event: "project_submitted", ...common });
         if (chance(0.30)) {
           add("contract_signed", uid, projTs + 7 * 86400, {
             project_id: projectId, partner_name: pick(PARTNERS),
