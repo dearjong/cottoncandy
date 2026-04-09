@@ -15,6 +15,8 @@ import { Step1Option } from "@/lib/types";
 import { COMMON_MESSAGES } from "@/lib/messages";
 import { getSubtitle } from "@/config/global-events";
 import { trackCreateProjectCta, publishAnalytics } from "@/lib/analytics";
+import { useAuthGate } from "@/hooks/use-auth-gate";
+import LoginRequiredModal from "@/components/ui/login-required-modal";
 
 const step1Options: Step1Option[] = [
   {
@@ -57,6 +59,7 @@ export default function Step1PartnerSelection() {
   const [showExampleDialog, setShowExampleDialog] = useState<boolean>(false);
   const [showGuideDialog, setShowGuideDialog] = useState<boolean>(false);
   const [location, setLocation] = useLocation();
+  const { showLoginModal, setShowLoginModal, requireAuth } = useAuthGate();
 
   const eventInfo = getSubtitle(undefined, "request");
 
@@ -78,6 +81,7 @@ export default function Step1PartnerSelection() {
       selected_option: selectedOption ?? "none",
       destination: selectedOption === "consulting" ? "/create-project/consulting-inquiry" : "/create-project/step2",
     });
+    requireAuth(() => {
     if (selectedOption) {
       localStorage.setItem("step1Selection", selectedOption);
 
@@ -101,6 +105,7 @@ export default function Step1PartnerSelection() {
         setLocation("/create-project/step2");
       }
     }
+    });
   };
 
   useEffect(() => {
@@ -629,6 +634,10 @@ export default function Step1PartnerSelection() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {showLoginModal && (
+        <LoginRequiredModal onClose={() => setShowLoginModal(false)} />
+      )}
     </Layout>
   );
 }

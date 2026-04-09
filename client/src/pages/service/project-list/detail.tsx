@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, X } from "lucide-react";
 import { getProjectById } from "@/lib/mockProjectData";
 import { trackProjectViewed, trackPartnerApplied } from "@/lib/analytics";
+import { useAuthGate } from "@/hooks/use-auth-gate";
+import LoginRequiredModal from "@/components/ui/login-required-modal";
 
 const MOCK_COMPANY = {
   name: "솔서창기획",
@@ -314,6 +316,7 @@ export default function ProjectDetail() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showDone, setShowDone] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const { showLoginModal, setShowLoginModal, requireAuth } = useAuthGate();
 
   const project = projectId ? getProjectById(projectId) : undefined;
 
@@ -709,7 +712,7 @@ export default function ProjectDetail() {
               </Button>
               <Button
                 className={`flex-1 ${submitted ? "btn-white" : "btn-pink"}`}
-                onClick={() => !submitted && setShowModal(true)}
+                onClick={() => !submitted && requireAuth(() => setShowModal(true))}
                 disabled={submitted}
               >
                 {submitted ? "신청완료" : "참여신청"}
@@ -735,6 +738,9 @@ export default function ProjectDetail() {
       )}
       {showDone && (
         <DoneModal onClose={handleDoneClose} />
+      )}
+      {showLoginModal && (
+        <LoginRequiredModal onClose={() => setShowLoginModal(false)} />
       )}
     </Layout>
   );
