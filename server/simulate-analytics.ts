@@ -69,6 +69,7 @@ async function sendBatch(batch: MpEvent[]): Promise<string | null> {
 interface Ga4UserEvents {
   clientId: string;
   userId: string;
+  sessionId: string;
   userProperties: Record<string, { value: unknown }>;
   events: Array<{ name: string; params: Record<string, unknown> }>;
 }
@@ -104,13 +105,36 @@ async function sendGa4UserBatch(entry: Ga4UserEvents): Promise<string | null> {
   return null;
 }
 
-export async function startSimulation(userCount: number): Promise<string> {
+export interface SimConfig {
+  userCount: number;
+  pctAdvertiser: number;
+  pctAgency: number;
+  pctProduction: number;
+  pctVisitor: number;
+  pctTvcf: number;
+  pctGoogle: number;
+  pctNaver: number;
+  pctKakao: number;
+  pctOrganic: number;
+  tvcfSsoRate: number;
+  tvcfManualLoginRate: number;
+  signupRate: number;
+}
+
+export const DEFAULT_CONFIG: SimConfig = {
+  userCount: 1000,
+  pctAdvertiser: 5, pctAgency: 30, pctProduction: 55, pctVisitor: 10,
+  pctTvcf: 85, pctGoogle: 5, pctNaver: 5, pctKakao: 3, pctOrganic: 2,
+  tvcfSsoRate: 50, tvcfManualLoginRate: 60, signupRate: 5,
+};
+
+export async function startSimulation(cfg: SimConfig): Promise<string> {
   const jobId = crypto.randomUUID();
   const job: SimJob = {
     status: "pending",
     progress: 0,
     message: "준비 중...",
-    totalUsers: userCount,
+    totalUsers: cfg.userCount,
     totalEvents: 0,
     batchesSent: 0,
     totalBatches: 0,
@@ -121,7 +145,7 @@ export async function startSimulation(userCount: number): Promise<string> {
   };
   jobs.set(jobId, job);
 
-  runJob(jobId, job, userCount).catch((e) => {
+  runJob(jobId, job, cfg).catch((e) => {
     job.status = "error";
     job.errors.push(String(e));
   });
@@ -129,10 +153,11 @@ export async function startSimulation(userCount: number): Promise<string> {
   return jobId;
 }
 
-async function runJob(jobId: string, job: SimJob, userCount: number) {
+async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   job.status = "generating";
   job.message = "가상 사용자 이벤트 생성 중...";
 
+  const { userCount } = cfg;
   const events: MpEvent[] = [];
   const ga4Map = new Map<string, Ga4UserEvents>();
   const funnel = job.funnelBreakdown;
@@ -149,15 +174,26 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
     if (GA4_KEY_EVENTS.has(event)) {
       const entry = ga4Map.get(distinctId);
       if (entry) {
-        entry.events.push({ name: event, params: { simulation: "true", ...props } });
+        // session_id + engagement_time_msec 필수 (GA4 실시간 반영 조건)
+        entry.events.push({
+          name: event,
+          params: {
+            session_id: entry.sessionId,
+            engagement_time_msec: randInt(500, 30000),
+            simulation: "true",
+            ...props,
+          },
+        });
       }
     }
   }
 
   function initGa4User(distinctId: string, userId: string, userProps: Record<string, unknown>) {
+    const sessionId = String(Date.now() - randInt(0, 1800000)); // 최근 30분 내 세션
     ga4Map.set(distinctId, {
-      clientId: `${Date.now()}.${Math.floor(Math.random() * 1e9)}`,
+      clientId: `${randInt(1000000000, 9999999999)}.${randInt(1000000000, 9999999999)}`,
       userId,
+      sessionId,
       userProperties: Object.fromEntries(
         Object.entries(userProps).map(([k, v]) => [k, { value: v }])
       ),
@@ -166,23 +202,21 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
   }
 
   // ── 유저 속성 풀 ──────────────────────────────────────
-  // 광고주 5% / 대행사 30% / 제작사 55% / 뜨내기 10%
   const USER_TYPE_LIST = [
-    { value: "advertiser", weight:  5 },
-    { value: "agency",     weight: 30 },
-    { value: "production", weight: 55 },
-    { value: "visitor",    weight: 10 },
+    { value: "advertiser", weight: cfg.pctAdvertiser },
+    { value: "agency",     weight: cfg.pctAgency     },
+    { value: "production", weight: cfg.pctProduction  },
+    { value: "visitor",    weight: cfg.pctVisitor     },
   ];
   const GENDERS    = [{ value: "male", weight: 50 }, { value: "female", weight: 50 }];
   const AGE_GROUPS = [{ value: "20s", weight: 10 }, { value: "30s", weight: 35 }, { value: "40s", weight: 35 }, { value: "50s", weight: 20 }];
 
-  // UTM: tvcf.co.kr 배너 85% / 나머지 15%
   const UTM_LIST = [
-    { value: { utm_source: "tvcf",    utm_medium: "banner",   channel: "referral", utm_campaign: "admarket_launch" }, weight: 85 },
-    { value: { utm_source: "google",  utm_medium: "cpc",      channel: "paid" },     weight: 5  },
-    { value: { utm_source: "naver",   utm_medium: "cpc",      channel: "paid" },     weight: 5  },
-    { value: { utm_source: "kakao",   utm_medium: "social",   channel: "social" },   weight: 3  },
-    { value: { utm_source: "organic", utm_medium: "organic",  channel: "organic" },  weight: 2  },
+    { value: { utm_source: "tvcf",    utm_medium: "banner",   channel: "referral", utm_campaign: "admarket_launch" }, weight: cfg.pctTvcf    },
+    { value: { utm_source: "google",  utm_medium: "cpc",      channel: "paid" },                                      weight: cfg.pctGoogle  },
+    { value: { utm_source: "naver",   utm_medium: "cpc",      channel: "paid" },                                      weight: cfg.pctNaver   },
+    { value: { utm_source: "kakao",   utm_medium: "social",   channel: "social" },                                    weight: cfg.pctKakao   },
+    { value: { utm_source: "organic", utm_medium: "organic",  channel: "organic" },                                   weight: cfg.pctOrganic },
   ];
 
   const GEO_LIST = [
@@ -246,19 +280,19 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
     const isTvcf = utm.utm_source === "tvcf";
 
     // SSO: tvcf 유입 유저 중 50%는 이미 로그인 상태
-    if (isTvcf && chance(0.50)) {
+    if (isTvcf && chance(cfg.tvcfSsoRate / 100)) {
       add("sso_login", uid, baseTs + 30, { source: "tvcf.co.kr", method: "sso", ...common });
       isAuthenticated = true;
     }
 
     // 수동 로그인: tvcf 비SSO 유저 중 60% (기존 tvcf 유저가 직접 로그인)
-    if (!isAuthenticated && isTvcf && chance(0.60)) {
+    if (!isAuthenticated && isTvcf && chance(cfg.tvcfManualLoginRate / 100)) {
       add("login", uid, baseTs + 120, { method: "email", source: "tvcf.co.kr", ...common });
       isAuthenticated = true;
     }
 
     // 일반 가입 (비로그인 유저 중 5%)
-    if (!isAuthenticated && chance(0.05)) {
+    if (!isAuthenticated && chance(cfg.signupRate / 100)) {
       add("signup_started", uid, baseTs + 30,  { method: "email", ...common });
       add("signup_funnel",  uid, baseTs + 35,  { step: 1, step_name: "account", path: "/signup", ...common });
 

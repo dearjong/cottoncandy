@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { startSimulation, getSimJob } from "./simulate-analytics";
+import { startSimulation, getSimJob, DEFAULT_CONFIG, type SimConfig } from "./simulate-analytics";
 import {
   projectDataSchema,
   type ProjectData,
@@ -312,8 +312,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // POST /api/admin/simulate/start — 시뮬레이션 시작 (비동기 job)
   app.post("/api/admin/simulate/start", async (req, res) => {
     try {
-      const userCount = Math.min(5000, Math.max(100, parseInt(String(req.body.userCount ?? "1000"), 10) || 1000));
-      const jobId = await startSimulation(userCount);
+      const b = req.body ?? {};
+      const num = (key: keyof SimConfig, min: number, max: number) =>
+        Math.min(max, Math.max(min, parseInt(String(b[key] ?? DEFAULT_CONFIG[key]), 10) || DEFAULT_CONFIG[key] as number));
+      const cfg: SimConfig = {
+        userCount:            num("userCount", 10, 10000),
+        pctAdvertiser:        num("pctAdvertiser", 0, 100),
+        pctAgency:            num("pctAgency", 0, 100),
+        pctProduction:        num("pctProduction", 0, 100),
+        pctVisitor:           num("pctVisitor", 0, 100),
+        pctTvcf:              num("pctTvcf", 0, 100),
+        pctGoogle:            num("pctGoogle", 0, 100),
+        pctNaver:             num("pctNaver", 0, 100),
+        pctKakao:             num("pctKakao", 0, 100),
+        pctOrganic:           num("pctOrganic", 0, 100),
+        tvcfSsoRate:          num("tvcfSsoRate", 0, 100),
+        tvcfManualLoginRate:  num("tvcfManualLoginRate", 0, 100),
+        signupRate:           num("signupRate", 0, 100),
+      };
+      const jobId = await startSimulation(cfg);
       res.json({ jobId });
     } catch (error) {
       console.error("Simulation start error:", error);

@@ -3,16 +3,9 @@ import { PageHeader } from "@/components/admin/page-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
 interface SimJob {
@@ -30,30 +23,72 @@ interface SimJob {
   completedAt?: number;
 }
 
+interface SimConfig {
+  userCount: number;
+  pctAdvertiser: number; pctAgency: number; pctProduction: number; pctVisitor: number;
+  pctTvcf: number; pctGoogle: number; pctNaver: number; pctKakao: number; pctOrganic: number;
+  tvcfSsoRate: number; tvcfManualLoginRate: number; signupRate: number;
+}
+
+const DEFAULTS: SimConfig = {
+  userCount: 1000,
+  pctAdvertiser: 5, pctAgency: 30, pctProduction: 55, pctVisitor: 10,
+  pctTvcf: 85, pctGoogle: 5, pctNaver: 5, pctKakao: 3, pctOrganic: 2,
+  tvcfSsoRate: 50, tvcfManualLoginRate: 60, signupRate: 5,
+};
+
 const FUNNEL_ORDER = [
-  { key: "site_visit",              label: "유입",             color: "bg-blue-400",    aarrr: "Acquisition" },
-  { key: "signup_complete",         label: "가입 완료",        color: "bg-orange-400",  aarrr: "Activation" },
-  { key: "activation_achieved",     label: "핵심행동 달성",    color: "bg-yellow-400",  aarrr: "" },
-  { key: "portfolio_registered",    label: "포트폴리오 등록",  color: "bg-purple-400",  aarrr: "" },
-  { key: "project_submitted",       label: "프로젝트 등록",    color: "bg-green-400",   aarrr: "" },
-  { key: "partner_applied",         label: "공고 지원",        color: "bg-teal-400",    aarrr: "" },
-  { key: "contract_signed",         label: "계약 체결",        color: "bg-emerald-500", aarrr: "Revenue" },
-  { key: "draft_submitted",         label: "시안 등록",        color: "bg-sky-400",     aarrr: "" },
-  { key: "draft_confirmed",         label: "시안 확정",        color: "bg-sky-500",     aarrr: "" },
-  { key: "deliverable_submitted",   label: "산출물 등록",      color: "bg-violet-400",  aarrr: "" },
-  { key: "deliverable_confirmed",   label: "산출물 확정",      color: "bg-violet-500",  aarrr: "" },
-  { key: "project_completed",       label: "프로젝트 완료",    color: "bg-pink-500",    aarrr: "" },
-  { key: "review_submitted",        label: "리뷰 등록",        color: "bg-gray-400",    aarrr: "" },
-  { key: "referral_sent",           label: "추천 공유",        color: "bg-indigo-400",  aarrr: "Referral" },
+  { key: "site_visit",            label: "유입",            color: "bg-blue-400",    aarrr: "Acquisition" },
+  { key: "signup_complete",       label: "가입 완료",       color: "bg-orange-400",  aarrr: "Activation" },
+  { key: "activation_achieved",   label: "핵심행동 달성",   color: "bg-yellow-400",  aarrr: "" },
+  { key: "portfolio_registered",  label: "포트폴리오 등록", color: "bg-purple-400",  aarrr: "" },
+  { key: "project_submitted",     label: "프로젝트 등록",   color: "bg-green-400",   aarrr: "" },
+  { key: "partner_applied",       label: "공고 지원",       color: "bg-teal-400",    aarrr: "" },
+  { key: "contract_signed",       label: "계약 체결",       color: "bg-emerald-500", aarrr: "Revenue" },
+  { key: "draft_submitted",       label: "시안 등록",       color: "bg-sky-400",     aarrr: "" },
+  { key: "draft_confirmed",       label: "시안 확정",       color: "bg-sky-500",     aarrr: "" },
+  { key: "deliverable_submitted", label: "산출물 등록",     color: "bg-violet-400",  aarrr: "" },
+  { key: "deliverable_confirmed", label: "산출물 확정",     color: "bg-violet-500",  aarrr: "" },
+  { key: "project_completed",     label: "프로젝트 완료",   color: "bg-pink-500",    aarrr: "" },
+  { key: "review_submitted",      label: "리뷰 등록",       color: "bg-gray-400",    aarrr: "" },
+  { key: "referral_sent",         label: "추천 공유",       color: "bg-indigo-400",  aarrr: "Referral" },
 ];
 
+function NumInput({ label, value, onChange, min = 0, max = 100, unit = "%" }: {
+  label: string; value: number; onChange: (v: number) => void; min?: number; max?: number; unit?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[10px] text-gray-400 leading-tight">{label}</span>
+      <div className="flex items-center gap-1">
+        <input
+          type="number" min={min} max={max} value={value}
+          onChange={(e) => onChange(Math.max(min, Math.min(max, Number(e.target.value) || 0)))}
+          className="w-16 border border-gray-200 rounded px-2 py-1 text-xs text-gray-800 text-right focus:outline-none focus:ring-1 focus:ring-pink-300"
+        />
+        <span className="text-xs text-gray-400">{unit}</span>
+      </div>
+    </div>
+  );
+}
+
+function sumWarn(vals: number[], label: string) {
+  const s = vals.reduce((a, b) => a + b, 0);
+  if (s !== 100) return <span className="text-[10px] text-amber-500">합계 {s}% (100% 권장) — {label}</span>;
+  return null;
+}
+
 export default function AdminSimulatePage() {
-  const [userCount, setUserCount] = useState("1000");
+  const [cfg, setCfg] = useState<SimConfig>(DEFAULTS);
   const [jobId, setJobId] = useState<string | null>(null);
   const [job, setJob] = useState<SimJob | null>(null);
   const [loading, setLoading] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  function set<K extends keyof SimConfig>(key: K, val: SimConfig[K]) {
+    setCfg((prev) => ({ ...prev, [key]: val }));
+  }
 
   function stopPolling() {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
@@ -67,7 +102,7 @@ export default function AdminSimulatePage() {
       const res = await fetch("/api/admin/simulate/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userCount: parseInt(userCount) }),
+        body: JSON.stringify(cfg),
       });
       const { jobId: id } = await res.json();
       setJobId(id);
@@ -95,6 +130,9 @@ export default function AdminSimulatePage() {
   const siteVisit = job?.funnelBreakdown["site_visit"] ?? 0;
   const utmBreakdown = job?.utmBreakdown ?? {} as Record<string, number>;
 
+  const utmSum = cfg.pctTvcf + cfg.pctGoogle + cfg.pctNaver + cfg.pctKakao + cfg.pctOrganic;
+  const userSum = cfg.pctAdvertiser + cfg.pctAgency + cfg.pctProduction + cfg.pctVisitor;
+
   return (
     <div className="space-y-6 p-6">
       <PageHeader
@@ -103,38 +141,75 @@ export default function AdminSimulatePage() {
         hidePeriodFilter
       />
 
-      {/* 설정 */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600 whitespace-nowrap">가상 사용자 수</span>
-            <Select value={userCount} onValueChange={setUserCount} disabled={!!isRunning}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="100">100명</SelectItem>
-                <SelectItem value="500">500명</SelectItem>
-                <SelectItem value="1000">1,000명</SelectItem>
-                <SelectItem value="2000">2,000명</SelectItem>
-                <SelectItem value="5000">5,000명</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-3 text-xs text-gray-400 border rounded px-3 py-1.5">
-            <span>광고주 5% / 대행사 30% / 제작사 55% / 뜨내기 10%</span>
-            <span>·</span>
-            <span>유입: tvcf.co.kr 배너 85% (SSO 50%) / 기타 15%</span>
-            <span>·</span>
-            <span>남 50% / 여 50% · 30~40대 중심</span>
-          </div>
-          <Button
-            className="btn-pink ml-auto"
-            onClick={() => setConfirmOpen(true)}
-            disabled={!!isRunning || loading}
-          >
+      {/* 설정 패널 */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-5">
+
+        {/* 유저 수 */}
+        <div className="flex items-center gap-4 flex-wrap">
+          <NumInput label="가상 사용자 수" value={cfg.userCount} unit="명"
+            min={10} max={10000} onChange={(v) => set("userCount", v)} />
+          <Button className="btn-pink ml-auto" onClick={() => setConfirmOpen(true)}
+            disabled={!!isRunning || loading}>
             {loading ? "시작 중..." : isRunning ? "실행 중..." : "▶ 시뮬레이션 시작"}
           </Button>
+        </div>
+
+        <hr className="border-gray-100" />
+
+        {/* 유저 타입 비율 */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-600">유저 타입 비율</span>
+            {sumWarn([cfg.pctAdvertiser, cfg.pctAgency, cfg.pctProduction, cfg.pctVisitor], "유저 타입")}
+          </div>
+          <div className="flex flex-wrap gap-4">
+            <NumInput label="광고주" value={cfg.pctAdvertiser} onChange={(v) => set("pctAdvertiser", v)} />
+            <NumInput label="대행사" value={cfg.pctAgency}     onChange={(v) => set("pctAgency", v)} />
+            <NumInput label="제작사" value={cfg.pctProduction} onChange={(v) => set("pctProduction", v)} />
+            <NumInput label="뜨내기" value={cfg.pctVisitor}    onChange={(v) => set("pctVisitor", v)} />
+            <div className="flex items-end pb-1">
+              <span className={`text-xs font-semibold ${userSum === 100 ? "text-green-600" : "text-amber-500"}`}>
+                합계 {userSum}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <hr className="border-gray-100" />
+
+        {/* UTM 비율 */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-gray-600">UTM 유입 비율</span>
+          </div>
+          <div className="flex flex-wrap gap-4">
+            <NumInput label="tvcf.co.kr" value={cfg.pctTvcf}    onChange={(v) => set("pctTvcf", v)} />
+            <NumInput label="Google"     value={cfg.pctGoogle}   onChange={(v) => set("pctGoogle", v)} />
+            <NumInput label="Naver"      value={cfg.pctNaver}    onChange={(v) => set("pctNaver", v)} />
+            <NumInput label="Kakao"      value={cfg.pctKakao}    onChange={(v) => set("pctKakao", v)} />
+            <NumInput label="Organic"    value={cfg.pctOrganic}  onChange={(v) => set("pctOrganic", v)} />
+            <div className="flex items-end pb-1">
+              <span className={`text-xs font-semibold ${utmSum === 100 ? "text-green-600" : "text-amber-500"}`}>
+                합계 {utmSum}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <hr className="border-gray-100" />
+
+        {/* 인증 전환율 */}
+        <div className="space-y-2">
+          <span className="text-xs font-medium text-gray-600">인증 전환율</span>
+          <div className="flex flex-wrap gap-4">
+            <NumInput label="tvcf SSO 자동 로그인율"   value={cfg.tvcfSsoRate}         onChange={(v) => set("tvcfSsoRate", v)} />
+            <NumInput label="비SSO 수동 로그인율"       value={cfg.tvcfManualLoginRate} onChange={(v) => set("tvcfManualLoginRate", v)} />
+            <NumInput label="신규 가입 전환율"           value={cfg.signupRate}          onChange={(v) => set("signupRate", v)} />
+            <div className="flex items-end pb-1 text-[10px] text-gray-400 max-w-xs leading-tight">
+              SSO → tvcf 유입 중 자동 로그인 비율<br />
+              수동 → 비SSO tvcf 유저 중 직접 로그인 비율
+            </div>
+          </div>
         </div>
       </div>
 
@@ -163,8 +238,8 @@ export default function AdminSimulatePage() {
             {[
               { label: "가상 사용자", value: job.totalUsers.toLocaleString() + "명" },
               { label: "생성 이벤트", value: job.totalEvents.toLocaleString() + "개" },
-              { label: "전송 배치", value: `${job.batchesSent} / ${job.totalBatches}` },
-              { label: "오류", value: job.errors.length + "건" },
+              { label: "전송 배치",   value: `${job.batchesSent} / ${job.totalBatches}` },
+              { label: "오류",        value: job.errors.length + "건" },
             ].map((s) => (
               <div key={s.label} className="bg-gray-50 rounded-lg p-3 text-center">
                 <div className="text-lg font-bold text-gray-800">{s.value}</div>
@@ -175,13 +250,14 @@ export default function AdminSimulatePage() {
 
           {job.errors.length > 0 && (
             <div className="bg-red-50 rounded-lg p-3 text-xs text-red-700 space-y-1 max-h-28 overflow-y-auto">
-              {job.errors.map((e, i) => <div key={i}>⚠ {e}</div>)}
+              {job.errors.slice(0, 10).map((e, i) => <div key={i}>⚠ {e}</div>)}
+              {job.errors.length > 10 && <div className="text-red-400">외 {job.errors.length - 10}건...</div>}
             </div>
           )}
         </div>
       )}
 
-      {/* UTM + AARRR 나란히 */}
+      {/* UTM + AARRR */}
       {job && job.totalEvents > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* UTM 유입 현황 */}
@@ -189,18 +265,18 @@ export default function AdminSimulatePage() {
             <p className="font-medium text-gray-800">UTM 유입 채널</p>
             <div className="space-y-2">
               {[
-                { key: "tvcf",    label: "tvcf.co.kr", color: "bg-pink-500",   pct: 85 },
-                { key: "google",  label: "Google",     color: "bg-blue-400",   pct: 5  },
-                { key: "naver",   label: "Naver",      color: "bg-green-500",  pct: 5  },
-                { key: "kakao",   label: "Kakao",      color: "bg-yellow-400", pct: 3  },
-                { key: "organic", label: "Organic",    color: "bg-gray-400",   pct: 2  },
+                { key: "tvcf",    label: "tvcf.co.kr", color: "bg-pink-500",   pct: cfg.pctTvcf    },
+                { key: "google",  label: "Google",     color: "bg-blue-400",   pct: cfg.pctGoogle  },
+                { key: "naver",   label: "Naver",      color: "bg-green-500",  pct: cfg.pctNaver   },
+                { key: "kakao",   label: "Kakao",      color: "bg-yellow-400", pct: cfg.pctKakao   },
+                { key: "organic", label: "Organic",    color: "bg-gray-400",   pct: cfg.pctOrganic },
               ].map(({ key, label, color, pct }) => {
                 const count = utmBreakdown[key] ?? Math.round((job.totalUsers * pct) / 100);
                 const total = job.totalUsers;
                 const actualPct = total > 0 ? Math.round((count / total) * 100) : pct;
                 return (
                   <div key={key} className="flex items-center gap-3">
-                    <div className="w-16 text-xs text-gray-600 shrink-0">{label}</div>
+                    <div className="w-20 text-xs text-gray-600 shrink-0">{label}</div>
                     <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
                       <div className={`${color} h-3 rounded-full`} style={{ width: `${actualPct}%` }} />
                     </div>
@@ -226,7 +302,8 @@ export default function AdminSimulatePage() {
                       : <span className="w-20 shrink-0" />}
                     <div className="w-24 text-xs text-gray-600 truncate shrink-0">{label}</div>
                     <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                      <div className={`${color} h-3 rounded-full transition-all duration-500`} style={{ width: `${Math.max(pct, count > 0 ? 1 : 0)}%` }} />
+                      <div className={`${color} h-3 rounded-full transition-all duration-500`}
+                        style={{ width: `${Math.max(pct, count > 0 ? 1 : 0)}%` }} />
                     </div>
                     <div className="w-12 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
                     <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
@@ -243,27 +320,14 @@ export default function AdminSimulatePage() {
         </div>
       )}
 
-      {/* 안내 (최초 상태) */}
-      {!job && (
-        <div className="bg-gray-50 rounded-xl border border-dashed border-gray-200 p-6 text-sm text-gray-500 space-y-2">
-          <p className="font-medium text-gray-700">시뮬레이션 동작 방식</p>
-          <ul className="space-y-1 list-disc list-inside text-xs text-gray-400">
-            <li>광고주 5% / 대행사 30% / 제작사 55% / 뜨내기(이탈) 10% · 남 50% / 여 50% · 30~40대 중심</li>
-            <li>유입: tvcf.co.kr 배너 85% (그 중 50%는 SSO 자동 로그인) / google·naver·kakao·organic 15%</li>
-            <li>유입 → 가입 → 핵심행동 → 포트폴리오/프로젝트 → 계약 → 시안 → 산출물 → 완료 → 리뷰</li>
-            <li>GA4 + Mixpanel 동시 전송 — 완료 후 Mixpanel Funnels / GA4 탐색 분석에서 확인</li>
-          </ul>
-        </div>
-      )}
-
       {/* 시작 확인 팝업 */}
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>시뮬레이션을 시작할까요?</AlertDialogTitle>
             <AlertDialogDescription>
-              가상 사용자 <strong>{parseInt(userCount).toLocaleString()}명</strong>의 이벤트를 생성하여
-              Mixpanel에 전송합니다. 실제 데이터에 시뮬레이션 이벤트가 추가됩니다.
+              가상 사용자 <strong>{cfg.userCount.toLocaleString()}명</strong>의 이벤트를 생성하여
+              GA4 + Mixpanel에 전송합니다. 실제 데이터에 시뮬레이션 이벤트가 추가됩니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
