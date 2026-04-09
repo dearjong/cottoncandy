@@ -9,6 +9,7 @@ import Login from "@/pages/member/login";
 import Signup from "@/pages/member/signup";
 import SignupPhone from "@/pages/member/signup-phone";
 import SignupEmail from "@/pages/member/signup-email";
+import SignupAccountType from "@/pages/member/signup-account-type";
 import Step1PartnerSelection from "@/pages/service/create-project/step1-partner-selection";
 import ConsultingInquiry from "@/pages/service/create-project/consulting-inquiry";
 import PartnerType from "@/pages/service/create-project/partner-type";
@@ -88,6 +89,7 @@ import MyProfile from "@/pages/my/profile";
 import MyWithdraw from "@/pages/my/withdraw";
 import MyInquiry from "@/pages/my/inquiry";
 import MyNotificationSettings from "@/pages/my/notification-settings";
+import MyJobInfo from "@/pages/my/job-info";
 import DesignSystem from "@/pages/design-system";
 import NotFound from "@/pages/not-found";
 import AdminLayout from "@/components/admin/admin-layout";
@@ -154,6 +156,7 @@ function Router() {
       <Route path="/signup" component={Signup} />
       <Route path="/signup/phone" component={SignupPhone} />
       <Route path="/signup/email" component={SignupEmail} />
+      <Route path="/signup/account-type" component={SignupAccountType} />
       <Route path="/create-project/step1">
         <ProtectedRoute component={Step1PartnerSelection} />
       </Route>
@@ -390,6 +393,9 @@ function Router() {
       </Route>
       <Route path="/my/notification-settings">
         <ProtectedRoute component={MyNotificationSettings} />
+      </Route>
+      <Route path="/my/job-info">
+        <ProtectedRoute component={MyJobInfo} />
       </Route>
       <Route path="/design-system" component={DesignSystem} />
       

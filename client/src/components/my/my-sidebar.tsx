@@ -29,6 +29,13 @@ export default function MySidebar() {
         </div>
 
         <button
+          onClick={() => setLocation("/my/job-info")}
+          className={`w-full text-left py-2 px-1 font-medium ${isActive("/my/job-info") ? "text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
+        >
+          직업정보
+        </button>
+
+        <button
           onClick={() => setLocation("/my/inquiry")}
           className={`w-full text-left py-2 px-1 font-medium ${isActive("/my/inquiry") ? "text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
         >
