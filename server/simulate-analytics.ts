@@ -107,11 +107,14 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
   }
 
   const UTM_SOURCES = [
-    { value: { utm_source: "organic", utm_medium: "(none)", utm_campaign: "(organic)" }, weight: 30 },
-    { value: { utm_source: "google", utm_medium: "cpc", utm_campaign: "brand_awareness" }, weight: 30 },
-    { value: { utm_source: "naver", utm_medium: "cpc", utm_campaign: "검색광고" }, weight: 20 },
-    { value: { utm_source: "kakao", utm_medium: "display", utm_campaign: "카카오비즈" }, weight: 10 },
-    { value: { utm_source: "referral", utm_medium: "referral", utm_campaign: "(referral)" }, weight: 10 },
+    { value: { utm_source: "organic",  utm_medium: "(none)",   utm_campaign: "(organic)",       channel: "organic",  referrer: "https://search.naver.com/",      referrer_domain: "search.naver.com" }, weight: 20 },
+    { value: { utm_source: "google",   utm_medium: "(none)",   utm_campaign: "(organic)",       channel: "organic",  referrer: "https://www.google.com/",         referrer_domain: "google.com"        }, weight: 10 },
+    { value: { utm_source: "google",   utm_medium: "cpc",      utm_campaign: "brand_awareness", channel: "paid",     referrer: "https://www.google.com/",         referrer_domain: "google.com"        }, weight: 20 },
+    { value: { utm_source: "naver",    utm_medium: "cpc",      utm_campaign: "검색광고",          channel: "paid",     referrer: "https://search.naver.com/",      referrer_domain: "search.naver.com" }, weight: 20 },
+    { value: { utm_source: "kakao",    utm_medium: "display",  utm_campaign: "카카오비즈",         channel: "paid",     referrer: "https://www.kakao.com/",          referrer_domain: "kakao.com"         }, weight: 10 },
+    { value: { utm_source: "instagram",utm_medium: "social",   utm_campaign: "브랜드_sns",         channel: "social",   referrer: "https://www.instagram.com/",      referrer_domain: "instagram.com"     }, weight: 10 },
+    { value: { utm_source: "referral", utm_medium: "referral", utm_campaign: "(referral)",      channel: "referral", referrer: "https://blog.naver.com/adreview", referrer_domain: "blog.naver.com"    }, weight: 5  },
+    { value: { utm_source: "(direct)", utm_medium: "(none)",   utm_campaign: "(direct)",        channel: "direct",   referrer: "direct",                          referrer_domain: "direct"            }, weight: 5  },
   ];
 
   const PARTNERS = ["솜사탕애드", "마케팅에이전션", "크리에이티브랩", "광고제작소", "미디어웍스"];

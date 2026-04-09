@@ -40,6 +40,55 @@ function captureUtmParams(): Record<string, string> {
   } catch { return {}; }
 }
 
+// ─── 유입 경로(트래픽 소스) 캡처 ─────────────────────────────
+
+const TRAFFIC_SOURCE_KEY = "analytics_traffic_source";
+
+const SEARCH_ENGINES = ["google", "naver", "daum", "bing", "yahoo", "baidu", "yandex", "duckduckgo"];
+const SOCIAL_DOMAINS = ["facebook", "instagram", "twitter", "x.com", "linkedin", "tiktok", "youtube", "pinterest", "kakao"];
+
+function deriveChannel(utm: Record<string, string>, referrerDomain: string): string {
+  const medium = (utm.utm_medium ?? "").toLowerCase();
+  const source = (utm.utm_source ?? "").toLowerCase();
+
+  if (medium.includes("cpc") || medium.includes("ppc") || medium.includes("paid") || source.includes("ads")) return "paid";
+  if (medium.includes("email") || source.includes("email") || source.includes("newsletter")) return "email";
+  if (medium.includes("social") || SOCIAL_DOMAINS.some(s => source.includes(s) || referrerDomain.includes(s))) return "social";
+  if (medium.includes("affiliate")) return "affiliate";
+  if (utm.utm_source) return "campaign";
+  if (SEARCH_ENGINES.some(s => referrerDomain.includes(s))) return "organic";
+  if (referrerDomain && referrerDomain !== window.location.hostname) return "referral";
+  return "direct";
+}
+
+/**
+ * 유입 경로 정보를 sessionStorage에 저장하고 반환.
+ * referrer, referrer_domain, channel, landing_path 포함.
+ * 세션당 1회 캡처 (랜딩 시점 기준으로 고정).
+ */
+export function captureTrafficSource(): Record<string, string> {
+  try {
+    const stored = sessionStorage.getItem(TRAFFIC_SOURCE_KEY);
+    if (stored) return JSON.parse(stored);
+
+    const utm = captureUtmParams();
+    const rawReferrer = document.referrer ?? "";
+    let referrerDomain = "";
+    try { referrerDomain = new URL(rawReferrer).hostname; } catch { /* direct */ }
+
+    const channel = deriveChannel(utm, referrerDomain);
+    const source: Record<string, string> = {
+      referrer: rawReferrer || "direct",
+      referrer_domain: referrerDomain || "direct",
+      channel,
+      landing_path: window.location.pathname,
+    };
+
+    sessionStorage.setItem(TRAFFIC_SOURCE_KEY, JSON.stringify(source));
+    return source;
+  } catch { return {}; }
+}
+
 // ─── Referral 코드 캡처 ──────────────────────────────────────
 
 /**
@@ -103,20 +152,21 @@ export function getAnalyticsSessionId(): string {
 
 /**
  * Mixpanel 전송 + GA4 전송 + 서버 `analytics_events` 적재 (POST /api/analytics/events).
- * UTM 파라미터·user_id·experiment variant를 모든 이벤트에 자동 첨부.
+ * UTM 파라미터·유입경로·user_id·experiment variant를 모든 이벤트에 자동 첨부.
  */
 export function publishAnalytics(
   eventName: string,
   properties?: Record<string, unknown>,
 ) {
   const utmProps = captureUtmParams();
+  const trafficSource = captureTrafficSource();
   const userId = (() => { try { return localStorage.getItem("analytics_user_id") ?? undefined; } catch { return undefined; } })();
   const experiments = (() => { try { return JSON.parse(localStorage.getItem(EXPERIMENT_STORAGE_KEY) ?? "{}") as Record<string, string>; } catch { return {}; } })();
   const experimentProps = Object.keys(experiments).length > 0
     ? { active_experiments: Object.keys(experiments).join(","), ...Object.fromEntries(Object.entries(experiments).map(([k, v]) => [`exp_${k}`, v])) }
     : {};
 
-  const props: Record<string, unknown> = { ...properties, ...utmProps, ...experimentProps };
+  const props: Record<string, unknown> = { ...properties, ...utmProps, ...trafficSource, ...experimentProps };
 
   // Mixpanel
   mixpanel.track(eventName, props);
@@ -220,14 +270,16 @@ export function trackLogin(props: {
 
 // ─── 유입 & 세션 ───────────────────────────────────────────────
 
-/** 세션당 1회 — 퍼널 1단계(유입) */
+/** 세션당 1회 — 퍼널 1단계(유입). referrer·channel·UTM 포함 */
 export function trackSiteVisitOnce(path: string) {
   try {
     if (sessionStorage.getItem(SITE_VISIT_SESSION_KEY)) return;
     sessionStorage.setItem(SITE_VISIT_SESSION_KEY, "1");
-    publishAnalytics("site_visit", { path });
+    const traffic = captureTrafficSource();
+    publishAnalytics("site_visit", { path, ...traffic });
   } catch {
-    publishAnalytics("site_visit", { path });
+    const traffic = captureTrafficSource();
+    publishAnalytics("site_visit", { path, ...traffic });
   }
 }
 
