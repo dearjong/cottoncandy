@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, MessageCircle, ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
 import Layout from "@/components/layout/layout";
 import { Button } from "@/components/ui/button";
@@ -68,25 +68,52 @@ export default function Home() {
 
   const projects = [
     {
-      title: "제1회 안전한 대한민국 영상 공",
+      title: "롯데칠성 2025 여름 캠페인 영상 공고",
+      company: "롯데칠성음료",
+      dDay: "D-14",
+      period: "2025-04-10 ~ 2025-04-24",
+      status: "접수중"
+    },
+    {
+      title: "현대자동차 아이오닉 브랜드 필름",
+      company: "현대자동차",
+      dDay: "D-7",
+      period: "2025-04-09 ~ 2025-04-16",
+      status: "접수중"
+    },
+    {
+      title: "CJ 올리브영 뷰티 캠페인 2025",
+      company: "CJ 올리브영",
+      dDay: "D-21",
+      period: "2025-04-01 ~ 2025-04-28",
+      status: "접수예정"
+    }
+  ];
+
+  const contests = [
+    {
+      title: "제1회 안전한 대한민국 영상 공모전",
       company: "대한산업안전협회",
       dDay: "D-120",
       period: "2025-04-14 ~ 2025-06-08",
-      status: "접수예정"
+      status: "접수예정",
+      prize: "총 상금 500만원"
     },
     {
-      title: "[KUDAF] 대한민국 대학생 디",
+      title: "[KUDAF] 대한민국 대학생 디지털 광고 공모전",
       company: "(사)한국디지털광고협회",
       dDay: "D-50",
       period: "2025-06-02 ~ 2025-09-26",
-      status: "접수중"
+      status: "접수중",
+      prize: "총 상금 1,000만원"
     },
     {
-      title: "제12회 청소년 통일문화 경연",
+      title: "제12회 청소년 통일문화 경연대회",
       company: "통일부 국립통일교육원",
       dDay: "D-30",
       period: "2025-03-27 ~ 2025-04-23",
-      status: "접수중"
+      status: "접수중",
+      prize: "총 상금 300만원"
     }
   ];
 
@@ -114,7 +141,7 @@ export default function Home() {
 
   const faqs = [
     { question: "프로젝트 등록은 어떻게 시작하나요?", answer: "" },
-    { 
+    {
       question: "기업 등급이 뭔가요?",
       answer: `
         Gold: TVCF.co.kr 포트폴리오 100건 이상, 리뷰 평균 4.7점 이상
@@ -173,7 +200,10 @@ export default function Home() {
                 key={index}
                 className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-white hover:shadow-md transition-all cursor-pointer"
                 data-testid={`category-${index}`}
-                onClick={() => navigate(`/agency-search?category=${encodeURIComponent(category.name)}`)}
+                onClick={() => {
+                  publishAnalytics("home_category_click", { category: category.name });
+                  navigate(`/agency-search?category=${encodeURIComponent(category.name)}`);
+                }}
               >
                 <div className="text-3xl">{category.icon}</div>
                 <span className="text-xs sm:text-sm text-gray-700">{category.name}</span>
@@ -186,16 +216,27 @@ export default function Home() {
       {/* Projects Section */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-12" data-testid="projects-title">
-            "프로젝트공고 · 입찰·공모전"
-          </h2>
+          <div className="flex items-center justify-between mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold" data-testid="projects-title">
+              프로젝트 공고
+            </h2>
+            <button
+              className="flex items-center gap-1 text-sm text-gray-500 hover:text-pink-600 transition-colors"
+              onClick={() => navigate("/project-list")}
+            >
+              전체보기 <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((project, index) => (
               <div
                 key={index}
                 className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer"
                 data-testid={`project-${index}`}
-                onClick={() => navigate("/project-list")}
+                onClick={() => {
+                  publishAnalytics("home_project_card_click", { title: project.title });
+                  navigate("/project-list");
+                }}
               >
                 <h3 className="font-bold text-lg mb-2">{project.title}</h3>
                 <p className="text-gray-600 text-sm mb-3">{project.company}</p>
@@ -209,29 +250,71 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <div className="text-center mt-8">
-            <Button
-              variant="outline"
-              className="btn-white"
-              onClick={() => navigate("/project-list")}
+        </div>
+      </section>
+
+      {/* Contest Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold" data-testid="contests-title">
+              영상 공모전
+            </h2>
+            <button
+              className="flex items-center gap-1 text-sm text-gray-500 hover:text-pink-600 transition-colors"
+              onClick={() => navigate("/contest")}
             >
-              프로젝트 전체보기
-            </Button>
+              전체보기 <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {contests.map((contest, index) => (
+              <div
+                key={index}
+                className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                data-testid={`contest-${index}`}
+                onClick={() => {
+                  publishAnalytics("home_contest_card_click", { title: contest.title });
+                  navigate("/contest");
+                }}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className={`px-3 py-1 rounded-full text-sm ${
+                    contest.status === '접수예정' ? 'bg-gray-100 text-gray-600' : 'bg-blue-100 text-blue-600'
+                  }`}>{contest.status}</span>
+                  <span className="text-2xl font-bold text-pink-600">{contest.dDay}</span>
+                </div>
+                <h3 className="font-bold text-lg mb-2 line-clamp-2">{contest.title}</h3>
+                <p className="text-gray-600 text-sm mb-3">{contest.company}</p>
+                <div className="flex items-center justify-between border-t border-gray-100 pt-3 mt-3">
+                  <span className="text-xs font-medium text-pink-600">{contest.prize}</span>
+                  <span className="text-xs text-gray-500">{contest.period}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-12" data-testid="features-title">
             "영상광고의 시작은 왜 CottonCandy 인가"
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="bg-white rounded-xl p-8 shadow-sm" data-testid={`feature-${index}`}>
+              <div
+                key={index}
+                className="bg-gray-50 rounded-xl p-8 hover:shadow-md transition-shadow cursor-pointer"
+                data-testid={`feature-${index}`}
+                onClick={() => navigate("/guide/features")}
+              >
                 <h3 className="text-xl font-bold mb-4 text-pink-600">+ {feature.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                <span className="inline-flex items-center gap-1 text-sm text-pink-600 mt-4">
+                  자세히 보기 <ArrowRight className="w-3 h-3" />
+                </span>
               </div>
             ))}
           </div>
@@ -239,37 +322,39 @@ export default function Home() {
       </section>
 
       {/* Partners Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-12" data-testid="partners-title">
-            Partners (대행사)
-          </h2>
+          <div className="flex items-center justify-between mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold" data-testid="partners-title">
+              Partners (대행사)
+            </h2>
+            <button
+              className="flex items-center gap-1 text-sm text-gray-500 hover:text-pink-600 transition-colors"
+              onClick={() => navigate("/agency-search")}
+            >
+              전체보기 <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {partners.map((partner, index) => (
               <div
                 key={index}
-                className="border border-gray-200 rounded-lg p-4 text-center hover:shadow-md hover:border-pink-300 transition-all cursor-pointer"
+                className="border border-gray-200 bg-white rounded-lg p-4 text-center hover:shadow-md hover:border-pink-300 transition-all cursor-pointer"
                 data-testid={`partner-${index}`}
-                onClick={() => navigate("/agency-search")}
+                onClick={() => {
+                  publishAnalytics("home_partner_click", { partner });
+                  navigate("/agency-search");
+                }}
               >
                 <span className="text-sm text-gray-700">{partner}</span>
               </div>
             ))}
           </div>
-          <div className="text-center mt-8">
-            <Button
-              variant="outline"
-              className="btn-white"
-              onClick={() => navigate("/agency-search")}
-            >
-              파트너사 전체보기
-            </Button>
-          </div>
         </div>
       </section>
 
       {/* Project Flow */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-12" data-testid="flow-title">
             프로젝트 Flow
@@ -277,7 +362,10 @@ export default function Home() {
           <div className="flex flex-wrap justify-center items-center gap-4">
             {["광고제작 의뢰", "참여신청 접수/제안", "OT/PT/계약", "영상 제작", "온 에어", "AS 및 정산"].map((step, index) => (
               <div key={index} className="flex items-center" data-testid={`flow-${index}`}>
-                <div className="bg-white border border-gray-200 rounded-lg px-6 py-3">
+                <div
+                  className="bg-white border border-gray-200 rounded-lg px-6 py-3 hover:border-pink-300 hover:shadow-sm transition-all cursor-pointer"
+                  onClick={() => navigate("/guide/how-to-use")}
+                >
                   <span className="font-medium">{step}</span>
                 </div>
                 {index < 5 && <span className="mx-2 text-gray-400">→</span>}
@@ -296,7 +384,7 @@ export default function Home() {
       </section>
 
       {/* Pricing */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold mb-8" data-testid="pricing-title">
             이용 요금
@@ -315,29 +403,92 @@ export default function Home() {
         </div>
       </section>
 
+      {/* AI 상담 Banner */}
+      <section className="py-16 bg-gradient-to-r from-[#16C2E9] to-[#EA4C89]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
+              <MessageCircle className="w-7 h-7 text-white" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white" data-testid="ai-chat-title">
+              AI 상담으로 빠르게 시작하세요
+            </h2>
+            <p className="text-white/90 text-lg">
+              어떤 광고가 필요한지 모르겠다면? AI가 맞춤 제안을 도와드립니다.
+            </p>
+            <div className="flex gap-3 mt-2">
+              <Button
+                className="bg-white text-pink-600 hover:bg-pink-50 font-medium px-6"
+                data-testid="button-ai-chat"
+                onClick={() => {
+                  publishAnalytics("home_ai_chat_click", {});
+                  navigate("/guide/inquiry");
+                }}
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                AI 상담 시작하기
+              </Button>
+              <Button
+                variant="outline"
+                className="border-white text-white hover:bg-white/10 px-6"
+                onClick={() => navigate("/guide")}
+              >
+                이용안내 보기
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-12" data-testid="faq-title">
-            자주 묻는 질문
-          </h2>
+          <div className="flex items-center justify-between mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold" data-testid="faq-title">
+              자주 묻는 질문
+            </h2>
+            <button
+              className="flex items-center gap-1 text-sm text-gray-500 hover:text-pink-600 transition-colors"
+              onClick={() => navigate("/guide/faq")}
+            >
+              전체 FAQ <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
           <div className="space-y-4">
             {faqs.map((faq, index) => (
-              <div key={index} className="bg-white rounded-lg overflow-hidden" data-testid={`faq-${index}`}>
+              <div key={index} className="border border-gray-200 rounded-lg overflow-hidden" data-testid={`faq-${index}`}>
                 <button
                   onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
                   className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
                 >
                   <span className="font-medium text-left">{faq.question}</span>
-                  <ChevronDown className={`w-5 h-5 transition-transform ${openFaqIndex === index ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-5 h-5 transition-transform flex-shrink-0 ${openFaqIndex === index ? 'rotate-180' : ''}`} />
                 </button>
-                {openFaqIndex === index && faq.answer && (
+                {openFaqIndex === index && (
                   <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                    <pre className="text-sm text-gray-600 whitespace-pre-wrap font-sans">{faq.answer}</pre>
+                    {faq.answer ? (
+                      <pre className="text-sm text-gray-600 whitespace-pre-wrap font-sans">{faq.answer}</pre>
+                    ) : (
+                      <button
+                        className="flex items-center gap-1 text-sm text-pink-600 hover:underline"
+                        onClick={() => navigate("/guide/faq")}
+                      >
+                        자세한 답변 보기 <ArrowRight className="w-3 h-3" />
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
             ))}
+          </div>
+          <div className="text-center mt-8">
+            <Button
+              variant="outline"
+              className="btn-white"
+              onClick={() => navigate("/guide/faq")}
+            >
+              FAQ 전체보기
+            </Button>
           </div>
         </div>
       </section>
