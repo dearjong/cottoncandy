@@ -60,7 +60,7 @@ const projectParentItem = {
 }
 
 const projectCoreItems = [
-  { title: "공고 프로젝트", url: "/admin/bidding", icon: Briefcase },
+  { title: "공고 프로젝트", url: "/admin/project_list", icon: Briefcase },
   { title: "1:1 프로젝트", url: "/admin/one-on-one", icon: HandHeart },
 ]
 const projectFilterItems = [
@@ -170,7 +170,7 @@ export function AppSidebar() {
   const isReviewsActive = useMemo(() => location === reviewsParentItem.url, [location])
 
   const projectCounts = useMemo(() => ({
-    "/admin/bidding": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.type === "공고").length,
+    "/admin/project_list": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.type === "공고").length,
     "/admin/one-on-one": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.type === "1:1").length,
     "/admin/pending-approval": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.status === "REQUESTED").length,
     "/admin/stop-cancel": MOCK_ADMIN_PROJECTS_V1.filter((p) => p.status === "STOPPED" || p.status === "CANCELLED").length,

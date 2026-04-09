@@ -37,7 +37,7 @@ React + Vite 기반 풀스택 앱으로, 관리자 패널이 핵심 기능입니
 [전체 프로젝트]              /admin/projects
 ├── 승인 대기                 /admin/pending-approval
 ├── 중단/취소 요청             /admin/stop-cancel
-├── 공고 프로젝트              /admin/bidding
+├── 공고 프로젝트              /admin/project_list
 ├── 1:1 프로젝트              /admin/one-on-one
 └── 참여현황                  /admin/participation
 

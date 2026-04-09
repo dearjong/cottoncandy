@@ -414,6 +414,9 @@ function Router() {
       <Route path="/admin/project-detail/:id">
         <AdminLayout><AdminProjectDetail /></AdminLayout>
       </Route>
+      <Route path="/admin/project_list">
+        <AdminLayout><AdminBiddingProjects /></AdminLayout>
+      </Route>
       <Route path="/admin/bidding">
         <AdminLayout><AdminBiddingProjects /></AdminLayout>
       </Route>
