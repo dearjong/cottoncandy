@@ -164,7 +164,8 @@ const UTM_SOURCES = [
   ...Array(2).fill({ utm_source: "referral", utm_medium: "referral", channel: "referral" }),// 10%
   ...Array(2).fill({ utm_source: "organic",  utm_medium: "organic",  channel: "organic" }), // 10%
 ];
-const CATEGORIES = ["영상광고","브랜드디자인","사진촬영","SNS마케팅","PPT디자인","웹개발"];
+const CATEGORIES = ["브랜드디자인","사진촬영","SNS마케팅","PPT디자인","웹개발"];
+const pickCategory = () => chance(0.85) ? "영상광고" : pick(CATEGORIES);
 const SEARCH_TERMS = ["영상","브랜드","광고","디자인","사진","마케팅","촬영"];
 
 async function simulateUser(i) {
@@ -201,7 +202,7 @@ async function simulateUser(i) {
 
   // 4. 카테고리 탐색 (35%)
   if (chance(0.35)) {
-    await emit(clientId, userId, "category_viewed", { category: pick(CATEGORIES), ...base }, next());
+    await emit(clientId, userId, "category_viewed", { category: pickCategory(), ...base }, next());
   }
 
   // 뜨내기는 여기서 종료 — 둘러보다 이탈
@@ -242,7 +243,7 @@ async function simulateUser(i) {
             const companySizes = ["solo","small","medium","large"];
             await emit(clientId, userId, "job_info_submitted", {
               company_size: pick(companySizes),
-              industry: pick(CATEGORIES),
+              industry: pickCategory(),
               ...base,
             }, next());
           }
@@ -266,7 +267,7 @@ async function simulateUser(i) {
               await emit(clientId, userId, "project_submitted", {
                 project_type: selectedOption,
                 is_first_time: true,
-                category: pick(CATEGORIES),
+                category: pickCategory(),
                 ...base,
               }, next());
               await emit(clientId, userId, "activation_achieved", { trigger_event: "project_submitted", user_type: userType, ...base }, next(500, 2000));
@@ -290,7 +291,7 @@ async function simulateUser(i) {
             if (chance(0.55)) {
               await emit(clientId, userId, "portfolio_registered", {
                 portfolio_id: `pf_${randInt(1000, 9999)}`,
-                category: pick(CATEGORIES),
+                category: pickCategory(),
                 partner_type: partnerType,
                 ...base,
               }, next());
@@ -299,17 +300,17 @@ async function simulateUser(i) {
             // 계약 → 시안 → 산출물 흐름 (40%)
             if (chance(0.40)) {
               await emit(clientId, userId, "contract_signed", { project_id: projectId, partner_type: partnerType, ...base }, next());
-              await emit(clientId, userId, "draft_submitted", { project_id: projectId, draft_round: 1, category: pick(CATEGORIES), ...base }, next());
+              await emit(clientId, userId, "draft_submitted", { project_id: projectId, draft_round: 1, category: pickCategory(), ...base }, next());
 
               if (chance(0.70)) {
                 await emit(clientId, userId, "draft_confirmed", { project_id: projectId, draft_round: 1, ...base }, next());
 
                 if (chance(0.80)) {
-                  await emit(clientId, userId, "deliverable_submitted", { project_id: projectId, category: pick(CATEGORIES), ...base }, next());
+                  await emit(clientId, userId, "deliverable_submitted", { project_id: projectId, category: pickCategory(), ...base }, next());
 
                   if (chance(0.85)) {
                     await emit(clientId, userId, "deliverable_confirmed", { project_id: projectId, ...base }, next());
-                    await emit(clientId, userId, "project_completed", { project_id: projectId, partner_type: partnerType, category: pick(CATEGORIES), ...base }, next());
+                    await emit(clientId, userId, "project_completed", { project_id: projectId, partner_type: partnerType, category: pickCategory(), ...base }, next());
                   }
                 }
               }
@@ -320,7 +321,7 @@ async function simulateUser(i) {
           if (isPartner && chance(0.20)) {
             await emit(clientId, userId, "portfolio_registered", {
               portfolio_id: `pf_${randInt(1000, 9999)}`,
-              category: pick(CATEGORIES),
+              category: pickCategory(),
               partner_type: partnerType,
               ...base,
             }, next());

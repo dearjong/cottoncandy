@@ -135,7 +135,14 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
     { value: { geo_region: "해외" },   weight: 5  },
   ];
 
-  const CATEGORIES   = ["영상광고","브랜드디자인","사진촬영","SNS마케팅","PPT디자인","웹개발"];
+  const CATEGORIES   = [
+    { value: "영상광고",    weight: 85 },
+    { value: "브랜드디자인", weight: 3  },
+    { value: "사진촬영",    weight: 3  },
+    { value: "SNS마케팅",   weight: 3  },
+    { value: "PPT디자인",   weight: 3  },
+    { value: "웹개발",      weight: 3  },
+  ];
   const PARTNERS     = ["솜사탕애드","마케팅에이전시","크리에이티브랩","광고제작소","미디어웍스"];
   const BUDGET_RANGES = ["500-1000만","1000-3000만","3000-5000만","5000만-1억","1억 이상"];
 
@@ -195,7 +202,7 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
           // 광고주: 프로젝트 등록 (가입 후 12%)
           if (userType === "advertiser" && chance(0.12)) {
             const projTs    = baseTs + 600;
-            const category  = pick(CATEGORIES);
+            const category  = weightedPick(CATEGORIES);
             const budget    = pick(BUDGET_RANGES);
             const projectId = `proj_${randInt(100, 999)}`;
             const pType     = pick(["공고", "1:1"] as const);
@@ -238,20 +245,20 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
             if (chance(0.55)) {
               add("portfolio_registered", uid, partnerTs + 100, {
                 portfolio_id: `pf_${randInt(1000, 9999)}`,
-                category: pick(CATEGORIES), partner_type: partnerType, ...common,
+                category: weightedPick(CATEGORIES), partner_type: partnerType, ...common,
               });
             }
 
             if (chance(0.40)) {
               add("contract_signed",       uid, partnerTs +  7 * 86400, { project_id: projectId, partner_type: partnerType, ...common });
-              add("draft_submitted",       uid, partnerTs + 14 * 86400, { project_id: projectId, draft_round: 1, category: pick(CATEGORIES), ...common });
+              add("draft_submitted",       uid, partnerTs + 14 * 86400, { project_id: projectId, draft_round: 1, category: weightedPick(CATEGORIES), ...common });
               if (chance(0.70)) {
                 add("draft_confirmed",     uid, partnerTs + 16 * 86400, { project_id: projectId, draft_round: 1, ...common });
                 if (chance(0.80)) {
-                  add("deliverable_submitted", uid, partnerTs + 25 * 86400, { project_id: projectId, category: pick(CATEGORIES), ...common });
+                  add("deliverable_submitted", uid, partnerTs + 25 * 86400, { project_id: projectId, category: weightedPick(CATEGORIES), ...common });
                   if (chance(0.85)) {
                     add("deliverable_confirmed", uid, partnerTs + 27 * 86400, { project_id: projectId, ...common });
-                    add("project_completed",     uid, partnerTs + 28 * 86400, { project_id: projectId, partner_type: partnerType, category: pick(CATEGORIES), ...common });
+                    add("project_completed",     uid, partnerTs + 28 * 86400, { project_id: projectId, partner_type: partnerType, category: weightedPick(CATEGORIES), ...common });
                   }
                 }
               }
@@ -262,7 +269,7 @@ async function runJob(jobId: string, job: SimJob, userCount: number) {
           if (isPartner && chance(0.20)) {
             add("portfolio_registered", uid, baseTs + 500, {
               portfolio_id: `pf_${randInt(1000, 9999)}`,
-              category: pick(CATEGORIES), partner_type: partnerType, ...common,
+              category: weightedPick(CATEGORIES), partner_type: partnerType, ...common,
             });
           }
 
