@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Step1Option } from "@/lib/types";
 import { COMMON_MESSAGES } from "@/lib/messages";
 import { getSubtitle } from "@/config/global-events";
-import { trackCreateProjectCta } from "@/lib/analytics";
+import { trackCreateProjectCta, publishAnalytics } from "@/lib/analytics";
 
 const step1Options: Step1Option[] = [
   {
@@ -74,6 +74,10 @@ export default function Step1PartnerSelection() {
 
   const handleNext = () => {
     trackCreateProjectCta(location, "next");
+    publishAnalytics("step1_cta_click", {
+      selected_option: selectedOption ?? "none",
+      destination: selectedOption === "consulting" ? "/create-project/consulting-inquiry" : "/create-project/step2",
+    });
     if (selectedOption) {
       localStorage.setItem("step1Selection", selectedOption);
 

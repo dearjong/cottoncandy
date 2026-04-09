@@ -143,6 +143,18 @@ function describeEvent(name: string, props: Record<string, unknown>): { label: s
     case "participation_final_selected":
       return { label: "최종선정 ✓", detail: `${p.partner_name ?? p.partner_id ?? ""}`, badge: "참여" };
 
+    // ── 프로젝트 등록 step1
+    case "step1_cta_click": {
+      const optionLabels: Record<string, string> = {
+        public: "공개 프로젝트",
+        private: "1:1 비공개 의뢰",
+        consulting: "컨설턴트에게 맡길래요",
+        none: "미선택",
+      };
+      const opt = String(p.selected_option ?? "none");
+      return { label: `프로젝트 등록 시작 · ${optionLabels[opt] ?? opt}`, detail: `→ ${p.destination ?? ""}`, badge: "전환" };
+    }
+
     // ── 전환
     case "activation_achieved":
       return { label: "핵심행동 달성 🎯", detail: `트리거: ${p.trigger_event ?? p.action ?? ""} · ${p.user_type ?? ""}`, badge: "전환" };
