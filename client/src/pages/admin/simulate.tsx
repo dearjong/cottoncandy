@@ -18,6 +18,7 @@ interface SimJob {
   totalBatches: number;
   funnelBreakdown: Record<string, number>;
   utmBreakdown: Record<string, number>;
+  userTypeBreakdown: Record<string, number>;
   errors: string[];
   startedAt: number;
   completedAt?: number;
@@ -39,6 +40,8 @@ const DEFAULTS: SimConfig = {
 
 const FUNNEL_ORDER = [
   { key: "site_visit",            label: "유입",            color: "bg-blue-400",    aarrr: "Acquisition" },
+  { key: "sso_login",             label: "SSO 로그인",      color: "bg-pink-400",    aarrr: "" },
+  { key: "login",                 label: "수동 로그인",     color: "bg-rose-400",    aarrr: "" },
   { key: "signup_complete",       label: "가입 완료",       color: "bg-orange-400",  aarrr: "Activation" },
   { key: "activation_achieved",   label: "핵심행동 달성",   color: "bg-yellow-400",  aarrr: "" },
   { key: "portfolio_registered",  label: "포트폴리오 등록", color: "bg-purple-400",  aarrr: "" },
@@ -129,6 +132,7 @@ export default function AdminSimulatePage() {
 
   const siteVisit = job?.funnelBreakdown["site_visit"] ?? 0;
   const utmBreakdown = job?.utmBreakdown ?? {} as Record<string, number>;
+  const userTypeBreakdown = job?.userTypeBreakdown ?? {} as Record<string, number>;
 
   const utmSum = cfg.pctTvcf + cfg.pctGoogle + cfg.pctNaver + cfg.pctKakao + cfg.pctOrganic;
   const userSum = cfg.pctAdvertiser + cfg.pctAgency + cfg.pctProduction + cfg.pctVisitor;
@@ -260,31 +264,59 @@ export default function AdminSimulatePage() {
       {/* UTM + AARRR */}
       {job && job.totalEvents > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* UTM 유입 현황 */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
-            <p className="font-medium text-gray-800">UTM 유입 채널</p>
-            <div className="space-y-2">
-              {[
-                { key: "tvcf",    label: "tvcf.co.kr", color: "bg-pink-500",   pct: cfg.pctTvcf    },
-                { key: "google",  label: "Google",     color: "bg-blue-400",   pct: cfg.pctGoogle  },
-                { key: "naver",   label: "Naver",      color: "bg-green-500",  pct: cfg.pctNaver   },
-                { key: "kakao",   label: "Kakao",      color: "bg-yellow-400", pct: cfg.pctKakao   },
-                { key: "organic", label: "Organic",    color: "bg-gray-400",   pct: cfg.pctOrganic },
-              ].map(({ key, label, color, pct }) => {
-                const count = utmBreakdown[key] ?? Math.round((job.totalUsers * pct) / 100);
-                const total = job.totalUsers;
-                const actualPct = total > 0 ? Math.round((count / total) * 100) : pct;
-                return (
-                  <div key={key} className="flex items-center gap-3">
-                    <div className="w-20 text-xs text-gray-600 shrink-0">{label}</div>
-                    <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                      <div className={`${color} h-3 rounded-full`} style={{ width: `${actualPct}%` }} />
+          {/* 유입 채널 + 유저 타입 */}
+          <div className="space-y-4">
+            {/* UTM */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
+              <p className="font-medium text-gray-800">UTM 유입 채널</p>
+              <div className="space-y-2">
+                {[
+                  { key: "tvcf",    label: "tvcf.co.kr", color: "bg-pink-500",   pct: cfg.pctTvcf    },
+                  { key: "google",  label: "Google",     color: "bg-blue-400",   pct: cfg.pctGoogle  },
+                  { key: "naver",   label: "Naver",      color: "bg-green-500",  pct: cfg.pctNaver   },
+                  { key: "kakao",   label: "Kakao",      color: "bg-yellow-400", pct: cfg.pctKakao   },
+                  { key: "organic", label: "Organic",    color: "bg-gray-400",   pct: cfg.pctOrganic },
+                ].map(({ key, label, color, pct }) => {
+                  const count = utmBreakdown[key] ?? Math.round((job.totalUsers * pct) / 100);
+                  const actualPct = job.totalUsers > 0 ? Math.round((count / job.totalUsers) * 100) : pct;
+                  return (
+                    <div key={key} className="flex items-center gap-3">
+                      <div className="w-20 text-xs text-gray-600 shrink-0">{label}</div>
+                      <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                        <div className={`${color} h-3 rounded-full`} style={{ width: `${actualPct}%` }} />
+                      </div>
+                      <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                      <div className="w-8 text-right text-xs text-gray-400">{actualPct}%</div>
                     </div>
-                    <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                    <div className="w-8 text-right text-xs text-gray-400">{actualPct}%</div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 유저 타입 */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
+              <p className="font-medium text-gray-800">유저 타입 비율</p>
+              <div className="space-y-2">
+                {[
+                  { key: "advertiser", label: "광고주",  color: "bg-blue-500",   pct: cfg.pctAdvertiser },
+                  { key: "agency",     label: "대행사",  color: "bg-green-500",  pct: cfg.pctAgency     },
+                  { key: "production", label: "제작사",  color: "bg-purple-500", pct: cfg.pctProduction },
+                  { key: "visitor",    label: "뜨내기",  color: "bg-gray-400",   pct: cfg.pctVisitor    },
+                ].map(({ key, label, color, pct }) => {
+                  const count = userTypeBreakdown[key] ?? Math.round((job.totalUsers * pct) / 100);
+                  const actualPct = job.totalUsers > 0 ? Math.round((count / job.totalUsers) * 100) : pct;
+                  return (
+                    <div key={key} className="flex items-center gap-3">
+                      <div className="w-14 text-xs text-gray-600 shrink-0">{label}</div>
+                      <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                        <div className={`${color} h-3 rounded-full`} style={{ width: `${actualPct}%` }} />
+                      </div>
+                      <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                      <div className="w-8 text-right text-xs text-gray-400">{actualPct}%</div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 

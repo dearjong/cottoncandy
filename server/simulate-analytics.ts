@@ -18,6 +18,7 @@ export interface SimJob {
   totalBatches: number;
   funnelBreakdown: Record<string, number>;
   utmBreakdown: Record<string, number>;
+  userTypeBreakdown: Record<string, number>;
   errors: string[];
   startedAt: number;
   completedAt?: number;
@@ -82,23 +83,56 @@ const GA4_KEY_EVENTS = new Set([
   "review_submitted", "project_completed", "activation_achieved",
 ]);
 
+const GA4_DEBUG_ENDPOINT = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${GA4_MEASUREMENT_ID}&api_secret=${GA4_API_SECRET}`;
+
+let ga4Validated = false; // 첫 번째 유저에만 validation 실행
+
 async function sendGa4UserBatch(entry: Ga4UserEvents): Promise<string | null> {
   const GA4_MAX = 25;
+  const payload = {
+    client_id: entry.clientId,
+    user_id: entry.userId,
+    user_properties: entry.userProperties,
+    events: [] as typeof entry.events,
+  };
+
   for (let i = 0; i < entry.events.length; i += GA4_MAX) {
-    const slice = entry.events.slice(i, i + GA4_MAX);
+    payload.events = entry.events.slice(i, i + GA4_MAX);
+    const body = JSON.stringify(payload);
+
+    // 첫 전송 시 debug 엔드포인트로 검증
+    if (!ga4Validated) {
+      ga4Validated = true;
+      try {
+        const dbgRes = await fetch(GA4_DEBUG_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+        });
+        const dbgJson = await dbgRes.json() as { validationMessages?: Array<{ description: string }> };
+        if (dbgJson.validationMessages && dbgJson.validationMessages.length > 0) {
+          console.error("[GA4 Validation]", JSON.stringify(dbgJson.validationMessages));
+        } else {
+          console.log("[GA4 Validation] OK — payload is valid");
+        }
+      } catch (e) {
+        console.error("[GA4 Validation Error]", e);
+      }
+    }
+
     try {
       const res = await fetch(GA4_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          client_id: entry.clientId,
-          user_id: entry.userId,
-          user_properties: entry.userProperties,
-          events: slice,
-        }),
+        body,
       });
-      if (!res.ok && res.status !== 204) return await res.text();
+      if (res.status !== 204 && res.status !== 200) {
+        const errText = await res.text();
+        console.error(`[GA4 Error] status=${res.status}`, errText);
+        return `status ${res.status}: ${errText}`;
+      }
     } catch (e) {
+      console.error("[GA4 Network Error]", e);
       return String(e);
     }
   }
@@ -140,6 +174,7 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     totalBatches: 0,
     funnelBreakdown: {},
     utmBreakdown: {},
+    userTypeBreakdown: {},
     errors: [],
     startedAt: Date.now(),
   };
@@ -154,6 +189,7 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
 }
 
 async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
+  ga4Validated = false; // 매 job마다 재검증
   job.status = "generating";
   job.message = "가상 사용자 이벤트 생성 중...";
 
@@ -162,6 +198,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   const ga4Map = new Map<string, Ga4UserEvents>();
   const funnel = job.funnelBreakdown;
   const utmCount = job.utmBreakdown;
+  const userTypeCount = job.userTypeBreakdown;
 
   function add(event: string, distinctId: string, ts: number, props: Record<string, unknown>) {
     events.push({
@@ -251,8 +288,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const geo      = weightedPick(GEO_LIST);
     const isPartner = userType === "agency" || userType === "production";
 
-    // UTM 집계
+    // UTM / 유저타입 집계
     utmCount[utm.utm_source] = (utmCount[utm.utm_source] ?? 0) + 1;
+    userTypeCount[userType] = (userTypeCount[userType] ?? 0) + 1;
 
     const joinSecsAgo = Math.floor(Math.random() * 69 * 3600); // 최근 69시간
     const baseTs = tsAgo(joinSecsAgo);
