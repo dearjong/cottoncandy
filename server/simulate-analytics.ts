@@ -430,8 +430,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     if (chance(isAuthenticated ? 0.40 : 0.20)) {
       // 인증 유저는 내부 페이지로, 미인증은 공개 페이지 위주
       const landingPage = isAuthenticated
-        ? weightedPick(DIRECT_LANDING_PAGES)
-        : weightedPick(DIRECT_LANDING_PAGES.filter((p) => ["홈","파트너 찾기","프로젝트 등록"].includes(p.label)));
+        ? weightedPick(DIRECT_LANDING_PAGES.map((p) => ({ value: p, weight: p.weight })))
+        : weightedPick(DIRECT_LANDING_PAGES.filter((p) => ["홈","파트너 찾기","프로젝트 등록"].includes(p.label)).map((p) => ({ value: p, weight: p.weight })));
       directCount[landingPage.path] = (directCount[landingPage.path] ?? 0) + 1;
       add("direct_entry", uid, baseTs + 5, {
         path: landingPage.path, page_label: landingPage.label,
