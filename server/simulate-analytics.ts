@@ -666,23 +666,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     }
   }
 
-  // ── Mixpanel 전송 ─────────────────────────────────
-  job.totalEvents = events.length;
-  job.totalBatches = Math.ceil(events.length / BATCH_SIZE);
-  job.status = "sending";
-  job.message = "Mixpanel 전송 중...";
-
-  for (let i = 0; i < events.length; i += BATCH_SIZE) {
-    const batch = events.slice(i, i + BATCH_SIZE);
-    const err = await sendBatch(batch);
-    if (err) job.errors.push(`MP 배치 ${job.batchesSent + 1}: ${err}`);
-    job.batchesSent += 1;
-    job.progress = Math.round((job.batchesSent / job.totalBatches) * 50); // 0~50%
-    job.message = `Mixpanel 전송 중... (${job.batchesSent}/${job.totalBatches} 배치)`;
-    await new Promise((r) => setTimeout(r, 15));
-  }
-
   // ── GA4 Measurement Protocol 전송 (실시간 개요 반영) ──
+  job.status = "sending";
   job.message = "GA4 전송 중...";
   const ga4Users = Array.from(ga4Map.values()).filter((u) => u.events.length > 0);
   let ga4Done = 0;
@@ -690,10 +675,25 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const err = await sendGa4UserBatch(userEntry);
     if (err) job.errors.push(`GA4 ${userEntry.userId}: ${err}`);
     ga4Done += 1;
-    job.progress = 50 + Math.round((ga4Done / ga4Users.length) * 50); // 50~100%
+    job.progress = Math.round((ga4Done / ga4Users.length) * 50); // 0~50%
     job.message = `GA4 전송 중... (${ga4Done}/${ga4Users.length} 유저)`;
     // GA4 rate limit 방지: 10명마다 잠깐 대기
     if (ga4Done % 10 === 0) await new Promise((r) => setTimeout(r, 30));
+  }
+
+  // ── Mixpanel 전송 ─────────────────────────────────
+  job.totalEvents = events.length;
+  job.totalBatches = Math.ceil(events.length / BATCH_SIZE);
+  job.message = "Mixpanel 전송 중...";
+
+  for (let i = 0; i < events.length; i += BATCH_SIZE) {
+    const batch = events.slice(i, i + BATCH_SIZE);
+    const err = await sendBatch(batch);
+    if (err) job.errors.push(`MP 배치 ${job.batchesSent + 1}: ${err}`);
+    job.batchesSent += 1;
+    job.progress = 50 + Math.round((job.batchesSent / job.totalBatches) * 50); // 50~100%
+    job.message = `Mixpanel 전송 중... (${job.batchesSent}/${job.totalBatches} 배치)`;
+    await new Promise((r) => setTimeout(r, 15));
   }
 
   job.status = "done";
