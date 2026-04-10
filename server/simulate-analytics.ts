@@ -246,6 +246,9 @@ export interface SimConfig {
   // 퍼널 인원 (절대 수)
   projectRegCount: number;
   portfolioRegCount: number;
+  // 완주 최소 보장
+  minProjectCompletions: number;
+  minPortfolioCompletions: number;
 }
 
 export const DEFAULT_CONFIG: SimConfig = {
@@ -259,6 +262,8 @@ export const DEFAULT_CONFIG: SimConfig = {
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
   projectRegCount: 30,
   portfolioRegCount: 50,
+  minProjectCompletions: 5,
+  minPortfolioCompletions: 5,
 };
 
 export async function startSimulation(cfg: SimConfig): Promise<string> {
@@ -965,13 +970,14 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     }
   }
 
-  // ── 최소 완주 보장: 프로젝트/포트폴리오 각 3건 ─────────────────────
-  const MIN_COMPLETIONS = 3;
+  // ── 최소 완주 보장 ─────────────────────────────────────────────────
+  const minProjComplete = cfg.minProjectCompletions ?? 5;
+  const minPfComplete   = cfg.minPortfolioCompletions ?? 5;
   const synTs = Math.floor(Date.now() / 1000) - 86400;
   const synthCommon = { user_type: "advertiser", utm_source: "tvcf", geo: "서울", gender: "male", age_group: "30s" };
 
-  if (job.projectCompletedCount < MIN_COMPLETIONS) {
-    const needed = MIN_COMPLETIONS - job.projectCompletedCount;
+  if (job.projectCompletedCount < minProjComplete) {
+    const needed = minProjComplete - job.projectCompletedCount;
     for (let k = 0; k < needed; k++) {
       const sUid = `sim_gp_${k}`;
       job.projectCompletedCount += 1;
@@ -987,8 +993,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   }
 
   const pfSynthCommon = { user_type: "production", utm_source: "tvcf", geo: "서울", gender: "male", age_group: "30s" };
-  if (job.portfolioCompletedCount < MIN_COMPLETIONS) {
-    const needed = MIN_COMPLETIONS - job.portfolioCompletedCount;
+  if (job.portfolioCompletedCount < minPfComplete) {
+    const needed = minPfComplete - job.portfolioCompletedCount;
     for (let k = 0; k < needed; k++) {
       const sUid = `sim_gpf_${k}`;
       job.portfolioCompletedCount += 1;

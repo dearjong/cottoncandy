@@ -62,6 +62,8 @@ interface SimConfig {
   pctSeoul: number; pctGyeonggi: number; pctLocal: number; pctAbroad: number;
   projectRegCount: number;
   portfolioRegCount: number;
+  minProjectCompletions: number;
+  minPortfolioCompletions: number;
 }
 
 const DEFAULTS: SimConfig = {
@@ -74,6 +76,8 @@ const DEFAULTS: SimConfig = {
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
   projectRegCount: 30,
   portfolioRegCount: 100,
+  minProjectCompletions: 5,
+  minPortfolioCompletions: 5,
 };
 
 function NumInput({ label, value, onChange, min = 0, max = 100, unit = "%" }: {
@@ -820,6 +824,19 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                       <NumInput label="프로젝트 등록"  value={dialogCfg.projectRegCount}  onChange={(v) => setD("projectRegCount", v)}  min={0} max={10000} unit="명" />
                       <NumInput label="포트폴리오 등록" value={dialogCfg.portfolioRegCount} onChange={(v) => setD("portfolioRegCount", v)} min={0} max={10000} unit="명" />
                     </div>
+                  </div>
+                </td>
+                <td className="py-1 pl-4 align-middle" />
+              </tr>
+              <tr>
+                <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">
+                  완주 최소 보장
+                  <div className="text-[9px] font-normal text-gray-400">부족하면 자동 보충</div>
+                </td>
+                <td className="py-1">
+                  <div className="flex gap-2 items-end">
+                    <NumInput label="프로젝트 최소" value={dialogCfg.minProjectCompletions}  onChange={(v) => setD("minProjectCompletions", v)}  min={0} max={1000} unit="건" />
+                    <NumInput label="포트폴리오 최소" value={dialogCfg.minPortfolioCompletions} onChange={(v) => setD("minPortfolioCompletions", v)} min={0} max={1000} unit="건" />
                   </div>
                 </td>
                 <td className="py-1 pl-4 align-middle" />

@@ -339,8 +339,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pctGyeonggi:      num("pctGyeonggi", 0, 100),
         pctLocal:         num("pctLocal", 0, 100),
         pctAbroad:        num("pctAbroad", 0, 100),
-        projectRegCount:  num("projectRegCount", 0, 10000),
-        portfolioRegCount: num("portfolioRegCount", 0, 10000),
+        projectRegCount:          num("projectRegCount", 0, 10000),
+        portfolioRegCount:        num("portfolioRegCount", 0, 10000),
+        minProjectCompletions:    num("minProjectCompletions", 0, 10000),
+        minPortfolioCompletions:  num("minPortfolioCompletions", 0, 10000),
       };
       const jobId = await startSimulation(cfg);
       res.json({ jobId });
