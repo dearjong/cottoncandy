@@ -492,6 +492,50 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   const PARTNERS     = ["솜사탕애드","마케팅에이전시","크리에이티브랩","광고제작소","미디어웍스"];
   const BUDGET_RANGES = ["500-1000만","1000-3000만","3000-5000만","5000만-1억","1억 이상"];
 
+  // ── 한국 이름 풀 ──────────────────────────────────────
+  const FAMILY_NAMES = ["김","이","박","최","정","강","조","윤","장","임","한","오","서","신","권","황","안","송","유","홍","고","문","양","손","배","백","허","남","전","노"];
+  const MALE_NAMES   = ["민준","서준","도윤","예준","시우","주원","하준","지호","준서","준우","현우","지훈","민재","건우","현준","선우","민혁","정우","재원","우진","성민","태양","진혁","승현","동현","재민","성준","영준","원준","지성","민성","태준","우현","재현","동준","승우","정민","혁준","진우","재훈"];
+  const FEMALE_NAMES = ["서연","서윤","지우","서현","민서","하은","하윤","지유","채원","수아","지아","소율","예은","지민","채은","지현","수빈","예린","다은","아린","은서","소연","나은","유진","세아","미래","혜진","정은","수현","아영","민지","예지","보라","소희","지혜","나연","다영","은지","수정","하나"];
+  const EMAIL_DOMAINS = ["gmail.com","naver.com","kakao.com","daum.net","hanmail.net","nate.com","outlook.com"];
+  const ADVERTISER_COMPANIES = ["삼성전자","LG전자","현대자동차","SK텔레콤","롯데그룹","CJ그룹","GS칼텍스","포스코","한화그룹","코카콜라코리아","맥도날드코리아","네이버","카카오","쿠팡","배달의민족","하이트진로","오뚜기","농심","풀무원","빙그레","아모레퍼시픽","LG생활건강","이니스프리","신세계백화점","롯데백화점","현대백화점","KB국민은행","신한은행","우리은행","하나은행"];
+  const PARTNER_COMPANIES = ["솜사탕애드","마케팅에이전시","크리에이티브랩","광고제작소","미디어웍스","픽셀스튜디오","비주얼팩토리","아이디어뱅크","크리에이티브허브","영상스튜디오","광고창작소","미디어플러스","콘텐츠랩","영상팩토리","디자인스튜디오","브랜드에이전시","멀티미디어","그래픽하우스","모션웍스","퍼블리셔스"];
+
+  function generateKoreanName(gender: string): { name: string; email: string } {
+    const family = pick(FAMILY_NAMES);
+    const given  = gender === "male" ? pick(MALE_NAMES) : pick(FEMALE_NAMES);
+    const name   = family + given;
+    const emailName = `${family}${given}${randInt(10, 999)}`.toLowerCase()
+      .replace(/[가-힣]/g, (c) => ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"][c.charCodeAt(0) % 26]);
+    const email = `${emailName}@${pick(EMAIL_DOMAINS)}`;
+    return { name, email };
+  }
+
+  // Mixpanel People 프로필 배치
+  const mpPeople: Array<Record<string, unknown>> = [];
+
+  function registerMixpanelPeople(distinctId: string, props: Record<string, unknown>) {
+    mpPeople.push({
+      $token: MIXPANEL_TOKEN,
+      $distinct_id: distinctId,
+      $set: props,
+    });
+  }
+
+  async function flushMixpanelPeople() {
+    const PEOPLE_URL = "https://api.mixpanel.com/engage";
+    for (let i = 0; i < mpPeople.length; i += BATCH_SIZE) {
+      const batch = mpPeople.slice(i, i + BATCH_SIZE);
+      try {
+        await fetch(PEOPLE_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "text/plain" },
+          body: JSON.stringify(batch),
+        });
+      } catch (_) { /* ignore */ }
+      await new Promise((r) => setTimeout(r, 15));
+    }
+  }
+
   let projRegDone = 0;
   let pfRegDone   = 0;
 
@@ -505,6 +549,12 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const isPartner = userType === "agency" || userType === "production";
     let didPortfolioReg = false;
 
+    // 이름 / 이메일 / 기업명 생성
+    const { name: userName, email: userEmail } = generateKoreanName(gender);
+    const userCompany = userType === "advertiser"
+      ? pick(ADVERTISER_COMPANIES)
+      : pick(PARTNER_COMPANIES);
+
     // UTM / 지역 / 성별 집계 (모든 유저)
     utmCount[utm.utm_source] = (utmCount[utm.utm_source] ?? 0) + 1;
     const region = geo.geo_region as string;
@@ -516,14 +566,29 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
     const common: Record<string, unknown> = {
       user_type: userType,
+      user_name: userName,
+      user_company: userCompany,
       gender,
       age_group: ageGroup,
       ...utm,
       ...geo,
     };
 
+    // Mixpanel People 프로필 등록 (로그인 유저 전용 → 가입/로그인 시 등록)
+    registerMixpanelPeople(uid, {
+      $name:        userName,
+      $email:       userEmail,
+      user_type:    userType,
+      user_company: userCompany,
+      gender,
+      age_group:    ageGroup,
+      geo_region:   geo.geo_region,
+      utm_source:   utm.utm_source,
+      simulation:   true,
+    });
+
     // GA4 유저 초기화
-    initGa4User(uid, uid, { user_type: userType, gender, age_group: ageGroup });
+    initGa4User(uid, uid, { user_type: userType, gender, age_group: ageGroup, user_name: userName });
 
     // ── Acquisition ──────────────────────────────────
     // 첫방문(60%) / 재방문(40%) 구분
@@ -1130,6 +1195,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     job.message = `Mixpanel 전송 중... (${job.batchesSent}/${job.totalBatches} 배치)`;
     await new Promise((r) => setTimeout(r, 15));
   }
+
+  // ── Mixpanel People 프로필 전송 ───────────────────────
+  job.message = "Mixpanel People 프로필 등록 중...";
+  await flushMixpanelPeople();
 
   job.status = "done";
   job.progress = 100;
