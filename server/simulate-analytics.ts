@@ -152,7 +152,8 @@ interface Ga4UserEvents {
 const GA4_KEY_EVENTS = new Set([
   "site_visit", "sso_login", "login",
   "signup_started", "signup_complete",
-  "project_submitted", "partner_applied", "contract_signed",
+  "portfolio_registered", "project_submitted",
+  "partner_applied", "contract_signed",
   "draft_submitted", "draft_confirmed",
   "deliverable_submitted", "deliverable_confirmed",
   "project_completed", "review_submitted", "referral_sent",
