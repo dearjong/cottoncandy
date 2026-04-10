@@ -211,485 +211,456 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
   const dGeoSum    = dialogCfg.pctSeoul + dialogCfg.pctGyeonggi + dialogCfg.pctLocal + dialogCfg.pctAbroad;
 
   return (
-    <div className="space-y-6">
-      {/* 항상 표시되는 차트들 */}
-      {(
-        <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              {/* UTM 유입 채널 */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-                <p className="font-medium text-gray-800">UTM 유입 채널</p>
-                <div className="space-y-2">
-                  {[
-                    { key: "tvcf",    label: "tvcf.co.kr", color: "bg-pink-500"   },
-                    { key: "google",  label: "Google",     color: "bg-blue-400"   },
-                    { key: "naver",   label: "Naver",      color: "bg-green-500"  },
-                    { key: "kakao",   label: "Kakao",      color: "bg-yellow-400" },
-                    { key: "organic", label: "Organic",    color: "bg-gray-400"   },
-                  ].map(({ key, label, color }) => {
-                    const count = utmBreakdown[key] ?? 0;
-                    const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
-                    return (
-                      <div key={key} className="flex items-center gap-3">
-                        <div className="w-20 text-xs text-gray-600 shrink-0">{label}</div>
-                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                          <div className={`${color} h-3 rounded-full`} style={{ width: `${pct}%` }} />
-                        </div>
-                        <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                        <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+    <div className="space-y-3">
 
-              {/* 접속 지역 */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-                <p className="font-medium text-gray-800">접속 지역</p>
-                <div className="space-y-2">
-                  {[
-                    { key: "서울",  color: "bg-blue-500"   },
-                    { key: "경기도", color: "bg-blue-400"   },
-                    { key: "지방",  color: "bg-purple-400" },
-                    { key: "해외",  color: "bg-indigo-400" },
-                  ].map(({ key, color }) => {
-                    const count = geoBreakdown[key] ?? 0;
-                    const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
-                    return (
-                      <div key={key} className="flex items-center gap-3">
-                        <div className="w-16 text-xs text-gray-600 shrink-0">{key}</div>
-                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                          <div className={`${color} h-3 rounded-full`} style={{ width: `${pct}%` }} />
-                        </div>
-                        <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                        <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+      {/* 상단 3열: UTM+지역 | 유저유형+성별+방문유형 | AARRR퍼널 */}
+      <div className="grid grid-cols-3 gap-3">
 
-              {/* 인증 현황 */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-                <div>
-                  <p className="font-medium text-gray-800">유저 유형</p>
-                  <p className="text-[10px] text-gray-400">미로그인 = 전체 - 로그인 유저 합계</p>
-                </div>
-                <div className="space-y-2">
-                  {(() => {
-                    const authSum = Object.values(userTypeBreakdown).reduce((a, b) => a + b, 0);
-                    const rows = [
-                      { key: "advertiser", label: "광고주",   color: "bg-blue-500",   count: userTypeBreakdown["advertiser"] ?? 0 },
-                      { key: "agency",     label: "대행사",   color: "bg-green-500",  count: userTypeBreakdown["agency"] ?? 0 },
-                      { key: "production", label: "제작사",   color: "bg-purple-500", count: userTypeBreakdown["production"] ?? 0 },
-                      { key: "milogin",    label: "미로그인", color: "bg-gray-300",   count: totalUsers - authSum },
-                    ];
-                    return rows.map(({ key, label, color, count }) => {
-                      const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
-                      return (
-                        <div key={key} className="flex items-center gap-3">
-                          <div className="w-14 text-xs text-gray-600 shrink-0">{label}</div>
-                          <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                            <div className={`${color} h-3 rounded-full`} style={{ width: `${pct}%` }} />
-                          </div>
-                          <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                          <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
-                        </div>
-                      );
-                    });
-                  })()}
-                </div>
-              </div>
-
-            </div>
-
-            <div className="space-y-4">
-              {/* AARRR 퍼널 */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-                <p className="font-medium text-gray-800">AARRR 퍼널</p>
-                <div className="space-y-2">
-                  {FUNNEL_ORDER.map(({ key, label, color, aarrr }) => {
-                    const count = job?.funnelBreakdown?.[key] ?? 0;
-                    const pct = siteVisit > 0 ? Math.round((count / siteVisit) * 100) : 0;
-                    return (
-                      <div key={key} className="flex items-center gap-2">
-                        {aarrr
-                          ? <span className="w-20 shrink-0 text-[10px] font-semibold text-gray-400 uppercase">{aarrr}</span>
-                          : <span className="w-20 shrink-0" />}
-                        <div className="w-24 text-xs text-gray-600 truncate shrink-0">{label}</div>
-                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                          <div className={`${color} h-3 rounded-full transition-all duration-500`}
-                            style={{ width: `${Math.max(pct, count > 0 ? 1 : 0)}%` }} />
-                        </div>
-                        <div className="w-12 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                        <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
-                      </div>
-                    );
-                  })}
-                </div>
-                {isDone && (
-                  <div className="bg-blue-50 rounded-lg px-3 py-2 text-xs text-blue-700">
-                    ✅ GA4 + Mixpanel 전송 완료
+        {/* 열1: UTM + 접속 지역 */}
+        <div className="space-y-3">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 space-y-2">
+            <p className="text-sm font-medium text-gray-800">UTM 유입 채널</p>
+            <div className="space-y-1.5">
+              {[
+                { key: "tvcf",    label: "tvcf.co.kr", color: "bg-pink-500"   },
+                { key: "google",  label: "Google",     color: "bg-blue-400"   },
+                { key: "naver",   label: "Naver",      color: "bg-green-500"  },
+                { key: "kakao",   label: "Kakao",      color: "bg-yellow-400" },
+                { key: "organic", label: "Organic",    color: "bg-gray-400"   },
+              ].map(({ key, label, color }) => {
+                const count = utmBreakdown[key] ?? 0;
+                const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
+                return (
+                  <div key={key} className="flex items-center gap-2">
+                    <div className="w-16 text-xs text-gray-600 shrink-0">{label}</div>
+                    <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                      <div className={`${color} h-2 rounded-full`} style={{ width: `${pct}%` }} />
+                    </div>
+                    <div className="w-9 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                    <div className="w-6 text-right text-[10px] text-gray-400">{pct}%</div>
                   </div>
-                )}
-              </div>
-
-              {/* 방문 유형 */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-                <div>
-                  <p className="font-medium text-gray-800">방문 유형</p>
-                  <p className="text-[10px] text-gray-400">GA4 신규 방문자 / 재방문자 기준</p>
-                </div>
-                <div className="space-y-2">
-                  {(() => {
-                    const first = job?.firstVisitCount ?? 0;
-                    const ret   = job?.returnVisitCount ?? 0;
-                    const total = first + ret;
-                    return [
-                      { label: "첫방문", count: first, color: "bg-teal-400"   },
-                      { label: "재방문", count: ret,   color: "bg-orange-400" },
-                    ].map(({ label, count, color }) => {
-                      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-                      return (
-                        <div key={label} className="flex items-center gap-3">
-                          <div className="w-14 text-xs text-gray-600 shrink-0">{label}</div>
-                          <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                            <div className={`${color} h-3 rounded-full transition-all duration-500`}
-                              style={{ width: `${Math.max(pct, count > 0 ? 1 : 0)}%` }} />
-                          </div>
-                          <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                          <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
-                        </div>
-                      );
-                    });
-                  })()}
-                </div>
-              </div>
-
+                );
+              })}
             </div>
           </div>
 
-          {/* 성별 + 직접 유입 나란히 */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 성별 */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-              <div>
-                <p className="font-medium text-gray-800">성별</p>
-                <p className="text-[10px] text-gray-400">전체 방문자 기준</p>
-              </div>
-              <div className="space-y-2">
-                {(() => {
-                  const gd = job?.genderBreakdown ?? {};
-                  const male   = gd["male"]   ?? 0;
-                  const female = gd["female"] ?? 0;
-                  const total  = male + female;
-                  return [
-                    { label: "남성", count: male,   color: "bg-blue-400" },
-                    { label: "여성", count: female, color: "bg-pink-400" },
-                  ].map(({ label, count, color }) => {
-                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-                    return (
-                      <div key={label} className="flex items-center gap-3">
-                        <div className="w-14 text-xs text-gray-600 shrink-0">{label}</div>
-                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                          <div className={`${color} h-3 rounded-full transition-all duration-500`}
-                            style={{ width: `${Math.max(pct, count > 0 ? 1 : 0)}%` }} />
-                        </div>
-                        <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                        <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 space-y-2">
+            <p className="text-sm font-medium text-gray-800">접속 지역</p>
+            <div className="space-y-1.5">
+              {[
+                { key: "서울",   color: "bg-blue-500"   },
+                { key: "경기도", color: "bg-blue-400"   },
+                { key: "지방",   color: "bg-purple-400" },
+                { key: "해외",   color: "bg-indigo-400" },
+              ].map(({ key, color }) => {
+                const count = geoBreakdown[key] ?? 0;
+                const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
+                return (
+                  <div key={key} className="flex items-center gap-2">
+                    <div className="w-12 text-xs text-gray-600 shrink-0">{key}</div>
+                    <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                      <div className={`${color} h-2 rounded-full`} style={{ width: `${pct}%` }} />
+                    </div>
+                    <div className="w-9 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                    <div className="w-6 text-right text-[10px] text-gray-400">{pct}%</div>
+                  </div>
+                );
+              })}
             </div>
+          </div>
+        </div>
 
-            {/* 직접 유입 / 북마크 랜딩 페이지 */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-              <div>
-                <p className="font-medium text-gray-800">직접 유입 / 북마크 랜딩 페이지</p>
-                <p className="text-[10px] text-gray-400">북마크하거나 URL을 직접 입력해 들어온 페이지 분포</p>
-              </div>
-              <div className="space-y-2">
-                {(() => {
-                  const entries = Object.entries(job?.directEntryBreakdown ?? {}).sort(([, a], [, b]) => b - a);
-                  const totalDirect = entries.reduce((s, [, v]) => s + v, 0);
-                  const maxCount = entries[0]?.[1] ?? 1;
-                  const PAGE_LABELS: Record<string, string> = {
-                    "/": "홈", "/work/home": "마이페이지 홈", "/work/projects": "내 프로젝트",
-                    "/partner": "파트너 찾기", "/create-project/step1": "프로젝트 등록",
-                    "/work/profile": "프로필", "/work/proposals": "제안 현황", "/work/contracts": "계약 관리",
-                  };
-                  const PAGE_COLORS: Record<string, string> = {
-                    "/": "bg-pink-400", "/work/home": "bg-blue-400", "/work/projects": "bg-indigo-400",
-                    "/partner": "bg-green-400", "/create-project/step1": "bg-amber-400",
-                    "/work/profile": "bg-purple-400", "/work/proposals": "bg-sky-400", "/work/contracts": "bg-orange-400",
-                  };
-                  return entries.map(([path, count]) => {
-                    const barPct = Math.round((count / maxCount) * 100);
-                    const sharePct = totalDirect > 0 ? Math.round((count / totalDirect) * 100) : 0;
-                    return (
-                      <div key={path} className="flex items-center gap-3">
-                        <div className="w-24 text-xs text-gray-600 truncate shrink-0">{PAGE_LABELS[path] ?? path}</div>
-                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                          <div className={`${PAGE_COLORS[path] ?? "bg-gray-400"} h-3 rounded-full transition-all duration-500`}
-                            style={{ width: `${Math.max(barPct, 2)}%` }} />
-                        </div>
-                        <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                        <div className="w-8 text-right text-xs text-gray-400">{sharePct}%</div>
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
+        {/* 열2: 유저유형 + 성별 + 방문유형 */}
+        <div className="space-y-3">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 space-y-2">
+            <div>
+              <p className="text-sm font-medium text-gray-800">유저 유형</p>
+              <p className="text-[10px] text-gray-400">미로그인 = 전체 - 로그인 유저 합계</p>
             </div>
-          </div>{/* /성별+직접유입 2열 */}
-
-          {/* 메인화면 클릭 분석 */}
-          {(() => {
-            const HOME_ELEMENT_META: Record<string, { label: string; color: string; dest: string }> = {
-              cta:            { label: "메인 Hero CTA (무료로 의뢰하기)", color: "bg-pink-500",    dest: "→ /create-project/step1" },
-              free_start_btn: { label: "무료로 시작하기 (헤더 버튼)",      color: "bg-rose-400",    dest: "→ /signup" },
-              login_btn:      { label: "로그인 아이콘 (헤더)",             color: "bg-blue-400",    dest: "→ /login" },
-              project_card:   { label: "공모전 · 프로젝트 카드",           color: "bg-amber-400",   dest: "→ 공고 상세" },
-              category:       { label: "카테고리 탐색",                    color: "bg-green-400",   dest: "→ /agency-search" },
-              faq:            { label: "FAQ 질문 클릭",                    color: "bg-violet-400",  dest: "(패널 열림)" },
-              feature_card:   { label: "서비스 특징 카드",                 color: "bg-indigo-400",  dest: "→ /guide/features" },
-              partner:        { label: "파트너 카드",                      color: "bg-teal-400",    dest: "→ /agency-search" },
-              flow_step:      { label: "이용 방법 단계",                   color: "bg-orange-400",  dest: "→ /guide/how-to-use" },
-              faq_more:       { label: "FAQ 전체보기",                     color: "bg-gray-400",    dest: "→ /guide/faq" },
-              etc:            { label: "기타 (이용약관 · Footer 등)",        color: "bg-slate-300",   dest: "(기타 클릭)" },
-            };
-            const breakdown = job?.homeClickBreakdown ?? {};
-            const entries = Object.entries(breakdown)
-              .filter(([key]) => key && key !== "undefined")
-              .sort(([, a], [, b]) => b - a);
-            const total = entries.reduce((s, [, v]) => s + v, 0);
-            const maxCount = entries[0]?.[1] ?? 1;
-            return (
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="font-medium text-gray-800">메인화면 클릭 분석</p>
-                    <p className="text-[10px] text-gray-400">홈(/)에서 사용자가 어떤 요소를 눌러 다음 화면으로 이동하는지{total > 0 ? ` — 총 ${total.toLocaleString()}회 클릭` : ""}</p>
-                  </div>
-                  <div className="text-[10px] text-gray-400 text-right shrink-0 pt-1">
-                    cta / 카드 / 로그인 등<br />11개 요소 추적
-                  </div>
-                </div>
-                {entries.length === 0 ? (
-                  <div className="text-xs text-gray-400 py-4 text-center">시뮬레이션 실행 후 데이터가 표시됩니다</div>
-                ) : (
-                  <>
-                    <div className="space-y-2">
-                      {entries.map(([element, count]) => {
-                        const meta = HOME_ELEMENT_META[element] ?? { label: element, color: "bg-gray-300", dest: "" };
-                        const barPct  = Math.round((count / maxCount) * 100);
-                        const sharePct = total > 0 ? Math.round((count / total) * 100) : 0;
-                        return (
-                          <div key={element} className="flex items-center gap-3">
-                            <div className="w-40 shrink-0">
-                              <div className="text-xs text-gray-700 truncate">{meta.label}</div>
-                              <div className="text-[10px] text-gray-400 truncate">{meta.dest}</div>
-                            </div>
-                            <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                              <div className={`${meta.color} h-3 rounded-full transition-all duration-500`}
-                                style={{ width: `${Math.max(barPct, 2)}%` }} />
-                            </div>
-                            <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                            <div className="w-8 text-right text-xs text-gray-400">{sharePct}%</div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div className="bg-pink-50 rounded-lg px-3 py-2 text-[10px] text-pink-700 mt-1">
-                      💡 CTA 클릭이 {Math.round(((breakdown["cta"] ?? 0) / Math.max(total, 1)) * 100)}%로 가장 높습니다.
-                      공모전 카드는 비로그인 유저의 주요 탐색 경로입니다.
-                    </div>
-                  </>
-                )}
-              </div>
-            );
-          })()}
-
-          {/* 멀티세션 작성 패턴 */}
-          {job && (job.projectCompletedCount > 0 || job.portfolioCompletedCount > 0) && (() => {
-            const pjN  = job.projectCompletedCount   || 1;
-            const pfN  = job.portfolioCompletedCount || 1;
-            const drN  = job.draftOpenedCount        || 1;
-            const avgProjDays    = +(job.projDaysSum     / pjN).toFixed(1);
-            const avgProjSess    = +(job.projSessionsSum / pjN).toFixed(1);
-            const avgProjMin     = Math.round(job.projWritingMinSum / pjN);
-            const avgPfDays      = +(job.pfDaysSum      / pfN).toFixed(1);
-            const avgPfSess      = +(job.pfSessionsSum  / pfN).toFixed(1);
-            const avgPfMin       = Math.round(job.pfWritingMinSum  / pfN);
-            const avgReturnHours = +(job.draftReturnHoursSum / drN).toFixed(1);
-            const statCell = (label: string, value: string | number, sub?: string) => (
-              <div className="flex flex-col items-center justify-center text-center p-4 bg-gray-50 rounded-xl">
-                <div className="text-xl font-bold text-gray-800">{value}</div>
-                <div className="text-xs text-gray-500 mt-0.5">{label}</div>
-                {sub && <div className="text-[10px] text-gray-400 mt-0.5">{sub}</div>}
-              </div>
-            );
-            return (
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
-                <div>
-                  <p className="font-medium text-gray-800">멀티세션 작성 패턴</p>
-                  <p className="text-[10px] text-gray-400">완주한 유저 기준 — 며칠에 걸쳐, 몇 번의 세션으로, 얼마나 작성했는지</p>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-indigo-600">프로젝트 등록 ({job.projectCompletedCount}건 완주)</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {statCell("평균 완주 기간", `${avgProjDays}일`)}
-                      {statCell("평균 세션 수", `${avgProjSess}회`)}
-                      {statCell("평균 작성시간", `${avgProjMin}분`, "갭 제외 순수")}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-purple-600">포트폴리오 등록 ({job.portfolioCompletedCount}건 완주)</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {statCell("평균 완주 기간", `${avgPfDays}일`)}
-                      {statCell("평균 세션 수", `${avgPfSess}회`)}
-                      {statCell("평균 작성시간", `${avgPfMin}분`, "갭 제외 순수")}
-                    </div>
-                  </div>
-                </div>
-                {job.draftOpenedCount > 0 && (
-                  <div className="flex items-center gap-3 pt-2 border-t border-gray-50 text-xs text-gray-500">
-                    <span className="w-2 h-2 rounded-full bg-green-400 inline-block shrink-0" />
-                    임시저장 후 평균 <strong className="text-gray-700 mx-0.5">{avgReturnHours}시간</strong> 뒤에 돌아와서 이어서 작성
-                    <span className="text-gray-300">|</span>
-                    총 <strong className="text-gray-700 mx-0.5">{job.draftOpenedCount}회</strong> 재방문
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-
-          {/* 퍼널 2개 나란히 */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-          {/* 프로젝트 등록 단계별 퍼널 */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div>
-                  <p className="font-medium text-gray-800">프로젝트 등록 단계별 퍼널</p>
-                  <p className="text-[10px] text-gray-400">광고주가 어느 단계에서 이탈하는지 확인합니다</p>
-                </div>
-                <div className="flex flex-wrap gap-3 text-xs">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-blue-400 inline-block" />
-                    공고 <strong>{job?.projectTypeBreakdown?.["공고"] ?? 0}건</strong>
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-violet-400 inline-block" />
-                    1:1 비공개 <strong>{job?.projectTypeBreakdown?.["1:1"] ?? 0}건</strong>
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-pink-400 inline-block" />
-                    컨설팅 <strong>{job?.consultingRegisteredCount ?? 0}건</strong>
-                  </span>
-                  <span className="text-gray-200">|</span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-indigo-400 inline-block" />
-                    임시저장 <strong>{job?.draftSavedCount ?? 0}건</strong>
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
-                    불러오기 <strong>{job?.draftOpenedCount ?? 0}건</strong>
-                  </span>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                {Array.from({ length: 18 }, (_, i) => i + 1).map((step) => {
-                  const stepFunnel = job?.stepFunnelBreakdown ?? {};
-                  const reached = stepFunnel[step] ?? 0;
-                  const dropped = (job?.stepDropoffBreakdown ?? {})[step] ?? 0;
-                  const pct = Math.round((reached / Math.max(...Object.values(stepFunnel), 1)) * 100);
-                  const dropPct = reached > 0 ? Math.round((dropped / reached) * 100) : 0;
-                  const isHighDropoff = dropPct >= 15;
+            <div className="space-y-1.5">
+              {(() => {
+                const authSum = Object.values(userTypeBreakdown).reduce((a, b) => a + b, 0);
+                const rows = [
+                  { key: "advertiser", label: "광고주",   color: "bg-blue-500",   count: userTypeBreakdown["advertiser"] ?? 0 },
+                  { key: "agency",     label: "대행사",   color: "bg-green-500",  count: userTypeBreakdown["agency"] ?? 0 },
+                  { key: "production", label: "제작사",   color: "bg-purple-500", count: userTypeBreakdown["production"] ?? 0 },
+                  { key: "milogin",    label: "미로그인", color: "bg-gray-300",   count: totalUsers - authSum },
+                ];
+                return rows.map(({ key, label, color, count }) => {
+                  const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
                   return (
-                    <div key={step} className="flex items-center gap-2">
-                      <div className="w-5 text-[10px] text-gray-400 text-right shrink-0">{step}</div>
-                      <div className="w-28 text-xs text-gray-600 truncate shrink-0">{PROJECT_STEP_LABELS[step]}</div>
-                      <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                        <div className="bg-indigo-400 h-3 rounded-full transition-all duration-500"
-                          style={{ width: `${Math.max(pct, reached > 0 ? 2 : 0)}%` }} />
+                    <div key={key} className="flex items-center gap-2">
+                      <div className="w-12 text-xs text-gray-600 shrink-0">{label}</div>
+                      <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                        <div className={`${color} h-2 rounded-full`} style={{ width: `${pct}%` }} />
                       </div>
-                      <div className="w-12 text-right text-xs font-medium text-gray-700">{reached.toLocaleString()}</div>
-                      {dropped > 0 ? (
-                        <div className={`w-20 text-right text-xs ${isHighDropoff ? "text-red-500 font-semibold" : "text-amber-500"}`}>
-                          -{dropped} ({dropPct}%)
-                        </div>
-                      ) : (
-                        <div className="w-20 text-right text-xs text-gray-300">—</div>
-                      )}
+                      <div className="w-9 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                      <div className="w-6 text-right text-[10px] text-gray-400">{pct}%</div>
                     </div>
                   );
-                })}
-              </div>
-              <div className="flex items-center gap-3 text-[10px] text-gray-400 pt-1">
-                <span><span className="text-red-500 font-semibold">빨간색</span> = 이탈률 15% 이상</span>
-                <span><span className="text-amber-500">주황색</span> = 일부 이탈</span>
-              </div>
+                });
+              })()}
             </div>
+          </div>
 
-          {/* 포트폴리오 등록 섹션별 퍼널 */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
-              <div>
-                <p className="font-medium text-gray-800">포트폴리오 등록 섹션별 퍼널</p>
-                <p className="text-[10px] text-gray-400">파트너가 어느 섹션에서 포트폴리오 작성을 멈추는지 확인합니다</p>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 space-y-2">
+            <div>
+              <p className="text-sm font-medium text-gray-800">성별</p>
+              <p className="text-[10px] text-gray-400">전체 방문자 기준</p>
+            </div>
+            <div className="space-y-1.5">
+              {(() => {
+                const gd = job?.genderBreakdown ?? {};
+                const male = gd["male"] ?? 0; const female = gd["female"] ?? 0;
+                const gTotal = male + female;
+                return [
+                  { label: "남성", count: male,   color: "bg-blue-400" },
+                  { label: "여성", count: female, color: "bg-pink-400" },
+                ].map(({ label, count, color }) => {
+                  const pct = gTotal > 0 ? Math.round((count / gTotal) * 100) : 0;
+                  return (
+                    <div key={label} className="flex items-center gap-2">
+                      <div className="w-12 text-xs text-gray-600 shrink-0">{label}</div>
+                      <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                        <div className={`${color} h-2 rounded-full transition-all duration-500`}
+                          style={{ width: `${Math.max(pct, count > 0 ? 1 : 0)}%` }} />
+                      </div>
+                      <div className="w-9 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                      <div className="w-6 text-right text-[10px] text-gray-400">{pct}%</div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 space-y-2">
+            <div>
+              <p className="text-sm font-medium text-gray-800">방문 유형</p>
+              <p className="text-[10px] text-gray-400">GA4 신규 방문자 / 재방문자 기준</p>
+            </div>
+            <div className="space-y-1.5">
+              {(() => {
+                const first = job?.firstVisitCount ?? 0; const ret = job?.returnVisitCount ?? 0;
+                const vTotal = first + ret;
+                return [
+                  { label: "첫방문", count: first, color: "bg-teal-400" },
+                  { label: "재방문", count: ret,   color: "bg-orange-400" },
+                ].map(({ label, count, color }) => {
+                  const pct = vTotal > 0 ? Math.round((count / vTotal) * 100) : 0;
+                  return (
+                    <div key={label} className="flex items-center gap-2">
+                      <div className="w-12 text-xs text-gray-600 shrink-0">{label}</div>
+                      <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                        <div className={`${color} h-2 rounded-full transition-all duration-500`}
+                          style={{ width: `${Math.max(pct, count > 0 ? 1 : 0)}%` }} />
+                      </div>
+                      <div className="w-9 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                      <div className="w-6 text-right text-[10px] text-gray-400">{pct}%</div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          </div>
+        </div>
+
+        {/* 열3: AARRR 퍼널 */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 space-y-2">
+          <p className="text-sm font-medium text-gray-800">AARRR 퍼널</p>
+          <div className="space-y-1">
+            {FUNNEL_ORDER.map(({ key, label, color, aarrr }) => {
+              const count = job?.funnelBreakdown?.[key] ?? 0;
+              const pct = siteVisit > 0 ? Math.round((count / siteVisit) * 100) : 0;
+              return (
+                <div key={key} className="flex items-center gap-1.5">
+                  {aarrr
+                    ? <span className="w-14 shrink-0 text-[9px] font-semibold text-gray-400 uppercase">{aarrr}</span>
+                    : <span className="w-14 shrink-0" />}
+                  <div className="w-20 text-[10px] text-gray-600 truncate shrink-0">{label}</div>
+                  <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                    <div className={`${color} h-2 rounded-full transition-all duration-500`}
+                      style={{ width: `${Math.max(pct, count > 0 ? 1 : 0)}%` }} />
+                  </div>
+                  <div className="w-10 text-right text-[10px] font-medium text-gray-700">{count.toLocaleString()}</div>
+                  <div className="w-6 text-right text-[10px] text-gray-400">{pct}%</div>
+                </div>
+              );
+            })}
+          </div>
+          {isDone && (
+            <div className="bg-blue-50 rounded-lg px-2 py-1 text-[10px] text-blue-700">✅ GA4 + Mixpanel 전송 완료</div>
+          )}
+        </div>
+      </div>
+
+      {/* 직접 유입 + 메인화면 클릭 분석 */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 space-y-2">
+          <div>
+            <p className="text-sm font-medium text-gray-800">직접 유입 / 북마크 랜딩 페이지</p>
+            <p className="text-[10px] text-gray-400">북마크하거나 URL을 직접 입력해 들어온 페이지 분포</p>
+          </div>
+          <div className="space-y-1.5">
+            {(() => {
+              const entries = Object.entries(job?.directEntryBreakdown ?? {}).sort(([, a], [, b]) => b - a);
+              const totalDirect = entries.reduce((s, [, v]) => s + v, 0);
+              const maxCount = entries[0]?.[1] ?? 1;
+              const PAGE_LABELS: Record<string, string> = {
+                "/": "홈", "/work/home": "마이페이지 홈", "/work/projects": "내 프로젝트",
+                "/partner": "파트너 찾기", "/create-project/step1": "프로젝트 등록",
+                "/work/profile": "프로필", "/work/proposals": "제안 현황", "/work/contracts": "계약 관리",
+              };
+              const PAGE_COLORS: Record<string, string> = {
+                "/": "bg-pink-400", "/work/home": "bg-blue-400", "/work/projects": "bg-indigo-400",
+                "/partner": "bg-green-400", "/create-project/step1": "bg-amber-400",
+                "/work/profile": "bg-purple-400", "/work/proposals": "bg-sky-400", "/work/contracts": "bg-orange-400",
+              };
+              if (entries.length === 0) return <div className="text-xs text-gray-400 py-3 text-center">시뮬레이션 실행 후 표시됩니다</div>;
+              return entries.map(([path, count]) => {
+                const barPct = Math.round((count / maxCount) * 100);
+                const sharePct = totalDirect > 0 ? Math.round((count / totalDirect) * 100) : 0;
+                return (
+                  <div key={path} className="flex items-center gap-2">
+                    <div className="w-24 text-xs text-gray-600 truncate shrink-0">{PAGE_LABELS[path] ?? path}</div>
+                    <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                      <div className={`${PAGE_COLORS[path] ?? "bg-gray-400"} h-2 rounded-full transition-all duration-500`}
+                        style={{ width: `${Math.max(barPct, 2)}%` }} />
+                    </div>
+                    <div className="w-9 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                    <div className="w-6 text-right text-[10px] text-gray-400">{sharePct}%</div>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        </div>
+
+        {(() => {
+          const HOME_ELEMENT_META: Record<string, { label: string; color: string; dest: string }> = {
+            cta:            { label: "메인 Hero CTA (무료로 의뢰하기)", color: "bg-pink-500",    dest: "→ /create-project/step1" },
+            free_start_btn: { label: "무료로 시작하기 (헤더 버튼)",      color: "bg-rose-400",    dest: "→ /signup" },
+            login_btn:      { label: "로그인 아이콘 (헤더)",             color: "bg-blue-400",    dest: "→ /login" },
+            project_card:   { label: "공모전 · 프로젝트 카드",           color: "bg-amber-400",   dest: "→ 공고 상세" },
+            category:       { label: "카테고리 탐색",                    color: "bg-green-400",   dest: "→ /agency-search" },
+            faq:            { label: "FAQ 질문 클릭",                    color: "bg-violet-400",  dest: "(패널 열림)" },
+            feature_card:   { label: "서비스 특징 카드",                 color: "bg-indigo-400",  dest: "→ /guide/features" },
+            partner:        { label: "파트너 카드",                      color: "bg-teal-400",    dest: "→ /agency-search" },
+            flow_step:      { label: "이용 방법 단계",                   color: "bg-orange-400",  dest: "→ /guide/how-to-use" },
+            faq_more:       { label: "FAQ 전체보기",                     color: "bg-gray-400",    dest: "→ /guide/faq" },
+            etc:            { label: "기타 (이용약관 · Footer 등)",        color: "bg-slate-300",   dest: "(기타 클릭)" },
+          };
+          const breakdown = job?.homeClickBreakdown ?? {};
+          const entries = Object.entries(breakdown)
+            .filter(([key]) => key && key !== "undefined")
+            .sort(([, a], [, b]) => b - a);
+          const total = entries.reduce((s, [, v]) => s + v, 0);
+          const maxCount = entries[0]?.[1] ?? 1;
+          return (
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-sm font-medium text-gray-800">메인화면 클릭 분석</p>
+                  <p className="text-[10px] text-gray-400">홈(/)에서 사용자가 어떤 요소를 클릭해 이동하는지{total > 0 ? ` — 총 ${total.toLocaleString()}회` : ""}</p>
+                </div>
+                <div className="text-[10px] text-gray-400 text-right shrink-0">11개 요소 추적</div>
+              </div>
+              {entries.length === 0 ? (
+                <div className="text-xs text-gray-400 py-3 text-center">시뮬레이션 실행 후 데이터가 표시됩니다</div>
+              ) : (
+                <>
+                  <div className="space-y-1.5">
+                    {entries.map(([element, count]) => {
+                      const meta = HOME_ELEMENT_META[element] ?? { label: element, color: "bg-gray-300", dest: "" };
+                      const barPct  = Math.round((count / maxCount) * 100);
+                      const sharePct = total > 0 ? Math.round((count / total) * 100) : 0;
+                      return (
+                        <div key={element} className="flex items-center gap-2">
+                          <div className="w-36 shrink-0">
+                            <div className="text-[10px] text-gray-700 truncate">{meta.label}</div>
+                            <div className="text-[9px] text-gray-400 truncate">{meta.dest}</div>
+                          </div>
+                          <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                            <div className={`${meta.color} h-2 rounded-full transition-all duration-500`}
+                              style={{ width: `${Math.max(barPct, 2)}%` }} />
+                          </div>
+                          <div className="w-9 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                          <div className="w-6 text-right text-[10px] text-gray-400">{sharePct}%</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="bg-pink-50 rounded-lg px-2 py-1.5 text-[10px] text-pink-700">
+                    💡 CTA 클릭이 {Math.round(((breakdown["cta"] ?? 0) / Math.max(total, 1)) * 100)}%로 가장 높습니다.
+                    공모전 카드는 비로그인 유저의 주요 탐색 경로입니다.
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* 멀티세션 작성 패턴 */}
+      {job && (job.projectCompletedCount > 0 || job.portfolioCompletedCount > 0) && (() => {
+        const pjN  = job.projectCompletedCount   || 1;
+        const pfN  = job.portfolioCompletedCount || 1;
+        const drN  = job.draftOpenedCount        || 1;
+        const avgProjDays    = +(job.projDaysSum     / pjN).toFixed(1);
+        const avgProjSess    = +(job.projSessionsSum / pjN).toFixed(1);
+        const avgProjMin     = Math.round(job.projWritingMinSum / pjN);
+        const avgPfDays      = +(job.pfDaysSum      / pfN).toFixed(1);
+        const avgPfSess      = +(job.pfSessionsSum  / pfN).toFixed(1);
+        const avgPfMin       = Math.round(job.pfWritingMinSum  / pfN);
+        const avgReturnHours = +(job.draftReturnHoursSum / drN).toFixed(1);
+        const statCell = (label: string, value: string | number, sub?: string) => (
+          <div className="flex flex-col items-center justify-center text-center p-2 bg-gray-50 rounded-lg">
+            <div className="text-base font-bold text-gray-800">{value}</div>
+            <div className="text-[10px] text-gray-500 mt-0.5">{label}</div>
+            {sub && <div className="text-[9px] text-gray-400">{sub}</div>}
+          </div>
+        );
+        return (
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 space-y-2">
+            <div>
+              <p className="text-sm font-medium text-gray-800">멀티세션 작성 패턴</p>
+              <p className="text-[10px] text-gray-400">완주한 유저 기준 — 며칠에 걸쳐, 몇 번의 세션으로, 얼마나 작성했는지</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-medium text-indigo-600">프로젝트 등록 ({job.projectCompletedCount}건 완주)</p>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {statCell("평균 완주 기간", `${avgProjDays}일`)}
+                  {statCell("평균 세션 수", `${avgProjSess}회`)}
+                  {statCell("평균 작성시간", `${avgProjMin}분`, "갭 제외 순수")}
+                </div>
               </div>
               <div className="space-y-1.5">
-                {(() => {
-                  const pfFunnel = job?.portfolioFunnelBreakdown ?? {};
-                  const pfDropoff = job?.portfolioDropoffBreakdown ?? {};
-                  const PORTFOLIO_LABELS: Record<number, string> = {
-                    1: "기업 정보", 2: "담당자 정보", 3: "경험·특화 분야",
-                    4: "광고 목적별 분야", 5: "제작 기법별 분야", 6: "대표 광고주",
-                    7: "대표 수상내역", 8: "대표 포트폴리오", 9: "대표 스태프",
-                    10: "최근 참여 프로젝트", 11: "Cotton Candy 활동", 12: "파일 업로드",
-                    13: "기업 소개글",
-                  };
-                  const maxCount = Math.max(...Object.values(pfFunnel), 1);
-                  return Array.from({ length: 13 }, (_, i) => i + 1).map((sec) => {
-                    const reached = pfFunnel[sec] ?? 0;
-                    const dropped = pfDropoff[sec] ?? 0;
-                    const barPct = Math.round((reached / maxCount) * 100);
-                    const dropPct = reached > 0 ? Math.round((dropped / reached) * 100) : 0;
-                    const isHighDropoff = dropPct >= 20;
-                    return (
-                      <div key={sec} className="flex items-center gap-2">
-                        <div className="w-4 text-[10px] text-gray-400 text-right shrink-0">{sec}</div>
-                        <div className="w-32 text-xs text-gray-600 truncate shrink-0">{PORTFOLIO_LABELS[sec]}</div>
-                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                          <div className="bg-purple-400 h-3 rounded-full transition-all duration-500"
-                            style={{ width: `${Math.max(barPct, reached > 0 ? 2 : 0)}%` }} />
-                        </div>
-                        <div className="w-12 text-right text-xs font-medium text-gray-700">{reached.toLocaleString()}</div>
-                        {dropped > 0 ? (
-                          <div className={`w-20 text-right text-xs ${isHighDropoff ? "text-red-500 font-semibold" : "text-amber-500"}`}>
-                            -{dropped} ({dropPct}%)
-                          </div>
-                        ) : (
-                          <div className="w-20 text-right text-xs text-gray-300">—</div>
-                        )}
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
-              <div className="text-[10px] text-gray-400">
-                <span className="text-red-500 font-semibold">빨간색</span> = 이탈률 20% 이상 &nbsp;|&nbsp;
-                <span className="text-amber-500">주황색</span> = 일부 이탈
+                <p className="text-[10px] font-medium text-purple-600">포트폴리오 등록 ({job.portfolioCompletedCount}건 완주)</p>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {statCell("평균 완주 기간", `${avgPfDays}일`)}
+                  {statCell("평균 세션 수", `${avgPfSess}회`)}
+                  {statCell("평균 작성시간", `${avgPfMin}분`, "갭 제외 순수")}
+                </div>
               </div>
             </div>
+            {job.draftOpenedCount > 0 && (
+              <div className="flex items-center gap-2 pt-1 border-t border-gray-50 text-[10px] text-gray-500">
+                <span className="w-2 h-2 rounded-full bg-green-400 inline-block shrink-0" />
+                임시저장 후 평균 <strong className="text-gray-700 mx-0.5">{avgReturnHours}시간</strong> 뒤에 돌아와서 이어서 작성
+                <span className="text-gray-300">|</span>
+                총 <strong className="text-gray-700 mx-0.5">{job.draftOpenedCount}회</strong> 재방문
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
-          </div>{/* /퍼널 2열 grid */}
-        </>
-      )}
+      {/* 퍼널 2개 나란히 */}
+      <div className="grid grid-cols-2 gap-3">
+
+        {/* 프로젝트 등록 단계별 퍼널 */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 space-y-2">
+          <div className="flex items-center justify-between flex-wrap gap-1.5">
+            <div>
+              <p className="text-sm font-medium text-gray-800">프로젝트 등록 단계별 퍼널</p>
+              <p className="text-[10px] text-gray-400">광고주가 어느 단계에서 이탈하는지 확인합니다</p>
+            </div>
+            <div className="flex flex-wrap gap-2 text-[10px]">
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" />공고 <strong>{job?.projectTypeBreakdown?.["공고"] ?? 0}건</strong></span>
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-violet-400 inline-block" />1:1 <strong>{job?.projectTypeBreakdown?.["1:1"] ?? 0}건</strong></span>
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-pink-400 inline-block" />컨설팅 <strong>{job?.consultingRegisteredCount ?? 0}건</strong></span>
+              <span className="text-gray-200">|</span>
+              <span>임시저장 <strong>{job?.draftSavedCount ?? 0}</strong></span>
+              <span>불러오기 <strong>{job?.draftOpenedCount ?? 0}</strong></span>
+            </div>
+          </div>
+          <div className="space-y-1">
+            {Array.from({ length: 18 }, (_, i) => i + 1).map((step) => {
+              const stepFunnel = job?.stepFunnelBreakdown ?? {};
+              const reached = stepFunnel[step] ?? 0;
+              const dropped = (job?.stepDropoffBreakdown ?? {})[step] ?? 0;
+              const pct = Math.round((reached / Math.max(...Object.values(stepFunnel), 1)) * 100);
+              const dropPct = reached > 0 ? Math.round((dropped / reached) * 100) : 0;
+              const isHighDropoff = dropPct >= 15;
+              return (
+                <div key={step} className="flex items-center gap-1.5">
+                  <div className="w-4 text-[9px] text-gray-400 text-right shrink-0">{step}</div>
+                  <div className="w-24 text-[10px] text-gray-600 truncate shrink-0">{PROJECT_STEP_LABELS[step]}</div>
+                  <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                    <div className="bg-indigo-400 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.max(pct, reached > 0 ? 2 : 0)}%` }} />
+                  </div>
+                  <div className="w-10 text-right text-[10px] font-medium text-gray-700">{reached.toLocaleString()}</div>
+                  {dropped > 0 ? (
+                    <div className={`w-16 text-right text-[10px] ${isHighDropoff ? "text-red-500 font-semibold" : "text-amber-500"}`}>
+                      -{dropped} ({dropPct}%)
+                    </div>
+                  ) : (
+                    <div className="w-16 text-right text-[10px] text-gray-300">—</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex items-center gap-3 text-[9px] text-gray-400">
+            <span><span className="text-red-500 font-semibold">빨간색</span> = 이탈률 15% 이상</span>
+            <span><span className="text-amber-500">주황색</span> = 일부 이탈</span>
+          </div>
+        </div>
+
+        {/* 포트폴리오 등록 섹션별 퍼널 */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 space-y-2">
+          <div>
+            <p className="text-sm font-medium text-gray-800">포트폴리오 등록 섹션별 퍼널</p>
+            <p className="text-[10px] text-gray-400">파트너가 어느 섹션에서 포트폴리오 작성을 멈추는지 확인합니다</p>
+          </div>
+          <div className="space-y-1">
+            {(() => {
+              const pfFunnel = job?.portfolioFunnelBreakdown ?? {};
+              const pfDropoff = job?.portfolioDropoffBreakdown ?? {};
+              const PORTFOLIO_LABELS: Record<number, string> = {
+                1: "기업 정보", 2: "담당자 정보", 3: "경험·특화 분야",
+                4: "광고 목적별 분야", 5: "제작 기법별 분야", 6: "대표 광고주",
+                7: "대표 수상내역", 8: "대표 포트폴리오", 9: "대표 스태프",
+                10: "최근 참여 프로젝트", 11: "Cotton Candy 활동", 12: "파일 업로드",
+                13: "기업 소개글",
+              };
+              const maxCount = Math.max(...Object.values(pfFunnel), 1);
+              return Array.from({ length: 13 }, (_, i) => i + 1).map((sec) => {
+                const reached = pfFunnel[sec] ?? 0;
+                const dropped = pfDropoff[sec] ?? 0;
+                const barPct = Math.round((reached / maxCount) * 100);
+                const dropPct = reached > 0 ? Math.round((dropped / reached) * 100) : 0;
+                const isHighDropoff = dropPct >= 20;
+                return (
+                  <div key={sec} className="flex items-center gap-1.5">
+                    <div className="w-4 text-[9px] text-gray-400 text-right shrink-0">{sec}</div>
+                    <div className="w-28 text-[10px] text-gray-600 truncate shrink-0">{PORTFOLIO_LABELS[sec]}</div>
+                    <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                      <div className="bg-purple-400 h-2 rounded-full transition-all duration-500"
+                        style={{ width: `${Math.max(barPct, reached > 0 ? 2 : 0)}%` }} />
+                    </div>
+                    <div className="w-10 text-right text-[10px] font-medium text-gray-700">{reached.toLocaleString()}</div>
+                    {dropped > 0 ? (
+                      <div className={`w-16 text-right text-[10px] ${isHighDropoff ? "text-red-500 font-semibold" : "text-amber-500"}`}>
+                        -{dropped} ({dropPct}%)
+                      </div>
+                    ) : (
+                      <div className="w-16 text-right text-[10px] text-gray-300">—</div>
+                    )}
+                  </div>
+                );
+              });
+            })()}
+          </div>
+          <div className="text-[9px] text-gray-400">
+            <span className="text-red-500 font-semibold">빨간색</span> = 이탈률 20% 이상 &nbsp;|&nbsp;
+            <span className="text-amber-500">주황색</span> = 일부 이탈
+          </div>
+        </div>
+
+      </div>{/* /퍼널 2열 grid */}
 
       {/* 시뮬레이션 설정 다이얼로그 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

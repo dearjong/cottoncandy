@@ -965,6 +965,43 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     }
   }
 
+  // ── 최소 완주 보장: 프로젝트/포트폴리오 각 3건 ─────────────────────
+  const MIN_COMPLETIONS = 3;
+  const synTs = Math.floor(Date.now() / 1000) - 86400;
+  const synthCommon = { user_type: "advertiser", utm_source: "tvcf", geo: "서울", gender: "male", age_group: "30s" };
+
+  if (job.projectCompletedCount < MIN_COMPLETIONS) {
+    const needed = MIN_COMPLETIONS - job.projectCompletedCount;
+    for (let k = 0; k < needed; k++) {
+      const sUid = `sim_gp_${k}`;
+      job.projectCompletedCount += 1;
+      job.projectTypeBreakdown["공고"] = (job.projectTypeBreakdown["공고"] ?? 0) + 1;
+      job.projDaysSum += 3; job.projSessionsSum += 2; job.projWritingMinSum += 90;
+      add("project_submitted", sUid, synTs + k * 3600, {
+        project_id: `gp_${k}`, project_type: "공고", category: "영상광고",
+        budget_range: "500-1000만", total_sessions: 2, total_hours: 72, total_days: 3,
+        avg_session_gap_hours: 36, total_writing_time_sec: 5400, total_writing_time_min: 90,
+        ...synthCommon,
+      });
+    }
+  }
+
+  const pfSynthCommon = { user_type: "production", utm_source: "tvcf", geo: "서울", gender: "male", age_group: "30s" };
+  if (job.portfolioCompletedCount < MIN_COMPLETIONS) {
+    const needed = MIN_COMPLETIONS - job.portfolioCompletedCount;
+    for (let k = 0; k < needed; k++) {
+      const sUid = `sim_gpf_${k}`;
+      job.portfolioCompletedCount += 1;
+      job.pfDaysSum += 5; job.pfSessionsSum += 3; job.pfWritingMinSum += 120;
+      add("portfolio_registered", sUid, synTs + k * 3600, {
+        portfolio_id: `gpf_${k}`, category: "영상광고", partner_type: "production",
+        total_sessions: 3, total_hours: 120, total_days: 5, avg_session_gap_hours: 40,
+        total_writing_time_sec: 7200, total_writing_time_min: 120,
+        ...pfSynthCommon,
+      });
+    }
+  }
+
   // ── GA4 Measurement Protocol 전송 (실시간 개요 반영) ──
   job.status = "sending";
   job.message = "GA4 전송 중...";
