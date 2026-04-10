@@ -1,3 +1,4 @@
+import { useLocation } from 'wouter';
 import { useState } from 'react';
 import Layout from '@/components/layout/layout';
 import WorkSidebar from '@/components/work/sidebar';
@@ -7,6 +8,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { COMMON_MESSAGES } from '@/lib/messages';
 
 export default function Purpose() {
+  const [, setLocation] = useLocation();
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const purposes = [
     '제품 판매 촉진',
@@ -65,10 +67,10 @@ export default function Purpose() {
                 </div>
 
                 <div className="flex gap-3 mt-8 pt-6 border-t">
-                  <Button variant="outline" className="btn-white" data-testid="button-purpose-prev">
+                  <Button variant="outline" className="btn-white" data-testid="button-purpose-prev" onClick={() => setLocation('/work/company-portfolio/experience')}>
                     이전
                   </Button>
-                  <Button className="btn-pink" data-testid="button-purpose-next">
+                  <Button className="btn-pink" data-testid="button-purpose-next" onClick={() => setLocation('/work/company-portfolio/technique')}>
                     다음
                   </Button>
                 </div>

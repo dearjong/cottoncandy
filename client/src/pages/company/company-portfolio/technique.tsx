@@ -1,3 +1,4 @@
+import { useLocation } from 'wouter';
 import { useState } from 'react';
 import Layout from '@/components/layout/layout';
 import WorkSidebar from '@/components/work/sidebar';
@@ -7,6 +8,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { COMMON_MESSAGES } from '@/lib/messages';
 
 export default function Technique() {
+  const [, setLocation] = useLocation();
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const techniques = [
     { title: 'AI', desc: 'AI 기반 영상·이미지·음성 합성' },
@@ -66,10 +68,10 @@ export default function Technique() {
                 </div>
 
                 <div className="flex gap-3 mt-8 pt-6 border-t">
-                  <Button variant="outline" className="btn-white" data-testid="button-technique-prev">
+                  <Button variant="outline" className="btn-white" data-testid="button-technique-prev" onClick={() => setLocation('/work/company-portfolio/purpose')}>
                     이전
                   </Button>
-                  <Button className="btn-pink" data-testid="button-technique-next">
+                  <Button className="btn-pink" data-testid="button-technique-next" onClick={() => setLocation('/work/company-portfolio/clients')}>
                     다음
                   </Button>
                 </div>

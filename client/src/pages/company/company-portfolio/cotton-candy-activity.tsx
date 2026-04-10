@@ -1,3 +1,4 @@
+import { useLocation } from 'wouter';
 import { useState } from 'react';
 import Layout from '@/components/layout/layout';
 import WorkSidebar from '@/components/work/sidebar';
@@ -7,6 +8,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { COMMON_MESSAGES } from '@/lib/messages';
 
 export default function CottonCandyActivity() {
+  const [, setLocation] = useLocation();
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   return (
@@ -74,10 +76,10 @@ export default function CottonCandyActivity() {
                 </div>
 
                 <div className="flex gap-3 mt-8 pt-6 border-t">
-                  <Button variant="outline" className="btn-white" data-testid="button-cotton-candy-prev">
+                  <Button variant="outline" className="btn-white" data-testid="button-cotton-candy-prev" onClick={() => setLocation('/work/company-portfolio/recent-projects')}>
                     이전
                   </Button>
-                  <Button className="btn-pink" data-testid="button-cotton-candy-next">
+                  <Button className="btn-pink" data-testid="button-cotton-candy-next" onClick={() => setLocation('/work/company-portfolio/file-upload')}>
                     다음
                   </Button>
                 </div>

@@ -1,3 +1,4 @@
+import { useLocation } from 'wouter';
 import { useState } from 'react';
 import Layout from '@/components/layout/layout';
 import WorkSidebar from '@/components/work/sidebar';
@@ -7,6 +8,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { COMMON_MESSAGES } from '@/lib/messages';
 
 export default function Clients() {
+  const [, setLocation] = useLocation();
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const clients = ['베스트전자', 'CJ', '동원', 'LG화학', '동서식품', '영원무역', '삼립식품', '동원'];
 
@@ -53,10 +55,10 @@ export default function Clients() {
                 </div>
 
                 <div className="flex gap-3 mt-8 pt-6 border-t">
-                  <Button variant="outline" className="btn-white" data-testid="button-clients-prev">
+                  <Button variant="outline" className="btn-white" data-testid="button-clients-prev" onClick={() => setLocation('/work/company-portfolio/technique')}>
                     이전
                   </Button>
-                  <Button className="btn-pink" data-testid="button-clients-next">
+                  <Button className="btn-pink" data-testid="button-clients-next" onClick={() => setLocation('/work/company-portfolio/awards')}>
                     다음
                   </Button>
                 </div>
