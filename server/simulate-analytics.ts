@@ -176,6 +176,47 @@ const GA4_DEBUG_ENDPOINT = `https://www.google-analytics.com/debug/mp/collect?me
 
 let ga4Validated = false; // 첫 번째 유저에만 validation 실행
 
+const BASE_URL = "https://admarket.co.kr";
+
+function derivePageLocation(event: string, props: Record<string, unknown>): string {
+  // 홈
+  if (["site_visit", "home_click", "step1_cta_click"].includes(event)) return `${BASE_URL}/`;
+  // 로그인/회원가입
+  if (["sso_login", "login"].includes(event)) return `${BASE_URL}/login`;
+  if (event === "signup_started") return `${BASE_URL}/signup`;
+  if (event === "signup_funnel") {
+    const step = Number(props.step ?? 1);
+    const paths: Record<number, string> = { 1: "/signup", 2: "/signup/email", 3: "/signup/phone", 4: "/signup/account-type", 5: "/signup/job-info" };
+    return `${BASE_URL}${paths[step] ?? "/signup"}`;
+  }
+  if (event === "signup_complete") return `${BASE_URL}/signup/phone`;
+  // 프로젝트 등록 단계 (step_N_screen)
+  if (event.startsWith("step_")) {
+    const m = event.match(/^step_(\d+)_/);
+    const n = m ? Number(m[1]) : 1;
+    return `${BASE_URL}/create-project/step${n}`;
+  }
+  if (["project_session_started"].includes(event)) {
+    const step = Number(props.steps_completed_so_far ?? 0) + 1;
+    return `${BASE_URL}/create-project/step${Math.min(step, 18)}`;
+  }
+  if (["project_draft_saved", "project_draft_opened"].includes(event)) {
+    const step = Number(props.step ?? 1);
+    return `${BASE_URL}/create-project/step${step}`;
+  }
+  if (event === "project_submitted") return `${BASE_URL}/create-project/step18`;
+  // 파트너/계약/리뷰/포트폴리오
+  if (event === "partner_applied") return `${BASE_URL}/partner/detail`;
+  if (event === "contract_signed") return `${BASE_URL}/work/contracts`;
+  if (event === "review_submitted") return `${BASE_URL}/work/reviews`;
+  if (["portfolio_registered", "portfolio_draft_saved", "portfolio_draft_opened"].includes(event))
+    return `${BASE_URL}/work/portfolio/register`;
+  if (event === "consulting_inquiry_submitted") return `${BASE_URL}/work/consulting`;
+  if (event === "referral_sent") return `${BASE_URL}/work/home`;
+  if (event === "activation_achieved") return `${BASE_URL}/work/home`;
+  return `${BASE_URL}/`;
+}
+
 async function sendGa4UserBatch(entry: Ga4UserEvents): Promise<string | null> {
   const GA4_MAX = 25;
   const payload = {
@@ -351,6 +392,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           params: {
             session_id: entry.sessionId,
             engagement_time_msec: randInt(500, 30000),
+            page_location: derivePageLocation(event, props),
+            page_referrer: `${BASE_URL}/`,
             simulation: "true",
             ...props,
           },
