@@ -1,6 +1,6 @@
 # ADMarket GA4 · Mixpanel 이벤트 정의서
 
-> 버전: v3.2 | 작성일: 2026-04-08 | 최종수정: 2026-04-10  
+> 버전: v3.3 | 작성일: 2026-04-08 | 최종수정: 2026-04-10  
 > 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
 
 ---
@@ -22,7 +22,7 @@
 
 ```
 mixpanel.identify(userId)           ← 익명 device_id → 실 사용자 ID 연결
-mixpanel.people.set({ $name, $email, user_type, last_login })
+mixpanel.people.set({ user_type, last_login })
 gtag("set", "user_properties", { user_id, user_type })
 localStorage.setItem("analytics_user_id", userId)   ← 새로고침 대응
 ```
@@ -31,41 +31,8 @@ localStorage.setItem("analytics_user_id", userId)   ← 새로고침 대응
 
 | 파라미터 | 설명 | 예시 |
 |---------|------|------|
-| `userId` | 고유 사용자 ID (실서비스: DB PK) | `user-kkotbyul@email.com` |
-| `userName` | 표시명 | `이꽃별` |
+| `userId` | 고유 사용자 ID (실서비스: DB PK) | `user-abc123` |
 | `userType` | `advertiser` / `partner` / `admin` | `advertiser` |
-| `email` | 이메일 주소 | `kkotbyul@example.com` |
-
-> **실서비스 연동 시**: `userId`를 서버 DB의 사용자 PK(UUID)로 교체하면 완성.
-
----
-
-### trackLogin — 로그인 이벤트
-
-> GA4 표준 `login` 이벤트 + Mixpanel `user_login` 커스텀 이벤트.  
-> `identifyUser()` 직후 호출.
-
-| 호출 위치 | 메서드 | 구현 |
-|-----------|--------|------|
-| `member/login.tsx` → `handleLogin` | `email` | ✅ 완료 |
-| `admin/login.tsx` → `handleLogin` | `email` | ✅ 완료 |
-
-#### 파라미터
-
-| 파라미터 | 타입 | 예시 |
-|---------|------|------|
-| `method` | `"email"` / `"naver"` / `"google"` / `"admin"` | `"email"` |
-| `user_type` | `"advertiser"` / `"partner"` / `"admin"` | `"advertiser"` |
-
-#### GA4 전송 형태
-
-```javascript
-gtag("event", "login", { method: "email" })   // GA4 표준 이벤트
-// Mixpanel: "user_login" { method, user_type }
-```
-
-> GA4 BigQuery 내보내기 시 `event_name = 'login'` 으로 필터.  
-> 소셜 로그인(네이버·구글) 연결 시 `method` 파라미터만 교체하면 됨.
 
 ---
 
@@ -741,23 +708,6 @@ site_visit
 
 ---
 
-## 16. Mixpanel 코호트 분석 설계
-
-| 분석 목적 | 퍼널 / 코호트 구성 |
-|---------|---------|
-| 의뢰사 가입 → 등록 전환율 | `signup_complete (advertiser)` → `project_submitted` |
-| 공고 등록 이탈 단계 파악 | `step_1_*` ~ `step_16_*` → `project_submitted` |
-| 파트너사 발견 → 지원 전환율 | `project_viewed` → `partner_applied` |
-| 매칭 → 계약 전환율 | `participation_final_selected` → `contract_signed` |
-| 계약 → 납품 완료율 | `contract_signed` → `deliverable_confirmed` |
-| 납품 → 프로젝트 종료율 | `deliverable_confirmed` → `project_completed` |
-| 전체 사이클 완주율 | `project_submitted` → `project_completed` |
-| 제안서 수락 소요 시간 | `draft_submitted` → `draft_confirmed` 사이 시간 |
-| 컨설팅 문의 → 응답 완료율 | `consulting_inquiry_submitted` → `consulting_responded` |
-| 대행사 탐색 깊이 | `partner_searched` → `agency_favorited` → `project_submitted` |
-
----
-
 ## 17. 구현 현황 요약
 
 > ⭐ = GA4 키 이벤트 (콘솔 전환 등록 대상) | GA4 `-` = Mixpanel 전용
@@ -1034,6 +984,6 @@ site_visit
 
 ---
 
-*이 문서는 ADMarket 플랫폼 GA4·Mixpanel 이벤트 정의 기준입니다. (v3.2 — 2026-04-10)*  
+*이 문서는 ADMarket 플랫폼 GA4·Mixpanel 이벤트 정의 기준입니다. (v3.3 — 2026-04-10)*  
 *전체 퍼널 이벤트 연결 완료: `project_completed` · `deliverable_submitted/confirmed` · `draft_submitted` · `portfolio_registered`*  
-*v3.2 추가: 시뮬레이션 유저 기업명(`user_company`) 생성 + Mixpanel People 프로필(`/engage`) 비식별 속성 등록 (이름·이메일 PII 제외)*
+*v3.3 정리: 섹션 0 PII(`$name`·`$email`·`userName`) 제거, `trackLogin` 중복 섹션 제거, 섹션 16 코호트 분석(섹션 15 퍼널과 중복) 제거*
