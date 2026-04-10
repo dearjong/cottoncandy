@@ -226,10 +226,10 @@ function ActivityTab() {
                 </div>
               </div>
 
-              {/* 인증 현황 */}
+              {/* 유저 유형 */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
                 <div>
-                  <p className="font-medium text-gray-800">인증 현황</p>
+                  <p className="font-medium text-gray-800">유저 유형</p>
                   <p className="text-[10px] text-gray-400">미로그인 = 전체 - 로그인 유저 합계</p>
                 </div>
                 <div className="space-y-2">
