@@ -658,7 +658,7 @@ export default function ReportsPage() {
               className="btn-pink-compact text-xs h-7 py-0 px-3"
               onClick={() => setSimSignal(s => s + 1)}
             >
-              ▶ 시뮬레이션 실행
+              시뮬레이션
             </Button>
           )}
         </div>
