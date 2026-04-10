@@ -49,8 +49,7 @@ interface SimConfig {
   pctSsoLogin: number; pctManualLogin: number; pctSignup: number;
   pctMale: number; pctFemale: number;
   pct20s: number; pct30s: number; pct40s: number; pct50s: number;
-  pctSeoul: number; pctGyeonggi: number; pctBusan: number; pctIncheon: number;
-  pctDaegu: number; pctDaejeon: number; pctGwangju: number; pctOtherRegion: number; pctAbroad: number;
+  pctSeoul: number; pctGyeonggi: number; pctLocal: number; pctAbroad: number;
 }
 
 const DEFAULTS: SimConfig = {
@@ -60,8 +59,7 @@ const DEFAULTS: SimConfig = {
   pctSsoLogin: 17,   pctManualLogin: 17,   pctSignup: 3,
   pctMale: 45,       pctFemale: 55,
   pct20s: 10,        pct30s: 35,           pct40s: 35,          pct50s: 20,
-  pctSeoul: 35,      pctGyeonggi: 20,      pctBusan: 8,         pctIncheon: 5,
-  pctDaegu: 4,       pctDaejeon: 3,        pctGwangju: 3,       pctOtherRegion: 17, pctAbroad: 5,
+  pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
 };
 
 function NumInput({ label, value, onChange, min = 0, max = 100, unit = "%" }: {
@@ -202,8 +200,7 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
   const dLoginSum  = dialogCfg.pctSsoLogin + dialogCfg.pctManualLogin + dialogCfg.pctSignup;
   const dGenderSum = dialogCfg.pctMale + dialogCfg.pctFemale;
   const dAgeSum    = dialogCfg.pct20s + dialogCfg.pct30s + dialogCfg.pct40s + dialogCfg.pct50s;
-  const dGeoSum    = dialogCfg.pctSeoul + dialogCfg.pctGyeonggi + dialogCfg.pctBusan + dialogCfg.pctIncheon
-                   + dialogCfg.pctDaegu + dialogCfg.pctDaejeon + dialogCfg.pctGwangju + dialogCfg.pctOtherRegion + dialogCfg.pctAbroad;
+  const dGeoSum    = dialogCfg.pctSeoul + dialogCfg.pctGyeonggi + dialogCfg.pctLocal + dialogCfg.pctAbroad;
 
   return (
     <div className="space-y-6">
@@ -254,15 +251,10 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                 <p className="font-medium text-gray-800">접속 지역</p>
                 <div className="space-y-2">
                   {[
-                    { key: "서울",    color: "bg-blue-500"   },
-                    { key: "경기도",  color: "bg-blue-400"   },
-                    { key: "부산",    color: "bg-purple-400" },
-                    { key: "인천",    color: "bg-green-400"  },
-                    { key: "대구",    color: "bg-yellow-400" },
-                    { key: "대전",    color: "bg-orange-400" },
-                    { key: "광주",    color: "bg-pink-400"   },
-                    { key: "기타지방",color: "bg-gray-400"   },
-                    { key: "해외",    color: "bg-indigo-400" },
+                    { key: "서울",  color: "bg-blue-500"   },
+                    { key: "경기도", color: "bg-blue-400"   },
+                    { key: "지방",  color: "bg-purple-400" },
+                    { key: "해외",  color: "bg-indigo-400" },
                   ].map(({ key, color }) => {
                     const count = geoBreakdown[key] ?? 0;
                     const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
@@ -453,6 +445,9 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
               </div>
             </div>
 
+          {/* 퍼널 2개 나란히 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
           {/* 프로젝트 등록 단계별 퍼널 */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
@@ -568,6 +563,8 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                 <span className="text-amber-500">주황색</span> = 일부 이탈
               </div>
             </div>
+
+          </div>{/* /퍼널 2열 grid */}
         </>
       )}
 
@@ -695,15 +692,10 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                 <td className="py-2.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">접속 지역</td>
                 <td className="py-2.5">
                   <div className="flex flex-wrap gap-3 items-end">
-                    <NumInput label="서울"    value={dialogCfg.pctSeoul}        onChange={(v) => setD("pctSeoul", v)} />
-                    <NumInput label="경기도"  value={dialogCfg.pctGyeonggi}     onChange={(v) => setD("pctGyeonggi", v)} />
-                    <NumInput label="부산"    value={dialogCfg.pctBusan}        onChange={(v) => setD("pctBusan", v)} />
-                    <NumInput label="인천"    value={dialogCfg.pctIncheon}      onChange={(v) => setD("pctIncheon", v)} />
-                    <NumInput label="대구"    value={dialogCfg.pctDaegu}        onChange={(v) => setD("pctDaegu", v)} />
-                    <NumInput label="대전"    value={dialogCfg.pctDaejeon}      onChange={(v) => setD("pctDaejeon", v)} />
-                    <NumInput label="광주"    value={dialogCfg.pctGwangju}      onChange={(v) => setD("pctGwangju", v)} />
-                    <NumInput label="기타지방" value={dialogCfg.pctOtherRegion} onChange={(v) => setD("pctOtherRegion", v)} />
-                    <NumInput label="해외"    value={dialogCfg.pctAbroad}       onChange={(v) => setD("pctAbroad", v)} />
+                    <NumInput label="서울"  value={dialogCfg.pctSeoul}    onChange={(v) => setD("pctSeoul", v)} />
+                    <NumInput label="경기"  value={dialogCfg.pctGyeonggi} onChange={(v) => setD("pctGyeonggi", v)} />
+                    <NumInput label="지방"  value={dialogCfg.pctLocal}    onChange={(v) => setD("pctLocal", v)} />
+                    <NumInput label="해외"  value={dialogCfg.pctAbroad}   onChange={(v) => setD("pctAbroad", v)} />
                   </div>
                 </td>
                 <td className="py-2.5 pl-4 text-right align-middle">

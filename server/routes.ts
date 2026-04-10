@@ -337,12 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pct50s:           num("pct50s", 0, 100),
         pctSeoul:         num("pctSeoul", 0, 100),
         pctGyeonggi:      num("pctGyeonggi", 0, 100),
-        pctBusan:         num("pctBusan", 0, 100),
-        pctIncheon:       num("pctIncheon", 0, 100),
-        pctDaegu:         num("pctDaegu", 0, 100),
-        pctDaejeon:       num("pctDaejeon", 0, 100),
-        pctGwangju:       num("pctGwangju", 0, 100),
-        pctOtherRegion:   num("pctOtherRegion", 0, 100),
+        pctLocal:         num("pctLocal", 0, 100),
         pctAbroad:        num("pctAbroad", 0, 100),
       };
       const jobId = await startSimulation(cfg);

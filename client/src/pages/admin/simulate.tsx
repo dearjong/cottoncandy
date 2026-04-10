@@ -32,8 +32,7 @@ interface SimConfig {
   pctSsoLogin: number; pctManualLogin: number; pctSignup: number;
   pctMale: number; pctFemale: number;
   pct20s: number; pct30s: number; pct40s: number; pct50s: number;
-  pctSeoul: number; pctGyeonggi: number; pctBusan: number; pctIncheon: number;
-  pctDaegu: number; pctDaejeon: number; pctGwangju: number; pctOtherRegion: number; pctAbroad: number;
+  pctSeoul: number; pctGyeonggi: number; pctLocal: number; pctAbroad: number;
 }
 
 const DEFAULTS: SimConfig = {
@@ -44,8 +43,7 @@ const DEFAULTS: SimConfig = {
   pctSsoLogin: 17, pctManualLogin: 17, pctSignup: 3,
   pctMale: 60, pctFemale: 40,
   pct20s: 10, pct30s: 35, pct40s: 35, pct50s: 20,
-  pctSeoul: 35, pctGyeonggi: 20, pctBusan: 8, pctIncheon: 5,
-  pctDaegu: 4, pctDaejeon: 3, pctGwangju: 3, pctOtherRegion: 17, pctAbroad: 5,
+  pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
 };
 
 function NumInput({ label, value, onChange, min = 0, max = 100, unit = "%" }: {
@@ -135,8 +133,7 @@ export default function AdminSimulatePage() {
   const dLoginSum = dialogCfg.pctSsoLogin + dialogCfg.pctManualLogin + dialogCfg.pctSignup;
   const dGenderSum= dialogCfg.pctMale + dialogCfg.pctFemale;
   const dAgeSum   = dialogCfg.pct20s + dialogCfg.pct30s + dialogCfg.pct40s + dialogCfg.pct50s;
-  const dGeoSum   = dialogCfg.pctSeoul + dialogCfg.pctGyeonggi + dialogCfg.pctBusan + dialogCfg.pctIncheon
-                  + dialogCfg.pctDaegu + dialogCfg.pctDaejeon + dialogCfg.pctGwangju + dialogCfg.pctOtherRegion + dialogCfg.pctAbroad;
+  const dGeoSum   = dialogCfg.pctSeoul + dialogCfg.pctGyeonggi + dialogCfg.pctLocal + dialogCfg.pctAbroad;
 
   return (
     <div className="space-y-6 p-6">
@@ -355,19 +352,13 @@ export default function AdminSimulatePage() {
             <div className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-medium text-gray-600">접속 지역</span>
-                {sumWarn([dialogCfg.pctSeoul,dialogCfg.pctGyeonggi,dialogCfg.pctBusan,dialogCfg.pctIncheon,
-                          dialogCfg.pctDaegu,dialogCfg.pctDaejeon,dialogCfg.pctGwangju,dialogCfg.pctOtherRegion,dialogCfg.pctAbroad], "지역")}
+                {sumWarn([dialogCfg.pctSeoul, dialogCfg.pctGyeonggi, dialogCfg.pctLocal, dialogCfg.pctAbroad], "지역")}
               </div>
               <div className="flex flex-wrap gap-4">
-                <NumInput label="서울"    value={dialogCfg.pctSeoul}       onChange={(v) => setD("pctSeoul", v)} />
-                <NumInput label="경기도"  value={dialogCfg.pctGyeonggi}    onChange={(v) => setD("pctGyeonggi", v)} />
-                <NumInput label="부산"    value={dialogCfg.pctBusan}       onChange={(v) => setD("pctBusan", v)} />
-                <NumInput label="인천"    value={dialogCfg.pctIncheon}     onChange={(v) => setD("pctIncheon", v)} />
-                <NumInput label="대구"    value={dialogCfg.pctDaegu}       onChange={(v) => setD("pctDaegu", v)} />
-                <NumInput label="대전"    value={dialogCfg.pctDaejeon}     onChange={(v) => setD("pctDaejeon", v)} />
-                <NumInput label="광주"    value={dialogCfg.pctGwangju}     onChange={(v) => setD("pctGwangju", v)} />
-                <NumInput label="기타지방" value={dialogCfg.pctOtherRegion} onChange={(v) => setD("pctOtherRegion", v)} />
-                <NumInput label="해외"    value={dialogCfg.pctAbroad}      onChange={(v) => setD("pctAbroad", v)} />
+                <NumInput label="서울"  value={dialogCfg.pctSeoul}    onChange={(v) => setD("pctSeoul", v)} />
+                <NumInput label="경기"  value={dialogCfg.pctGyeonggi} onChange={(v) => setD("pctGyeonggi", v)} />
+                <NumInput label="지방"  value={dialogCfg.pctLocal}    onChange={(v) => setD("pctLocal", v)} />
+                <NumInput label="해외"  value={dialogCfg.pctAbroad}   onChange={(v) => setD("pctAbroad", v)} />
                 <div className="flex items-end pb-1">
                   <span className={`text-xs font-semibold ${dGeoSum === 100 ? "text-green-600" : "text-amber-500"}`}>합계 {dGeoSum}%</span>
                 </div>

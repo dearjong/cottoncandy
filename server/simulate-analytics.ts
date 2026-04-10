@@ -226,8 +226,7 @@ export interface SimConfig {
   // 연령대 (합계 100%)
   pct20s: number; pct30s: number; pct40s: number; pct50s: number;
   // 접속 지역 (합계 100%)
-  pctSeoul: number; pctGyeonggi: number; pctBusan: number; pctIncheon: number;
-  pctDaegu: number; pctDaejeon: number; pctGwangju: number; pctOtherRegion: number; pctAbroad: number;
+  pctSeoul: number; pctGyeonggi: number; pctLocal: number; pctAbroad: number;
 }
 
 export const DEFAULT_CONFIG: SimConfig = {
@@ -238,8 +237,7 @@ export const DEFAULT_CONFIG: SimConfig = {
   pctSsoLogin: 17, pctManualLogin: 17, pctSignup: 3,
   pctMale: 45, pctFemale: 55,
   pct20s: 10, pct30s: 35, pct40s: 35, pct50s: 20,
-  pctSeoul: 35, pctGyeonggi: 20, pctBusan: 8, pctIncheon: 5,
-  pctDaegu: 4, pctDaejeon: 3, pctGwangju: 3, pctOtherRegion: 17, pctAbroad: 5,
+  pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
 };
 
 export async function startSimulation(cfg: SimConfig): Promise<string> {
@@ -362,15 +360,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   ];
 
   const GEO_LIST = [
-    { value: { geo_region: "서울" },    weight: cfg.pctSeoul       },
-    { value: { geo_region: "경기도" },  weight: cfg.pctGyeonggi    },
-    { value: { geo_region: "부산" },    weight: cfg.pctBusan       },
-    { value: { geo_region: "인천" },    weight: cfg.pctIncheon     },
-    { value: { geo_region: "대구" },    weight: cfg.pctDaegu       },
-    { value: { geo_region: "대전" },    weight: cfg.pctDaejeon     },
-    { value: { geo_region: "광주" },    weight: cfg.pctGwangju     },
-    { value: { geo_region: "기타지방"}, weight: cfg.pctOtherRegion },
-    { value: { geo_region: "해외" },    weight: cfg.pctAbroad      },
+    { value: { geo_region: "서울" },  weight: cfg.pctSeoul    },
+    { value: { geo_region: "경기도" }, weight: cfg.pctGyeonggi },
+    { value: { geo_region: "지방" },  weight: cfg.pctLocal    },
+    { value: { geo_region: "해외" },  weight: cfg.pctAbroad   },
   ];
 
   const CATEGORIES   = [
