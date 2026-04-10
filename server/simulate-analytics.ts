@@ -463,8 +463,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const homeClickN = randInt(1, 4);
     for (let c = 0; c < homeClickN; c++) {
       const el = weightedPick(HOME_CLICK_ELEMENTS);
-      job.homeClickBreakdown[el.value] = (job.homeClickBreakdown[el.value] ?? 0) + 1;
-      add("home_click", uid, baseTs + 5 + c * 20, { element: el.value, ...common });
+      job.homeClickBreakdown[el] = (job.homeClickBreakdown[el] ?? 0) + 1;
+      add("home_click", uid, baseTs + 5 + c * 20, { element: el, ...common });
     }
 
     // ── 인증 결정 (직접 % 기반) ───────────────────────────
