@@ -551,7 +551,6 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
     const common: Record<string, unknown> = {
       user_type: userType,
-      user_company: userCompany,
       gender,
       age_group: ageGroup,
       ...utm,

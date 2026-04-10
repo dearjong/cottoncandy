@@ -897,12 +897,13 @@ site_visit
 
 | 프로퍼티 | 예시값 | 설명 |
 |---------|--------|------|
-| `user_company` | `삼성전자` | 광고주 기업명 또는 파트너사명 (공개 기업명) |
 | `user_type` | `advertiser` / `agency` / `production` | 유저 유형 |
 | `gender` | `male` / `female` | 성별 |
 | `age_group` | `20s` ~ `50s` | 연령대 |
 | `geo_region` | `서울` / `경기도` / `부산` 등 | 지역 |
 | `utm_source` / `utm_medium` | `google` / `cpc` 등 | 유입 채널 |
+
+> **기업명(`user_company`)은 이벤트에 포함하지 않음.** 동일 유저 추적은 `distinct_id`로, 소속 기업 정보는 Mixpanel People 프로필(유저 속성)에 한 번만 저장.
 
 ---
 
