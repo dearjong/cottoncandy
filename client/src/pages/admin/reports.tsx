@@ -53,7 +53,7 @@ const DEFAULTS: SimConfig = {
   pctAdvertiser: 5,  pctAgency: 30,       pctProduction: 65,
   pctTvcf: 85,       pctGoogle: 5,         pctNaver: 5,        pctKakao: 3,   pctOrganic: 2,
   pctSsoLogin: 17,   pctManualLogin: 17,   pctSignup: 3,
-  pctMale: 60,       pctFemale: 40,
+  pctMale: 45,       pctFemale: 55,
   pct20s: 10,        pct30s: 35,           pct40s: 35,          pct50s: 20,
   pctSeoul: 35,      pctGyeonggi: 20,      pctBusan: 8,         pctIncheon: 5,
   pctDaegu: 4,       pctDaejeon: 3,        pctGwangju: 3,       pctOtherRegion: 17, pctAbroad: 5,
@@ -573,8 +573,8 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                 <td className="py-2.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">성별</td>
                 <td className="py-2.5">
                   <div className="flex flex-wrap gap-3 items-end">
-                    <NumInput label="남성" value={dialogCfg.pctMale}   onChange={(v) => setD("pctMale", v)} />
                     <NumInput label="여성" value={dialogCfg.pctFemale} onChange={(v) => setD("pctFemale", v)} />
+                    <NumInput label="남성" value={dialogCfg.pctMale}   onChange={(v) => setD("pctMale", v)} />
                   </div>
                 </td>
                 <td className="py-2.5 pl-4 text-right align-middle">
