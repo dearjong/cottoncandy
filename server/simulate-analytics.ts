@@ -42,6 +42,8 @@ export interface SimJob {
   portfolioFunnelBreakdown: Record<number, number>;
   portfolioDropoffBreakdown: Record<number, number>;
   homeClickBreakdown: Record<string, number>;
+  dwellSecSum: Record<string, number>;
+  dwellCount: Record<string, number>;
   errors: string[];
   startedAt: number;
   completedAt?: number;
@@ -344,6 +346,8 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     portfolioFunnelBreakdown: {},
     portfolioDropoffBreakdown: {},
     homeClickBreakdown: {},
+    dwellSecSum: {},
+    dwellCount: {},
     errors: [],
     startedAt: Date.now(),
   };
@@ -423,6 +427,25 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         }
       }
     }
+  }
+
+  // 페이지 체류시간 누적 헬퍼
+  const DWELL_PROFILES: Record<string, { min: number; max: number }> = {
+    "홈 (/)":          { min: 20,  max: 180 },
+    "파트너 탐색":      { min: 30,  max: 220 },
+    "공고 상세":        { min: 60,  max: 320 },
+    "프로젝트 등록":    { min: 25,  max: 210 },
+    "포트폴리오 등록":  { min: 35,  max: 260 },
+    "컨설팅 문의":      { min: 90,  max: 380 },
+    "계약 화면":        { min: 90,  max: 520 },
+    "납품/산출물":      { min: 40,  max: 260 },
+  };
+  function addDwell(page: string) {
+    const p = DWELL_PROFILES[page];
+    if (!p) return;
+    const sec = randInt(p.min, p.max);
+    job.dwellSecSum[page] = (job.dwellSecSum[page] ?? 0) + sec;
+    job.dwellCount[page]  = (job.dwellCount[page]  ?? 0) + 1;
   }
 
   function initGa4User(distinctId: string, userId: string, userProps: Record<string, unknown>) {
@@ -576,6 +599,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const isNewVisitor = chance(0.60);
     if (isNewVisitor) { job.firstVisitCount += 1; } else { job.returnVisitCount += 1; }
     add("site_visit", uid, baseTs, { path: "/", is_new_visitor: isNewVisitor, ...common });
+    addDwell("홈 (/)");
 
     // ── 메인화면 클릭 이벤트 (모든 방문자) ──────────────────
     const homeClickN = randInt(1, 4);
@@ -636,6 +660,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     // 유저 타입 집계 (인증된 유저만 — 미로그인은 total - sum으로 계산)
     userTypeCount[userType] = (userTypeCount[userType] ?? 0) + 1;
 
+    // 파트너 탐색 페이지 체류 (40% 확률)
+    if (chance(0.40)) addDwell("파트너 탐색");
+
     const partnerType = userType === "agency" ? "대행사" : "제작사";
 
     // 광고주: 프로젝트 등록 — 18단계 퍼널
@@ -658,6 +685,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         add("consulting_inquiry_submitted", uid, projTs, {
           inquiry_type: "new", category, is_first_time: utm.utm_source !== "tvcf", ...common,
         });
+        addDwell("컨설팅 문의");
         add("activation_achieved", uid, projTs + 1, { trigger_event: "consulting_inquiry_submitted", ...common });
       } else {
         // 공개(공고) / 비공개(1:1) — 18단계 퍼널 (멀티 세션)
@@ -724,6 +752,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
               ...common,
             });
 
+            job.dwellSecSum["프로젝트 등록"] = (job.dwellSecSum["프로젝트 등록"] ?? 0) + stepDuration;
+            job.dwellCount["프로젝트 등록"]  = (job.dwellCount["프로젝트 등록"]  ?? 0) + 1;
             sessionWriteOffset  += stepDuration;
             projTotalWritingSec += stepDuration;
 
@@ -818,6 +848,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           });
           add("activation_achieved", uid, projCurrentTs + 61, { trigger_event: "project_submitted", ...common });
           if (chance(0.30)) {
+            addDwell("계약 화면");
             add("contract_signed", uid, projCurrentTs + 7 * 86400, {
               project_id: projectId, partner_name: pick(PARTNERS),
               budget_range: budget, contract_value_krw: randInt(5, 30) * 10_000_000, ...common,
@@ -838,6 +869,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       const projectId  = `proj_${randInt(100, 999)}`;
       const partnerTs  = baseTs + 400;
 
+      addDwell("공고 상세");
       add("partner_applied", uid, partnerTs, {
         project_id: projectId, project_type: pick(["공고","1:1"]),
         partner_type: partnerType, is_first_time: utm.utm_source !== "tvcf", ...common,
@@ -901,6 +933,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
               ...common,
             });
 
+            job.dwellSecSum["포트폴리오 등록"] = (job.dwellSecSum["포트폴리오 등록"] ?? 0) + secDuration;
+            job.dwellCount["포트폴리오 등록"]  = (job.dwellCount["포트폴리오 등록"]  ?? 0) + 1;
             pfSessionWriteOffset += secDuration;
             pfTotalWritingSec    += secDuration;
 
@@ -965,11 +999,13 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         }
       }
       if (chance(0.40)) {
+        addDwell("계약 화면");
         add("contract_signed",       uid, partnerTs +  7 * 86400, { project_id: projectId, partner_type: partnerType, ...common });
         add("draft_submitted",       uid, partnerTs + 14 * 86400, { project_id: projectId, draft_round: 1, category: weightedPick(CATEGORIES), ...common });
         if (chance(0.70)) {
           add("draft_confirmed",     uid, partnerTs + 16 * 86400, { project_id: projectId, draft_round: 1, ...common });
           if (chance(0.80)) {
+            addDwell("납품/산출물");
             add("deliverable_submitted", uid, partnerTs + 25 * 86400, { project_id: projectId, category: weightedPick(CATEGORIES), ...common });
             if (chance(0.85)) {
               add("deliverable_confirmed", uid, partnerTs + 27 * 86400, { project_id: projectId, ...common });
