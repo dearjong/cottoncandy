@@ -327,115 +327,33 @@ Cotton Candy 알림
             <ChevronDown className={`w-4 h-4 transition-transform ${portfolioOpen ? 'rotate-180' : ''}`} />
           </button>
           {portfolioOpen && (
-            <div className="ml-8 space-y-1">
-            <Link 
-              href="/work/company-portfolio/manager-info" 
-              className={`block px-4 py-2 text-sm hover:text-pink-600 ${
-                location === '/work/company-portfolio/manager-info' ? 'text-pink-600' : 'text-gray-600'
-              }`}
-              data-testid="sidebar-manager-info"
-            >
-담당자 정보
-            </Link>
-            <Link 
-              href="/work/company-portfolio/experience" 
-              className={`block px-4 py-2 text-sm hover:text-pink-600 ${
-                location === '/work/company-portfolio/experience' ? 'text-pink-600' : 'text-gray-600'
-              }`}
-              data-testid="sidebar-experience"
-            >
-경험·특화 분야/광고매체
-            </Link>
-            <Link 
-              href="/work/company-portfolio/purpose" 
-              className={`block px-4 py-2 text-sm hover:text-pink-600 ${
-                location === '/work/company-portfolio/purpose' ? 'text-pink-600' : 'text-gray-600'
-              }`}
-              data-testid="sidebar-purpose"
-            >
-광고 목적별 전문 분야
-            </Link>
-            <Link 
-              href="/work/company-portfolio/technique" 
-              className={`block px-4 py-2 text-sm hover:text-pink-600 ${
-                location === '/work/company-portfolio/technique' ? 'text-pink-600' : 'text-gray-600'
-              }`}
-              data-testid="sidebar-technique"
-            >
-제작 기법별 전문분야
-            </Link>
-            <Link 
-              href="/work/company-portfolio/clients" 
-              className={`block px-4 py-2 text-sm hover:text-pink-600 ${
-                location === '/work/company-portfolio/clients' ? 'text-pink-600' : 'text-gray-600'
-              }`}
-              data-testid="sidebar-clients"
-            >
-대표 광고주
-            </Link>
-            <Link 
-              href="/work/company-portfolio/awards" 
-              className={`block px-4 py-2 text-sm hover:text-pink-600 ${
-                location === '/work/company-portfolio/awards' ? 'text-pink-600' : 'text-gray-600'
-              }`}
-              data-testid="sidebar-awards"
-            >
-대표 수상내역
-            </Link>
-            <Link 
-              href="/work/company-portfolio/portfolio" 
-              className={`block px-4 py-2 text-sm hover:text-pink-600 ${
-                location === '/work/company-portfolio/portfolio' ? 'text-pink-600' : 'text-gray-600'
-              }`}
-              data-testid="sidebar-portfolio-list"
-            >
-대표 포트폴리오
-            </Link>
-            <Link 
-              href="/work/company-portfolio/staff" 
-              className={`block px-4 py-2 text-sm hover:text-pink-600 ${
-                location === '/work/company-portfolio/staff' ? 'text-pink-600' : 'text-gray-600'
-              }`}
-              data-testid="sidebar-staff"
-            >
-대표 스태프
-            </Link>
-            <Link 
-              href="/work/company-portfolio/recent-projects" 
-              className={`block px-4 py-2 text-sm hover:text-pink-600 ${
-                location === '/work/company-portfolio/recent-projects' ? 'text-pink-600' : 'text-gray-600'
-              }`}
-              data-testid="sidebar-recent-projects"
-            >
-최근 참여 프로젝트
-            </Link>
-            <Link 
-              href="/work/company-portfolio/cotton-candy-activity" 
-              className={`block px-4 py-2 text-sm hover:text-pink-600 ${
-                location === '/work/company-portfolio/cotton-candy-activity' ? 'text-pink-600' : 'text-gray-600'
-              }`}
-              data-testid="sidebar-cotton-candy-activity"
-            >
-최근 Cotton Candy 활동
-            </Link>
-            <Link 
-              href="/work/company-portfolio/file-upload" 
-              className={`block px-4 py-2 text-sm hover:text-pink-600 ${
-                location === '/work/company-portfolio/file-upload' ? 'text-pink-600' : 'text-gray-600'
-              }`}
-              data-testid="sidebar-file-upload"
-            >
-파일 업로드
-            </Link>
-            <Link 
-              href="/work/company-portfolio/intro" 
-              className={`block px-4 py-2 text-sm hover:text-pink-600 ${
-                location === '/work/company-portfolio/intro' ? 'text-pink-600' : 'text-gray-600'
-              }`}
-              data-testid="sidebar-intro"
-            >
-기업 소개글
-            </Link>
+            <div className="ml-4 space-y-0.5">
+              {[
+                { label: "담당자 정보",                   href: "/work/company-portfolio/manager-info",         id: "sidebar-manager-info" },
+                { label: "회사소개",                      href: "/work/company-portfolio/intro",                id: "sidebar-intro" },
+                { label: "경험·특화 분야/광고매체",       href: "/work/company-portfolio/experience",           id: "sidebar-experience" },
+                { label: "광고 목적별 전문 분야",          href: "/work/company-portfolio/purpose",              id: "sidebar-purpose" },
+                { label: "제작 기법별 전문분야",           href: "/work/company-portfolio/technique",            id: "sidebar-technique" },
+                { label: "대표 광고주",                   href: "/work/company-portfolio/clients",              id: "sidebar-clients" },
+                { label: "대표 수상내역",                  href: "/work/company-portfolio/awards",               id: "sidebar-awards" },
+                { label: "대표 포트폴리오",               href: "/work/company-portfolio/portfolio",            id: "sidebar-portfolio-list" },
+                { label: "대표 스태프",                   href: "/work/company-portfolio/staff",                id: "sidebar-staff" },
+                { label: "최근 참여 프로젝트",             href: "/work/company-portfolio/recent-projects",      id: "sidebar-recent-projects" },
+                { label: "최근 Cotton Candy 활동",        href: "/work/company-portfolio/cotton-candy-activity",id: "sidebar-cotton-candy-activity" },
+                { label: "파일 업로드",                   href: "/work/company-portfolio/file-upload",          id: "sidebar-file-upload" },
+                { label: "회사소개서&포트폴리오 미리보기", href: "/portfolio/preview",                           id: "sidebar-portfolio-preview" },
+              ].map(({ label, href, id }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`block px-3 py-1.5 text-xs rounded hover:text-pink-600 ${
+                    location === href ? 'text-pink-600' : 'text-gray-600'
+                  }`}
+                  data-testid={id}
+                >
+                  └ {label}
+                </Link>
+              ))}
             </div>
           )}
         </div>

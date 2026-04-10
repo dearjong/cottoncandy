@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import Layout from "@/components/layout/layout";
+import WorkSidebar from "@/components/work/sidebar";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -10,24 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  FileText,
-  Home,
-  Mail,
-  FolderOpen,
-  Copy,
-  Edit,
-  Trash2,
-  ChevronDown,
-  ChevronUp,
-  Globe,
-  MessageCircle,
-  Heart,
-  Building2,
-  Users,
-  BookOpen,
-  Bell,
-} from "lucide-react";
+import { Copy, Edit, Trash2, Globe, MessageCircle, Mail, Heart } from "lucide-react";
 
 type PortfolioItem = {
   id: string;
@@ -48,121 +32,14 @@ const THUMB_COLORS = ["bg-gray-300", "bg-green-200", "bg-orange-200", "bg-blue-2
 
 export default function Portfolio() {
   const [, setLocation] = useLocation();
-  const [portfolioOpen, setPortfolioOpen] = useState(true);
   const [repVisible, setRepVisible] = useState(true);
-
-  const subMenuItems = [
-    { label: "담당자 정보", path: "/work/company-portfolio/manager-info" },
-    { label: "회사소개", path: "/work/company-portfolio/intro" },
-    { label: "경험·특화 분야/광고매체", path: "/work/company-portfolio/experience" },
-    { label: "광고 목적별 전문 분야", path: "/work/company-portfolio/purpose" },
-    { label: "제작 기법별 전문분야", path: "/work/company-portfolio/technique" },
-    { label: "대표 광고주", path: "/work/company-portfolio/clients" },
-    { label: "대표 수상내역", path: "/work/company-portfolio/awards" },
-    { label: "대표 포트폴리오", path: "/work/company-portfolio/portfolio" },
-    { label: "대표 스태프", path: "/work/company-portfolio/staff" },
-    { label: "최근 참여 프로젝트", path: "/work/company-portfolio/recent-projects" },
-    { label: "최근 Cotton Candy 활동", path: "/work/company-portfolio/cotton-candy-activity" },
-    { label: "파일 업로드", path: "/work/company-portfolio/file-upload" },
-    { label: "회사소개서&포트폴리오 미리보기", path: "/portfolio/preview" },
-  ];
 
   return (
     <Layout>
       <div className="bg-white min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex gap-8">
-            {/* 왼쪽 사이드바 */}
-            <aside className="w-60 flex-shrink-0">
-              {/* My의뢰 / My 참여 탭 */}
-              <div className="flex gap-2 mb-5">
-                <button className="flex-1 py-1.5 text-sm font-medium text-gray-500 border border-gray-200 rounded-full">
-                  My의뢰
-                </button>
-                <button className="flex-1 py-1.5 text-sm font-medium text-white bg-gray-900 rounded-full">
-                  My 참여
-                </button>
-              </div>
-
-              <nav className="space-y-0.5">
-                {/* Work 홈 */}
-                <button
-                  className="w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50"
-                  onClick={() => setLocation("/work/home")}
-                >
-                  <Home className="w-4 h-4 text-gray-500" />
-                  Work 홈
-                </button>
-
-                {/* 메세시·알림 */}
-                <button className="w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between text-sm text-gray-700 hover:bg-gray-50">
-                  <span className="flex items-center gap-2">
-                    <Bell className="w-4 h-4 text-gray-500" />
-                    메세시·알림
-                    <span className="w-2 h-2 bg-red-500 rounded-full inline-block" />
-                  </span>
-                  <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
-                </button>
-
-                {/* 프로젝트 관리 */}
-                <button
-                  className="w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between text-sm text-gray-700 hover:bg-gray-50"
-                  onClick={() => setLocation("/work/project/list")}
-                >
-                  <span className="flex items-center gap-2">
-                    <FolderOpen className="w-4 h-4 text-gray-500" />
-                    프로젝트 관리
-                  </span>
-                  <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
-                </button>
-
-                {/* 문서함 */}
-                <button className="w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50">
-                  <BookOpen className="w-4 h-4 text-gray-500" />
-                  문서함
-                </button>
-
-                {/* 회사소개서 & 포트폴리오 */}
-                <button
-                  className="w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between text-sm font-medium text-gray-900 bg-gray-50"
-                  onClick={() => setPortfolioOpen(!portfolioOpen)}
-                >
-                  <span className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-gray-600" />
-                    회사소개서 &amp; 포트폴리오
-                  </span>
-                  {portfolioOpen
-                    ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" />
-                    : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
-                </button>
-
-                {portfolioOpen && (
-                  <div className="pl-4 space-y-0.5">
-                    {subMenuItems.map((item) => (
-                      <button
-                        key={item.path}
-                        className="w-full text-left px-3 py-1.5 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded"
-                        onClick={() => setLocation(item.path)}
-                      >
-                        └ {item.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* 기업 정보 */}
-                <button className="w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50">
-                  <Building2 className="w-4 h-4 text-gray-500" />
-                  기업 정보
-                </button>
-
-                {/* 구성원 관리 */}
-                <button className="w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50">
-                  <Users className="w-4 h-4 text-gray-500" />
-                  구성원 관리
-                </button>
-              </nav>
-            </aside>
+            <WorkSidebar />
 
             {/* 메인 컨텐츠 */}
             <main className="flex-1 min-w-0">
@@ -176,12 +53,9 @@ export default function Portfolio() {
               {/* 회사 카드 */}
               <div className="border border-gray-200 rounded-xl p-5 mb-2">
                 <div className="flex items-start gap-4 mb-3">
-                  {/* 로고 */}
                   <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0 text-lg">
                     🍭
                   </div>
-
-                  {/* 회사 정보 */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className="font-bold text-base">솜사탕애드</span>
@@ -192,7 +66,6 @@ export default function Portfolio() {
                       <span className="text-xs text-gray-500">Creative중심 대행사</span>
                     </div>
                   </div>
-
                   <Heart className="w-5 h-5 text-gray-300 flex-shrink-0 mt-1" />
                 </div>
 
@@ -204,14 +77,12 @@ export default function Portfolio() {
                   [최근 3년] ♂ 35회 &nbsp;|&nbsp; ✈ 75작품 &nbsp;|&nbsp; 직원 20명 이상 &nbsp;|&nbsp; 최소 제작비 2억 ↑
                 </p>
 
-                {/* 썸네일 이미지 4개 */}
                 <div className="grid grid-cols-4 gap-2 mb-3">
                   {THUMB_COLORS.map((cls, i) => (
                     <div key={i} className={`${cls} rounded-lg h-20`} />
                   ))}
                 </div>
 
-                {/* 태그 */}
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {["전기전자", "기업PR", "식품/제과", "공사/단체/공익/기업PR", "#공공기관_정책캠페인", "#뷰티_숏폼", "#급행제작 대응"].map((tag) => (
                     <span key={tag} className="px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-700">{tag}</span>
@@ -221,7 +92,6 @@ export default function Portfolio() {
 
                 <p className="text-xs text-green-700 mb-3">✓ Cotton Candy 활동 - 3작품</p>
 
-                {/* 하단 액션 */}
                 <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
                   <button className="p-1.5 text-gray-400 hover:text-gray-600"><Globe className="w-4 h-4" /></button>
                   <button className="p-1.5 text-gray-400 hover:text-gray-600"><MessageCircle className="w-4 h-4" /></button>
@@ -232,7 +102,6 @@ export default function Portfolio() {
                 </div>
               </div>
 
-              {/* 소개서 상세 예시 링크 */}
               <div className="flex justify-end mb-5">
                 <span className="text-xs text-gray-400 cursor-pointer hover:underline">※ 소개서 상세 내용 예시 ⓘ</span>
               </div>
@@ -255,7 +124,6 @@ export default function Portfolio() {
                 {PORTFOLIO_ITEMS.map((item) => (
                   <div key={item.id} className="border border-gray-100 rounded-lg px-4 py-3">
                     <div className="flex items-center gap-3 flex-wrap">
-                      {/* 제목 */}
                       <button
                         className="text-sm text-gray-900 font-medium hover:text-pink-600 hover:underline text-left flex-1 min-w-0 truncate"
                         onClick={() => setLocation("/portfolio/preview")}
@@ -263,7 +131,6 @@ export default function Portfolio() {
                         {item.title}
                       </button>
 
-                      {/* 대표 소개서 공개여부 토글 */}
                       {item.isRepresentative && (
                         <div className="flex items-center gap-1.5 text-xs text-gray-500 shrink-0">
                           대표 소개서 공개여부
@@ -275,10 +142,8 @@ export default function Portfolio() {
                         </div>
                       )}
 
-                      {/* 날짜 */}
                       <span className="text-xs text-gray-400 shrink-0">{item.date}</span>
 
-                      {/* 액션 버튼 */}
                       <div className="flex items-center gap-1 shrink-0">
                         <Button variant="ghost" size="sm" className="text-xs h-7 px-2 text-gray-600">
                           <Copy className="w-3.5 h-3.5 mr-1" />복사
