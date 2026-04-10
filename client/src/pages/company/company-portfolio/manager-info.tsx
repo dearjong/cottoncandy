@@ -167,7 +167,7 @@ export default function ManagerInfo() {
                     <Button
                       className="w-full bg-gray-200 hover:bg-gray-300 text-gray-500 font-normal"
                       data-testid="button-manager-info-next"
-                      onClick={() => setLocation('/work/company-portfolio/company-info')}
+                      onClick={() => setLocation('/work/company-portfolio/intro')}
                     >
                       다음
                     </Button>
