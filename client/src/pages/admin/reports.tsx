@@ -577,7 +577,7 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
 
       {/* 시뮬레이션 설정 다이얼로그 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pb-2">
             <DialogTitle>시뮬레이션 설정</DialogTitle>
           </DialogHeader>
