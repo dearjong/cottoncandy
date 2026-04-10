@@ -227,6 +227,9 @@ export interface SimConfig {
   pct20s: number; pct30s: number; pct40s: number; pct50s: number;
   // 접속 지역 (합계 100%)
   pctSeoul: number; pctGyeonggi: number; pctLocal: number; pctAbroad: number;
+  // 퍼널 인원 (절대 수)
+  projectRegCount: number;
+  portfolioRegCount: number;
 }
 
 export const DEFAULT_CONFIG: SimConfig = {
@@ -238,6 +241,8 @@ export const DEFAULT_CONFIG: SimConfig = {
   pctMale: 45, pctFemale: 55,
   pct20s: 10, pct30s: 35, pct40s: 35, pct50s: 20,
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
+  projectRegCount: 30,
+  portfolioRegCount: 50,
 };
 
 export async function startSimulation(cfg: SimConfig): Promise<string> {
@@ -377,6 +382,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   const PARTNERS     = ["솜사탕애드","마케팅에이전시","크리에이티브랩","광고제작소","미디어웍스"];
   const BUDGET_RANGES = ["500-1000만","1000-3000만","3000-5000만","5000만-1억","1억 이상"];
 
+  let projRegDone = 0;
+  let pfRegDone   = 0;
+
   for (let i = 1; i <= userCount; i++) {
     const uid      = `sim_user_${String(i).padStart(4, "0")}`;
     const userType = weightedPick(USER_TYPE_LIST);
@@ -385,6 +393,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const utm      = weightedPick(UTM_LIST);
     const geo      = weightedPick(GEO_LIST);
     const isPartner = userType === "agency" || userType === "production";
+    let didPortfolioReg = false;
 
     // UTM / 지역 / 성별 집계 (모든 유저)
     utmCount[utm.utm_source] = (utmCount[utm.utm_source] ?? 0) + 1;
@@ -466,7 +475,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const partnerType = userType === "agency" ? "대행사" : "제작사";
 
     // 광고주: 프로젝트 등록 — 18단계 퍼널
-    if (userType === "advertiser" && chance(0.12)) {
+    if (userType === "advertiser" && projRegDone < cfg.projectRegCount) {
+      projRegDone++;
       const projTs    = baseTs + 600;
       const category  = weightedPick(CATEGORIES);
       const budget    = pick(BUDGET_RANGES);
@@ -565,8 +575,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       });
       add("activation_achieved", uid, partnerTs + 1, { trigger_event: "partner_applied", ...common });
 
-      // 포트폴리오 등록 퍼널 (55%)
-      if (chance(0.55)) {
+      // 포트폴리오 등록 퍼널
+      if (!didPortfolioReg && pfRegDone < cfg.portfolioRegCount) {
+        pfRegDone++;
+        didPortfolioReg = true;
         const pfTs = partnerTs + 100;
         let pfLastSection = 0;
         for (const sec of PORTFOLIO_SECTIONS) {
@@ -610,8 +622,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       }
     }
 
-    // 파트너: 포트폴리오만 등록 (20%) — 섹션별 퍼널
-    if (isPartner && chance(0.20)) {
+    // 파트너: 포트폴리오만 등록 — 섹션별 퍼널
+    if (isPartner && !didPortfolioReg && pfRegDone < cfg.portfolioRegCount) {
+      pfRegDone++;
+      didPortfolioReg = true;
       const pfTs2 = baseTs + 500;
       let pfLastSection2 = 0;
       for (const sec of PORTFOLIO_SECTIONS) {

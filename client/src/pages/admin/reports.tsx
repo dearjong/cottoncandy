@@ -50,6 +50,8 @@ interface SimConfig {
   pctMale: number; pctFemale: number;
   pct20s: number; pct30s: number; pct40s: number; pct50s: number;
   pctSeoul: number; pctGyeonggi: number; pctLocal: number; pctAbroad: number;
+  projectRegCount: number;
+  portfolioRegCount: number;
 }
 
 const DEFAULTS: SimConfig = {
@@ -60,6 +62,8 @@ const DEFAULTS: SimConfig = {
   pctMale: 45,       pctFemale: 55,
   pct20s: 10,        pct30s: 35,           pct40s: 35,          pct50s: 20,
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
+  projectRegCount: 30,
+  portfolioRegCount: 50,
 };
 
 function NumInput({ label, value, onChange, min = 0, max = 100, unit = "%" }: {
@@ -703,6 +707,18 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                 </td>
                 <td className="py-2.5 pl-4 text-right align-middle">
                   <span className={`font-semibold ${dGeoSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dGeoSum}%</span>
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">퍼널 인원</td>
+                <td className="py-2.5">
+                  <div className="flex flex-wrap gap-3 items-end">
+                    <NumInput label="프로젝트 등록" value={dialogCfg.projectRegCount}  onChange={(v) => setD("projectRegCount", v)}  min={0} max={10000} unit="명" />
+                    <NumInput label="포트폴리오 등록" value={dialogCfg.portfolioRegCount} onChange={(v) => setD("portfolioRegCount", v)} min={0} max={10000} unit="명" />
+                  </div>
+                </td>
+                <td className="py-2.5 pl-4 text-right align-middle">
+                  <span className="text-[10px] text-gray-400">단계 랜덤</span>
                 </td>
               </tr>
             </tbody>

@@ -33,6 +33,8 @@ interface SimConfig {
   pctMale: number; pctFemale: number;
   pct20s: number; pct30s: number; pct40s: number; pct50s: number;
   pctSeoul: number; pctGyeonggi: number; pctLocal: number; pctAbroad: number;
+  projectRegCount: number;
+  portfolioRegCount: number;
 }
 
 const DEFAULTS: SimConfig = {
@@ -44,6 +46,8 @@ const DEFAULTS: SimConfig = {
   pctMale: 60, pctFemale: 40,
   pct20s: 10, pct30s: 35, pct40s: 35, pct50s: 20,
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
+  projectRegCount: 30,
+  portfolioRegCount: 50,
 };
 
 function NumInput({ label, value, onChange, min = 0, max = 100, unit = "%" }: {
@@ -362,6 +366,18 @@ export default function AdminSimulatePage() {
                 <div className="flex items-end pb-1">
                   <span className={`text-xs font-semibold ${dGeoSum === 100 ? "text-green-600" : "text-amber-500"}`}>합계 {dGeoSum}%</span>
                 </div>
+              </div>
+            </div>
+
+            {/* 퍼널 인원 */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-gray-600">퍼널 인원</span>
+                <span className="text-[10px] text-gray-400">단계는 랜덤</span>
+              </div>
+              <div className="flex flex-wrap gap-4">
+                <NumInput label="프로젝트 등록"  value={dialogCfg.projectRegCount}  onChange={(v) => setD("projectRegCount", v)}  min={0} max={10000} unit="명" />
+                <NumInput label="포트폴리오 등록" value={dialogCfg.portfolioRegCount} onChange={(v) => setD("portfolioRegCount", v)} min={0} max={10000} unit="명" />
               </div>
             </div>
 
