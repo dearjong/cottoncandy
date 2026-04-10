@@ -1,6 +1,6 @@
 # ADMarket GA4 · Mixpanel 이벤트 정의서
 
-> 버전: v3.1 | 작성일: 2026-04-08 | 최종수정: 2026-04-10  
+> 버전: v3.2 | 작성일: 2026-04-08 | 최종수정: 2026-04-10  
 > 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
 
 ---
@@ -890,6 +890,20 @@ site_visit
 | `user_id` | 로그인 사용자 ID | localStorage |
 | `active_experiments` / `exp_<id>` | A/B 실험 배정 정보 | localStorage |
 
+### 시뮬레이션 전용 자동 첨부 프로퍼티
+
+> `simulate-analytics.ts` 내 `common` 객체를 통해 모든 시뮬레이션 이벤트에 자동 포함.
+
+| 프로퍼티 | 예시값 | 설명 |
+|---------|--------|------|
+| `user_name` | `김민준` | 시뮬레이션 유저 한국 이름 |
+| `user_company` | `삼성전자` | 광고주 기업명 또는 파트너사명 |
+| `user_type` | `advertiser` / `agency` / `production` | 유저 유형 |
+| `gender` | `male` / `female` | 성별 |
+| `age_group` | `20s` ~ `50s` | 연령대 |
+| `geo_region` | `서울` / `경기도` / `부산` 등 | 지역 |
+| `utm_source` / `utm_medium` | `google` / `cpc` 등 | 유입 채널 |
+
 ---
 
 ## 18. GA4 Measurement Protocol 시뮬레이션 동작
@@ -928,6 +942,37 @@ site_visit
 | `partner_applied` | `admarket.co.kr/partner/detail` |
 | `contract_signed` | `admarket.co.kr/work/contracts` |
 | `review_submitted` | `admarket.co.kr/work/reviews` |
+
+### Mixpanel People 프로필 시뮬레이션 등록
+
+> 이벤트 전송 완료 후 `/engage` 엔드포인트를 통해 시뮬레이션 유저 전원의 People 프로필을 일괄 등록.
+
+| 항목 | 값 / 설명 |
+|------|---------|
+| Endpoint | `https://api.mixpanel.com/engage` |
+| 처리 방식 | Batch 50개씩 전송 (이벤트 전송 완료 후 실행) |
+| 등록 시점 | 시뮬레이션 완료 직전 ("Mixpanel People 프로필 등록 중..." 상태) |
+
+**등록 필드 (`$set`)**
+
+| 필드 | 예시값 | 설명 |
+|-----|--------|------|
+| `$name` | `김민준` | Mixpanel Users 탭에 표시되는 이름 |
+| `$email` | `minjun42@naver.com` | 이메일 |
+| `user_type` | `advertiser` | 유저 유형 |
+| `user_company` | `삼성전자` | 소속 기업명 |
+| `gender` | `male` | 성별 |
+| `age_group` | `30s` | 연령대 |
+| `geo_region` | `서울` | 지역 |
+| `utm_source` | `google` | 유입 채널 |
+| `simulation` | `true` | 실제 유저와 구분용 플래그 |
+
+**이름 생성 알고리즘**
+
+- 성씨: 30개 (김·이·박·최·정 등)
+- 남자 이름: 40개, 여자 이름: 40개 (무작위 조합)
+- 이메일: `{이름+숫자}@{gmail.com|naver.com|kakao.com 등 7개 도메인}`
+- 기업명: 광고주 30개(삼성전자·LG전자·현대차 등), 파트너사 20개(솜사탕애드·크리에이티브랩 등)
 
 ### 주의사항
 
@@ -990,5 +1035,6 @@ site_visit
 
 ---
 
-*이 문서는 ADMarket 플랫폼 GA4·Mixpanel 이벤트 정의 기준입니다. (v3.0 — 2026-04-10)*  
-*전체 퍼널 이벤트 연결 완료: `project_completed` · `deliverable_submitted/confirmed` · `draft_submitted` · `portfolio_registered`*
+*이 문서는 ADMarket 플랫폼 GA4·Mixpanel 이벤트 정의 기준입니다. (v3.2 — 2026-04-10)*  
+*전체 퍼널 이벤트 연결 완료: `project_completed` · `deliverable_submitted/confirmed` · `draft_submitted` · `portfolio_registered`*  
+*v3.2 추가: 시뮬레이션 유저 한국 이름·기업명 생성 + Mixpanel People 프로필(`/engage`) 등록 + 공통 프로퍼티 `user_name` · `user_company` 추가*
