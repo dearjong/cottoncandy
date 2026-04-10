@@ -54,6 +54,8 @@ export default function PortfolioPreview() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<Tab>("intro");
   const [agreed, setAgreed] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [awardsOpen, setAwardsOpen] = useState(true);
   const [portfolioOpen, setPortfolioOpen] = useState(true);
   const [staffOpen, setStaffOpen] = useState(true);
@@ -388,7 +390,7 @@ export default function PortfolioPreview() {
                   <Button
                     className="flex-1 bg-pink-600 hover:bg-pink-700 text-white font-normal"
                     disabled={!agreed}
-                    onClick={() => setLocation("/portfolio")}
+                    onClick={() => setShowConfirm(true)}
                   >
                     등록하기
                   </Button>
@@ -398,6 +400,57 @@ export default function PortfolioPreview() {
           </div>
         </div>
       </div>
+
+      {/* 등록 확인 팝업 */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-80 p-6 relative">
+            <button
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              onClick={() => setShowConfirm(false)}
+            >
+              ✕
+            </button>
+            <p className="popup-title text-center mb-6">등록할까요?</p>
+            <div className="popup-buttons flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 rounded-full font-normal"
+                onClick={() => setShowConfirm(false)}
+              >
+                취소
+              </Button>
+              <Button
+                className="flex-1 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-normal"
+                onClick={() => { setShowConfirm(false); setShowSuccess(true); }}
+              >
+                확인
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 등록 완료 팝업 */}
+      {showSuccess && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-80 p-6 relative">
+            <button
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              onClick={() => { setShowSuccess(false); setLocation("/portfolio"); }}
+            >
+              ✕
+            </button>
+            <p className="popup-title text-center mb-6">등록되었습니다.</p>
+            <Button
+              className="w-full rounded-full bg-pink-600 hover:bg-pink-700 text-white font-normal"
+              onClick={() => { setShowSuccess(false); setLocation("/portfolio"); }}
+            >
+              확인
+            </Button>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
