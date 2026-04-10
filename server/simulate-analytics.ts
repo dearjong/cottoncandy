@@ -209,7 +209,8 @@ function derivePageLocation(event: string, props: Record<string, unknown>): stri
   if (event === "partner_applied") return `${BASE_URL}/partner/detail`;
   if (event === "contract_signed") return `${BASE_URL}/work/contracts`;
   if (event === "review_submitted") return `${BASE_URL}/work/reviews`;
-  if (["portfolio_registered", "portfolio_draft_saved", "portfolio_draft_opened"].includes(event))
+  if (["portfolio_registered", "portfolio_draft_saved", "portfolio_draft_opened"].includes(event)
+    || event.startsWith("portfolio_section_"))
     return `${BASE_URL}/work/portfolio/register`;
   if (event === "consulting_inquiry_submitted") return `${BASE_URL}/work/consulting`;
   if (event === "referral_sent") return `${BASE_URL}/work/home`;
@@ -382,8 +383,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     });
     funnel[event] = (funnel[event] ?? 0) + 1;
 
-    // GA4: 키 이벤트만 수집 (timestamp_micros 생략 → 실시간 개요 반영)
-    if (GA4_KEY_EVENTS.has(event)) {
+    // GA4: 키 이벤트 + 모든 step/portfolio 섹션 이벤트 수집
+    if (GA4_KEY_EVENTS.has(event) || /^step_\d+_/.test(event) || /^portfolio_section_/.test(event)) {
       const entry = ga4Map.get(distinctId);
       if (entry) {
         // session_id + engagement_time_msec 필수 (GA4 실시간 반영 조건)
