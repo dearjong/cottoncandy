@@ -1,6 +1,6 @@
 # ADMarket GA4 · Mixpanel 이벤트 정의서
 
-> 버전: v2.8 | 작성일: 2026-04-08 | 검증일: 2026-04-08  
+> 버전: v2.9 | 작성일: 2026-04-08 | 최종수정: 2026-04-10  
 > 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
 
 ---
@@ -183,6 +183,8 @@ gtag("event", "login", { method: "email" })   // GA4 표준 이벤트
 |-------------|------|------|
 | `step_{N}_{화면명}` | 화면 진입 | ✅ 완료 |
 | `step_{N}_{화면명}_cta` | 버튼 클릭 | ✅ 완료 |
+| `project_draft_saved` | 임시저장 (세션 종료 또는 이탈 전) | ✅ 완료 |
+| `project_draft_opened` | 임시저장 불러오기 (재방문 시) | ✅ 완료 |
 | `project_submitted` | 최종 제출 완료 | ✅ 완료 |
 
 **`project_submitted` 파라미터**
@@ -190,31 +192,140 @@ gtag("event", "login", { method: "email" })   // GA4 표준 이벤트
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
 | `project_type` | `공고` / `1:1` / `컨설팅` | 유형 구분 (핵심) |
-| `partner_type` | `제작` / `대행` | 파트너 유형 |
-| `budget_range` | `3000-5000` | 예산 구간(만원) |
+| `budget_range` | `3000-5000만` | 예산 구간 |
+| `total_sessions` | `2` | 완료까지 걸린 세션 수 |
+| `total_days` | `1.5` | 완료까지 걸린 총 일수 |
+| `avg_session_gap_hours` | `18` | 세션 간 평균 간격(시간) |
+| `total_writing_time_min` | `47` | 순수 화면 작성 시간(분, 갭 제외) |
 
-> **설계 포인트**: `project_type`으로 공고/1:1을 나눠야 퍼널 이탈률을 따로 볼 수 있음
+> **설계 포인트**: `project_type`으로 공고/1:1을 나눠야 퍼널 이탈률을 따로 볼 수 있음  
+> 멀티세션 파라미터로 "며칠에 걸쳐 작성했는가"를 분석할 수 있음
 
-**등록 단계 이벤트 목록**
+**`project_draft_saved` 파라미터**
 
-| 단계 | 화면명 | 이벤트명 |
-|-----|--------|---------|
-| 1 | 파트너 유형 선택 | `step_1_partner_selection` |
-| 2 | 프로젝트명 | `step_2_project_name` |
-| 3 | 광고 목적 | `step_3_advertising_objective` |
-| 4 | 제작 기법 | `step_4_production_technique` |
-| 5 | 매체 채널 | `step_5_media_channel` |
-| 6 | 주요 클라이언트 | `step_6_main_client` |
-| 7 | 예산 | `step_7_budget` |
-| 8 | 대금 지급 조건 | `step_8_payment_terms` |
-| 9 | 일정 | `step_9_schedule` |
-| 10 | 상품 정보 | `step_10_product_info` |
-| 11 | 담당자 | `step_11_contact_person` |
-| 12 | 경쟁사 제외 | `step_12_excluded_competitors` |
-| 13 | 참여 조건 | `step_13_participant_conditions` |
-| 14 | 필수 제출물 | `step_14_required_files` |
-| 15 | 기업 정보 | `step_15_company_info` |
-| 16 | 추가 설명 | `step_16_additional_description` |
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `step` | `8` | 저장 시점 단계 |
+| `project_type` | `공고` | 프로젝트 유형 |
+| `session_number` | `1` | 현재 세션 번호 |
+| `draft_save_count` | `2` | 누적 저장 횟수 |
+| `steps_completed` | `7` | 완료된 단계 수 |
+| `cumulative_writing_sec` | `1240` | 누적 작성 시간(초) |
+| `next_session_gap_hours` | `24` | 다음 세션까지 예상 갭 (세션 종료 저장 시만) |
+
+**`project_draft_opened` 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `project_type` | `공고` | 프로젝트 유형 |
+| `session_number` | `2` | 현재 세션 번호 |
+| `steps_completed_so_far` | `7` | 이전 세션까지 완료된 단계 수 |
+| `draft_save_count` | `1` | 저장 횟수 |
+| `days_since_last_save` | `1.0` | 마지막 저장 후 경과 일수 |
+| `hours_since_last_save` | `24` | 마지막 저장 후 경과 시간 |
+
+**등록 단계 이벤트 목록 (18단계)**
+
+| 단계 | 화면명 | 이벤트명 | 통과율 |
+|-----|--------|---------|--------|
+| 1 | 파트너 찾기 방식 | `step_1_partner_selection` | 85% |
+| 2 | 파트너 유형 | `step_2_partner_type` | 90% |
+| 3 | 프로젝트명 | `step_3_project_name` | 88% |
+| 4 | 광고 목적 | `step_4_advertising_objective` | 85% |
+| 5 | 제작 기법 | `step_5_production_technique` | 87% |
+| 6 | 노출 매체 | `step_6_media_channel` | 88% |
+| 7 | 주요 고객 | `step_7_main_client` | 90% |
+| **8** | **예산** | **`step_8_budget`** | **73% ← 최대 이탈** |
+| 9 | 대금 지급 | `step_9_payment_terms` | 88% |
+| 10 | 일정 | `step_10_schedule` | 87% |
+| 11 | 제품정보 | `step_11_product_info` | 86% |
+| 12 | 담당자정보 | `step_12_contact_person` | 90% |
+| 13 | 경쟁사 제외 | `step_13_excluded_competitors` | 92% |
+| 14 | 참여기업 조건 | `step_14_participant_conditions` | 90% |
+| 15 | 제출자료 | `step_15_required_files` | 88% |
+| 16 | 기업정보 | `step_16_company_info` | 85% |
+| 17 | 상세설명 | `step_17_additional_description` | 88% |
+| 18 | 최종 확인 & 등록 | `step_18_project_details` | 100% |
+
+---
+
+## 6-1. 포트폴리오 등록 퍼널 (파트너사)
+
+> `agency` / `production` 유저만 해당. 13개 섹션, 1~4세션으로 분산 등록 가능.
+
+| 이벤트명 | 설명 | 구현 |
+|---------|------|------|
+| `portfolio_session_started` | 각 세션 시작 | ✅ 완료 |
+| `portfolio_section_{id}` | 섹션 진입 (13개) | ✅ 완료 |
+| `portfolio_draft_saved` | 임시저장 (세션 종료 또는 이탈 전) | ✅ 완료 |
+| `portfolio_draft_opened` | 임시저장 불러오기 (재방문 시) | ✅ 완료 |
+| `portfolio_section_abandoned` | 섹션 이탈 | ✅ 완료 |
+| `portfolio_registered` | 포트폴리오 등록 완료 | ✅ 완료 |
+
+**포트폴리오 섹션 목록 (13개)**
+
+| 섹션 | section_id | 섹션명 | 통과율 |
+|-----|-----------|--------|--------|
+| 1 | `company_info` | 기업 정보 | 90% |
+| 2 | `manager_info` | 담당자 정보 | 85% |
+| 3 | `experience` | 경험·특화 분야/광고매체 | 80% |
+| 4 | `purpose` | 광고 목적별 전문 분야 | 78% |
+| 5 | `technique` | 제작 기법별 전문분야 | 82% |
+| 6 | `clients` | 대표 광고주 | 75% |
+| **7** | `awards` | **대표 수상내역** | **70% ← 이탈 주의** |
+| 8 | `portfolio` | 대표 포트폴리오 | 85% |
+| **9** | `staff` | **대표 스태프** | **65% ← 최대 이탈** |
+| 10 | `recent_projects` | 최근 참여 프로젝트 | 72% |
+| 11 | `cotton_candy` | Cotton Candy 활동 | 80% |
+| 12 | `file_upload` | 파일 업로드 | 78% |
+| 13 | `intro` | 기업 소개글 | 85% |
+
+**`portfolio_registered` 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `portfolio_id` | `pf_3821` | 포트폴리오 ID |
+| `category` | `영상광고` | 카테고리 |
+| `partner_type` | `대행사` / `제작사` | 파트너 유형 |
+| `total_sessions` | `3` | 완료까지 세션 수 |
+| `total_days` | `2.5` | 완료까지 총 일수 |
+| `avg_session_gap_hours` | `20` | 세션 간 평균 간격 |
+| `total_writing_time_min` | `85` | 순수 작성 시간(분) |
+
+**`portfolio_draft_saved` / `portfolio_draft_opened` 파라미터**: `project_draft_*`와 동일 구조, `step` 대신 `sections_completed` 사용.
+
+---
+
+## 6-2. 멀티세션 임시저장 흐름
+
+> 프로젝트 등록(1~3세션) · 포트폴리오 등록(1~4세션) 공통 흐름
+
+```
+[세션 1]
+  project_session_started  (session_number: 1)
+  step_1_* → step_6_*
+  ↓ 세션 종료 → 자동 저장
+  project_draft_saved  (draft_save_count: 1, next_session_gap_hours: 24)
+
+  [24시간 경과]
+
+[세션 2]
+  project_draft_opened  (days_since_last_save: 1.0, draft_save_count: 1)
+  project_session_started  (session_number: 2)
+  step_7_* → step_13_*
+  ↓ 세션 종료 → 자동 저장
+  project_draft_saved  (draft_save_count: 2, next_session_gap_hours: 8)
+
+  [8시간 경과]
+
+[세션 3]
+  project_draft_opened  (days_since_last_save: 0.3, draft_save_count: 2)
+  project_session_started  (session_number: 3)
+  step_14_* → step_18_project_details
+  project_submitted  (total_sessions: 3, total_days: 1.3, total_writing_time_min: 47)
+```
+
+**이탈 시 흐름**: 이탈 판정 → `draft_saved` (80% 확률) → `step_abandoned` → `page_exit`
 
 ---
 
@@ -448,13 +559,26 @@ GA4 관리 콘솔 → `activation_achieved`를 전환 이벤트로 추가 마킹
 |---------|----------|------|------|
 | `signup_complete` | 회원가입 완료 | 공통 | ✅ |
 | `project_submitted` | 프로젝트 등록 완료 | 의뢰사 | ✅ |
+| `project_draft_saved` | 프로젝트 임시저장 | 의뢰사 | ✅ |
+| `project_draft_opened` | 프로젝트 임시저장 불러오기 | 의뢰사 | ✅ |
+| `portfolio_registered` | 포트폴리오 등록 완료 | 파트너사 | ✅ |
+| `portfolio_draft_saved` | 포트폴리오 임시저장 | 파트너사 | ✅ |
+| `portfolio_draft_opened` | 포트폴리오 임시저장 불러오기 | 파트너사 | ✅ |
 | `partner_applied` | 파트너 지원 완료 | 파트너사 | ✅ |
 | `proposal_submitted` | 제안서 제출 | 파트너사 | ✅ |
 | `partner_selected` | 최종선정 확정 CTA 클릭 | 의뢰사 | ✅ |
 | `contract_signed` | 계약 등록 완료 = 파트너 선정 확정 | 의뢰사 | ✅ |
+| `draft_submitted` | 초안 제출 | 파트너사 | ✅ |
+| `draft_confirmed` | 초안 승인 | 의뢰사 | ✅ |
+| `deliverable_submitted` | 최종 납품물 제출 | 파트너사 | ✅ |
+| `deliverable_confirmed` | 최종 납품물 승인 | 의뢰사 | ✅ |
 | `participation_final_selected` | 최종 파트너 선정 토글 | 의뢰사 | ✅ |
 | `consulting_inquiry_submitted` | 컨설팅 문의 접수 | 의뢰사 | ✅ |
 | `review_submitted` | 제작 리뷰 등록 = 프로젝트 완료 | 의뢰사 | ✅ |
+| `activation_achieved` | 첫 핵심 행동 달성 | 공통 | ✅ |
+| `referral_sent` | 지인 추천 발송 | 공통 | ✅ |
+
+> ⚠ `first_visit`은 GA4 예약어 → **영구 제외** (배치 전체 거부됨)
 
 ---
 
@@ -582,6 +706,23 @@ site_visit
 | `referral_sent` | ✅ | ✅ | 완료 — method: copy/share (내정보 → 추천 링크 복사) |
 | `referral_signed_up` | ✅ | ✅ | 완료 — referrer_code (?ref= 파라미터 가입 시 발송) |
 | `activation_achieved` | ✅ | ✅ | 완료 — trigger_event, user_type (첫 핵심 행동 달성 시 자동 발사) |
+| `sso_login` | ✅ | ✅ | 완료 — source: tvcf.co.kr, method: sso |
+| `signup_started` | ✅ | ✅ | 완료 — method: email |
+| `direct_entry` | ✅ | ✅ | 완료 — path, page_label, is_authenticated |
+| `project_session_started` | - | ✅ | 완료 — session_number, steps_completed_so_far |
+| `project_draft_saved` | ✅ | ✅ | 완료 — draft_save_count, steps_completed, cumulative_writing_sec |
+| `project_draft_opened` | ✅ | ✅ | 완료 — draft_save_count, days_since_last_save, hours_since_last_save |
+| `project_step_abandoned` | - | ✅ | 완료 — step, had_draft, time_on_step_sec |
+| `portfolio_session_started` | - | ✅ | 완료 — session_number, sections_completed_so_far |
+| `portfolio_section_{id}` (13개) | - | ✅ | 완료 — section, section_id, time_on_section_sec |
+| `portfolio_draft_saved` | ✅ | ✅ | 완료 — draft_save_count, sections_completed |
+| `portfolio_draft_opened` | ✅ | ✅ | 완료 — draft_save_count, days_since_last_save |
+| `portfolio_section_abandoned` | - | ✅ | 완료 — section, had_draft |
+| `portfolio_registered` | ✅ | ✅ | 완료 — total_sessions, total_writing_time_min |
+| `draft_submitted` | ✅ | ✅ | 완료 |
+| `draft_confirmed` | ✅ | ✅ | 완료 |
+| `deliverable_submitted` | ✅ | ✅ | 완료 |
+| `deliverable_confirmed` | ✅ | ✅ | 완료 |
 
 ### 자동 첨부 프로퍼티 (모든 이벤트 공통)
 | 프로퍼티 | 설명 | 소스 |
