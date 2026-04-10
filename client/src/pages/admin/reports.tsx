@@ -49,6 +49,7 @@ interface SimJob {
   homeClickBreakdown: Record<string, number>;
   dwellSecSum: Record<string, number>;
   dwellCount: Record<string, number>;
+  pageViewBreakdown: Record<string, number>;
   exitPageBreakdown: Record<string, number>;
   errors: string[];
   startedAt: number;
@@ -650,65 +651,104 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
             );
           })()}
 
-          {/* 체류시간 + 이탈 페이지 나란히 */}
-          {job && job.exitPageBreakdown && Object.keys(job.exitPageBreakdown).length > 0 && (() => {
+          {/* 방문 화면 순위 + 이탈 페이지 순위 */}
+          {job && (job.pageViewBreakdown || job.exitPageBreakdown) && (() => {
             const PAGE_ORDER = ["홈 (/)", "파트너 탐색", "공고 상세", "프로젝트 등록", "포트폴리오 등록", "컨설팅 문의", "계약 화면", "납품/산출물", "리뷰 등록"];
-            const EXIT_COLORS: Record<string, string> = {
-              "홈 (/)":        "bg-blue-400",
-              "파트너 탐색":    "bg-teal-400",
-              "공고 상세":      "bg-sky-400",
-              "프로젝트 등록":  "bg-orange-400",
+            const PAGE_COLORS: Record<string, string> = {
+              "홈 (/)":         "bg-blue-400",
+              "파트너 탐색":     "bg-teal-400",
+              "공고 상세":       "bg-sky-400",
+              "프로젝트 등록":   "bg-orange-400",
               "포트폴리오 등록": "bg-purple-400",
-              "컨설팅 문의":    "bg-pink-400",
-              "계약 화면":      "bg-emerald-400",
-              "납품/산출물":    "bg-violet-400",
-              "리뷰 등록":      "bg-gray-400",
+              "컨설팅 문의":     "bg-pink-400",
+              "계약 화면":       "bg-emerald-400",
+              "납품/산출물":     "bg-violet-400",
+              "리뷰 등록":       "bg-gray-400",
             };
-            const total = Object.values(job.exitPageBreakdown).reduce((s, v) => s + v, 0) || 1;
-            const entries = PAGE_ORDER
-              .map((page) => ({ page, count: job.exitPageBreakdown[page] ?? 0 }))
+
+            // 방문 순위
+            const pvTotal = Object.values(job.pageViewBreakdown ?? {}).reduce((s, v) => s + v, 0) || 1;
+            const pvEntries = PAGE_ORDER
+              .map((page) => ({ page, count: (job.pageViewBreakdown ?? {})[page] ?? 0 }))
               .filter((e) => e.count > 0)
               .sort((a, b) => b.count - a.count);
-            const maxCount = entries[0]?.count ?? 1;
-            const top = entries[0];
+            const pvMax = pvEntries[0]?.count ?? 1;
+
+            // 이탈 순위
+            const exTotal = Object.values(job.exitPageBreakdown ?? {}).reduce((s, v) => s + v, 0) || 1;
+            const exEntries = PAGE_ORDER
+              .map((page) => ({ page, count: (job.exitPageBreakdown ?? {})[page] ?? 0 }))
+              .filter((e) => e.count > 0)
+              .sort((a, b) => b.count - a.count);
+            const exMax = exEntries[0]?.count ?? 1;
+            const topExit = exEntries[0];
+
+            const BarRow = ({ page, count, max, total, idx }: { page: string; count: number; max: number; total: number; idx: number }) => (
+              <div className="flex items-center gap-3">
+                <div className="w-4 text-[10px] text-gray-300 text-right shrink-0 font-medium">{idx + 1}</div>
+                <div className="w-24 text-xs text-gray-600 shrink-0 leading-tight">{page}</div>
+                <div className="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                  <div className={`${PAGE_COLORS[page] ?? "bg-gray-300"} h-2.5 rounded-full transition-all duration-500`}
+                    style={{ width: `${Math.max(Math.round((count / max) * 100), 2)}%` }} />
+                </div>
+                <div className="w-10 text-right text-xs font-semibold text-gray-700 shrink-0">{count.toLocaleString()}</div>
+                <div className="w-8 text-right text-[10px] text-gray-400 shrink-0">{Math.round((count / total) * 100)}%</div>
+              </div>
+            );
+
             return (
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="font-medium text-gray-800">이탈 페이지 순위</p>
-                    <p className="text-[10px] text-gray-400">유저가 마지막으로 머물다 떠난 화면 — 총 {total.toLocaleString()}명 기준</p>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* 방문 화면 순위 */}
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-medium text-gray-800">방문 화면 순위</p>
+                      <p className="text-[10px] text-gray-400">유저가 가장 많이 방문한 화면 — 총 방문 {pvTotal.toLocaleString()}회 기준</p>
+                    </div>
+                    <div className="text-[10px] text-gray-400 bg-gray-50 rounded px-2 py-1 shrink-0">
+                      GA4 <code className="text-gray-500">page_view</code> 기반
+                    </div>
                   </div>
-                  <div className="text-[10px] text-gray-400 bg-gray-50 rounded px-2 py-1 shrink-0">
-                    GA4 <code className="text-gray-500">page_exit</code> 이벤트 기반
+                  <div className="space-y-2.5">
+                    {pvEntries.map(({ page, count }, idx) => (
+                      <BarRow key={page} page={page} count={count} max={pvMax} total={pvTotal} idx={idx} />
+                    ))}
                   </div>
+                  {pvEntries[0] && (
+                    <div className="bg-blue-50 rounded-lg px-3 py-2 text-[10px] text-blue-700">
+                      💡 <strong>{pvEntries[0].page}</strong>이 전체 방문의 {Math.round((pvEntries[0].count / pvTotal) * 100)}%를 차지합니다.
+                      {pvEntries[0].page === "홈 (/)" && " 홈 화면의 콘텐츠 품질과 CTA 배치가 핵심 전환 포인트입니다."}
+                      {pvEntries[0].page === "파트너 탐색" && " 파트너 탐색 화면이 핵심 경로입니다. 검색·필터 UX를 지속 개선하세요."}
+                      {pvEntries[0].page === "공고 상세" && " 공고 상세 조회가 높습니다. 지원 CTA를 더 눈에 띄게 배치해 보세요."}
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-2.5">
-                  {entries.map(({ page, count }, idx) => {
-                    const barPct = Math.round((count / maxCount) * 100);
-                    const sharePct = Math.round((count / total) * 100);
-                    const color = EXIT_COLORS[page] ?? "bg-gray-300";
-                    return (
-                      <div key={page} className="flex items-center gap-3">
-                        <div className="w-4 text-[10px] text-gray-300 text-right shrink-0 font-medium">{idx + 1}</div>
-                        <div className="w-24 text-xs text-gray-600 shrink-0 leading-tight">{page}</div>
-                        <div className="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                          <div className={`${color} h-2.5 rounded-full transition-all duration-500`}
-                            style={{ width: `${Math.max(barPct, 2)}%` }} />
-                        </div>
-                        <div className="w-10 text-right text-xs font-semibold text-gray-700 shrink-0">{count.toLocaleString()}</div>
-                        <div className="w-8 text-right text-[10px] text-gray-400 shrink-0">{sharePct}%</div>
-                      </div>
-                    );
-                  })}
-                </div>
-                {top && (
-                  <div className="bg-amber-50 rounded-lg px-3 py-2 text-[10px] text-amber-700">
-                    💡 <strong>{top.page}</strong>에서 {Math.round((top.count / total) * 100)}%의 유저가 이탈합니다.
-                    {top.page === "홈 (/)" && " 랜딩 페이지 메시지와 CTA를 개선하면 이탈률을 줄일 수 있습니다."}
-                    {top.page === "프로젝트 등록" && " 등록 퍼널 중간 이탈이 많습니다. 임시저장 안내를 강화해 보세요."}
-                    {top.page === "파트너 탐색" && " 파트너 탐색 후 전환이 낮습니다. 필터·추천 알고리즘을 점검해 보세요."}
+
+                {/* 이탈 페이지 순위 */}
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-medium text-gray-800">이탈 페이지 순위</p>
+                      <p className="text-[10px] text-gray-400">유저가 마지막으로 머물다 떠난 화면 — 총 {exTotal.toLocaleString()}명 기준</p>
+                    </div>
+                    <div className="text-[10px] text-gray-400 bg-gray-50 rounded px-2 py-1 shrink-0">
+                      GA4 <code className="text-gray-500">page_exit</code> 기반
+                    </div>
                   </div>
-                )}
+                  <div className="space-y-2.5">
+                    {exEntries.map(({ page, count }, idx) => (
+                      <BarRow key={page} page={page} count={count} max={exMax} total={exTotal} idx={idx} />
+                    ))}
+                  </div>
+                  {topExit && (
+                    <div className="bg-amber-50 rounded-lg px-3 py-2 text-[10px] text-amber-700">
+                      💡 <strong>{topExit.page}</strong>에서 {Math.round((topExit.count / exTotal) * 100)}%의 유저가 이탈합니다.
+                      {topExit.page === "홈 (/)" && " 랜딩 페이지 메시지와 CTA를 개선하면 이탈률을 줄일 수 있습니다."}
+                      {topExit.page === "프로젝트 등록" && " 등록 퍼널 중간 이탈이 많습니다. 임시저장 안내를 강화해 보세요."}
+                      {topExit.page === "파트너 탐색" && " 파트너 탐색 후 전환이 낮습니다. 필터·추천 알고리즘을 점검해 보세요."}
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })()}

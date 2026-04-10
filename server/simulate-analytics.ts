@@ -44,6 +44,7 @@ export interface SimJob {
   homeClickBreakdown: Record<string, number>;
   dwellSecSum: Record<string, number>;
   dwellCount: Record<string, number>;
+  pageViewBreakdown: Record<string, number>;
   exitPageBreakdown: Record<string, number>;
   errors: string[];
   startedAt: number;
@@ -349,6 +350,7 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     homeClickBreakdown: {},
     dwellSecSum: {},
     dwellCount: {},
+    pageViewBreakdown: {},
     exitPageBreakdown: {},
     errors: [],
     startedAt: Date.now(),
@@ -448,6 +450,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const sec = randInt(p.min, p.max);
     job.dwellSecSum[page] = (job.dwellSecSum[page] ?? 0) + sec;
     job.dwellCount[page]  = (job.dwellCount[page]  ?? 0) + 1;
+    job.pageViewBreakdown[page] = (job.pageViewBreakdown[page] ?? 0) + 1;
   }
 
   function initGa4User(distinctId: string, userId: string, userProps: Record<string, unknown>) {
@@ -693,6 +696,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       } else {
         // 공개(공고) / 비공개(1:1) — 18단계 퍼널 (멀티 세션)
         exitPage = "프로젝트 등록";
+        job.pageViewBreakdown["프로젝트 등록"] = (job.pageViewBreakdown["프로젝트 등록"] ?? 0) + 1;
         const optionStr = pType === "공고" ? "public" : "private";
         add("step1_cta_click", uid, projTs, { selected_option: optionStr, ...common });
 
@@ -859,6 +863,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             });
             if (chance(0.70)) {
               exitPage = "리뷰 등록";
+              job.pageViewBreakdown["리뷰 등록"] = (job.pageViewBreakdown["리뷰 등록"] ?? 0) + 1;
               add("review_submitted", uid, projCurrentTs + 30 * 86400, {
                 project_id: projectId, has_client_rating: true,
                 has_partner_rating: chance(0.8), has_text: chance(0.6), ...common,
@@ -939,6 +944,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             });
 
             exitPage = "포트폴리오 등록";
+            job.pageViewBreakdown["포트폴리오 등록"] = (job.pageViewBreakdown["포트폴리오 등록"] ?? 0) + 1;
             job.dwellSecSum["포트폴리오 등록"] = (job.dwellSecSum["포트폴리오 등록"] ?? 0) + secDuration;
             job.dwellCount["포트폴리오 등록"]  = (job.dwellCount["포트폴리오 등록"]  ?? 0) + 1;
             pfSessionWriteOffset += secDuration;
