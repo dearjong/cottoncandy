@@ -153,7 +153,10 @@ const GA4_KEY_EVENTS = new Set([
   "site_visit", "sso_login", "login",
   "signup_started", "signup_complete",
   "project_submitted", "partner_applied", "contract_signed",
-  "review_submitted", "project_completed", "activation_achieved",
+  "draft_submitted", "draft_confirmed",
+  "deliverable_submitted", "deliverable_confirmed",
+  "project_completed", "review_submitted", "referral_sent",
+  "activation_achieved",
 ]);
 
 const GA4_DEBUG_ENDPOINT = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${GA4_MEASUREMENT_ID}&api_secret=${GA4_API_SECRET}`;
