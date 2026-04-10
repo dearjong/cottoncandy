@@ -383,22 +383,38 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     });
     funnel[event] = (funnel[event] ?? 0) + 1;
 
-    // GA4: 키 이벤트 + 모든 step/portfolio 섹션 이벤트 수집
-    if (GA4_KEY_EVENTS.has(event) || /^step_\d+_/.test(event) || /^portfolio_section_/.test(event)) {
+    // GA4: page_view + 키 이벤트 수집
+    const isStepEvent = /^step_\d+_/.test(event) || /^portfolio_section_/.test(event);
+    if (GA4_KEY_EVENTS.has(event) || isStepEvent) {
       const entry = ga4Map.get(distinctId);
       if (entry) {
-        // session_id + engagement_time_msec 필수 (GA4 실시간 반영 조건)
+        const pageLocation = derivePageLocation(event, props);
+
+        // page_view 이벤트 → GA4 '페이지 및 화면' 보고서에 반영
         entry.events.push({
-          name: event,
+          name: "page_view",
           params: {
             session_id: entry.sessionId,
-            engagement_time_msec: randInt(500, 30000),
-            page_location: derivePageLocation(event, props),
+            engagement_time_msec: randInt(200, 8000),
+            page_location: pageLocation,
             page_referrer: `${BASE_URL}/`,
-            simulation: "true",
-            ...props,
           },
         });
+
+        // 키 전환 이벤트는 custom event도 함께 전송 → GA4 이벤트 보고서에 반영
+        if (GA4_KEY_EVENTS.has(event)) {
+          entry.events.push({
+            name: event,
+            params: {
+              session_id: entry.sessionId,
+              engagement_time_msec: randInt(500, 30000),
+              page_location: pageLocation,
+              page_referrer: `${BASE_URL}/`,
+              simulation: "true",
+              ...props,
+            },
+          });
+        }
       }
     }
   }
