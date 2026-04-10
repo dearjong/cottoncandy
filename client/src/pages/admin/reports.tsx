@@ -459,6 +459,7 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
               partner:        { label: "파트너 카드",                      color: "bg-teal-400",    dest: "→ /agency-search" },
               flow_step:      { label: "이용 방법 단계",                   color: "bg-orange-400",  dest: "→ /guide/how-to-use" },
               faq_more:       { label: "FAQ 전체보기",                     color: "bg-gray-400",    dest: "→ /guide/faq" },
+              etc:            { label: "기타 (이용약관 · Footer 등)",        color: "bg-slate-300",   dest: "(기타 클릭)" },
             };
             const breakdown = job?.homeClickBreakdown ?? {};
             const entries = Object.entries(breakdown)
@@ -474,7 +475,7 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                     <p className="text-[10px] text-gray-400">홈(/)에서 사용자가 어떤 요소를 눌러 다음 화면으로 이동하는지{total > 0 ? ` — 총 ${total.toLocaleString()}회 클릭` : ""}</p>
                   </div>
                   <div className="text-[10px] text-gray-400 text-right shrink-0 pt-1">
-                    cta / 카드 / 로그인 등<br />10개 요소 추적
+                    cta / 카드 / 로그인 등<br />11개 요소 추적
                   </div>
                 </div>
                 {entries.length === 0 ? (

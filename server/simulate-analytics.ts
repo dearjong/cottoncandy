@@ -407,6 +407,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     { value: "feature_card",   weight: 4  },
     { value: "partner",        weight: 1  },
     { value: "flow_step",      weight: 1  },
+    { value: "etc",            weight: 3  },
   ];
 
   const CATEGORIES   = [
