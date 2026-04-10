@@ -127,7 +127,7 @@ function loadSavedCfg(): SimConfig {
   } catch { return DEFAULTS; }
 }
 
-function ActivityTab({ autoOpen }: { autoOpen?: boolean }) {
+function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?: number }) {
   const [data, setData] = useState<{ jobId: string; job: SimJob } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -144,11 +144,12 @@ function ActivityTab({ autoOpen }: { autoOpen?: boolean }) {
   }
 
   useEffect(() => {
-    if (autoOpen) {
-      setDialogCfg(cfg);
-      setDialogOpen(true);
-    }
+    if (autoOpen) { setDialogCfg(cfg); setDialogOpen(true); }
   }, [autoOpen]);
+
+  useEffect(() => {
+    if (openSignal && openSignal > 0) { setDialogCfg(cfg); setDialogOpen(true); }
+  }, [openSignal]);
 
   async function startSim(runCfg: SimConfig) {
     setCfg(runCfg);
@@ -201,27 +202,6 @@ function ActivityTab({ autoOpen }: { autoOpen?: boolean }) {
 
   return (
     <div className="space-y-6">
-      {/* 액션 행: 버튼 + 인라인 진행바 */}
-      <div className="flex items-center gap-3">
-        <Button
-          className="btn-pink-compact text-xs h-7 py-0 px-3 shrink-0"
-          onClick={() => { setDialogCfg(cfg); setDialogOpen(true); }}
-          disabled={!!isRunning || loading}
-        >
-          시뮬레이션 설정
-        </Button>
-        {isRunning && job && (
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <span className="text-[11px] text-gray-500 shrink-0 whitespace-nowrap">{job.message}</span>
-            <Progress value={job.progress} className="h-1.5 flex-1" />
-            <span className="text-[11px] font-semibold text-pink-600 shrink-0">{job.progress}%</span>
-          </div>
-        )}
-        {loading && !isRunning && (
-          <span className="text-[11px] text-gray-400">시작 중...</span>
-        )}
-      </div>
-
       {/* 항상 표시되는 차트들 */}
       {(
         <>
@@ -739,19 +719,54 @@ export default function ReportsPage() {
   const search = useSearch();
   const autoOpenSim = new URLSearchParams(search).get("simulate") === "1";
   const [activeTab, setActiveTab] = useState("activity");
+  const [simSignal, setSimSignal] = useState(0);
+  const [simStatus, setSimStatus] = useState<{ progress: number; message: string; status: string } | null>(null);
+
+  useEffect(() => {
+    const poll = setInterval(async () => {
+      try {
+        const res = await fetch("/api/admin/simulate/latest");
+        const json = await res.json();
+        setSimStatus(json?.job ?? null);
+      } catch { /* ignore */ }
+    }, 3000);
+    return () => clearInterval(poll);
+  }, []);
+
+  const isRunning = simStatus && ["pending", "generating", "sending"].includes(simStatus.status);
 
   return (
     <div className="space-y-6 p-6">
       <PageHeader title="통계/리포트" description="플랫폼 성과 데이터와 상세 리포트를 확인하세요" hidePeriodFilter />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-gray-100">
-          <TabsTrigger value="activity">활동현황</TabsTrigger>
-          <TabsTrigger value="platform">플랫폼 현황</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center gap-3 min-w-0">
+          <TabsList className="bg-gray-100 shrink-0">
+            <TabsTrigger value="activity">활동현황</TabsTrigger>
+            <TabsTrigger value="platform">플랫폼 현황</TabsTrigger>
+          </TabsList>
+          {activeTab === "activity" && (
+            <>
+              <Button
+                className="btn-pink-compact text-xs h-7 py-0 px-3 shrink-0"
+                onClick={() => setSimSignal(s => s + 1)}
+                disabled={!!isRunning}
+              >
+                시뮬레이션 설정
+              </Button>
+              {isRunning && simStatus && (
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="text-[11px] text-gray-500 shrink-0 whitespace-nowrap">{simStatus.message}</span>
+                  <Progress value={simStatus.progress} className="h-1.5 flex-1" />
+                  <span className="text-[11px] font-semibold text-pink-600 shrink-0">{simStatus.progress}%</span>
+                </div>
+              )}
+            </>
+          )}
+        </div>
 
         <TabsContent value="activity" className="mt-6">
-          <ActivityTab autoOpen={autoOpenSim} />
+          <ActivityTab autoOpen={autoOpenSim} openSignal={simSignal} />
         </TabsContent>
 
         <TabsContent value="platform" className="mt-6">
