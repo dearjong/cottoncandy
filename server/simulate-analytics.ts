@@ -500,65 +500,105 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         });
         add("activation_achieved", uid, projTs + 1, { trigger_event: "consulting_inquiry_submitted", ...common });
       } else {
-        // 공개(공고) / 비공개(1:1) — 18단계 퍼널
+        // 공개(공고) / 비공개(1:1) — 18단계 퍼널 (멀티 세션)
         const optionStr = pType === "공고" ? "public" : "private";
         add("step1_cta_click", uid, projTs, { selected_option: optionStr, ...common });
 
-        let lastStep = 0;
-        let savedDraft = false;
+        const projNumSessions = weightedPick([
+          { value: 1, weight: 25 }, { value: 2, weight: 45 }, { value: 3, weight: 30 },
+        ]);
+        const projStepsPerSession = Math.ceil(18 / projNumSessions);
+        let projCurrentTs     = projTs;
+        let lastStep          = 0;
+        let savedDraft        = false;
+        let projAbandoned     = false;
+        let projTotalSessions = 0;
+        const projGapsHours: number[] = [];
 
-        for (const s of PROJECT_STEPS) {
-          stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
-          add(`step_${s.step}_${s.screen}`, uid, projTs + s.step * 60, {
-            step: s.step, screen: s.screen, project_type: pType, ...common,
+        for (let sIdx = 0; sIdx < projNumSessions && !projAbandoned; sIdx++) {
+          projTotalSessions++;
+          const sessionOffset = (step: number) => (step - sIdx * projStepsPerSession) * 60;
+
+          add("project_session_started", uid, projCurrentTs, {
+            session_number: sIdx + 1, steps_completed_so_far: lastStep,
+            project_type: pType, ...common,
           });
 
-          // 임시저장 (step 5~15에서 7% 확률)
-          if (s.step >= 5 && s.step <= 15 && !savedDraft && chance(0.07)) {
-            savedDraft = true;
-            job.draftSavedCount += 1;
-            add("project_draft_saved", uid, projTs + s.step * 60 + 30, {
-              step: s.step, screen: s.screen, project_type: pType, ...common,
+          const sessionSteps = PROJECT_STEPS.slice(sIdx * projStepsPerSession, (sIdx + 1) * projStepsPerSession);
+
+          for (const s of sessionSteps) {
+            stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
+            add(`step_${s.step}_${s.screen}`, uid, projCurrentTs + sessionOffset(s.step), {
+              step: s.step, screen: s.screen, project_type: pType, session_number: sIdx + 1, ...common,
             });
-            if (chance(0.75)) {
-              job.draftResumedCount += 1;
-              add("project_draft_resumed", uid, projTs + s.step * 60 + randInt(3600, 86400), {
-                step: s.step, screen: s.screen, project_type: pType, resumed_after_sec: randInt(3600, 86400), ...common,
+
+            // 임시저장 (step 5~15에서 7% 확률)
+            if (s.step >= 5 && s.step <= 15 && !savedDraft && chance(0.07)) {
+              savedDraft = true;
+              job.draftSavedCount += 1;
+              const draftTs = projCurrentTs + sessionOffset(s.step) + 30;
+              add("project_draft_saved", uid, draftTs, {
+                step: s.step, screen: s.screen, project_type: pType, session_number: sIdx + 1, ...common,
               });
+              if (chance(0.75)) {
+                job.draftResumedCount += 1;
+                const resumeGap = randInt(3600, 86400);
+                add("project_draft_resumed", uid, draftTs + resumeGap, {
+                  step: s.step, screen: s.screen, project_type: pType,
+                  resumed_after_sec: resumeGap, session_number: sIdx + 1, ...common,
+                });
+              }
             }
+
+            // 이탈 판정
+            if (s.step < 18 && !chance(s.passRate)) {
+              stepDropoff[s.step] = (stepDropoff[s.step] ?? 0) + 1;
+              add("project_step_abandoned", uid, projCurrentTs + sessionOffset(s.step) + 45, {
+                step: s.step, screen: s.screen, project_type: pType,
+                had_draft: savedDraft, session_number: sIdx + 1, ...common,
+              });
+              add("page_exit", uid, projCurrentTs + sessionOffset(s.step) + 50, {
+                path: `/create-project/step${s.step}`, exit_step: s.step, ...common,
+              });
+              lastStep = s.step;
+              projAbandoned = true;
+              break;
+            }
+            lastStep = s.step;
           }
 
-          // 이탈 판정
-          if (s.step < 18 && !chance(s.passRate)) {
-            stepDropoff[s.step] = (stepDropoff[s.step] ?? 0) + 1;
-            add("project_step_abandoned", uid, projTs + s.step * 60 + 45, {
-              step: s.step, screen: s.screen, project_type: pType,
-              had_draft: savedDraft, ...common,
+          if (!projAbandoned && sIdx < projNumSessions - 1) {
+            add("project_step_saved", uid, projCurrentTs + projStepsPerSession * 60 + 10, {
+              steps_completed: lastStep, project_type: pType, session_number: sIdx + 1, ...common,
             });
-            add("page_exit", uid, projTs + s.step * 60 + 50, {
-              path: `/create-project/step${s.step}`, exit_step: s.step, ...common,
-            });
-            lastStep = s.step;
-            break;
+            const gapHours = randInt(1, 48);
+            projGapsHours.push(gapHours);
+            projCurrentTs = projCurrentTs + projStepsPerSession * 60 + gapHours * 3600;
           }
-          lastStep = s.step;
         }
 
         // 18단계 완주 → 등록 완료
         if (lastStep === 18) {
+          const projTotalHours = Math.round((projCurrentTs - projTs) / 3600);
+          const projTotalDays  = +(projTotalHours / 24).toFixed(1);
+          const projAvgGap     = projGapsHours.length > 0
+            ? Math.round(projGapsHours.reduce((a, b) => a + b, 0) / projGapsHours.length) : 0;
+
           job.projectTypeBreakdown[pType] = (job.projectTypeBreakdown[pType] ?? 0) + 1;
-          add("project_submitted", uid, projTs + 18 * 60 + 30, {
+          add("project_submitted", uid, projCurrentTs + 60, {
             project_id: projectId, project_type: pType,
-            category, budget_range: budget, is_first_time: utm.utm_source !== "tvcf", ...common,
+            category, budget_range: budget, is_first_time: utm.utm_source !== "tvcf",
+            total_sessions: projTotalSessions, total_hours: projTotalHours,
+            total_days: projTotalDays, avg_session_gap_hours: projAvgGap, ...common,
           });
-          add("activation_achieved", uid, projTs + 18 * 60 + 31, { trigger_event: "project_submitted", ...common });
+          add("activation_achieved", uid, projCurrentTs + 61, { trigger_event: "project_submitted", ...common });
           if (chance(0.30)) {
-            add("contract_signed", uid, projTs + 7 * 86400, {
+            add("contract_signed", uid, projCurrentTs + 7 * 86400, {
               project_id: projectId, partner_name: pick(PARTNERS),
               budget_range: budget, contract_value_krw: randInt(5, 30) * 10_000_000, ...common,
             });
             if (chance(0.70)) {
-              add("review_submitted", uid, projTs + 30 * 86400, {
+              add("review_submitted", uid, projCurrentTs + 30 * 86400, {
                 project_id: projectId, has_client_rating: true,
                 has_partner_rating: chance(0.8), has_text: chance(0.6), ...common,
               });
@@ -579,34 +619,72 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       });
       add("activation_achieved", uid, partnerTs + 1, { trigger_event: "partner_applied", ...common });
 
-      // 포트폴리오 등록 퍼널
+      // 포트폴리오 등록 퍼널 (멀티 세션)
       if (!didPortfolioReg && pfRegDone < cfg.portfolioRegCount) {
         pfRegDone++;
         didPortfolioReg = true;
         const pfTs = partnerTs + 100;
-        let pfLastSection = 0;
-        for (const sec of PORTFOLIO_SECTIONS) {
-          pfFunnel[sec.step] = (pfFunnel[sec.step] ?? 0) + 1;
-          add(`portfolio_section_${sec.id}`, uid, pfTs + sec.step * 40, {
-            section: sec.step, section_id: sec.id, partner_type: partnerType, ...common,
+
+        const pfNumSessions = weightedPick([
+          { value: 1, weight: 15 }, { value: 2, weight: 35 },
+          { value: 3, weight: 30 }, { value: 4, weight: 20 },
+        ]);
+        const pfSecsPerSession = Math.ceil(13 / pfNumSessions);
+        let pfCurrentTs      = pfTs;
+        let pfLastSection    = 0;
+        let pfAbandoned      = false;
+        let pfTotalSessions  = 0;
+        const pfGapsHours: number[] = [];
+
+        for (let sIdx = 0; sIdx < pfNumSessions && !pfAbandoned; sIdx++) {
+          pfTotalSessions++;
+          add("portfolio_session_started", uid, pfCurrentTs, {
+            session_number: sIdx + 1, sections_completed_so_far: pfLastSection,
+            partner_type: partnerType, ...common,
           });
-          if (sec.step < 13 && !chance(sec.passRate)) {
-            pfDropoff[sec.step] = (pfDropoff[sec.step] ?? 0) + 1;
-            add("portfolio_section_abandoned", uid, pfTs + sec.step * 40 + 20, {
-              section: sec.step, section_id: sec.id, partner_type: partnerType, ...common,
+
+          const sessionSecs = PORTFOLIO_SECTIONS.slice(sIdx * pfSecsPerSession, (sIdx + 1) * pfSecsPerSession);
+
+          for (const sec of sessionSecs) {
+            pfFunnel[sec.step] = (pfFunnel[sec.step] ?? 0) + 1;
+            add(`portfolio_section_${sec.id}`, uid, pfCurrentTs + (sec.step - sIdx * pfSecsPerSession) * 40, {
+              section: sec.step, section_id: sec.id, partner_type: partnerType, session_number: sIdx + 1, ...common,
             });
-            add("page_exit", uid, pfTs + sec.step * 40 + 25, {
-              path: "/work/portfolio", exit_section: sec.step, exit_section_id: sec.id, ...common,
-            });
+            if (sec.step < 13 && !chance(sec.passRate)) {
+              pfDropoff[sec.step] = (pfDropoff[sec.step] ?? 0) + 1;
+              add("portfolio_section_abandoned", uid, pfCurrentTs + (sec.step - sIdx * pfSecsPerSession) * 40 + 20, {
+                section: sec.step, section_id: sec.id, partner_type: partnerType, session_number: sIdx + 1, ...common,
+              });
+              add("page_exit", uid, pfCurrentTs + (sec.step - sIdx * pfSecsPerSession) * 40 + 25, {
+                path: "/work/portfolio", exit_section: sec.step, exit_section_id: sec.id, ...common,
+              });
+              pfLastSection = sec.step;
+              pfAbandoned = true;
+              break;
+            }
             pfLastSection = sec.step;
-            break;
           }
-          pfLastSection = sec.step;
+
+          if (!pfAbandoned && sIdx < pfNumSessions - 1) {
+            add("portfolio_section_saved", uid, pfCurrentTs + pfSecsPerSession * 40 + 10, {
+              sections_completed: pfLastSection, partner_type: partnerType, session_number: sIdx + 1, ...common,
+            });
+            const gapHours = randInt(1, 72);
+            pfGapsHours.push(gapHours);
+            pfCurrentTs = pfCurrentTs + pfSecsPerSession * 40 + gapHours * 3600;
+          }
         }
+
         if (pfLastSection === 13) {
-          add("portfolio_registered", uid, pfTs + 13 * 40 + 10, {
+          const pfTotalHours = Math.round((pfCurrentTs - pfTs) / 3600);
+          const pfTotalDays  = +(pfTotalHours / 24).toFixed(1);
+          const pfAvgGap     = pfGapsHours.length > 0
+            ? Math.round(pfGapsHours.reduce((a, b) => a + b, 0) / pfGapsHours.length) : 0;
+          add("portfolio_registered", uid, pfCurrentTs + 13 * 40 + 10, {
             portfolio_id: `pf_${randInt(1000, 9999)}`,
-            category: weightedPick(CATEGORIES), partner_type: partnerType, ...common,
+            category: weightedPick(CATEGORIES), partner_type: partnerType,
+            total_sessions: pfTotalSessions, total_hours: pfTotalHours,
+            total_days: pfTotalDays, avg_session_gap_hours: pfAvgGap, ...common,
           });
         }
       }
@@ -626,34 +704,72 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       }
     }
 
-    // 파트너: 포트폴리오만 등록 — 섹션별 퍼널
+    // 파트너: 포트폴리오만 등록 — 섹션별 퍼널 (멀티 세션)
     if (isPartner && !didPortfolioReg && pfRegDone < cfg.portfolioRegCount) {
       pfRegDone++;
       didPortfolioReg = true;
       const pfTs2 = baseTs + 500;
-      let pfLastSection2 = 0;
-      for (const sec of PORTFOLIO_SECTIONS) {
-        pfFunnel[sec.step] = (pfFunnel[sec.step] ?? 0) + 1;
-        add(`portfolio_section_${sec.id}`, uid, pfTs2 + sec.step * 40, {
-          section: sec.step, section_id: sec.id, partner_type: partnerType, ...common,
+
+      const pfNumSessions2 = weightedPick([
+        { value: 1, weight: 15 }, { value: 2, weight: 35 },
+        { value: 3, weight: 30 }, { value: 4, weight: 20 },
+      ]);
+      const pfSecsPerSession2 = Math.ceil(13 / pfNumSessions2);
+      let pfCurrentTs2      = pfTs2;
+      let pfLastSection2    = 0;
+      let pfAbandoned2      = false;
+      let pfTotalSessions2  = 0;
+      const pfGapsHours2: number[] = [];
+
+      for (let sIdx = 0; sIdx < pfNumSessions2 && !pfAbandoned2; sIdx++) {
+        pfTotalSessions2++;
+        add("portfolio_session_started", uid, pfCurrentTs2, {
+          session_number: sIdx + 1, sections_completed_so_far: pfLastSection2,
+          partner_type: partnerType, ...common,
         });
-        if (sec.step < 13 && !chance(sec.passRate)) {
-          pfDropoff[sec.step] = (pfDropoff[sec.step] ?? 0) + 1;
-          add("portfolio_section_abandoned", uid, pfTs2 + sec.step * 40 + 20, {
-            section: sec.step, section_id: sec.id, partner_type: partnerType, ...common,
+
+        const sessionSecs2 = PORTFOLIO_SECTIONS.slice(sIdx * pfSecsPerSession2, (sIdx + 1) * pfSecsPerSession2);
+
+        for (const sec of sessionSecs2) {
+          pfFunnel[sec.step] = (pfFunnel[sec.step] ?? 0) + 1;
+          add(`portfolio_section_${sec.id}`, uid, pfCurrentTs2 + (sec.step - sIdx * pfSecsPerSession2) * 40, {
+            section: sec.step, section_id: sec.id, partner_type: partnerType, session_number: sIdx + 1, ...common,
           });
-          add("page_exit", uid, pfTs2 + sec.step * 40 + 25, {
-            path: "/work/portfolio", exit_section: sec.step, exit_section_id: sec.id, ...common,
-          });
+          if (sec.step < 13 && !chance(sec.passRate)) {
+            pfDropoff[sec.step] = (pfDropoff[sec.step] ?? 0) + 1;
+            add("portfolio_section_abandoned", uid, pfCurrentTs2 + (sec.step - sIdx * pfSecsPerSession2) * 40 + 20, {
+              section: sec.step, section_id: sec.id, partner_type: partnerType, session_number: sIdx + 1, ...common,
+            });
+            add("page_exit", uid, pfCurrentTs2 + (sec.step - sIdx * pfSecsPerSession2) * 40 + 25, {
+              path: "/work/portfolio", exit_section: sec.step, exit_section_id: sec.id, ...common,
+            });
+            pfLastSection2 = sec.step;
+            pfAbandoned2 = true;
+            break;
+          }
           pfLastSection2 = sec.step;
-          break;
         }
-        pfLastSection2 = sec.step;
+
+        if (!pfAbandoned2 && sIdx < pfNumSessions2 - 1) {
+          add("portfolio_section_saved", uid, pfCurrentTs2 + pfSecsPerSession2 * 40 + 10, {
+            sections_completed: pfLastSection2, partner_type: partnerType, session_number: sIdx + 1, ...common,
+          });
+          const gapHours2 = randInt(1, 72);
+          pfGapsHours2.push(gapHours2);
+          pfCurrentTs2 = pfCurrentTs2 + pfSecsPerSession2 * 40 + gapHours2 * 3600;
+        }
       }
+
       if (pfLastSection2 === 13) {
-        add("portfolio_registered", uid, pfTs2 + 13 * 40 + 10, {
+        const pfTotalHours2 = Math.round((pfCurrentTs2 - pfTs2) / 3600);
+        const pfTotalDays2  = +(pfTotalHours2 / 24).toFixed(1);
+        const pfAvgGap2     = pfGapsHours2.length > 0
+          ? Math.round(pfGapsHours2.reduce((a, b) => a + b, 0) / pfGapsHours2.length) : 0;
+        add("portfolio_registered", uid, pfCurrentTs2 + 13 * 40 + 10, {
           portfolio_id: `pf_${randInt(1000, 9999)}`,
-          category: weightedPick(CATEGORIES), partner_type: partnerType, ...common,
+          category: weightedPick(CATEGORIES), partner_type: partnerType,
+          total_sessions: pfTotalSessions2, total_hours: pfTotalHours2,
+          total_days: pfTotalDays2, avg_session_gap_hours: pfAvgGap2, ...common,
         });
       }
     }
