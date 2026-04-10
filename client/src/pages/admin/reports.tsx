@@ -655,7 +655,7 @@ export default function ReportsPage() {
           </TabsList>
           {activeTab === "activity" && (
             <Button
-              className="btn-pink text-xs h-7 px-2.5 w-fit"
+              className="btn-pink-compact text-xs h-7 py-0 px-3"
               onClick={() => setSimSignal(s => s + 1)}
             >
               ▶ 시뮬레이션 실행
