@@ -9,8 +9,8 @@ type MainTabKey = "dashboard" | "calendar" | "progress"
 
 function getMainTabFromLocation(location: string): MainTabKey {
   if (location.startsWith("/admin/calendar")) return "calendar"
-  if (location.startsWith("/admin/dashboard")) return "dashboard"
-  if (location === "/admin/progress" || location === "/admin") return "progress"
+  if (location.startsWith("/admin/dashboard") || location === "/admin") return "dashboard"
+  if (location === "/admin/progress") return "progress"
   return "progress"
 }
 
@@ -23,7 +23,7 @@ function getRouteFromTab(tab: MainTabKey): string {
 function getTitle(tab: MainTabKey) {
   if (tab === "calendar") return "관리자 캘린더"
   if (tab === "progress") return "진행 현황"
-  return "대시보드"
+  return "통계"
 }
 
 function getDescription(tab: MainTabKey) {
@@ -56,7 +56,7 @@ export function AdminMainTabs({ children }: { children: ReactNode }) {
         <TabsList className="grid w-full grid-cols-3 h-10">
           <TabsTrigger value="progress">진행 현황</TabsTrigger>
           <TabsTrigger value="calendar">캘린더</TabsTrigger>
-          <TabsTrigger value="dashboard">대시보드</TabsTrigger>
+          <TabsTrigger value="dashboard">통계</TabsTrigger>
         </TabsList>
       </Tabs>
 
