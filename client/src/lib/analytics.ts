@@ -779,6 +779,20 @@ export function trackCompanyVerificationRejected(props: {
 }
 
 /**
+ * 포트폴리오(회사소개서) 등록 완료 — /portfolio/preview 등록하기 → 확인 버튼 클릭 시.
+ * 등록 완료 팝업의 확인 버튼 클릭 직전 호출.
+ */
+export function trackPortfolioRegistered(props: {
+  portfolio_title?: string;
+  is_first_time?: boolean;
+}) {
+  publishAnalytics("portfolio_registered", {
+    ...props,
+    user_type: "partner",
+  });
+}
+
+/**
  * 기업 회원 활성화 완료 — 인증 승인 이후 기업 회원 등급 부여 시.
  * trackCompanyVerificationApproved() 직후 자동 호출.
  */

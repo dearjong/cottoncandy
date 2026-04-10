@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import Layout from "@/components/layout/layout";
 import WorkSidebar from "@/components/work/sidebar";
+import { trackPortfolioRegistered } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -422,7 +423,11 @@ export default function PortfolioPreview() {
               </Button>
               <Button
                 className="flex-1 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-normal"
-                onClick={() => { setShowConfirm(false); setShowSuccess(true); }}
+                onClick={() => {
+                  trackPortfolioRegistered({ portfolio_title: "Campaign creators 솜사탕애드 입니다", is_first_time: false });
+                  setShowConfirm(false);
+                  setShowSuccess(true);
+                }}
               >
                 확인
               </Button>
