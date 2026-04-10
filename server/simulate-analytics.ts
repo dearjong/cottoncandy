@@ -26,6 +26,8 @@ export interface SimJob {
   draftResumedCount: number;
   projectTypeBreakdown: Record<string, number>;
   consultingRegisteredCount: number;
+  firstVisitCount: number;
+  returnVisitCount: number;
   directEntryBreakdown: Record<string, number>;
   portfolioFunnelBreakdown: Record<number, number>;
   portfolioDropoffBreakdown: Record<number, number>;
@@ -259,6 +261,8 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     draftResumedCount: 0,
     projectTypeBreakdown: {},
     consultingRegisteredCount: 0,
+    firstVisitCount: 0,
+    returnVisitCount: 0,
     directEntryBreakdown: {},
     portfolioFunnelBreakdown: {},
     portfolioDropoffBreakdown: {},
@@ -407,7 +411,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     initGa4User(uid, uid, { user_type: userType, gender, age_group: ageGroup });
 
     // ── Acquisition ──────────────────────────────────
-    add("site_visit", uid, baseTs, { path: "/", ...common });
+    // 첫방문(60%) / 재방문(40%) 구분
+    const isNewVisitor = chance(0.60);
+    if (isNewVisitor) { job.firstVisitCount += 1; } else { job.returnVisitCount += 1; }
+    add("site_visit", uid, baseTs, { path: "/", is_new_visitor: isNewVisitor, ...common });
 
     // ── 인증 결정 (직접 % 기반) ───────────────────────────
     let isAuthenticated = false;
