@@ -24,6 +24,15 @@ export interface SimJob {
   stepDropoffBreakdown: Record<number, number>;
   draftSavedCount: number;
   draftOpenedCount: number;
+  draftReturnHoursSum: number;
+  projectCompletedCount: number;
+  projDaysSum: number;
+  projSessionsSum: number;
+  projWritingMinSum: number;
+  portfolioCompletedCount: number;
+  pfDaysSum: number;
+  pfSessionsSum: number;
+  pfWritingMinSum: number;
   projectTypeBreakdown: Record<string, number>;
   consultingRegisteredCount: number;
   firstVisitCount: number;
@@ -269,6 +278,15 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     stepDropoffBreakdown: {},
     draftSavedCount: 0,
     draftOpenedCount: 0,
+    draftReturnHoursSum: 0,
+    projectCompletedCount: 0,
+    projDaysSum: 0,
+    projSessionsSum: 0,
+    projWritingMinSum: 0,
+    portfolioCompletedCount: 0,
+    pfDaysSum: 0,
+    pfSessionsSum: 0,
+    pfWritingMinSum: 0,
     projectTypeBreakdown: {},
     consultingRegisteredCount: 0,
     firstVisitCount: 0,
@@ -527,13 +545,14 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           // 재방문 세션: 임시저장 열기 이벤트
           if (sIdx > 0) {
             job.draftOpenedCount += 1;
-            const gapHoursSoFar = projGapsHours.reduce((a, b) => a + b, 0);
+            const lastGap = projGapsHours[projGapsHours.length - 1] ?? 0;
+            job.draftReturnHoursSum += lastGap;
             add("project_draft_opened", uid, projCurrentTs, {
               project_type: pType, session_number: sIdx + 1,
               steps_completed_so_far: lastStep,
               draft_save_count: projDraftSaveCount,
-              days_since_last_save: +(gapHoursSoFar / 24).toFixed(1),
-              hours_since_last_save: gapHoursSoFar,
+              days_since_last_save: +(lastGap / 24).toFixed(1),
+              hours_since_last_save: lastGap,
               cumulative_writing_sec: projTotalWritingSec, ...common,
             });
           }
@@ -618,6 +637,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             ? Math.round(projGapsHours.reduce((a, b) => a + b, 0) / projGapsHours.length) : 0;
 
           job.projectTypeBreakdown[pType] = (job.projectTypeBreakdown[pType] ?? 0) + 1;
+          job.projectCompletedCount += 1;
+          job.projDaysSum     += projTotalDays;
+          job.projSessionsSum += projTotalSessions;
+          job.projWritingMinSum += Math.round(projTotalWritingSec / 60);
           add("project_submitted", uid, projCurrentTs + 10, {
             project_id: projectId, project_type: pType,
             category, budget_range: budget, is_first_time: utm.utm_source !== "tvcf",
@@ -680,13 +703,14 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           // 재방문 세션: 임시저장 열기
           if (sIdx > 0) {
             job.draftOpenedCount += 1;
-            const pfGapSoFar = pfGapsHours.reduce((a, b) => a + b, 0);
+            const pfLastGap = pfGapsHours[pfGapsHours.length - 1] ?? 0;
+            job.draftReturnHoursSum += pfLastGap;
             add("portfolio_draft_opened", uid, pfCurrentTs, {
               partner_type: partnerType, session_number: sIdx + 1,
               sections_completed_so_far: pfLastSection,
               draft_save_count: pfDraftSaveCount,
-              days_since_last_save: +(pfGapSoFar / 24).toFixed(1),
-              hours_since_last_save: pfGapSoFar,
+              days_since_last_save: +(pfLastGap / 24).toFixed(1),
+              hours_since_last_save: pfLastGap,
               cumulative_writing_sec: pfTotalWritingSec, ...common,
             });
           }
@@ -759,6 +783,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           const pfTotalDays  = +(pfTotalHours / 24).toFixed(1);
           const pfAvgGap     = pfGapsHours.length > 0
             ? Math.round(pfGapsHours.reduce((a, b) => a + b, 0) / pfGapsHours.length) : 0;
+          job.portfolioCompletedCount += 1;
+          job.pfDaysSum       += pfTotalDays;
+          job.pfSessionsSum   += pfTotalSessions;
+          job.pfWritingMinSum += Math.round(pfTotalWritingSec / 60);
           add("portfolio_registered", uid, pfCurrentTs + 10, {
             portfolio_id: `pf_${randInt(1000, 9999)}`,
             category: weightedPick(CATEGORIES), partner_type: partnerType,
@@ -811,13 +839,14 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         // 재방문 세션: 임시저장 열기
         if (sIdx > 0) {
           job.draftOpenedCount += 1;
-          const pfGapSoFar2 = pfGapsHours2.reduce((a, b) => a + b, 0);
+          const pfLastGap2 = pfGapsHours2[pfGapsHours2.length - 1] ?? 0;
+          job.draftReturnHoursSum += pfLastGap2;
           add("portfolio_draft_opened", uid, pfCurrentTs2, {
             partner_type: partnerType, session_number: sIdx + 1,
             sections_completed_so_far: pfLastSection2,
             draft_save_count: pfDraftSaveCount2,
-            days_since_last_save: +(pfGapSoFar2 / 24).toFixed(1),
-            hours_since_last_save: pfGapSoFar2,
+            days_since_last_save: +(pfLastGap2 / 24).toFixed(1),
+            hours_since_last_save: pfLastGap2,
             cumulative_writing_sec: pfTotalWritingSec2, ...common,
           });
         }
@@ -890,6 +919,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         const pfTotalDays2  = +(pfTotalHours2 / 24).toFixed(1);
         const pfAvgGap2     = pfGapsHours2.length > 0
           ? Math.round(pfGapsHours2.reduce((a, b) => a + b, 0) / pfGapsHours2.length) : 0;
+        job.portfolioCompletedCount += 1;
+        job.pfDaysSum       += pfTotalDays2;
+        job.pfSessionsSum   += pfTotalSessions2;
+        job.pfWritingMinSum += Math.round(pfTotalWritingSec2 / 60);
         add("portfolio_registered", uid, pfCurrentTs2 + 10, {
           portfolio_id: `pf_${randInt(1000, 9999)}`,
           category: weightedPick(CATEGORIES), partner_type: partnerType,

@@ -29,6 +29,15 @@ interface SimJob {
   stepDropoffBreakdown: Record<number, number>;
   draftSavedCount: number;
   draftOpenedCount: number;
+  draftReturnHoursSum: number;
+  projectCompletedCount: number;
+  projDaysSum: number;
+  projSessionsSum: number;
+  projWritingMinSum: number;
+  portfolioCompletedCount: number;
+  pfDaysSum: number;
+  pfSessionsSum: number;
+  pfWritingMinSum: number;
   projectTypeBreakdown: Record<string, number>;
   consultingRegisteredCount: number;
   firstVisitCount: number;
@@ -435,6 +444,61 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
               </div>
             </div>
           </div>{/* /성별+직접유입 2열 */}
+
+          {/* 멀티세션 작성 패턴 */}
+          {job && (job.projectCompletedCount > 0 || job.portfolioCompletedCount > 0) && (() => {
+            const pjN  = job.projectCompletedCount   || 1;
+            const pfN  = job.portfolioCompletedCount || 1;
+            const drN  = job.draftOpenedCount        || 1;
+            const avgProjDays    = +(job.projDaysSum     / pjN).toFixed(1);
+            const avgProjSess    = +(job.projSessionsSum / pjN).toFixed(1);
+            const avgProjMin     = Math.round(job.projWritingMinSum / pjN);
+            const avgPfDays      = +(job.pfDaysSum      / pfN).toFixed(1);
+            const avgPfSess      = +(job.pfSessionsSum  / pfN).toFixed(1);
+            const avgPfMin       = Math.round(job.pfWritingMinSum  / pfN);
+            const avgReturnHours = +(job.draftReturnHoursSum / drN).toFixed(1);
+            const statCell = (label: string, value: string | number, sub?: string) => (
+              <div className="flex flex-col items-center justify-center text-center p-4 bg-gray-50 rounded-xl">
+                <div className="text-xl font-bold text-gray-800">{value}</div>
+                <div className="text-xs text-gray-500 mt-0.5">{label}</div>
+                {sub && <div className="text-[10px] text-gray-400 mt-0.5">{sub}</div>}
+              </div>
+            );
+            return (
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+                <div>
+                  <p className="font-medium text-gray-800">멀티세션 작성 패턴</p>
+                  <p className="text-[10px] text-gray-400">완주한 유저 기준 — 며칠에 걸쳐, 몇 번의 세션으로, 얼마나 작성했는지</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-indigo-600">프로젝트 등록 ({job.projectCompletedCount}건 완주)</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {statCell("평균 완주 기간", `${avgProjDays}일`)}
+                      {statCell("평균 세션 수", `${avgProjSess}회`)}
+                      {statCell("평균 작성시간", `${avgProjMin}분`, "갭 제외 순수")}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-purple-600">포트폴리오 등록 ({job.portfolioCompletedCount}건 완주)</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {statCell("평균 완주 기간", `${avgPfDays}일`)}
+                      {statCell("평균 세션 수", `${avgPfSess}회`)}
+                      {statCell("평균 작성시간", `${avgPfMin}분`, "갭 제외 순수")}
+                    </div>
+                  </div>
+                </div>
+                {job.draftOpenedCount > 0 && (
+                  <div className="flex items-center gap-3 pt-2 border-t border-gray-50 text-xs text-gray-500">
+                    <span className="w-2 h-2 rounded-full bg-green-400 inline-block shrink-0" />
+                    임시저장 후 평균 <strong className="text-gray-700 mx-0.5">{avgReturnHours}시간</strong> 뒤에 돌아와서 이어서 작성
+                    <span className="text-gray-300">|</span>
+                    총 <strong className="text-gray-700 mx-0.5">{job.draftOpenedCount}회</strong> 재방문
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* 퍼널 2개 나란히 */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
