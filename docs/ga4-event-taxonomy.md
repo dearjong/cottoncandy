@@ -3,39 +3,6 @@
 > 버전: v3.3 | 작성일: 2026-04-08 | 최종수정: 2026-04-10  
 > 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
 
----
-
-## 0. 사용자 식별 구조 (identifyUser)
-
-> 모든 이벤트에 `user_id`가 붙으려면 **로그인/가입 시점에 반드시 1회 호출** 필요.
-
-### 호출 위치
-
-| 위치 | 시점 | 구현 |
-|------|------|------|
-| `member/login.tsx` | 로그인 버튼 클릭 성공 | ✅ 완료 |
-| `member/signup-email.tsx` | 이메일 인증 완료 | ✅ 완료 |
-| `admin/login.tsx` | 관리자 로그인 성공 | ✅ 완료 |
-| `FunnelRouteListener` (앱 마운트) | 새로고침 후 재식별 | ✅ 완료 |
-
-### identifyUser 동작
-
-```
-mixpanel.identify(userId)           ← 익명 device_id → 실 사용자 ID 연결
-mixpanel.people.set({ user_type, last_login })
-gtag("set", "user_properties", { user_id, user_type })
-localStorage.setItem("analytics_user_id", userId)   ← 새로고침 대응
-```
-
-### 파라미터
-
-| 파라미터 | 설명 | 예시 |
-|---------|------|------|
-| `userId` | 고유 사용자 ID (실서비스: DB PK) | `user-abc123` |
-| `userType` | `advertiser` / `partner` / `admin` | `advertiser` |
-
----
-
 ## 1. 설계 원칙
 
 - 이벤트명: `snake_case` 통일 (GA4·Mixpanel 공통)
@@ -837,7 +804,6 @@ site_visit
 | 프로퍼티 | 설명 | 소스 |
 |---------|------|------|
 | `utm_source` / `utm_medium` / `utm_campaign` | 유입 채널 정보 | URL 파라미터 → sessionStorage 고정 |
-| `user_id` | 로그인 사용자 ID | localStorage |
 | `active_experiments` / `exp_<id>` | A/B 실험 배정 정보 | localStorage |
 
 ### 시뮬레이션 전용 자동 첨부 프로퍼티
@@ -986,4 +952,4 @@ site_visit
 
 *이 문서는 ADMarket 플랫폼 GA4·Mixpanel 이벤트 정의 기준입니다. (v3.3 — 2026-04-10)*  
 *전체 퍼널 이벤트 연결 완료: `project_completed` · `deliverable_submitted/confirmed` · `draft_submitted` · `portfolio_registered`*  
-*v3.3 정리: 섹션 0 PII(`$name`·`$email`·`userName`) 제거, `trackLogin` 중복 섹션 제거, 섹션 16 코호트 분석(섹션 15 퍼널과 중복) 제거*
+*v3.3 정리: 섹션 0(`identifyUser`) 제거 — SDK 내부 처리 (GA4 `client_id` · Mixpanel `distinct_id`는 플랫폼이 자동 관리), `user_id` 공통 프로퍼티 제거, 섹션 16 코호트 분석 중복 제거*
