@@ -29,6 +29,8 @@ interface SimJob {
   stepDropoffBreakdown: Record<number, number>;
   draftSavedCount: number;
   draftResumedCount: number;
+  projectTypeBreakdown: Record<string, number>;
+  consultingRegisteredCount: number;
   directEntryBreakdown: Record<string, number>;
   portfolioFunnelBreakdown: Record<number, number>;
   portfolioDropoffBreakdown: Record<number, number>;
@@ -377,14 +379,27 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                   <p className="font-medium text-gray-800">프로젝트 등록 단계별 퍼널</p>
                   <p className="text-[10px] text-gray-400">광고주가 어느 단계에서 이탈하는지 확인합니다</p>
                 </div>
-                <div className="flex gap-4 text-xs">
+                <div className="flex flex-wrap gap-3 text-xs">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-400 inline-block" />
+                    <span className="w-2 h-2 rounded-full bg-blue-400 inline-block" />
+                    공고 <strong>{job?.projectTypeBreakdown?.["공고"] ?? 0}건</strong>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-violet-400 inline-block" />
+                    1:1 비공개 <strong>{job?.projectTypeBreakdown?.["1:1"] ?? 0}건</strong>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-pink-400 inline-block" />
+                    컨설팅 <strong>{job?.consultingRegisteredCount ?? 0}건</strong>
+                  </span>
+                  <span className="text-gray-200">|</span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-indigo-400 inline-block" />
                     임시저장 <strong>{job?.draftSavedCount ?? 0}건</strong>
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-green-400 inline-block" />
-                    저장 후 재개 <strong>{job?.draftResumedCount ?? 0}건</strong>
+                    <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
+                    재개 <strong>{job?.draftResumedCount ?? 0}건</strong>
                   </span>
                 </div>
               </div>

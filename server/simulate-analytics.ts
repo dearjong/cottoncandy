@@ -24,6 +24,8 @@ export interface SimJob {
   stepDropoffBreakdown: Record<number, number>;
   draftSavedCount: number;
   draftResumedCount: number;
+  projectTypeBreakdown: Record<string, number>;
+  consultingRegisteredCount: number;
   directEntryBreakdown: Record<string, number>;
   portfolioFunnelBreakdown: Record<number, number>;
   portfolioDropoffBreakdown: Record<number, number>;
@@ -255,6 +257,8 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     stepDropoffBreakdown: {},
     draftSavedCount: 0,
     draftResumedCount: 0,
+    projectTypeBreakdown: {},
+    consultingRegisteredCount: 0,
     directEntryBreakdown: {},
     portfolioFunnelBreakdown: {},
     portfolioDropoffBreakdown: {},
@@ -464,70 +468,84 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       const category  = weightedPick(CATEGORIES);
       const budget    = pick(BUDGET_RANGES);
       const projectId = `proj_${randInt(100, 999)}`;
-      const pType     = pick(["공고", "1:1"] as const);
+      const pType     = weightedPick([
+        { value: "공고"    as const, weight: 45 },
+        { value: "1:1"     as const, weight: 30 },
+        { value: "컨설팅"  as const, weight: 25 },
+      ]);
 
-      add("step1_cta_click", uid, projTs, { selected_option: pType === "공고" ? "public" : "private", ...common });
-
-      let lastStep = 0;
-      let savedDraft = false;
-
-      for (const s of PROJECT_STEPS) {
-        // 단계 도달 집계
-        stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
-        add(`step_${s.step}_${s.screen}`, uid, projTs + s.step * 60, {
-          step: s.step, screen: s.screen, project_type: pType, ...common,
+      // 컨설팅 의뢰 경로 (18단계 퍼널 없음)
+      if (pType === "컨설팅") {
+        job.consultingRegisteredCount += 1;
+        job.projectTypeBreakdown["컨설팅"] = (job.projectTypeBreakdown["컨설팅"] ?? 0) + 1;
+        add("consulting_inquiry_submitted", uid, projTs, {
+          inquiry_type: "new", category, is_first_time: utm.utm_source !== "tvcf", ...common,
         });
+        add("activation_achieved", uid, projTs + 1, { trigger_event: "consulting_inquiry_submitted", ...common });
+      } else {
+        // 공개(공고) / 비공개(1:1) — 18단계 퍼널
+        const optionStr = pType === "공고" ? "public" : "private";
+        add("step1_cta_click", uid, projTs, { selected_option: optionStr, ...common });
 
-        // 임시저장 (step 5~15에서 7% 확률)
-        if (s.step >= 5 && s.step <= 15 && !savedDraft && chance(0.07)) {
-          savedDraft = true;
-          job.draftSavedCount += 1;
-          add("project_draft_saved", uid, projTs + s.step * 60 + 30, {
+        let lastStep = 0;
+        let savedDraft = false;
+
+        for (const s of PROJECT_STEPS) {
+          stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
+          add(`step_${s.step}_${s.screen}`, uid, projTs + s.step * 60, {
             step: s.step, screen: s.screen, project_type: pType, ...common,
           });
-          // 재개 여부 (75%)
-          if (chance(0.75)) {
-            job.draftResumedCount += 1;
-            add("project_draft_resumed", uid, projTs + s.step * 60 + randInt(3600, 86400), {
-              step: s.step, screen: s.screen, project_type: pType, resumed_after_sec: randInt(3600, 86400), ...common,
+
+          // 임시저장 (step 5~15에서 7% 확률)
+          if (s.step >= 5 && s.step <= 15 && !savedDraft && chance(0.07)) {
+            savedDraft = true;
+            job.draftSavedCount += 1;
+            add("project_draft_saved", uid, projTs + s.step * 60 + 30, {
+              step: s.step, screen: s.screen, project_type: pType, ...common,
             });
+            if (chance(0.75)) {
+              job.draftResumedCount += 1;
+              add("project_draft_resumed", uid, projTs + s.step * 60 + randInt(3600, 86400), {
+                step: s.step, screen: s.screen, project_type: pType, resumed_after_sec: randInt(3600, 86400), ...common,
+              });
+            }
           }
-        }
 
-        // 이탈 판정
-        if (s.step < 18 && !chance(s.passRate)) {
-          stepDropoff[s.step] = (stepDropoff[s.step] ?? 0) + 1;
-          add("project_step_abandoned", uid, projTs + s.step * 60 + 45, {
-            step: s.step, screen: s.screen, project_type: pType,
-            had_draft: savedDraft, ...common,
-          });
-          add("page_exit", uid, projTs + s.step * 60 + 50, {
-            path: `/create-project/step${s.step}`, exit_step: s.step, ...common,
-          });
-          lastStep = s.step;
-          break;
-        }
-
-        lastStep = s.step;
-      }
-
-      // 18단계까지 완주 → 프로젝트 등록 완료
-      if (lastStep === 18) {
-        add("project_submitted", uid, projTs + 18 * 60 + 30, {
-          project_id: projectId, project_type: pType,
-          category, budget_range: budget, is_first_time: utm.utm_source !== "tvcf", ...common,
-        });
-        add("activation_achieved", uid, projTs + 18 * 60 + 31, { trigger_event: "project_submitted", ...common });
-        if (chance(0.30)) {
-          add("contract_signed", uid, projTs + 7 * 86400, {
-            project_id: projectId, partner_name: pick(PARTNERS),
-            budget_range: budget, contract_value_krw: randInt(5, 30) * 10_000_000, ...common,
-          });
-          if (chance(0.70)) {
-            add("review_submitted", uid, projTs + 30 * 86400, {
-              project_id: projectId, has_client_rating: true,
-              has_partner_rating: chance(0.8), has_text: chance(0.6), ...common,
+          // 이탈 판정
+          if (s.step < 18 && !chance(s.passRate)) {
+            stepDropoff[s.step] = (stepDropoff[s.step] ?? 0) + 1;
+            add("project_step_abandoned", uid, projTs + s.step * 60 + 45, {
+              step: s.step, screen: s.screen, project_type: pType,
+              had_draft: savedDraft, ...common,
             });
+            add("page_exit", uid, projTs + s.step * 60 + 50, {
+              path: `/create-project/step${s.step}`, exit_step: s.step, ...common,
+            });
+            lastStep = s.step;
+            break;
+          }
+          lastStep = s.step;
+        }
+
+        // 18단계 완주 → 등록 완료
+        if (lastStep === 18) {
+          job.projectTypeBreakdown[pType] = (job.projectTypeBreakdown[pType] ?? 0) + 1;
+          add("project_submitted", uid, projTs + 18 * 60 + 30, {
+            project_id: projectId, project_type: pType,
+            category, budget_range: budget, is_first_time: utm.utm_source !== "tvcf", ...common,
+          });
+          add("activation_achieved", uid, projTs + 18 * 60 + 31, { trigger_event: "project_submitted", ...common });
+          if (chance(0.30)) {
+            add("contract_signed", uid, projTs + 7 * 86400, {
+              project_id: projectId, partner_name: pick(PARTNERS),
+              budget_range: budget, contract_value_krw: randInt(5, 30) * 10_000_000, ...common,
+            });
+            if (chance(0.70)) {
+              add("review_submitted", uid, projTs + 30 * 86400, {
+                project_id: projectId, has_client_rating: true,
+                has_partner_rating: chance(0.8), has_text: chance(0.6), ...common,
+              });
+            }
           }
         }
       }
