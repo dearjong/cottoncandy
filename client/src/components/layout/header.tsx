@@ -611,6 +611,9 @@ export default function Header() {
                 <Button
                   onClick={() => {
                     trackHeaderInteraction({ target: "signup" });
+                    if (location === "/") {
+                      publishAnalytics("home_click", { element: "free_start_btn", destination: "/signup" });
+                    }
                     setLocation("/signup");
                   }}
                   className="btn-dark w-auto px-5"
@@ -621,6 +624,9 @@ export default function Header() {
                 <button
                   onClick={() => {
                     trackHeaderInteraction({ target: "login" });
+                    if (location === "/") {
+                      publishAnalytics("home_click", { element: "login_btn", destination: "/login" });
+                    }
                     setLocation("/login");
                   }}
                   className="w-11 h-11 aspect-square shrink-0 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"

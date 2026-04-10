@@ -46,6 +46,7 @@ interface SimJob {
   directEntryBreakdown: Record<string, number>;
   portfolioFunnelBreakdown: Record<number, number>;
   portfolioDropoffBreakdown: Record<number, number>;
+  homeClickBreakdown: Record<string, number>;
   errors: string[];
   startedAt: number;
   completedAt?: number;
@@ -444,6 +445,64 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
               </div>
             </div>
           </div>{/* /성별+직접유입 2열 */}
+
+          {/* 메인화면 클릭 분석 */}
+          {job && Object.keys(job.homeClickBreakdown ?? {}).length > 0 && (() => {
+            const HOME_ELEMENT_META: Record<string, { label: string; color: string; dest: string }> = {
+              cta:            { label: "메인 Hero CTA (무료로 의뢰하기)", color: "bg-pink-500",    dest: "→ /create-project/step1" },
+              free_start_btn: { label: "무료로 시작하기 (헤더 버튼)",      color: "bg-rose-400",    dest: "→ /signup" },
+              login_btn:      { label: "로그인 아이콘 (헤더)",             color: "bg-blue-400",    dest: "→ /login" },
+              project_card:   { label: "공모전 · 프로젝트 카드",           color: "bg-amber-400",   dest: "→ 공고 상세" },
+              category:       { label: "카테고리 탐색",                    color: "bg-green-400",   dest: "→ /agency-search" },
+              faq:            { label: "FAQ 질문 클릭",                    color: "bg-violet-400",  dest: "(패널 열림)" },
+              feature_card:   { label: "서비스 특징 카드",                 color: "bg-indigo-400",  dest: "→ /guide/features" },
+              partner:        { label: "파트너 카드",                      color: "bg-teal-400",    dest: "→ /agency-search" },
+              flow_step:      { label: "이용 방법 단계",                   color: "bg-orange-400",  dest: "→ /guide/how-to-use" },
+              faq_more:       { label: "FAQ 전체보기",                     color: "bg-gray-400",    dest: "→ /guide/faq" },
+            };
+            const entries = Object.entries(job.homeClickBreakdown)
+              .sort(([, a], [, b]) => b - a);
+            const total = entries.reduce((s, [, v]) => s + v, 0);
+            const maxCount = entries[0]?.[1] ?? 1;
+            return (
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-medium text-gray-800">메인화면 클릭 분석</p>
+                    <p className="text-[10px] text-gray-400">홈(/)에서 사용자가 어떤 요소를 눌러 다음 화면으로 이동하는지 — 총 {total.toLocaleString()}회 클릭</p>
+                  </div>
+                  <div className="text-[10px] text-gray-400 text-right shrink-0 pt-1">
+                    cta / 카드 / 로그인 등<br />8개 요소 추적
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {entries.map(([element, count]) => {
+                    const meta = HOME_ELEMENT_META[element] ?? { label: element, color: "bg-gray-300", dest: "" };
+                    const barPct  = Math.round((count / maxCount) * 100);
+                    const sharePct = total > 0 ? Math.round((count / total) * 100) : 0;
+                    return (
+                      <div key={element} className="flex items-center gap-3">
+                        <div className="w-40 shrink-0">
+                          <div className="text-xs text-gray-700 truncate">{meta.label}</div>
+                          <div className="text-[10px] text-gray-400 truncate">{meta.dest}</div>
+                        </div>
+                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                          <div className={`${meta.color} h-3 rounded-full transition-all duration-500`}
+                            style={{ width: `${Math.max(barPct, 2)}%` }} />
+                        </div>
+                        <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                        <div className="w-8 text-right text-xs text-gray-400">{sharePct}%</div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="bg-pink-50 rounded-lg px-3 py-2 text-[10px] text-pink-700 mt-1">
+                  💡 CTA 클릭이 {Math.round(((job.homeClickBreakdown["cta"] ?? 0) / Math.max(total, 1)) * 100)}%로 가장 높습니다.
+                  공모전 카드는 비로그인 유저의 주요 탐색 경로입니다.
+                </div>
+              </div>
+            );
+          })()}
 
           {/* 멀티세션 작성 패턴 */}
           {job && (job.projectCompletedCount > 0 || job.portfolioCompletedCount > 0) && (() => {

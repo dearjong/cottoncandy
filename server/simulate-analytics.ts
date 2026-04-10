@@ -41,6 +41,7 @@ export interface SimJob {
   directEntryBreakdown: Record<string, number>;
   portfolioFunnelBreakdown: Record<number, number>;
   portfolioDropoffBreakdown: Record<number, number>;
+  homeClickBreakdown: Record<string, number>;
   errors: string[];
   startedAt: number;
   completedAt?: number;
@@ -295,6 +296,7 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     directEntryBreakdown: {},
     portfolioFunnelBreakdown: {},
     portfolioDropoffBreakdown: {},
+    homeClickBreakdown: {},
     errors: [],
     startedAt: Date.now(),
   };
@@ -395,6 +397,18 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     { value: { geo_region: "해외" },  weight: cfg.pctAbroad   },
   ];
 
+  const HOME_CLICK_ELEMENTS = [
+    { value: "cta",            weight: 28 },
+    { value: "project_card",   weight: 20 },
+    { value: "login_btn",      weight: 16 },
+    { value: "free_start_btn", weight: 12 },
+    { value: "category",       weight: 10 },
+    { value: "faq",            weight: 8  },
+    { value: "feature_card",   weight: 4  },
+    { value: "partner",        weight: 1  },
+    { value: "flow_step",      weight: 1  },
+  ];
+
   const CATEGORIES   = [
     { value: "영상광고",    weight: 85 },
     { value: "브랜드디자인", weight: 3  },
@@ -444,6 +458,14 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const isNewVisitor = chance(0.60);
     if (isNewVisitor) { job.firstVisitCount += 1; } else { job.returnVisitCount += 1; }
     add("site_visit", uid, baseTs, { path: "/", is_new_visitor: isNewVisitor, ...common });
+
+    // ── 메인화면 클릭 이벤트 (모든 방문자) ──────────────────
+    const homeClickN = randInt(1, 4);
+    for (let c = 0; c < homeClickN; c++) {
+      const el = weightedPick(HOME_CLICK_ELEMENTS);
+      job.homeClickBreakdown[el.value] = (job.homeClickBreakdown[el.value] ?? 0) + 1;
+      add("home_click", uid, baseTs + 5 + c * 20, { element: el.value, ...common });
+    }
 
     // ── 인증 결정 (직접 % 기반) ───────────────────────────
     let isAuthenticated = false;
