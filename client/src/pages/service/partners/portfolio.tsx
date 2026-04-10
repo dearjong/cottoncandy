@@ -300,7 +300,11 @@ export default function Portfolio() {
               </div>
 
               {/* 새 소개서 등록 버튼 */}
-              <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white font-normal" data-testid="button-new-portfolio">
+              <Button
+                className="w-full bg-pink-600 hover:bg-pink-700 text-white font-normal"
+                data-testid="button-new-portfolio"
+                onClick={() => setLocation("/work/company-portfolio/manager-info")}
+              >
                 새 소개서 등록하기 +
               </Button>
             </main>
