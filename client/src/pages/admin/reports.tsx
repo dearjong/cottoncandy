@@ -28,7 +28,7 @@ interface SimJob {
   stepFunnelBreakdown: Record<number, number>;
   stepDropoffBreakdown: Record<number, number>;
   draftSavedCount: number;
-  draftResumedCount: number;
+  draftOpenedCount: number;
   projectTypeBreakdown: Record<string, number>;
   consultingRegisteredCount: number;
   firstVisitCount: number;
@@ -466,7 +466,7 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                   </span>
                   <span className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
-                    재개 <strong>{job?.draftResumedCount ?? 0}건</strong>
+                    불러오기 <strong>{job?.draftOpenedCount ?? 0}건</strong>
                   </span>
                 </div>
               </div>

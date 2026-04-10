@@ -23,7 +23,7 @@ export interface SimJob {
   stepFunnelBreakdown: Record<number, number>;
   stepDropoffBreakdown: Record<number, number>;
   draftSavedCount: number;
-  draftResumedCount: number;
+  draftOpenedCount: number;
   projectTypeBreakdown: Record<string, number>;
   consultingRegisteredCount: number;
   firstVisitCount: number;
@@ -268,7 +268,7 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     stepFunnelBreakdown: {},
     stepDropoffBreakdown: {},
     draftSavedCount: 0,
-    draftResumedCount: 0,
+    draftOpenedCount: 0,
     projectTypeBreakdown: {},
     consultingRegisteredCount: 0,
     firstVisitCount: 0,
@@ -512,7 +512,6 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         const projStepsPerSession = Math.ceil(18 / projNumSessions);
         let projCurrentTs        = projTs;
         let lastStep             = 0;
-        let savedDraft           = false;
         let projAbandoned        = false;
         let projTotalSessions    = 0;
         let projTotalWritingSec  = 0; // 실제 화면 작성 시간 (갭 제외)
@@ -527,6 +526,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
           // 재방문 세션: 임시저장 열기 이벤트
           if (sIdx > 0) {
+            job.draftOpenedCount += 1;
             const gapHoursSoFar = projGapsHours.reduce((a, b) => a + b, 0);
             add("project_draft_opened", uid, projCurrentTs, {
               project_type: pType, session_number: sIdx + 1,
@@ -679,6 +679,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
           // 재방문 세션: 임시저장 열기
           if (sIdx > 0) {
+            job.draftOpenedCount += 1;
             const pfGapSoFar = pfGapsHours.reduce((a, b) => a + b, 0);
             add("portfolio_draft_opened", uid, pfCurrentTs, {
               partner_type: partnerType, session_number: sIdx + 1,
@@ -809,6 +810,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
         // 재방문 세션: 임시저장 열기
         if (sIdx > 0) {
+          job.draftOpenedCount += 1;
           const pfGapSoFar2 = pfGapsHours2.reduce((a, b) => a + b, 0);
           add("portfolio_draft_opened", uid, pfCurrentTs2, {
             partner_type: partnerType, session_number: sIdx + 1,
