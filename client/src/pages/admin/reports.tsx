@@ -648,7 +648,7 @@ export default function ReportsPage() {
       <PageHeader title="통계/리포트" description="플랫폼 성과 데이터와 상세 리포트를 확인하세요" hidePeriodFilter />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <TabsList className="bg-gray-100">
             <TabsTrigger value="activity">활동현황</TabsTrigger>
             <TabsTrigger value="platform">플랫폼 현황</TabsTrigger>
