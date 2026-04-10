@@ -111,7 +111,7 @@ const FUNNEL_ORDER = [
   { key: "referral_sent",         label: "추천 공유",       color: "bg-indigo-400",  aarrr: "Referral" },
 ];
 
-function ActivityTab({ autoOpen }: { autoOpen?: boolean }) {
+function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?: number }) {
   const [data, setData] = useState<{ jobId: string; job: SimJob } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -133,6 +133,13 @@ function ActivityTab({ autoOpen }: { autoOpen?: boolean }) {
       setDialogOpen(true);
     }
   }, [autoOpen]);
+
+  useEffect(() => {
+    if (openSignal && openSignal > 0) {
+      setDialogCfg(cfg);
+      setDialogOpen(true);
+    }
+  }, [openSignal]);
 
   async function startSim(runCfg: SimConfig) {
     setCfg(runCfg);
@@ -203,13 +210,6 @@ function ActivityTab({ autoOpen }: { autoOpen?: boolean }) {
               }
             </p>
           </div>
-          <Button
-            className="btn-pink text-xs"
-            onClick={() => { setDialogCfg(cfg); setDialogOpen(true); }}
-            disabled={!!isRunning || loading}
-          >
-            {loading ? "시작 중..." : isRunning ? "실행 중..." : "▶ 시뮬레이션 실행"}
-          </Button>
         </div>
 
         {isRunning && (
@@ -668,19 +668,32 @@ function ActivityTab({ autoOpen }: { autoOpen?: boolean }) {
 export default function ReportsPage() {
   const search = useSearch();
   const autoOpenSim = new URLSearchParams(search).get("simulate") === "1";
+  const [simSignal, setSimSignal] = useState(0);
+  const [activeTab, setActiveTab] = useState("activity");
 
   return (
     <div className="space-y-6 p-6">
       <PageHeader title="통계/리포트" description="플랫폼 성과 데이터와 상세 리포트를 확인하세요" hidePeriodFilter />
 
-      <Tabs defaultValue="activity">
-        <TabsList className="bg-gray-100">
-          <TabsTrigger value="activity">활동현황</TabsTrigger>
-          <TabsTrigger value="platform">플랫폼 현황</TabsTrigger>
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <div className="flex items-center justify-between">
+          <TabsList className="bg-gray-100">
+            <TabsTrigger value="activity">활동현황</TabsTrigger>
+            <TabsTrigger value="platform">플랫폼 현황</TabsTrigger>
+          </TabsList>
+          {activeTab === "activity" && (
+            <Button
+              size="sm"
+              className="btn-pink text-xs h-8 px-3"
+              onClick={() => setSimSignal(s => s + 1)}
+            >
+              ▶ 시뮬레이션 실행
+            </Button>
+          )}
+        </div>
 
         <TabsContent value="activity" className="mt-6">
-          <ActivityTab autoOpen={autoOpenSim} />
+          <ActivityTab autoOpen={autoOpenSim} openSignal={simSignal} />
         </TabsContent>
 
         <TabsContent value="platform" className="mt-6">
