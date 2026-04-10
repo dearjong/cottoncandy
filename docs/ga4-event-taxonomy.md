@@ -86,7 +86,6 @@
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `project_id` | `PN-20240614-0001` | 프로젝트 ID |
 | `project_type` | `공고` / `1:1` | 유형 구분 |
 | `user_type` | `partner` / `guest` | 누가 보는지 |
 
@@ -102,7 +101,6 @@
 
 | 파라미터 | 예시값 |
 |---------|--------|
-| `company_id` | `42` |
 | `company_type` | `agency` / `production` |
 | `action` | `add` / `remove` |
 | `user_type` | `advertiser` |
@@ -231,7 +229,6 @@
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `portfolio_id` | `pf_3821` | 포트폴리오 ID |
 | `category` | `영상광고` | 카테고리 |
 | `partner_type` | `대행사` / `제작사` | 파트너 유형 |
 | `total_sessions` | `3` | 완료까지 세션 수 |
@@ -316,7 +313,6 @@
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `project_id` | `PN-20240614-0001` | 프로젝트 ID |
 | `project_type` | `공고` / `1:1` | 유형 구분 |
 | `partner_type` | `제작사` / `대행사` | 파트너 유형 |
 
@@ -347,7 +343,6 @@
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `consulting_id` | `CONS-20250401-001` | 컨설팅 케이스 ID |
 | `channel` | `SMS,KAKAO` | 발송 채널 (복수 시 콤마 구분) |
 | `user_type` | `admin` | 항상 관리자(컨설턴트) |
 
@@ -355,7 +350,6 @@
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `consulting_id` | `CONS-20250401-001` | 컨설팅 케이스 ID |
 | `outcome_kind` | `MATCHING_PUBLIC` | 결과 유형 (`MATCHING_PUBLIC` / `MATCHING_1TO1` / `DIRECT_INTRO` / `SIMPLE_CONSULT`) |
 | `service_tier` | `FULLCARE_PT` | 서비스 티어 (`SIMPLE_MATCH` / `PROJECT_RUN` / `FULLCARE_PT` / `CUSTOM`) |
 | `user_type` | `admin` | 항상 관리자(컨설턴트) |
@@ -364,8 +358,6 @@
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `consulting_id` | `CONS-20250401-001` | 연결 대상 컨설팅 케이스 ID |
-| `project_id` | `PID-20250401-0001` | 연결된 프로젝트 ID |
 | `outcome_kind` | `MATCHING_PUBLIC` | 결과 유형 |
 | `user_type` | `admin` | 항상 관리자(컨설턴트) |
 
@@ -390,8 +382,6 @@
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `company_id` | `1` | 기업 ID |
-| `company_name` | `솜사탕애드` | 기업명 |
 | `user_type` | `advertiser` | 항상 의뢰사 |
 | `invited` / `confirmed` / `completed` / `selected` | `true` / `false` | 토글 상태 |
 | `pt_round` | `pt1` / `pt2` | PT 차수 (PT 이벤트만) |
@@ -413,7 +403,6 @@
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `partner_name` | `마케팅에이전션` | 계약 파트너명 |
 | `budget_range` | `1.5억~2억원` | 계약비 구간 (UX 표시용) |
 | `contract_value_krw` | `180000000` | **실제 계약 금액 (원)** — GA4 `value` 파라미터로도 전달, 매출 집계용 |
 | `value` | `180000000` | GA4 표준 매출 파라미터 (자동 설정) |
@@ -428,7 +417,6 @@
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
 | `request_type` | `internal` / `partner` | 인정부서 vs 파트너사 요청 구분 |
-| `partner_name` | `마케팅에이전션` | 파트너명 |
 
 ---
 
@@ -456,7 +444,6 @@
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `project_title` | `[베스트전자] TV 신제품 프로모션` | 프로젝트명 |
 | `concept_count` | `3` | 제출 컨셉 수 |
 | `user_type` | `partner` | 항상 파트너사 |
 
@@ -464,14 +451,12 @@
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `project_title` | `[베스트전자] TV 신제품 프로모션` | 프로젝트명 |
 | `user_type` | `advertiser` | 항상 의뢰사 |
 
 **`deliverable_submitted` · `deliverable_confirmed` 공통 파라미터**
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `project_title` | `[베스트전자] TV 신제품 프로모션` | 프로젝트명 |
 | `phase` | `1` / `2` | 산출물 차수 |
 | `user_type` | `partner` / `advertiser` | 발송 주체 |
 
@@ -496,7 +481,6 @@
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `partner_name` | `솜사탕애드` | 파트너 기업명 |
 | `has_client_rating` | `true` | 의뢰사 평점 작성 여부 |
 | `has_partner_rating` | `true` | 파트너사 평점 작성 여부 |
 | `has_text` | `true` | 리뷰 텍스트 작성 여부 |
@@ -506,8 +490,6 @@
 
 | 파라미터 | 예시값 | 설명 |
 |---------|--------|------|
-| `partner_name` | `솜사탕애드` | 파트너 기업명 |
-| `project_title` | `[베스트전자] TV 신제품 프로모션` | 프로젝트명 (있는 경우) |
 | `user_type` | `advertiser` | 항상 의뢰사 |
 
 > **설계 포인트**: `review_submitted`(리뷰 등록)와 `project_completed`(최종 완료 버튼)는 review.tsx `handleComplete`에서 동시 발사.  
@@ -667,7 +649,7 @@ site_visit
     → consulting_responded               ← 컨설턴트 응답 완료 (케이스 종결)
 
 [별도 흐름] 컨설턴트가 직접 새 프로젝트 생성 후 연결:
-  consulting_project_linked (consulting_id ↔ project_id)
+  consulting_project_linked (케이스 → 프로젝트 연결)
 ```
 
 > ※ 컨설팅은 프로젝트로 자동 "전환"되지 않음.  
@@ -952,4 +934,4 @@ site_visit
 
 *이 문서는 ADMarket 플랫폼 GA4·Mixpanel 이벤트 정의 기준입니다. (v3.3 — 2026-04-10)*  
 *전체 퍼널 이벤트 연결 완료: `project_completed` · `deliverable_submitted/confirmed` · `draft_submitted` · `portfolio_registered`*  
-*v3.3 정리: 섹션 0(`identifyUser`) 제거 — SDK 내부 처리 (GA4 `client_id` · Mixpanel `distinct_id`는 플랫폼이 자동 관리), `user_id` 공통 프로퍼티 제거, 섹션 16 코호트 분석 중복 제거*
+*v3.3 정리: 섹션 0(`identifyUser`) · `user_id` 제거 (SDK 내부 처리), `project_id` · `consulting_id` · `company_id` · `portfolio_id` · `partner_name` · `project_title` 등 시스템 ID·고유명사 전체 제거 — 이벤트 정의서는 분석 차원 파라미터만 포함*
