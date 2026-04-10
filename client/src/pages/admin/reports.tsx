@@ -710,7 +710,7 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                 </td>
               </tr>
               <tr>
-                <td className="py-2.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">퍼널 인원</td>
+                <td className="py-2.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">활동인원</td>
                 <td className="py-2.5">
                   <div className="flex flex-wrap gap-3 items-end">
                     <NumInput label="프로젝트 등록" value={dialogCfg.projectRegCount}  onChange={(v) => setD("projectRegCount", v)}  min={0} max={10000} unit="명" />

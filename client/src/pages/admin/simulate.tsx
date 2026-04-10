@@ -372,7 +372,7 @@ export default function AdminSimulatePage() {
             {/* 퍼널 인원 */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-gray-600">퍼널 인원</span>
+                <span className="text-xs font-medium text-gray-600">활동인원</span>
                 <span className="text-[10px] text-gray-400">단계는 랜덤</span>
               </div>
               <div className="flex flex-wrap gap-4">
