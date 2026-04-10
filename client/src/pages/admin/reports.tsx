@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 
@@ -134,12 +137,46 @@ function loadSavedCfg(): SimConfig {
   } catch { return DEFAULTS; }
 }
 
-function ActivityTab() {
+function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?: number }) {
   const [data, setData] = useState<{ jobId: string; job: SimJob } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [cfg, setCfg] = useState<SimConfig>(loadSavedCfg);
+  const [dialogCfg, setDialogCfg] = useState<SimConfig>(loadSavedCfg);
+  const [loading, setLoading] = useState(false);
+
+  function setD<K extends keyof SimConfig>(key: K, val: SimConfig[K]) {
+    setDialogCfg((prev) => ({ ...prev, [key]: val }));
+  }
 
   function stopPolling() {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+  }
+
+  useEffect(() => {
+    if (autoOpen) { setDialogCfg(cfg); setDialogOpen(true); }
+  }, [autoOpen]);
+
+  useEffect(() => {
+    if (openSignal && openSignal > 0) { setDialogCfg(cfg); setDialogOpen(true); }
+  }, [openSignal]);
+
+  async function startSim(runCfg: SimConfig) {
+    setCfg(runCfg);
+    try { localStorage.setItem(SIM_CFG_KEY, JSON.stringify(runCfg)); } catch {}
+    setDialogOpen(false);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/simulate/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(runCfg),
+      });
+      await res.json();
+      setLoading(false);
+    } catch {
+      setLoading(false);
+    }
   }
 
   async function fetchLatest() {
@@ -165,6 +202,13 @@ function ActivityTab() {
   const utmBreakdown = job?.utmBreakdown ?? {};
   const userTypeBreakdown = job?.userTypeBreakdown ?? {};
   const geoBreakdown = job?.geoBreakdown ?? {};
+
+  const dUtmSum    = dialogCfg.pctTvcf + dialogCfg.pctGoogle + dialogCfg.pctNaver + dialogCfg.pctKakao + dialogCfg.pctOrganic;
+  const dUserSum   = dialogCfg.pctAdvertiser + dialogCfg.pctAgency + dialogCfg.pctProduction;
+  const dLoginSum  = dialogCfg.pctSsoLogin + dialogCfg.pctManualLogin + dialogCfg.pctSignup;
+  const dGenderSum = dialogCfg.pctMale + dialogCfg.pctFemale;
+  const dAgeSum    = dialogCfg.pct20s + dialogCfg.pct30s + dialogCfg.pct40s + dialogCfg.pct50s;
+  const dGeoSum    = dialogCfg.pctSeoul + dialogCfg.pctGyeonggi + dialogCfg.pctLocal + dialogCfg.pctAbroad;
 
   return (
     <div className="space-y-6">
@@ -226,7 +270,7 @@ function ActivityTab() {
                 </div>
               </div>
 
-              {/* 유저 유형 */}
+              {/* 인증 현황 */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
                 <div>
                   <p className="font-medium text-gray-800">유저 유형</p>
@@ -403,7 +447,7 @@ function ActivityTab() {
           </div>{/* /성별+직접유입 2열 */}
 
           {/* 메인화면 클릭 분석 */}
-          {job && Object.keys(job.homeClickBreakdown ?? {}).length > 0 && (() => {
+          {(() => {
             const HOME_ELEMENT_META: Record<string, { label: string; color: string; dest: string }> = {
               cta:            { label: "메인 Hero CTA (무료로 의뢰하기)", color: "bg-pink-500",    dest: "→ /create-project/step1" },
               free_start_btn: { label: "무료로 시작하기 (헤더 버튼)",      color: "bg-rose-400",    dest: "→ /signup" },
@@ -416,7 +460,8 @@ function ActivityTab() {
               flow_step:      { label: "이용 방법 단계",                   color: "bg-orange-400",  dest: "→ /guide/how-to-use" },
               faq_more:       { label: "FAQ 전체보기",                     color: "bg-gray-400",    dest: "→ /guide/faq" },
             };
-            const entries = Object.entries(job.homeClickBreakdown)
+            const breakdown = job?.homeClickBreakdown ?? {};
+            const entries = Object.entries(breakdown)
               .filter(([key]) => key && key !== "undefined")
               .sort(([, a], [, b]) => b - a);
             const total = entries.reduce((s, [, v]) => s + v, 0);
@@ -426,37 +471,43 @@ function ActivityTab() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="font-medium text-gray-800">메인화면 클릭 분석</p>
-                    <p className="text-[10px] text-gray-400">홈(/)에서 사용자가 어떤 요소를 눌러 다음 화면으로 이동하는지 — 총 {total.toLocaleString()}회 클릭</p>
+                    <p className="text-[10px] text-gray-400">홈(/)에서 사용자가 어떤 요소를 눌러 다음 화면으로 이동하는지{total > 0 ? ` — 총 ${total.toLocaleString()}회 클릭` : ""}</p>
                   </div>
                   <div className="text-[10px] text-gray-400 text-right shrink-0 pt-1">
-                    cta / 카드 / 로그인 등<br />8개 요소 추적
+                    cta / 카드 / 로그인 등<br />10개 요소 추적
                   </div>
                 </div>
-                <div className="space-y-2">
-                  {entries.map(([element, count]) => {
-                    const meta = HOME_ELEMENT_META[element] ?? { label: element, color: "bg-gray-300", dest: "" };
-                    const barPct  = Math.round((count / maxCount) * 100);
-                    const sharePct = total > 0 ? Math.round((count / total) * 100) : 0;
-                    return (
-                      <div key={element} className="flex items-center gap-3">
-                        <div className="w-40 shrink-0">
-                          <div className="text-xs text-gray-700 truncate">{meta.label}</div>
-                          <div className="text-[10px] text-gray-400 truncate">{meta.dest}</div>
-                        </div>
-                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                          <div className={`${meta.color} h-3 rounded-full transition-all duration-500`}
-                            style={{ width: `${Math.max(barPct, 2)}%` }} />
-                        </div>
-                        <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                        <div className="w-8 text-right text-xs text-gray-400">{sharePct}%</div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="bg-pink-50 rounded-lg px-3 py-2 text-[10px] text-pink-700 mt-1">
-                  💡 CTA 클릭이 {Math.round(((job.homeClickBreakdown["cta"] ?? 0) / Math.max(total, 1)) * 100)}%로 가장 높습니다.
-                  공모전 카드는 비로그인 유저의 주요 탐색 경로입니다.
-                </div>
+                {entries.length === 0 ? (
+                  <div className="text-xs text-gray-400 py-4 text-center">시뮬레이션 실행 후 데이터가 표시됩니다</div>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      {entries.map(([element, count]) => {
+                        const meta = HOME_ELEMENT_META[element] ?? { label: element, color: "bg-gray-300", dest: "" };
+                        const barPct  = Math.round((count / maxCount) * 100);
+                        const sharePct = total > 0 ? Math.round((count / total) * 100) : 0;
+                        return (
+                          <div key={element} className="flex items-center gap-3">
+                            <div className="w-40 shrink-0">
+                              <div className="text-xs text-gray-700 truncate">{meta.label}</div>
+                              <div className="text-[10px] text-gray-400 truncate">{meta.dest}</div>
+                            </div>
+                            <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                              <div className={`${meta.color} h-3 rounded-full transition-all duration-500`}
+                                style={{ width: `${Math.max(barPct, 2)}%` }} />
+                            </div>
+                            <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                            <div className="w-8 text-right text-xs text-gray-400">{sharePct}%</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="bg-pink-50 rounded-lg px-3 py-2 text-[10px] text-pink-700 mt-1">
+                      💡 CTA 클릭이 {Math.round(((breakdown["cta"] ?? 0) / Math.max(total, 1)) * 100)}%로 가장 높습니다.
+                      공모전 카드는 비로그인 유저의 주요 탐색 경로입니다.
+                    </div>
+                  </>
+                )}
               </div>
             );
           })()}
@@ -639,144 +690,49 @@ function ActivityTab() {
         </>
       )}
 
-    </div>
-  );
-}
+      {/* 시뮬레이션 설정 다이얼로그 */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader className="pb-2">
+            <DialogTitle>시뮬레이션 설정</DialogTitle>
+          </DialogHeader>
 
-function SimulateSettingsTab() {
-  const [cfg, setCfg] = useState<SimConfig>(loadSavedCfg);
-  const [loading, setLoading] = useState(false);
-  const [job, setJob] = useState<SimJob | null>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  function setC<K extends keyof SimConfig>(key: K, val: SimConfig[K]) {
-    setCfg((prev) => ({ ...prev, [key]: val }));
-  }
-
-  function stopPolling() {
-    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-  }
-
-  useEffect(() => {
-    const fetchLatest = async () => {
-      try {
-        const res = await fetch("/api/admin/simulate/latest");
-        const json = await res.json();
-        setJob(json?.job ?? null);
-      } catch { /* ignore */ }
-    };
-    fetchLatest();
-    pollRef.current = setInterval(fetchLatest, 3000);
-    return () => stopPolling();
-  }, []);
-
-  async function startSim() {
-    try { localStorage.setItem(SIM_CFG_KEY, JSON.stringify(cfg)); } catch {}
-    setLoading(true);
-    try {
-      const res = await fetch("/api/admin/simulate/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(cfg),
-      });
-      await res.json();
-      setLoading(false);
-    } catch { setLoading(false); }
-  }
-
-  const isRunning = job && ["pending", "generating", "sending"].includes(job.status);
-  const isDone = job?.status === "done";
-
-  const utmSum    = cfg.pctTvcf + cfg.pctGoogle + cfg.pctNaver + cfg.pctKakao + cfg.pctOrganic;
-  const userSum   = cfg.pctAdvertiser + cfg.pctAgency + cfg.pctProduction;
-  const loginSum  = cfg.pctSsoLogin + cfg.pctManualLogin + cfg.pctSignup;
-  const genderSum = cfg.pctMale + cfg.pctFemale;
-  const ageSum    = cfg.pct20s + cfg.pct30s + cfg.pct40s + cfg.pct50s;
-  const geoSum    = cfg.pctSeoul + cfg.pctGyeonggi + cfg.pctLocal + cfg.pctAbroad;
-
-  return (
-    <div className="space-y-5">
-
-      {/* 진행 상황 */}
-      {job && (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="font-medium text-gray-800">진행 상황</span>
+          {/* 기본 설정 행 */}
+          <div className="flex items-center gap-6 pb-3 border-b border-gray-100">
             <div className="flex items-center gap-2">
-              {isRunning && <Badge className="bg-blue-100 text-blue-700 animate-pulse border-0">실행 중</Badge>}
-              {isDone    && <Badge className="bg-green-100 text-green-700 border-0">완료</Badge>}
-              {job.status === "error" && <Badge variant="destructive">오류</Badge>}
-              <span className="text-xs text-gray-400">{(((job.completedAt ?? Date.now()) - job.startedAt) / 1000).toFixed(1)}초 경과</span>
+              <span className="text-xs text-gray-500 whitespace-nowrap">가상 사용자</span>
+              <Select value={String(dialogCfg.userCount)} onValueChange={(v) => setD("userCount", Number(v))}>
+                <SelectTrigger className="w-28 h-8 text-xs border-gray-200"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {[100, 300, 500, 1000, 2000, 3000, 5000, 10000].map((n) => (
+                    <SelectItem key={n} value={String(n)}>{n.toLocaleString()}명</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 whitespace-nowrap">이벤트 분산 기간</span>
+              <Select value={String(dialogCfg.periodDays)} onValueChange={(v) => setD("periodDays", Number(v))}>
+                <SelectTrigger className="w-28 h-8 text-xs border-gray-200"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 7, 14, 30, 60, 90].map((d) => (
+                    <SelectItem key={d} value={String(d)}>{d}일간 분산</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">{job.message}</span>
-              <span className="font-medium text-gray-700">{job.progress}%</span>
-            </div>
-            <Progress value={job.progress} className="h-1.5" />
-          </div>
-          <div className="grid grid-cols-4 gap-3">
-            {[
-              { label: "가상 사용자", value: job.totalUsers.toLocaleString() + "명" },
-              { label: "생성 이벤트", value: job.totalEvents.toLocaleString() + "개" },
-              { label: "전송 배치",   value: `${job.batchesSent} / ${job.totalBatches}` },
-              { label: "오류",        value: job.errors.length + "건" },
-            ].map((s) => (
-              <div key={s.label} className="bg-gray-50 rounded-lg p-3 text-center">
-                <div className="text-lg font-bold text-gray-800">{s.value}</div>
-                <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
-              </div>
-            ))}
-          </div>
-          {isDone && (
-            <div className="bg-green-50 rounded-lg px-4 py-3 text-sm text-green-700">
-              ✅ GA4 + Mixpanel 전송 완료 — 활동현황 탭에서 결과를 확인하세요
-            </div>
-          )}
-        </div>
-      )}
 
-      {/* 설정 카드 */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
-        <p className="font-medium text-gray-800">시뮬레이션 설정</p>
-
-        {/* 기본 설정 행 */}
-        <div className="flex items-center gap-6 pb-3 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500 whitespace-nowrap">가상 사용자</span>
-            <Select value={String(cfg.userCount)} onValueChange={(v) => setC("userCount", Number(v))}>
-              <SelectTrigger className="w-28 h-8 text-xs border-gray-200"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {[100, 300, 500, 1000, 2000, 3000, 5000, 10000].map((n) => (
-                  <SelectItem key={n} value={String(n)}>{n.toLocaleString()}명</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500 whitespace-nowrap">이벤트 분산 기간</span>
-            <Select value={String(cfg.periodDays)} onValueChange={(v) => setC("periodDays", Number(v))}>
-              <SelectTrigger className="w-28 h-8 text-xs border-gray-200"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {[1, 2, 3, 7, 14, 30, 60, 90].map((d) => (
-                  <SelectItem key={d} value={String(d)}>{d}일간 분산</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* 설정 테이블 */}
-        <table className="w-full text-xs border-collapse">
-          <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left py-1 pr-4 text-[10px] font-medium text-gray-400 w-24">구분</th>
-              <th className="text-left py-1 text-[10px] font-medium text-gray-400">항목별 비율</th>
-              <th className="text-right py-1 pl-4 text-[10px] font-medium text-gray-400 w-16">합계</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
+          {/* 설정 테이블 */}
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="text-left py-1 pr-4 text-[10px] font-medium text-gray-400 w-24">구분</th>
+                <th className="text-left py-1 text-[10px] font-medium text-gray-400">항목별 비율</th>
+                <th className="text-right py-1 pl-4 text-[10px] font-medium text-gray-400 w-16">합계</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
               <tr>
                 <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">
                   인증 현황
@@ -784,17 +740,17 @@ function SimulateSettingsTab() {
                 </td>
                 <td className="py-1">
                   <div className="flex flex-wrap gap-2 items-end">
-                    <NumInput label="SSO 로그인"  value={cfg.pctSsoLogin}    onChange={(v) => setC("pctSsoLogin", v)} />
-                    <NumInput label="수동 로그인"  value={cfg.pctManualLogin} onChange={(v) => setC("pctManualLogin", v)} />
-                    <NumInput label="신규 가입"    value={cfg.pctSignup}      onChange={(v) => setC("pctSignup", v)} />
+                    <NumInput label="SSO 로그인"  value={dialogCfg.pctSsoLogin}    onChange={(v) => setD("pctSsoLogin", v)} />
+                    <NumInput label="수동 로그인"  value={dialogCfg.pctManualLogin} onChange={(v) => setD("pctManualLogin", v)} />
+                    <NumInput label="신규 가입"    value={dialogCfg.pctSignup}      onChange={(v) => setD("pctSignup", v)} />
                     <div className="flex flex-col gap-0.5">
                       <span className="text-[10px] text-gray-400">미로그인</span>
-                      <span className="text-xs font-semibold text-gray-700">{Math.max(0, 100 - loginSum)}%</span>
+                      <span className="text-xs font-semibold text-gray-700">{Math.max(0, 100 - dLoginSum)}%</span>
                     </div>
                   </div>
                 </td>
                 <td className="py-1 pl-4 text-right align-middle">
-                  <span className={`font-semibold ${loginSum > 100 ? "text-red-500" : "text-gray-400"}`}>{loginSum}%</span>
+                  <span className={`font-semibold ${dLoginSum > 100 ? "text-red-500" : "text-gray-400"}`}>{dLoginSum}%</span>
                 </td>
               </tr>
               <tr>
@@ -804,28 +760,28 @@ function SimulateSettingsTab() {
                 </td>
                 <td className="py-1">
                   <div className="flex flex-wrap gap-2 items-end">
-                    <NumInput label="광고주" value={cfg.pctAdvertiser} onChange={(v) => setC("pctAdvertiser", v)} />
-                    <NumInput label="대행사" value={cfg.pctAgency}     onChange={(v) => setC("pctAgency", v)} />
-                    <NumInput label="제작사" value={cfg.pctProduction} onChange={(v) => setC("pctProduction", v)} />
+                    <NumInput label="광고주" value={dialogCfg.pctAdvertiser} onChange={(v) => setD("pctAdvertiser", v)} />
+                    <NumInput label="대행사" value={dialogCfg.pctAgency}     onChange={(v) => setD("pctAgency", v)} />
+                    <NumInput label="제작사" value={dialogCfg.pctProduction} onChange={(v) => setD("pctProduction", v)} />
                   </div>
                 </td>
                 <td className="py-1 pl-4 text-right align-middle">
-                  <span className={`font-semibold ${userSum === 100 ? "text-green-600" : "text-amber-500"}`}>{userSum}%</span>
+                  <span className={`font-semibold ${dUserSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dUserSum}%</span>
                 </td>
               </tr>
               <tr>
                 <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">UTM 유입</td>
                 <td className="py-1">
                   <div className="flex flex-wrap gap-2 items-end">
-                    <NumInput label="tvcf.co.kr" value={cfg.pctTvcf}    onChange={(v) => setC("pctTvcf", v)} />
-                    <NumInput label="Google"     value={cfg.pctGoogle}   onChange={(v) => setC("pctGoogle", v)} />
-                    <NumInput label="Naver"      value={cfg.pctNaver}    onChange={(v) => setC("pctNaver", v)} />
-                    <NumInput label="Kakao"      value={cfg.pctKakao}    onChange={(v) => setC("pctKakao", v)} />
-                    <NumInput label="Organic"    value={cfg.pctOrganic}  onChange={(v) => setC("pctOrganic", v)} />
+                    <NumInput label="tvcf.co.kr" value={dialogCfg.pctTvcf}    onChange={(v) => setD("pctTvcf", v)} />
+                    <NumInput label="Google"     value={dialogCfg.pctGoogle}   onChange={(v) => setD("pctGoogle", v)} />
+                    <NumInput label="Naver"      value={dialogCfg.pctNaver}    onChange={(v) => setD("pctNaver", v)} />
+                    <NumInput label="Kakao"      value={dialogCfg.pctKakao}    onChange={(v) => setD("pctKakao", v)} />
+                    <NumInput label="Organic"    value={dialogCfg.pctOrganic}  onChange={(v) => setD("pctOrganic", v)} />
                   </div>
                 </td>
                 <td className="py-1 pl-4 text-right align-middle">
-                  <span className={`font-semibold ${utmSum === 100 ? "text-green-600" : "text-amber-500"}`}>{utmSum}%</span>
+                  <span className={`font-semibold ${dUtmSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dUtmSum}%</span>
                 </td>
               </tr>
               <tr>
@@ -833,35 +789,35 @@ function SimulateSettingsTab() {
                 <td className="py-1">
                   <div className="flex flex-wrap gap-x-6 gap-y-1 items-end">
                     <div className="flex gap-2 items-end">
-                      <NumInput label="여성" value={cfg.pctFemale} onChange={(v) => setC("pctFemale", v)} />
-                      <NumInput label="남성" value={cfg.pctMale}   onChange={(v) => setC("pctMale", v)} />
-                      <span className={`text-[10px] font-semibold pb-1 ${genderSum === 100 ? "text-green-600" : "text-amber-500"}`}>{genderSum}%</span>
+                      <NumInput label="여성" value={dialogCfg.pctFemale} onChange={(v) => setD("pctFemale", v)} />
+                      <NumInput label="남성" value={dialogCfg.pctMale}   onChange={(v) => setD("pctMale", v)} />
+                      <span className={`text-[10px] font-semibold pb-1 ${dGenderSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dGenderSum}%</span>
                     </div>
                     <div className="flex gap-2 items-end">
-                      <NumInput label="20대" value={cfg.pct20s} onChange={(v) => setC("pct20s", v)} />
-                      <NumInput label="30대" value={cfg.pct30s} onChange={(v) => setC("pct30s", v)} />
-                      <NumInput label="40대" value={cfg.pct40s} onChange={(v) => setC("pct40s", v)} />
-                      <NumInput label="50대" value={cfg.pct50s} onChange={(v) => setC("pct50s", v)} />
-                      <span className={`text-[10px] font-semibold pb-1 ${ageSum === 100 ? "text-green-600" : "text-amber-500"}`}>{ageSum}%</span>
+                      <NumInput label="20대" value={dialogCfg.pct20s} onChange={(v) => setD("pct20s", v)} />
+                      <NumInput label="30대" value={dialogCfg.pct30s} onChange={(v) => setD("pct30s", v)} />
+                      <NumInput label="40대" value={dialogCfg.pct40s} onChange={(v) => setD("pct40s", v)} />
+                      <NumInput label="50대" value={dialogCfg.pct50s} onChange={(v) => setD("pct50s", v)} />
+                      <span className={`text-[10px] font-semibold pb-1 ${dAgeSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dAgeSum}%</span>
                     </div>
                   </div>
                 </td>
                 <td className="py-1 pl-4 align-middle" />
               </tr>
               <tr>
-                <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">지역·등록유형</td>
+                <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">지역·활동인원</td>
                 <td className="py-1">
                   <div className="flex flex-wrap gap-x-6 gap-y-1 items-end">
                     <div className="flex gap-2 items-end">
-                      <NumInput label="서울"  value={cfg.pctSeoul}    onChange={(v) => setC("pctSeoul", v)} />
-                      <NumInput label="경기"  value={cfg.pctGyeonggi} onChange={(v) => setC("pctGyeonggi", v)} />
-                      <NumInput label="지방"  value={cfg.pctLocal}    onChange={(v) => setC("pctLocal", v)} />
-                      <NumInput label="해외"  value={cfg.pctAbroad}   onChange={(v) => setC("pctAbroad", v)} />
-                      <span className={`text-[10px] font-semibold pb-1 ${geoSum === 100 ? "text-green-600" : "text-amber-500"}`}>{geoSum}%</span>
+                      <NumInput label="서울"  value={dialogCfg.pctSeoul}    onChange={(v) => setD("pctSeoul", v)} />
+                      <NumInput label="경기"  value={dialogCfg.pctGyeonggi} onChange={(v) => setD("pctGyeonggi", v)} />
+                      <NumInput label="지방"  value={dialogCfg.pctLocal}    onChange={(v) => setD("pctLocal", v)} />
+                      <NumInput label="해외"  value={dialogCfg.pctAbroad}   onChange={(v) => setD("pctAbroad", v)} />
+                      <span className={`text-[10px] font-semibold pb-1 ${dGeoSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dGeoSum}%</span>
                     </div>
                     <div className="flex gap-2 items-end">
-                      <NumInput label="프로젝트 등록"  value={cfg.projectRegCount}  onChange={(v) => setC("projectRegCount", v)}  min={0} max={10000} unit="명" />
-                      <NumInput label="포트폴리오 등록" value={cfg.portfolioRegCount} onChange={(v) => setC("portfolioRegCount", v)} min={0} max={10000} unit="명" />
+                      <NumInput label="프로젝트 등록"  value={dialogCfg.projectRegCount}  onChange={(v) => setD("projectRegCount", v)}  min={0} max={10000} unit="명" />
+                      <NumInput label="포트폴리오 등록" value={dialogCfg.portfolioRegCount} onChange={(v) => setD("portfolioRegCount", v)} min={0} max={10000} unit="명" />
                     </div>
                   </div>
                 </td>
@@ -874,16 +830,18 @@ function SimulateSettingsTab() {
             ⚠ 실행 시 실제 GA4 + Mixpanel 계정에 가상 이벤트가 추가됩니다.
           </div>
 
-          <div className="flex justify-end pt-1">
+          <DialogFooter className="gap-2 pt-1">
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>취소</Button>
             <Button
               className="bg-pink-600 hover:bg-pink-700 text-white"
-              onClick={startSim}
+              onClick={() => startSim(dialogCfg)}
               disabled={!!isRunning || loading}
             >
-              {loading ? "시작 중..." : `▶ ${cfg.userCount.toLocaleString()}명 / ${cfg.periodDays}일간 분산 시작`}
+              {loading ? "시작 중..." : `▶ ${dialogCfg.userCount.toLocaleString()}명 / ${dialogCfg.periodDays}일간 분산 시작`}
             </Button>
-          </div>
-      </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -891,29 +849,59 @@ function SimulateSettingsTab() {
 export default function ReportsPage() {
   const search = useSearch();
   const autoOpenSim = new URLSearchParams(search).get("simulate") === "1";
-  const [activeTab, setActiveTab] = useState(autoOpenSim ? "simulate" : "activity");
+  const [activeTab, setActiveTab] = useState("activity");
+  const [simSignal, setSimSignal] = useState(0);
+  const [simStatus, setSimStatus] = useState<{ progress: number; message: string; status: string } | null>(null);
+
+  useEffect(() => {
+    const poll = setInterval(async () => {
+      try {
+        const res = await fetch("/api/admin/simulate/latest");
+        const json = await res.json();
+        setSimStatus(json?.job ?? null);
+      } catch { /* ignore */ }
+    }, 3000);
+    return () => clearInterval(poll);
+  }, []);
+
+  const isRunning = simStatus && ["pending", "generating", "sending"].includes(simStatus.status);
 
   return (
     <div className="space-y-6 p-6">
       <PageHeader title="통계/리포트" description="플랫폼 성과 데이터와 상세 리포트를 확인하세요" hidePeriodFilter />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-gray-100">
-          <TabsTrigger value="activity">활동현황</TabsTrigger>
-          <TabsTrigger value="platform">플랫폼 현황</TabsTrigger>
-          <TabsTrigger value="simulate">시뮬레이션 설정 및 실행</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center gap-3 min-w-0">
+          <TabsList className="bg-gray-100 shrink-0">
+            <TabsTrigger value="activity">활동현황</TabsTrigger>
+            <TabsTrigger value="platform">플랫폼 현황</TabsTrigger>
+          </TabsList>
+          {activeTab === "activity" && (
+            <>
+              <Button
+                className="btn-pink-compact text-xs h-7 py-0 px-3 shrink-0"
+                onClick={() => setSimSignal(s => s + 1)}
+                disabled={!!isRunning}
+              >
+                시뮬레이션 설정 및 실행
+              </Button>
+              {isRunning && simStatus && (
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="text-[11px] text-gray-500 shrink-0 whitespace-nowrap">{simStatus.message}</span>
+                  <Progress value={simStatus.progress} className="h-1.5 flex-1" />
+                  <span className="text-[11px] font-semibold text-pink-600 shrink-0">{simStatus.progress}%</span>
+                </div>
+              )}
+            </>
+          )}
+        </div>
 
         <TabsContent value="activity" className="mt-6">
-          <ActivityTab />
+          <ActivityTab autoOpen={autoOpenSim} openSignal={simSignal} />
         </TabsContent>
 
         <TabsContent value="platform" className="mt-6">
           <StatisticsDashboard />
-        </TabsContent>
-
-        <TabsContent value="simulate" className="mt-6">
-          <SimulateSettingsTab />
         </TabsContent>
       </Tabs>
     </div>
