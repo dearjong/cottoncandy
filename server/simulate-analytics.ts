@@ -508,37 +508,51 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           { value: 1, weight: 25 }, { value: 2, weight: 45 }, { value: 3, weight: 30 },
         ]);
         const projStepsPerSession = Math.ceil(18 / projNumSessions);
-        let projCurrentTs     = projTs;
-        let lastStep          = 0;
-        let savedDraft        = false;
-        let projAbandoned     = false;
-        let projTotalSessions = 0;
+        let projCurrentTs        = projTs;
+        let lastStep             = 0;
+        let savedDraft           = false;
+        let projAbandoned        = false;
+        let projTotalSessions    = 0;
+        let projTotalWritingSec  = 0; // 실제 화면 작성 시간 (갭 제외)
         const projGapsHours: number[] = [];
 
         for (let sIdx = 0; sIdx < projNumSessions && !projAbandoned; sIdx++) {
           projTotalSessions++;
-          const sessionOffset = (step: number) => (step - sIdx * projStepsPerSession) * 60;
+          let sessionWriteOffset = 0; // 세션 내 경과 시간(초)
 
           add("project_session_started", uid, projCurrentTs, {
             session_number: sIdx + 1, steps_completed_so_far: lastStep,
-            project_type: pType, ...common,
+            project_type: pType, cumulative_writing_sec: projTotalWritingSec, ...common,
           });
 
           const sessionSteps = PROJECT_STEPS.slice(sIdx * projStepsPerSession, (sIdx + 1) * projStepsPerSession);
 
           for (const s of sessionSteps) {
+            // 단계별 소요시간: 초반 단순(45-120s), 중반 상세(90-420s), 후반 확인(30-120s)
+            const stepDuration = s.step <= 3 ? randInt(45, 120)
+              : s.step <= 12 ? randInt(90, 420)
+              : randInt(30, 120);
+
             stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
-            add(`step_${s.step}_${s.screen}`, uid, projCurrentTs + sessionOffset(s.step), {
-              step: s.step, screen: s.screen, project_type: pType, session_number: sIdx + 1, ...common,
+            add(`step_${s.step}_${s.screen}`, uid, projCurrentTs + sessionWriteOffset, {
+              step: s.step, screen: s.screen, project_type: pType,
+              session_number: sIdx + 1,
+              time_on_step_sec: stepDuration,
+              cumulative_writing_sec: projTotalWritingSec + stepDuration,
+              ...common,
             });
+
+            sessionWriteOffset     += stepDuration;
+            projTotalWritingSec    += stepDuration;
 
             // 임시저장 (step 5~15에서 7% 확률)
             if (s.step >= 5 && s.step <= 15 && !savedDraft && chance(0.07)) {
               savedDraft = true;
               job.draftSavedCount += 1;
-              const draftTs = projCurrentTs + sessionOffset(s.step) + 30;
+              const draftTs = projCurrentTs + sessionWriteOffset;
               add("project_draft_saved", uid, draftTs, {
-                step: s.step, screen: s.screen, project_type: pType, session_number: sIdx + 1, ...common,
+                step: s.step, screen: s.screen, project_type: pType,
+                session_number: sIdx + 1, cumulative_writing_sec: projTotalWritingSec, ...common,
               });
               if (chance(0.75)) {
                 job.draftResumedCount += 1;
@@ -553,11 +567,12 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             // 이탈 판정
             if (s.step < 18 && !chance(s.passRate)) {
               stepDropoff[s.step] = (stepDropoff[s.step] ?? 0) + 1;
-              add("project_step_abandoned", uid, projCurrentTs + sessionOffset(s.step) + 45, {
+              add("project_step_abandoned", uid, projCurrentTs + sessionWriteOffset + 5, {
                 step: s.step, screen: s.screen, project_type: pType,
-                had_draft: savedDraft, session_number: sIdx + 1, ...common,
+                had_draft: savedDraft, session_number: sIdx + 1,
+                time_on_step_sec: stepDuration, cumulative_writing_sec: projTotalWritingSec, ...common,
               });
-              add("page_exit", uid, projCurrentTs + sessionOffset(s.step) + 50, {
+              add("page_exit", uid, projCurrentTs + sessionWriteOffset + 10, {
                 path: `/create-project/step${s.step}`, exit_step: s.step, ...common,
               });
               lastStep = s.step;
@@ -568,12 +583,15 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           }
 
           if (!projAbandoned && sIdx < projNumSessions - 1) {
-            add("project_step_saved", uid, projCurrentTs + projStepsPerSession * 60 + 10, {
-              steps_completed: lastStep, project_type: pType, session_number: sIdx + 1, ...common,
+            add("project_step_saved", uid, projCurrentTs + sessionWriteOffset + 10, {
+              steps_completed: lastStep, project_type: pType,
+              session_number: sIdx + 1, cumulative_writing_sec: projTotalWritingSec, ...common,
             });
             const gapHours = randInt(1, 48);
             projGapsHours.push(gapHours);
-            projCurrentTs = projCurrentTs + projStepsPerSession * 60 + gapHours * 3600;
+            projCurrentTs = projCurrentTs + sessionWriteOffset + gapHours * 3600;
+          } else if (!projAbandoned) {
+            projCurrentTs = projCurrentTs + sessionWriteOffset;
           }
         }
 
@@ -585,11 +603,13 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             ? Math.round(projGapsHours.reduce((a, b) => a + b, 0) / projGapsHours.length) : 0;
 
           job.projectTypeBreakdown[pType] = (job.projectTypeBreakdown[pType] ?? 0) + 1;
-          add("project_submitted", uid, projCurrentTs + 60, {
+          add("project_submitted", uid, projCurrentTs + 10, {
             project_id: projectId, project_type: pType,
             category, budget_range: budget, is_first_time: utm.utm_source !== "tvcf",
             total_sessions: projTotalSessions, total_hours: projTotalHours,
-            total_days: projTotalDays, avg_session_gap_hours: projAvgGap, ...common,
+            total_days: projTotalDays, avg_session_gap_hours: projAvgGap,
+            total_writing_time_sec: projTotalWritingSec,
+            total_writing_time_min: Math.round(projTotalWritingSec / 60), ...common,
           });
           add("activation_achieved", uid, projCurrentTs + 61, { trigger_event: "project_submitted", ...common });
           if (chance(0.30)) {
@@ -629,33 +649,49 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           { value: 1, weight: 15 }, { value: 2, weight: 35 },
           { value: 3, weight: 30 }, { value: 4, weight: 20 },
         ]);
-        const pfSecsPerSession = Math.ceil(13 / pfNumSessions);
-        let pfCurrentTs      = pfTs;
-        let pfLastSection    = 0;
-        let pfAbandoned      = false;
-        let pfTotalSessions  = 0;
+        const pfSecsPerSession  = Math.ceil(13 / pfNumSessions);
+        let pfCurrentTs         = pfTs;
+        let pfLastSection       = 0;
+        let pfAbandoned         = false;
+        let pfTotalSessions     = 0;
+        let pfTotalWritingSec   = 0;
         const pfGapsHours: number[] = [];
 
         for (let sIdx = 0; sIdx < pfNumSessions && !pfAbandoned; sIdx++) {
           pfTotalSessions++;
+          let pfSessionWriteOffset = 0;
+
           add("portfolio_session_started", uid, pfCurrentTs, {
             session_number: sIdx + 1, sections_completed_so_far: pfLastSection,
-            partner_type: partnerType, ...common,
+            partner_type: partnerType, cumulative_writing_sec: pfTotalWritingSec, ...common,
           });
 
           const sessionSecs = PORTFOLIO_SECTIONS.slice(sIdx * pfSecsPerSession, (sIdx + 1) * pfSecsPerSession);
 
           for (const sec of sessionSecs) {
+            // 섹션별 소요시간: 간단 섹션(60-180s), 상세 섹션(180-600s)
+            const secDuration = [1,2,3].includes(sec.step) ? randInt(60, 180) : randInt(180, 600);
+
             pfFunnel[sec.step] = (pfFunnel[sec.step] ?? 0) + 1;
-            add(`portfolio_section_${sec.id}`, uid, pfCurrentTs + (sec.step - sIdx * pfSecsPerSession) * 40, {
-              section: sec.step, section_id: sec.id, partner_type: partnerType, session_number: sIdx + 1, ...common,
+            add(`portfolio_section_${sec.id}`, uid, pfCurrentTs + pfSessionWriteOffset, {
+              section: sec.step, section_id: sec.id, partner_type: partnerType,
+              session_number: sIdx + 1,
+              time_on_section_sec: secDuration,
+              cumulative_writing_sec: pfTotalWritingSec + secDuration,
+              ...common,
             });
+
+            pfSessionWriteOffset += secDuration;
+            pfTotalWritingSec    += secDuration;
+
             if (sec.step < 13 && !chance(sec.passRate)) {
               pfDropoff[sec.step] = (pfDropoff[sec.step] ?? 0) + 1;
-              add("portfolio_section_abandoned", uid, pfCurrentTs + (sec.step - sIdx * pfSecsPerSession) * 40 + 20, {
-                section: sec.step, section_id: sec.id, partner_type: partnerType, session_number: sIdx + 1, ...common,
+              add("portfolio_section_abandoned", uid, pfCurrentTs + pfSessionWriteOffset + 5, {
+                section: sec.step, section_id: sec.id, partner_type: partnerType,
+                session_number: sIdx + 1,
+                time_on_section_sec: secDuration, cumulative_writing_sec: pfTotalWritingSec, ...common,
               });
-              add("page_exit", uid, pfCurrentTs + (sec.step - sIdx * pfSecsPerSession) * 40 + 25, {
+              add("page_exit", uid, pfCurrentTs + pfSessionWriteOffset + 10, {
                 path: "/work/portfolio", exit_section: sec.step, exit_section_id: sec.id, ...common,
               });
               pfLastSection = sec.step;
@@ -666,12 +702,15 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           }
 
           if (!pfAbandoned && sIdx < pfNumSessions - 1) {
-            add("portfolio_section_saved", uid, pfCurrentTs + pfSecsPerSession * 40 + 10, {
-              sections_completed: pfLastSection, partner_type: partnerType, session_number: sIdx + 1, ...common,
+            add("portfolio_section_saved", uid, pfCurrentTs + pfSessionWriteOffset + 10, {
+              sections_completed: pfLastSection, partner_type: partnerType,
+              session_number: sIdx + 1, cumulative_writing_sec: pfTotalWritingSec, ...common,
             });
             const gapHours = randInt(1, 72);
             pfGapsHours.push(gapHours);
-            pfCurrentTs = pfCurrentTs + pfSecsPerSession * 40 + gapHours * 3600;
+            pfCurrentTs = pfCurrentTs + pfSessionWriteOffset + gapHours * 3600;
+          } else if (!pfAbandoned) {
+            pfCurrentTs = pfCurrentTs + pfSessionWriteOffset;
           }
         }
 
@@ -680,11 +719,13 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           const pfTotalDays  = +(pfTotalHours / 24).toFixed(1);
           const pfAvgGap     = pfGapsHours.length > 0
             ? Math.round(pfGapsHours.reduce((a, b) => a + b, 0) / pfGapsHours.length) : 0;
-          add("portfolio_registered", uid, pfCurrentTs + 13 * 40 + 10, {
+          add("portfolio_registered", uid, pfCurrentTs + 10, {
             portfolio_id: `pf_${randInt(1000, 9999)}`,
             category: weightedPick(CATEGORIES), partner_type: partnerType,
             total_sessions: pfTotalSessions, total_hours: pfTotalHours,
-            total_days: pfTotalDays, avg_session_gap_hours: pfAvgGap, ...common,
+            total_days: pfTotalDays, avg_session_gap_hours: pfAvgGap,
+            total_writing_time_sec: pfTotalWritingSec,
+            total_writing_time_min: Math.round(pfTotalWritingSec / 60), ...common,
           });
         }
       }
@@ -714,33 +755,48 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         { value: 1, weight: 15 }, { value: 2, weight: 35 },
         { value: 3, weight: 30 }, { value: 4, weight: 20 },
       ]);
-      const pfSecsPerSession2 = Math.ceil(13 / pfNumSessions2);
-      let pfCurrentTs2      = pfTs2;
-      let pfLastSection2    = 0;
-      let pfAbandoned2      = false;
-      let pfTotalSessions2  = 0;
+      const pfSecsPerSession2   = Math.ceil(13 / pfNumSessions2);
+      let pfCurrentTs2          = pfTs2;
+      let pfLastSection2        = 0;
+      let pfAbandoned2          = false;
+      let pfTotalSessions2      = 0;
+      let pfTotalWritingSec2    = 0;
       const pfGapsHours2: number[] = [];
 
       for (let sIdx = 0; sIdx < pfNumSessions2 && !pfAbandoned2; sIdx++) {
         pfTotalSessions2++;
+        let pfSessionWriteOffset2 = 0;
+
         add("portfolio_session_started", uid, pfCurrentTs2, {
           session_number: sIdx + 1, sections_completed_so_far: pfLastSection2,
-          partner_type: partnerType, ...common,
+          partner_type: partnerType, cumulative_writing_sec: pfTotalWritingSec2, ...common,
         });
 
         const sessionSecs2 = PORTFOLIO_SECTIONS.slice(sIdx * pfSecsPerSession2, (sIdx + 1) * pfSecsPerSession2);
 
         for (const sec of sessionSecs2) {
+          const secDuration2 = [1,2,3].includes(sec.step) ? randInt(60, 180) : randInt(180, 600);
+
           pfFunnel[sec.step] = (pfFunnel[sec.step] ?? 0) + 1;
-          add(`portfolio_section_${sec.id}`, uid, pfCurrentTs2 + (sec.step - sIdx * pfSecsPerSession2) * 40, {
-            section: sec.step, section_id: sec.id, partner_type: partnerType, session_number: sIdx + 1, ...common,
+          add(`portfolio_section_${sec.id}`, uid, pfCurrentTs2 + pfSessionWriteOffset2, {
+            section: sec.step, section_id: sec.id, partner_type: partnerType,
+            session_number: sIdx + 1,
+            time_on_section_sec: secDuration2,
+            cumulative_writing_sec: pfTotalWritingSec2 + secDuration2,
+            ...common,
           });
+
+          pfSessionWriteOffset2 += secDuration2;
+          pfTotalWritingSec2    += secDuration2;
+
           if (sec.step < 13 && !chance(sec.passRate)) {
             pfDropoff[sec.step] = (pfDropoff[sec.step] ?? 0) + 1;
-            add("portfolio_section_abandoned", uid, pfCurrentTs2 + (sec.step - sIdx * pfSecsPerSession2) * 40 + 20, {
-              section: sec.step, section_id: sec.id, partner_type: partnerType, session_number: sIdx + 1, ...common,
+            add("portfolio_section_abandoned", uid, pfCurrentTs2 + pfSessionWriteOffset2 + 5, {
+              section: sec.step, section_id: sec.id, partner_type: partnerType,
+              session_number: sIdx + 1,
+              time_on_section_sec: secDuration2, cumulative_writing_sec: pfTotalWritingSec2, ...common,
             });
-            add("page_exit", uid, pfCurrentTs2 + (sec.step - sIdx * pfSecsPerSession2) * 40 + 25, {
+            add("page_exit", uid, pfCurrentTs2 + pfSessionWriteOffset2 + 10, {
               path: "/work/portfolio", exit_section: sec.step, exit_section_id: sec.id, ...common,
             });
             pfLastSection2 = sec.step;
@@ -751,12 +807,15 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         }
 
         if (!pfAbandoned2 && sIdx < pfNumSessions2 - 1) {
-          add("portfolio_section_saved", uid, pfCurrentTs2 + pfSecsPerSession2 * 40 + 10, {
-            sections_completed: pfLastSection2, partner_type: partnerType, session_number: sIdx + 1, ...common,
+          add("portfolio_section_saved", uid, pfCurrentTs2 + pfSessionWriteOffset2 + 10, {
+            sections_completed: pfLastSection2, partner_type: partnerType,
+            session_number: sIdx + 1, cumulative_writing_sec: pfTotalWritingSec2, ...common,
           });
           const gapHours2 = randInt(1, 72);
           pfGapsHours2.push(gapHours2);
-          pfCurrentTs2 = pfCurrentTs2 + pfSecsPerSession2 * 40 + gapHours2 * 3600;
+          pfCurrentTs2 = pfCurrentTs2 + pfSessionWriteOffset2 + gapHours2 * 3600;
+        } else if (!pfAbandoned2) {
+          pfCurrentTs2 = pfCurrentTs2 + pfSessionWriteOffset2;
         }
       }
 
@@ -765,11 +824,13 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         const pfTotalDays2  = +(pfTotalHours2 / 24).toFixed(1);
         const pfAvgGap2     = pfGapsHours2.length > 0
           ? Math.round(pfGapsHours2.reduce((a, b) => a + b, 0) / pfGapsHours2.length) : 0;
-        add("portfolio_registered", uid, pfCurrentTs2 + 13 * 40 + 10, {
+        add("portfolio_registered", uid, pfCurrentTs2 + 10, {
           portfolio_id: `pf_${randInt(1000, 9999)}`,
           category: weightedPick(CATEGORIES), partner_type: partnerType,
           total_sessions: pfTotalSessions2, total_hours: pfTotalHours2,
-          total_days: pfTotalDays2, avg_session_gap_hours: pfAvgGap2, ...common,
+          total_days: pfTotalDays2, avg_session_gap_hours: pfAvgGap2,
+          total_writing_time_sec: pfTotalWritingSec2,
+          total_writing_time_min: Math.round(pfTotalWritingSec2 / 60), ...common,
         });
       }
     }
