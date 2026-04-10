@@ -369,49 +369,52 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                 </div>
               </div>
 
-              {/* 성별 */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-                <div>
-                  <p className="font-medium text-gray-800">성별</p>
-                  <p className="text-[10px] text-gray-400">전체 방문자 기준</p>
-                </div>
-                <div className="space-y-2">
-                  {(() => {
-                    const genderBreakdown = job?.genderBreakdown ?? {};
-                    const male   = genderBreakdown["male"]   ?? 0;
-                    const female = genderBreakdown["female"] ?? 0;
-                    const total  = male + female;
-                    return [
-                      { label: "남성", count: male,   color: "bg-blue-400"  },
-                      { label: "여성", count: female, color: "bg-pink-400"  },
-                    ].map(({ label, count, color }) => {
-                      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-                      return (
-                        <div key={label} className="flex items-center gap-3">
-                          <div className="w-14 text-xs text-gray-600 shrink-0">{label}</div>
-                          <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                            <div className={`${color} h-3 rounded-full transition-all duration-500`}
-                              style={{ width: `${Math.max(pct, count > 0 ? 1 : 0)}%` }} />
-                          </div>
-                          <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                          <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
-                        </div>
-                      );
-                    });
-                  })()}
-                </div>
-              </div>
             </div>
           </div>
 
-          {/* 직접 유입 / 북마크 랜딩 페이지 */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-            <div>
-              <p className="font-medium text-gray-800">직접 유입 / 북마크 랜딩 페이지</p>
-              <p className="text-[10px] text-gray-400">북마크하거나 URL을 직접 입력해 들어온 페이지 분포</p>
+          {/* 성별 + 직접 유입 나란히 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* 성별 */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
+              <div>
+                <p className="font-medium text-gray-800">성별</p>
+                <p className="text-[10px] text-gray-400">전체 방문자 기준</p>
+              </div>
+              <div className="space-y-2">
+                {(() => {
+                  const gd = job?.genderBreakdown ?? {};
+                  const male   = gd["male"]   ?? 0;
+                  const female = gd["female"] ?? 0;
+                  const total  = male + female;
+                  return [
+                    { label: "남성", count: male,   color: "bg-blue-400" },
+                    { label: "여성", count: female, color: "bg-pink-400" },
+                  ].map(({ label, count, color }) => {
+                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                    return (
+                      <div key={label} className="flex items-center gap-3">
+                        <div className="w-14 text-xs text-gray-600 shrink-0">{label}</div>
+                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                          <div className={`${color} h-3 rounded-full transition-all duration-500`}
+                            style={{ width: `${Math.max(pct, count > 0 ? 1 : 0)}%` }} />
+                        </div>
+                        <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                        <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
             </div>
-            <div className="space-y-2">
-              {(() => {
+
+            {/* 직접 유입 / 북마크 랜딩 페이지 */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
+              <div>
+                <p className="font-medium text-gray-800">직접 유입 / 북마크 랜딩 페이지</p>
+                <p className="text-[10px] text-gray-400">북마크하거나 URL을 직접 입력해 들어온 페이지 분포</p>
+              </div>
+              <div className="space-y-2">
+                {(() => {
                   const entries = Object.entries(job?.directEntryBreakdown ?? {}).sort(([, a], [, b]) => b - a);
                   const totalDirect = entries.reduce((s, [, v]) => s + v, 0);
                   const maxCount = entries[0]?.[1] ?? 1;
@@ -430,13 +433,12 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                     const sharePct = totalDirect > 0 ? Math.round((count / totalDirect) * 100) : 0;
                     return (
                       <div key={path} className="flex items-center gap-3">
-                        <div className="w-28 text-xs text-gray-600 truncate shrink-0">{PAGE_LABELS[path] ?? path}</div>
-                        <div className="text-[10px] text-gray-400 w-36 truncate shrink-0">{path}</div>
+                        <div className="w-24 text-xs text-gray-600 truncate shrink-0">{PAGE_LABELS[path] ?? path}</div>
                         <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
                           <div className={`${PAGE_COLORS[path] ?? "bg-gray-400"} h-3 rounded-full transition-all duration-500`}
                             style={{ width: `${Math.max(barPct, 2)}%` }} />
                         </div>
-                        <div className="w-12 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                        <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
                         <div className="w-8 text-right text-xs text-gray-400">{sharePct}%</div>
                       </div>
                     );
@@ -444,6 +446,7 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                 })()}
               </div>
             </div>
+          </div>{/* /성별+직접유입 2열 */}
 
           {/* 퍼널 2개 나란히 */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
