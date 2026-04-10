@@ -4,7 +4,7 @@ import Layout from '@/components/layout/layout';
 import WorkSidebar from '@/components/work/sidebar';
 import { useToast } from '@/hooks/use-toast';
 import { X, Plus, ExternalLink, FileText, ChevronDown } from 'lucide-react';
-import { trackProposalSubmitted } from '@/lib/analytics';
+import { trackProposalSubmitted, trackDraftSubmitted } from '@/lib/analytics';
 
 const PROJECT_TITLE = '[베스트킨티 TV 신제품 완제초점 프로포전]';
 
@@ -146,6 +146,10 @@ export default function WorkProjectProposalRegister() {
 
   const handleSubmit = () => {
     setSubmitted(true);
+    trackDraftSubmitted({
+      project_title: PROJECT_TITLE,
+      concept_count: groups.reduce((sum, g) => sum + g.items.length, 0),
+    });
     trackProposalSubmitted({
       project_title: PROJECT_TITLE,
       has_strategic_file: strategicFileUploaded,

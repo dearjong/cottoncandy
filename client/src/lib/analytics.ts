@@ -779,6 +779,42 @@ export function trackCompanyVerificationRejected(props: {
 }
 
 /**
+ * 시안(제안서) 제출 — proposal-register.tsx 제출하기 버튼 클릭 시 (파트너).
+ */
+export function trackDraftSubmitted(props: { project_title?: string; concept_count?: number }) {
+  publishAnalytics("draft_submitted", { ...props, user_type: "partner" });
+}
+
+/**
+ * 시안(제안서) 확정 — 의뢰사가 제안서를 확정/확인할 때.
+ */
+export function trackDraftConfirmed(props: { project_title?: string }) {
+  publishAnalytics("draft_confirmed", { ...props, user_type: "advertiser" });
+}
+
+/**
+ * 산출물 선택 요청 — 파트너가 의뢰사에 산출물 선택 요청 시.
+ */
+export function trackDeliverableSubmitted(props: { project_title?: string; phase?: number }) {
+  publishAnalytics("deliverable_submitted", { ...props, user_type: "partner" });
+}
+
+/**
+ * 산출물 최종 확정 — 의뢰사가 최종 산출물을 확정할 때.
+ */
+export function trackDeliverableConfirmed(props: { project_title?: string; phase?: number }) {
+  publishAnalytics("deliverable_confirmed", { ...props, user_type: "advertiser" });
+}
+
+/**
+ * 프로젝트 완료 — 제작 리뷰 양쪽 완료 처리 시.
+ * review.tsx handleComplete() 에서 호출.
+ */
+export function trackProjectCompleted(props: { partner_name?: string; project_title?: string }) {
+  publishAnalytics("project_completed", { ...props, user_type: "advertiser" });
+}
+
+/**
  * 포트폴리오(회사소개서) 등록 완료 — /portfolio/preview 등록하기 → 확인 버튼 클릭 시.
  * 등록 완료 팝업의 확인 버튼 클릭 직전 호출.
  */

@@ -11,6 +11,7 @@ import {
   trackReviewSubmitted,
   trackReviewEdited,
   trackReviewCompleted,
+  trackProjectCompleted,
 } from '@/lib/analytics';
 
 const CLIENT_ITEMS = [
@@ -111,6 +112,7 @@ export default function WorkProjectReview() {
 
   function handleComplete() {
     trackReviewCompleted({ partner_name: PARTNER });
+    trackProjectCompleted({ partner_name: PARTNER });
     setSubmitState('completed');
     toast({ title: '완료', description: '프로젝트가 최종 완료되었습니다.', duration: 2000 });
   }

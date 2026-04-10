@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { trackDeliverableSubmitted, trackDeliverableConfirmed } from '@/lib/analytics';
 
 const MOCK_PROJECTS = [{ id: '1', label: '[베스트전자] TV 신제품 판매촉진 프로모션' }];
 
@@ -60,11 +61,78 @@ const PHASE_TABS = [
   { key: 2, label: '2차 산출물' },
 ] as const;
 
+type PopupKey = 'upload_request' | 'final_request' | 'selection_complete' | 'final_confirm' | null;
+
+function TwoStepPopup({
+  confirmTitle,
+  confirmSub,
+  successTitle,
+  onConfirm,
+  onClose,
+}: {
+  confirmTitle: string;
+  confirmSub?: string;
+  successTitle: string;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  const [done, setDone] = useState(false);
+
+  function handleConfirm() {
+    onConfirm();
+    setDone(true);
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-xl w-72 p-6 relative">
+        <button
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+        {!done ? (
+          <>
+            <p className="popup-title text-center mb-1">{confirmTitle}</p>
+            {confirmSub && (
+              <p className="text-xs text-pink-500 text-center mb-5">{confirmSub}</p>
+            )}
+            {!confirmSub && <div className="mb-5" />}
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1 rounded-full font-normal" onClick={onClose}>
+                취소
+              </Button>
+              <Button
+                className="flex-1 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-normal"
+                onClick={handleConfirm}
+              >
+                확인
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="popup-title text-center mb-6">{successTitle}</p>
+            <Button
+              className="w-full rounded-full bg-pink-600 hover:bg-pink-700 text-white font-normal"
+              onClick={onClose}
+            >
+              확인
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function WorkProjectDeliverables() {
   const [projectId, setProjectId] = useState('1');
   const [phaseTab, setPhaseTab] = useState<1 | 2>(1);
   const [opinions, setOpinions] = useState<Record<string, string>>({});
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [activePopup, setActivePopup] = useState<PopupKey>(null);
 
   const filteredDeliverables = MOCK_DELIVERABLES.filter((d) => d.phase === phaseTab);
 
@@ -135,7 +203,6 @@ export default function WorkProjectDeliverables() {
                     ) : (
                       filteredDeliverables.map((d, idx) => (
                         <div key={d.id} className="p-6 hover:bg-gray-50/50 transition-colors">
-                          {/* 산출물 행 */}
                           <div className="flex gap-4 mb-4">
                             <div className="flex items-start gap-3 shrink-0">
                               <label className="flex items-center pt-1 cursor-pointer">
@@ -164,7 +231,6 @@ export default function WorkProjectDeliverables() {
                               <p className="text-gray-400 text-xs mt-2">{d.registeredAt}</p>
                             </div>
                           </div>
-                          {/* 각 산출물 아래 광고주 의견 */}
                           <div className="ml-14 pl-4 border-l-2 border-pink-100 bg-pink-50/30 rounded-r-lg py-3 px-4">
                             <Label className="text-gray-700 text-sm font-medium block mb-1">
                               {OPINION_LABEL}
@@ -203,25 +269,99 @@ export default function WorkProjectDeliverables() {
                   </div>
                 </div>
 
-                {/* 최종 산출물 확정 */}
-                <div className="flex flex-wrap items-center gap-3 pt-2">
+                {/* CTA 버튼 4개 */}
+                <div className="flex flex-wrap gap-3 pt-2">
+                  {/* ① 산출물 업로드 완료 및 선택요청 (파트너) */}
                   <Button
-                    size="default"
-                    className="bg-pink-600 hover:bg-pink-700 text-white shadow-md hover:shadow-lg transition-shadow"
+                    variant="outline"
+                    className="font-normal"
+                    onClick={() => setActivePopup('upload_request')}
+                  >
+                    의뢰사에 산출물 선택 요청하기
+                  </Button>
+
+                  {/* ② 최종산출물 확정요청 (파트너) */}
+                  <Button
+                    variant="outline"
+                    className="font-normal"
+                    onClick={() => setActivePopup('final_request')}
+                  >
+                    의뢰사에 최종산출물 확정 요청하기
+                  </Button>
+
+                  {/* ③ 선택완료 및 수정요청 (의뢰사) */}
+                  <Button
+                    variant="outline"
+                    className="font-normal"
+                    onClick={() => setActivePopup('selection_complete')}
+                  >
+                    작품 선택완료 및 수정요청
+                  </Button>
+
+                  {/* ④ 최종 산출물 확정 등록 (의뢰사) */}
+                  <Button
+                    className="bg-pink-600 hover:bg-pink-700 text-white font-normal shadow-md"
+                    disabled={selectedIds.length === 0}
+                    onClick={() => setActivePopup('final_confirm')}
                   >
                     선택된 작품을 최종 산출물로 확정 등록하기
+                    {selectedIds.length > 0 && ` (${selectedIds.length}개)`}
                   </Button>
-                  {selectedIds.length > 0 && (
-                    <span className="text-sm text-gray-500">
-                      {selectedIds.length}개 선택됨
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* ① 산출물 업로드 완료 및 선택요청 팝업 */}
+      {activePopup === 'upload_request' && (
+        <TwoStepPopup
+          confirmTitle={"의뢰사에\n산출물 선택을 요청할까요?"}
+          confirmSub="산출물 선택 요청 후에는 새 버전으로 업로드 됩니다."
+          successTitle="요청되었어요."
+          onConfirm={() =>
+            trackDeliverableSubmitted({ project_title: MOCK_PROJECTS[0].label, phase: phaseTab })
+          }
+          onClose={() => setActivePopup(null)}
+        />
+      )}
+
+      {/* ② 최종산출물 확정요청 팝업 */}
+      {activePopup === 'final_request' && (
+        <TwoStepPopup
+          confirmTitle={"의뢰사에\n최종산출물 확정을 요청할까요?"}
+          successTitle="요청되었어요."
+          onConfirm={() =>
+            trackDeliverableSubmitted({ project_title: MOCK_PROJECTS[0].label, phase: phaseTab })
+          }
+          onClose={() => setActivePopup(null)}
+        />
+      )}
+
+      {/* ③ 선택완료 및 수정요청 팝업 */}
+      {activePopup === 'selection_complete' && (
+        <TwoStepPopup
+          confirmTitle="작품 선택완료 및 수정요청할까요?"
+          confirmSub="산출물을 결정 후 선택변경이 불가능합니다."
+          successTitle="완료되었어요."
+          onConfirm={() => {}}
+          onClose={() => setActivePopup(null)}
+        />
+      )}
+
+      {/* ④ 최종산출물 선택완료 팝업 */}
+      {activePopup === 'final_confirm' && (
+        <TwoStepPopup
+          confirmTitle={"선택하신 작품을\n최종산출물로 결정할까요?"}
+          confirmSub="최종 산출물 결정 후 더이상 수정이 불가합니다."
+          successTitle="최종산출물 선택이 완료되었어요."
+          onConfirm={() =>
+            trackDeliverableConfirmed({ project_title: MOCK_PROJECTS[0].label, phase: phaseTab })
+          }
+          onClose={() => setActivePopup(null)}
+        />
+      )}
     </Layout>
   );
 }
