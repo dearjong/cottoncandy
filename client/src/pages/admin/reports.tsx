@@ -127,7 +127,7 @@ function loadSavedCfg(): SimConfig {
   } catch { return DEFAULTS; }
 }
 
-function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?: number }) {
+function ActivityTab({ autoOpen }: { autoOpen?: boolean }) {
   const [data, setData] = useState<{ jobId: string; job: SimJob } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -149,13 +149,6 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
       setDialogOpen(true);
     }
   }, [autoOpen]);
-
-  useEffect(() => {
-    if (openSignal && openSignal > 0) {
-      setDialogCfg(cfg);
-      setDialogOpen(true);
-    }
-  }, [openSignal]);
 
   async function startSim(runCfg: SimConfig) {
     setCfg(runCfg);
@@ -208,15 +201,26 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
 
   return (
     <div className="space-y-6">
-      {isRunning && (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-3 space-y-1.5">
-          <div className="flex justify-between text-xs text-gray-500">
-            <span>{job.message}</span>
-            <span>{job.progress}%</span>
+      {/* 액션 행: 버튼 + 인라인 진행바 */}
+      <div className="flex items-center gap-3">
+        <Button
+          className="btn-pink-compact text-xs h-7 py-0 px-3 shrink-0"
+          onClick={() => { setDialogCfg(cfg); setDialogOpen(true); }}
+          disabled={!!isRunning || loading}
+        >
+          시뮬레이션 설정
+        </Button>
+        {isRunning && job && (
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <span className="text-[11px] text-gray-500 shrink-0 whitespace-nowrap">{job.message}</span>
+            <Progress value={job.progress} className="h-1.5 flex-1" />
+            <span className="text-[11px] font-semibold text-pink-600 shrink-0">{job.progress}%</span>
           </div>
-          <Progress value={job.progress} className="h-1.5" />
-        </div>
-      )}
+        )}
+        {loading && !isRunning && (
+          <span className="text-[11px] text-gray-400">시작 중...</span>
+        )}
+      </div>
 
       {/* 항상 표시되는 차트들 */}
       {(
@@ -577,7 +581,7 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
 
       {/* 시뮬레이션 설정 다이얼로그 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl">
           <DialogHeader className="pb-2">
             <DialogTitle>시뮬레이션 설정</DialogTitle>
           </DialogHeader>
@@ -612,52 +616,52 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
           <table className="w-full text-xs border-collapse">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left py-1.5 pr-4 text-[10px] font-medium text-gray-400 w-28">구분</th>
-                <th className="text-left py-1.5 text-[10px] font-medium text-gray-400">항목별 비율 (%)</th>
-                <th className="text-right py-1.5 pl-4 text-[10px] font-medium text-gray-400 w-20">합계</th>
+                <th className="text-left py-1 pr-4 text-[10px] font-medium text-gray-400 w-24">구분</th>
+                <th className="text-left py-1 text-[10px] font-medium text-gray-400">항목별 비율</th>
+                <th className="text-right py-1 pl-4 text-[10px] font-medium text-gray-400 w-16">합계</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               <tr>
-                <td className="py-2.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">
+                <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">
                   인증 현황
-                  <div className="text-[9px] font-normal text-gray-400 mt-0.5">전체 방문자 기준</div>
+                  <div className="text-[9px] font-normal text-gray-400">방문자 기준</div>
                 </td>
-                <td className="py-2.5">
-                  <div className="flex flex-wrap gap-3 items-end">
+                <td className="py-1">
+                  <div className="flex flex-wrap gap-2 items-end">
                     <NumInput label="SSO 로그인"  value={dialogCfg.pctSsoLogin}    onChange={(v) => setD("pctSsoLogin", v)} />
                     <NumInput label="수동 로그인"  value={dialogCfg.pctManualLogin} onChange={(v) => setD("pctManualLogin", v)} />
                     <NumInput label="신규 가입"    value={dialogCfg.pctSignup}      onChange={(v) => setD("pctSignup", v)} />
-                    <div className="flex flex-col gap-0.5 pb-1">
+                    <div className="flex flex-col gap-0.5">
                       <span className="text-[10px] text-gray-400">미로그인</span>
-                      <span className="text-sm font-semibold text-gray-700">{Math.max(0, 100 - dLoginSum)}%</span>
+                      <span className="text-xs font-semibold text-gray-700">{Math.max(0, 100 - dLoginSum)}%</span>
                     </div>
                   </div>
                 </td>
-                <td className="py-2.5 pl-4 text-right align-middle">
+                <td className="py-1 pl-4 text-right align-middle">
                   <span className={`font-semibold ${dLoginSum > 100 ? "text-red-500" : "text-gray-400"}`}>{dLoginSum}%</span>
                 </td>
               </tr>
               <tr>
-                <td className="py-2.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">
+                <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">
                   유저 타입
-                  <div className="text-[9px] font-normal text-gray-400 mt-0.5">로그인 유저 내</div>
+                  <div className="text-[9px] font-normal text-gray-400">로그인 유저</div>
                 </td>
-                <td className="py-2.5">
-                  <div className="flex flex-wrap gap-3 items-end">
+                <td className="py-1">
+                  <div className="flex flex-wrap gap-2 items-end">
                     <NumInput label="광고주" value={dialogCfg.pctAdvertiser} onChange={(v) => setD("pctAdvertiser", v)} />
                     <NumInput label="대행사" value={dialogCfg.pctAgency}     onChange={(v) => setD("pctAgency", v)} />
                     <NumInput label="제작사" value={dialogCfg.pctProduction} onChange={(v) => setD("pctProduction", v)} />
                   </div>
                 </td>
-                <td className="py-2.5 pl-4 text-right align-middle">
+                <td className="py-1 pl-4 text-right align-middle">
                   <span className={`font-semibold ${dUserSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dUserSum}%</span>
                 </td>
               </tr>
               <tr>
-                <td className="py-2.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">UTM 유입</td>
-                <td className="py-2.5">
-                  <div className="flex flex-wrap gap-3 items-end">
+                <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">UTM 유입</td>
+                <td className="py-1">
+                  <div className="flex flex-wrap gap-2 items-end">
                     <NumInput label="tvcf.co.kr" value={dialogCfg.pctTvcf}    onChange={(v) => setD("pctTvcf", v)} />
                     <NumInput label="Google"     value={dialogCfg.pctGoogle}   onChange={(v) => setD("pctGoogle", v)} />
                     <NumInput label="Naver"      value={dialogCfg.pctNaver}    onChange={(v) => setD("pctNaver", v)} />
@@ -665,66 +669,53 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                     <NumInput label="Organic"    value={dialogCfg.pctOrganic}  onChange={(v) => setD("pctOrganic", v)} />
                   </div>
                 </td>
-                <td className="py-2.5 pl-4 text-right align-middle">
+                <td className="py-1 pl-4 text-right align-middle">
                   <span className={`font-semibold ${dUtmSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dUtmSum}%</span>
                 </td>
               </tr>
               <tr>
-                <td className="py-2.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">성별</td>
-                <td className="py-2.5">
-                  <div className="flex flex-wrap gap-3 items-end">
-                    <NumInput label="여성" value={dialogCfg.pctFemale} onChange={(v) => setD("pctFemale", v)} />
-                    <NumInput label="남성" value={dialogCfg.pctMale}   onChange={(v) => setD("pctMale", v)} />
+                <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">성별·연령대</td>
+                <td className="py-1">
+                  <div className="flex flex-wrap gap-x-6 gap-y-1 items-end">
+                    <div className="flex gap-2 items-end">
+                      <NumInput label="여성" value={dialogCfg.pctFemale} onChange={(v) => setD("pctFemale", v)} />
+                      <NumInput label="남성" value={dialogCfg.pctMale}   onChange={(v) => setD("pctMale", v)} />
+                      <span className={`text-[10px] font-semibold pb-1 ${dGenderSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dGenderSum}%</span>
+                    </div>
+                    <div className="flex gap-2 items-end">
+                      <NumInput label="20대" value={dialogCfg.pct20s} onChange={(v) => setD("pct20s", v)} />
+                      <NumInput label="30대" value={dialogCfg.pct30s} onChange={(v) => setD("pct30s", v)} />
+                      <NumInput label="40대" value={dialogCfg.pct40s} onChange={(v) => setD("pct40s", v)} />
+                      <NumInput label="50대" value={dialogCfg.pct50s} onChange={(v) => setD("pct50s", v)} />
+                      <span className={`text-[10px] font-semibold pb-1 ${dAgeSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dAgeSum}%</span>
+                    </div>
                   </div>
                 </td>
-                <td className="py-2.5 pl-4 text-right align-middle">
-                  <span className={`font-semibold ${dGenderSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dGenderSum}%</span>
-                </td>
+                <td className="py-1 pl-4 align-middle" />
               </tr>
               <tr>
-                <td className="py-2.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">연령대</td>
-                <td className="py-2.5">
-                  <div className="flex flex-wrap gap-3 items-end">
-                    <NumInput label="20대" value={dialogCfg.pct20s} onChange={(v) => setD("pct20s", v)} />
-                    <NumInput label="30대" value={dialogCfg.pct30s} onChange={(v) => setD("pct30s", v)} />
-                    <NumInput label="40대" value={dialogCfg.pct40s} onChange={(v) => setD("pct40s", v)} />
-                    <NumInput label="50대" value={dialogCfg.pct50s} onChange={(v) => setD("pct50s", v)} />
+                <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">지역·활동인원</td>
+                <td className="py-1">
+                  <div className="flex flex-wrap gap-x-6 gap-y-1 items-end">
+                    <div className="flex gap-2 items-end">
+                      <NumInput label="서울"  value={dialogCfg.pctSeoul}    onChange={(v) => setD("pctSeoul", v)} />
+                      <NumInput label="경기"  value={dialogCfg.pctGyeonggi} onChange={(v) => setD("pctGyeonggi", v)} />
+                      <NumInput label="지방"  value={dialogCfg.pctLocal}    onChange={(v) => setD("pctLocal", v)} />
+                      <NumInput label="해외"  value={dialogCfg.pctAbroad}   onChange={(v) => setD("pctAbroad", v)} />
+                      <span className={`text-[10px] font-semibold pb-1 ${dGeoSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dGeoSum}%</span>
+                    </div>
+                    <div className="flex gap-2 items-end">
+                      <NumInput label="프로젝트 등록"  value={dialogCfg.projectRegCount}  onChange={(v) => setD("projectRegCount", v)}  min={0} max={10000} unit="명" />
+                      <NumInput label="포트폴리오 등록" value={dialogCfg.portfolioRegCount} onChange={(v) => setD("portfolioRegCount", v)} min={0} max={10000} unit="명" />
+                    </div>
                   </div>
                 </td>
-                <td className="py-2.5 pl-4 text-right align-middle">
-                  <span className={`font-semibold ${dAgeSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dAgeSum}%</span>
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">접속 지역</td>
-                <td className="py-2.5">
-                  <div className="flex flex-wrap gap-3 items-end">
-                    <NumInput label="서울"  value={dialogCfg.pctSeoul}    onChange={(v) => setD("pctSeoul", v)} />
-                    <NumInput label="경기"  value={dialogCfg.pctGyeonggi} onChange={(v) => setD("pctGyeonggi", v)} />
-                    <NumInput label="지방"  value={dialogCfg.pctLocal}    onChange={(v) => setD("pctLocal", v)} />
-                    <NumInput label="해외"  value={dialogCfg.pctAbroad}   onChange={(v) => setD("pctAbroad", v)} />
-                  </div>
-                </td>
-                <td className="py-2.5 pl-4 text-right align-middle">
-                  <span className={`font-semibold ${dGeoSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dGeoSum}%</span>
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">활동인원</td>
-                <td className="py-2.5">
-                  <div className="flex flex-wrap gap-3 items-end">
-                    <NumInput label="프로젝트 등록" value={dialogCfg.projectRegCount}  onChange={(v) => setD("projectRegCount", v)}  min={0} max={10000} unit="명" />
-                    <NumInput label="포트폴리오 등록" value={dialogCfg.portfolioRegCount} onChange={(v) => setD("portfolioRegCount", v)} min={0} max={10000} unit="명" />
-                  </div>
-                </td>
-                <td className="py-2.5 pl-4 text-right align-middle">
-                  <span className="text-[10px] text-gray-400">단계 랜덤</span>
-                </td>
+                <td className="py-1 pl-4 align-middle" />
               </tr>
             </tbody>
           </table>
 
-          <div className="bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 text-xs text-amber-700">
+          <div className="text-[10px] text-amber-600 bg-amber-50 border border-amber-100 rounded px-2 py-1">
             ⚠ 실행 시 실제 GA4 + Mixpanel 계정에 가상 이벤트가 추가됩니다.
           </div>
 
@@ -747,7 +738,6 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
 export default function ReportsPage() {
   const search = useSearch();
   const autoOpenSim = new URLSearchParams(search).get("simulate") === "1";
-  const [simSignal, setSimSignal] = useState(0);
   const [activeTab, setActiveTab] = useState("activity");
 
   return (
@@ -755,23 +745,13 @@ export default function ReportsPage() {
       <PageHeader title="통계/리포트" description="플랫폼 성과 데이터와 상세 리포트를 확인하세요" hidePeriodFilter />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="flex items-center gap-2">
-          <TabsList className="bg-gray-100">
-            <TabsTrigger value="activity">활동현황</TabsTrigger>
-            <TabsTrigger value="platform">플랫폼 현황</TabsTrigger>
-          </TabsList>
-          {activeTab === "activity" && (
-            <Button
-              className="btn-pink-compact text-xs h-7 py-0 px-3"
-              onClick={() => setSimSignal(s => s + 1)}
-            >
-              시뮬레이션 설정
-            </Button>
-          )}
-        </div>
+        <TabsList className="bg-gray-100">
+          <TabsTrigger value="activity">활동현황</TabsTrigger>
+          <TabsTrigger value="platform">플랫폼 현황</TabsTrigger>
+        </TabsList>
 
         <TabsContent value="activity" className="mt-6">
-          <ActivityTab autoOpen={autoOpenSim} openSignal={simSignal} />
+          <ActivityTab autoOpen={autoOpenSim} />
         </TabsContent>
 
         <TabsContent value="platform" className="mt-6">
