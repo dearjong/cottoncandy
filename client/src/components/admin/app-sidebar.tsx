@@ -46,7 +46,7 @@ import { Link, useLocation } from "wouter"
 import { MOCK_ADMIN_PROJECTS_V1 } from "@/data/mockData"
 
 // admin 폴더 전용 메뉴 (admin_v2와 분리)
-const mainParentItem = { title: "메인", url: "/admin", icon: Home }
+const mainParentItem = { title: "대시보드", url: "/admin", icon: Home }
 const mainMenuItems = [
   { title: "통계", url: "/admin/dashboard", icon: Home },
   { title: "관리자 캘린더", url: "/admin/calendar", icon: Calendar },
