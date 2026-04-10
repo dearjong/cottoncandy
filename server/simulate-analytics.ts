@@ -154,6 +154,8 @@ const GA4_KEY_EVENTS = new Set([
   "signup_started", "signup_complete",
   "portfolio_registered", "project_submitted",
   "partner_applied", "contract_signed",
+  "project_draft_saved", "project_draft_opened",
+  "portfolio_draft_saved", "portfolio_draft_opened",
   "draft_submitted", "draft_confirmed",
   "deliverable_submitted", "deliverable_confirmed",
   "project_completed", "review_submitted", "referral_sent",
@@ -516,11 +518,27 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         let projTotalWritingSec  = 0; // 실제 화면 작성 시간 (갭 제외)
         const projGapsHours: number[] = [];
 
+        let projDraftSaveCount = 0;
+        let projLastSaveTs    = projTs;
+
         for (let sIdx = 0; sIdx < projNumSessions && !projAbandoned; sIdx++) {
           projTotalSessions++;
-          let sessionWriteOffset = 0; // 세션 내 경과 시간(초)
+          let sessionWriteOffset = 0;
 
-          add("project_session_started", uid, projCurrentTs, {
+          // 재방문 세션: 임시저장 열기 이벤트
+          if (sIdx > 0) {
+            const gapHoursSoFar = projGapsHours.reduce((a, b) => a + b, 0);
+            add("project_draft_opened", uid, projCurrentTs, {
+              project_type: pType, session_number: sIdx + 1,
+              steps_completed_so_far: lastStep,
+              draft_save_count: projDraftSaveCount,
+              days_since_last_save: +(gapHoursSoFar / 24).toFixed(1),
+              hours_since_last_save: gapHoursSoFar,
+              cumulative_writing_sec: projTotalWritingSec, ...common,
+            });
+          }
+
+          add("project_session_started", uid, projCurrentTs + 5, {
             session_number: sIdx + 1, steps_completed_so_far: lastStep,
             project_type: pType, cumulative_writing_sec: projTotalWritingSec, ...common,
           });
@@ -534,7 +552,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
               : randInt(30, 120);
 
             stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
-            add(`step_${s.step}_${s.screen}`, uid, projCurrentTs + sessionWriteOffset, {
+            add(`step_${s.step}_${s.screen}`, uid, projCurrentTs + sessionWriteOffset + 10, {
               step: s.step, screen: s.screen, project_type: pType,
               session_number: sIdx + 1,
               time_on_step_sec: stepDuration,
@@ -542,37 +560,28 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
               ...common,
             });
 
-            sessionWriteOffset     += stepDuration;
-            projTotalWritingSec    += stepDuration;
-
-            // 임시저장 (step 5~15에서 7% 확률)
-            if (s.step >= 5 && s.step <= 15 && !savedDraft && chance(0.07)) {
-              savedDraft = true;
-              job.draftSavedCount += 1;
-              const draftTs = projCurrentTs + sessionWriteOffset;
-              add("project_draft_saved", uid, draftTs, {
-                step: s.step, screen: s.screen, project_type: pType,
-                session_number: sIdx + 1, cumulative_writing_sec: projTotalWritingSec, ...common,
-              });
-              if (chance(0.75)) {
-                job.draftResumedCount += 1;
-                const resumeGap = randInt(3600, 86400);
-                add("project_draft_resumed", uid, draftTs + resumeGap, {
-                  step: s.step, screen: s.screen, project_type: pType,
-                  resumed_after_sec: resumeGap, session_number: sIdx + 1, ...common,
-                });
-              }
-            }
+            sessionWriteOffset  += stepDuration;
+            projTotalWritingSec += stepDuration;
 
             // 이탈 판정
             if (s.step < 18 && !chance(s.passRate)) {
               stepDropoff[s.step] = (stepDropoff[s.step] ?? 0) + 1;
-              add("project_step_abandoned", uid, projCurrentTs + sessionWriteOffset + 5, {
+              // 이탈 전 임시저장 (80% 확률 — 다음에 다시 올 수도 있음)
+              if (chance(0.80)) {
+                projDraftSaveCount++;
+                job.draftSavedCount += 1;
+                add("project_draft_saved", uid, projCurrentTs + sessionWriteOffset + 5, {
+                  step: s.step, screen: s.screen, project_type: pType,
+                  session_number: sIdx + 1, draft_save_count: projDraftSaveCount,
+                  steps_completed: lastStep, cumulative_writing_sec: projTotalWritingSec, ...common,
+                });
+              }
+              add("project_step_abandoned", uid, projCurrentTs + sessionWriteOffset + 10, {
                 step: s.step, screen: s.screen, project_type: pType,
-                had_draft: savedDraft, session_number: sIdx + 1,
+                had_draft: projDraftSaveCount > 0, session_number: sIdx + 1,
                 time_on_step_sec: stepDuration, cumulative_writing_sec: projTotalWritingSec, ...common,
               });
-              add("page_exit", uid, projCurrentTs + sessionWriteOffset + 10, {
+              add("page_exit", uid, projCurrentTs + sessionWriteOffset + 15, {
                 path: `/create-project/step${s.step}`, exit_step: s.step, ...common,
               });
               lastStep = s.step;
@@ -583,13 +592,19 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           }
 
           if (!projAbandoned && sIdx < projNumSessions - 1) {
-            add("project_step_saved", uid, projCurrentTs + sessionWriteOffset + 10, {
-              steps_completed: lastStep, project_type: pType,
-              session_number: sIdx + 1, cumulative_writing_sec: projTotalWritingSec, ...common,
-            });
+            // 세션 종료 = 임시저장
+            projDraftSaveCount++;
+            job.draftSavedCount += 1;
             const gapHours = randInt(1, 48);
             projGapsHours.push(gapHours);
-            projCurrentTs = projCurrentTs + sessionWriteOffset + gapHours * 3600;
+            add("project_draft_saved", uid, projCurrentTs + sessionWriteOffset + 10, {
+              steps_completed: lastStep, project_type: pType,
+              session_number: sIdx + 1, draft_save_count: projDraftSaveCount,
+              cumulative_writing_sec: projTotalWritingSec,
+              next_session_gap_hours: gapHours, ...common,
+            });
+            projLastSaveTs = projCurrentTs + sessionWriteOffset + 10;
+            projCurrentTs  = projLastSaveTs + gapHours * 3600;
           } else if (!projAbandoned) {
             projCurrentTs = projCurrentTs + sessionWriteOffset;
           }
@@ -655,13 +670,27 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         let pfAbandoned         = false;
         let pfTotalSessions     = 0;
         let pfTotalWritingSec   = 0;
+        let pfDraftSaveCount    = 0;
         const pfGapsHours: number[] = [];
 
         for (let sIdx = 0; sIdx < pfNumSessions && !pfAbandoned; sIdx++) {
           pfTotalSessions++;
           let pfSessionWriteOffset = 0;
 
-          add("portfolio_session_started", uid, pfCurrentTs, {
+          // 재방문 세션: 임시저장 열기
+          if (sIdx > 0) {
+            const pfGapSoFar = pfGapsHours.reduce((a, b) => a + b, 0);
+            add("portfolio_draft_opened", uid, pfCurrentTs, {
+              partner_type: partnerType, session_number: sIdx + 1,
+              sections_completed_so_far: pfLastSection,
+              draft_save_count: pfDraftSaveCount,
+              days_since_last_save: +(pfGapSoFar / 24).toFixed(1),
+              hours_since_last_save: pfGapSoFar,
+              cumulative_writing_sec: pfTotalWritingSec, ...common,
+            });
+          }
+
+          add("portfolio_session_started", uid, pfCurrentTs + 5, {
             session_number: sIdx + 1, sections_completed_so_far: pfLastSection,
             partner_type: partnerType, cumulative_writing_sec: pfTotalWritingSec, ...common,
           });
@@ -669,11 +698,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           const sessionSecs = PORTFOLIO_SECTIONS.slice(sIdx * pfSecsPerSession, (sIdx + 1) * pfSecsPerSession);
 
           for (const sec of sessionSecs) {
-            // 섹션별 소요시간: 간단 섹션(60-180s), 상세 섹션(180-600s)
             const secDuration = [1,2,3].includes(sec.step) ? randInt(60, 180) : randInt(180, 600);
 
             pfFunnel[sec.step] = (pfFunnel[sec.step] ?? 0) + 1;
-            add(`portfolio_section_${sec.id}`, uid, pfCurrentTs + pfSessionWriteOffset, {
+            add(`portfolio_section_${sec.id}`, uid, pfCurrentTs + pfSessionWriteOffset + 10, {
               section: sec.step, section_id: sec.id, partner_type: partnerType,
               session_number: sIdx + 1,
               time_on_section_sec: secDuration,
@@ -686,12 +714,20 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
             if (sec.step < 13 && !chance(sec.passRate)) {
               pfDropoff[sec.step] = (pfDropoff[sec.step] ?? 0) + 1;
-              add("portfolio_section_abandoned", uid, pfCurrentTs + pfSessionWriteOffset + 5, {
+              if (chance(0.80)) {
+                pfDraftSaveCount++;
+                add("portfolio_draft_saved", uid, pfCurrentTs + pfSessionWriteOffset + 5, {
+                  sections_completed: pfLastSection, partner_type: partnerType,
+                  session_number: sIdx + 1, draft_save_count: pfDraftSaveCount,
+                  cumulative_writing_sec: pfTotalWritingSec, ...common,
+                });
+              }
+              add("portfolio_section_abandoned", uid, pfCurrentTs + pfSessionWriteOffset + 10, {
                 section: sec.step, section_id: sec.id, partner_type: partnerType,
-                session_number: sIdx + 1,
+                session_number: sIdx + 1, had_draft: pfDraftSaveCount > 0,
                 time_on_section_sec: secDuration, cumulative_writing_sec: pfTotalWritingSec, ...common,
               });
-              add("page_exit", uid, pfCurrentTs + pfSessionWriteOffset + 10, {
+              add("page_exit", uid, pfCurrentTs + pfSessionWriteOffset + 15, {
                 path: "/work/portfolio", exit_section: sec.step, exit_section_id: sec.id, ...common,
               });
               pfLastSection = sec.step;
@@ -702,12 +738,15 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           }
 
           if (!pfAbandoned && sIdx < pfNumSessions - 1) {
-            add("portfolio_section_saved", uid, pfCurrentTs + pfSessionWriteOffset + 10, {
-              sections_completed: pfLastSection, partner_type: partnerType,
-              session_number: sIdx + 1, cumulative_writing_sec: pfTotalWritingSec, ...common,
-            });
+            pfDraftSaveCount++;
             const gapHours = randInt(1, 72);
             pfGapsHours.push(gapHours);
+            add("portfolio_draft_saved", uid, pfCurrentTs + pfSessionWriteOffset + 10, {
+              sections_completed: pfLastSection, partner_type: partnerType,
+              session_number: sIdx + 1, draft_save_count: pfDraftSaveCount,
+              cumulative_writing_sec: pfTotalWritingSec,
+              next_session_gap_hours: gapHours, ...common,
+            });
             pfCurrentTs = pfCurrentTs + pfSessionWriteOffset + gapHours * 3600;
           } else if (!pfAbandoned) {
             pfCurrentTs = pfCurrentTs + pfSessionWriteOffset;
@@ -761,13 +800,27 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       let pfAbandoned2          = false;
       let pfTotalSessions2      = 0;
       let pfTotalWritingSec2    = 0;
+      let pfDraftSaveCount2     = 0;
       const pfGapsHours2: number[] = [];
 
       for (let sIdx = 0; sIdx < pfNumSessions2 && !pfAbandoned2; sIdx++) {
         pfTotalSessions2++;
         let pfSessionWriteOffset2 = 0;
 
-        add("portfolio_session_started", uid, pfCurrentTs2, {
+        // 재방문 세션: 임시저장 열기
+        if (sIdx > 0) {
+          const pfGapSoFar2 = pfGapsHours2.reduce((a, b) => a + b, 0);
+          add("portfolio_draft_opened", uid, pfCurrentTs2, {
+            partner_type: partnerType, session_number: sIdx + 1,
+            sections_completed_so_far: pfLastSection2,
+            draft_save_count: pfDraftSaveCount2,
+            days_since_last_save: +(pfGapSoFar2 / 24).toFixed(1),
+            hours_since_last_save: pfGapSoFar2,
+            cumulative_writing_sec: pfTotalWritingSec2, ...common,
+          });
+        }
+
+        add("portfolio_session_started", uid, pfCurrentTs2 + 5, {
           session_number: sIdx + 1, sections_completed_so_far: pfLastSection2,
           partner_type: partnerType, cumulative_writing_sec: pfTotalWritingSec2, ...common,
         });
@@ -778,7 +831,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           const secDuration2 = [1,2,3].includes(sec.step) ? randInt(60, 180) : randInt(180, 600);
 
           pfFunnel[sec.step] = (pfFunnel[sec.step] ?? 0) + 1;
-          add(`portfolio_section_${sec.id}`, uid, pfCurrentTs2 + pfSessionWriteOffset2, {
+          add(`portfolio_section_${sec.id}`, uid, pfCurrentTs2 + pfSessionWriteOffset2 + 10, {
             section: sec.step, section_id: sec.id, partner_type: partnerType,
             session_number: sIdx + 1,
             time_on_section_sec: secDuration2,
@@ -791,12 +844,20 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
           if (sec.step < 13 && !chance(sec.passRate)) {
             pfDropoff[sec.step] = (pfDropoff[sec.step] ?? 0) + 1;
-            add("portfolio_section_abandoned", uid, pfCurrentTs2 + pfSessionWriteOffset2 + 5, {
+            if (chance(0.80)) {
+              pfDraftSaveCount2++;
+              add("portfolio_draft_saved", uid, pfCurrentTs2 + pfSessionWriteOffset2 + 5, {
+                sections_completed: pfLastSection2, partner_type: partnerType,
+                session_number: sIdx + 1, draft_save_count: pfDraftSaveCount2,
+                cumulative_writing_sec: pfTotalWritingSec2, ...common,
+              });
+            }
+            add("portfolio_section_abandoned", uid, pfCurrentTs2 + pfSessionWriteOffset2 + 10, {
               section: sec.step, section_id: sec.id, partner_type: partnerType,
-              session_number: sIdx + 1,
+              session_number: sIdx + 1, had_draft: pfDraftSaveCount2 > 0,
               time_on_section_sec: secDuration2, cumulative_writing_sec: pfTotalWritingSec2, ...common,
             });
-            add("page_exit", uid, pfCurrentTs2 + pfSessionWriteOffset2 + 10, {
+            add("page_exit", uid, pfCurrentTs2 + pfSessionWriteOffset2 + 15, {
               path: "/work/portfolio", exit_section: sec.step, exit_section_id: sec.id, ...common,
             });
             pfLastSection2 = sec.step;
@@ -807,12 +868,15 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         }
 
         if (!pfAbandoned2 && sIdx < pfNumSessions2 - 1) {
-          add("portfolio_section_saved", uid, pfCurrentTs2 + pfSessionWriteOffset2 + 10, {
-            sections_completed: pfLastSection2, partner_type: partnerType,
-            session_number: sIdx + 1, cumulative_writing_sec: pfTotalWritingSec2, ...common,
-          });
+          pfDraftSaveCount2++;
           const gapHours2 = randInt(1, 72);
           pfGapsHours2.push(gapHours2);
+          add("portfolio_draft_saved", uid, pfCurrentTs2 + pfSessionWriteOffset2 + 10, {
+            sections_completed: pfLastSection2, partner_type: partnerType,
+            session_number: sIdx + 1, draft_save_count: pfDraftSaveCount2,
+            cumulative_writing_sec: pfTotalWritingSec2,
+            next_session_gap_hours: gapHours2, ...common,
+          });
           pfCurrentTs2 = pfCurrentTs2 + pfSessionWriteOffset2 + gapHours2 * 3600;
         } else if (!pfAbandoned2) {
           pfCurrentTs2 = pfCurrentTs2 + pfSessionWriteOffset2;
