@@ -616,21 +616,23 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           { value: 1, weight: 25 }, { value: 2, weight: 45 }, { value: 3, weight: 30 },
         ]);
         const projStepsPerSession = Math.ceil(18 / projNumSessions);
+        let projStepIdx          = 0;  // PROJECT_STEPS 배열 내 현재 위치 (0-based)
         let projCurrentTs        = projTs;
         let lastStep             = 0;
-        let projAbandoned        = false;
         let projTotalSessions    = 0;
-        let projTotalWritingSec  = 0; // 실제 화면 작성 시간 (갭 제외)
+        let projTotalWritingSec  = 0;
         const projGapsHours: number[] = [];
+        let projDraftSaveCount   = 0;
+        let projLastSaveTs       = projTs;
+        let projFinallyAbandoned = false; // 임시저장 없이 완전 이탈
 
-        let projDraftSaveCount = 0;
-        let projLastSaveTs    = projTs;
-
-        for (let sIdx = 0; sIdx < projNumSessions && !projAbandoned; sIdx++) {
+        for (let sIdx = 0; sIdx < projNumSessions && projStepIdx < PROJECT_STEPS.length && !projFinallyAbandoned; sIdx++) {
           projTotalSessions++;
-          let sessionWriteOffset = 0;
+          let sessionWriteOffset  = 0;
+          let sessionDroppedOff   = false;
+          let sessionSavedDraft   = false;
 
-          // 재방문 세션: 임시저장 열기 이벤트
+          // 재방문 세션: 임시저장 열기 → 중간 단계부터 재개
           if (sIdx > 0) {
             job.draftOpenedCount += 1;
             const lastGap = projGapsHours[projGapsHours.length - 1] ?? 0;
@@ -638,6 +640,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             add("project_draft_opened", uid, projCurrentTs, {
               project_type: pType, session_number: sIdx + 1,
               steps_completed_so_far: lastStep,
+              resume_from_step: PROJECT_STEPS[projStepIdx]?.step ?? lastStep,
               draft_save_count: projDraftSaveCount,
               days_since_last_save: +(lastGap / 24).toFixed(1),
               hours_since_last_save: lastGap,
@@ -647,13 +650,14 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
           add("project_session_started", uid, projCurrentTs + 5, {
             session_number: sIdx + 1, steps_completed_so_far: lastStep,
+            resume_from_step: PROJECT_STEPS[projStepIdx]?.step ?? 1,
             project_type: pType, cumulative_writing_sec: projTotalWritingSec, ...common,
           });
 
-          const sessionSteps = PROJECT_STEPS.slice(sIdx * projStepsPerSession, (sIdx + 1) * projStepsPerSession);
+          // 이 세션 담당 스텝: projStepIdx 위치부터 최대 projStepsPerSession개
+          const sessionSteps = PROJECT_STEPS.slice(projStepIdx, projStepIdx + projStepsPerSession);
 
           for (const s of sessionSteps) {
-            // 단계별 소요시간: 초반 단순(45-120s), 중반 상세(90-420s), 후반 확인(30-120s)
             const stepDuration = s.step <= 3 ? randInt(45, 120)
               : s.step <= 12 ? randInt(90, 420)
               : randInt(30, 120);
@@ -662,6 +666,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             add(`step_${s.step}_${s.screen}`, uid, projCurrentTs + sessionWriteOffset + 10, {
               step: s.step, screen: s.screen, project_type: pType,
               session_number: sIdx + 1,
+              resumed_from_draft: sIdx > 0,
               time_on_step_sec: stepDuration,
               cumulative_writing_sec: projTotalWritingSec + stepDuration,
               ...common,
@@ -673,14 +678,15 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             // 이탈 판정
             if (s.step < 18 && !chance(s.passRate)) {
               stepDropoff[s.step] = (stepDropoff[s.step] ?? 0) + 1;
-              // 이탈 전 임시저장 (80% 확률 — 다음에 다시 올 수도 있음)
+              // 이탈 전 임시저장 (80% 확률)
               if (chance(0.80)) {
                 projDraftSaveCount++;
                 job.draftSavedCount += 1;
+                sessionSavedDraft = true;
                 add("project_draft_saved", uid, projCurrentTs + sessionWriteOffset + 5, {
                   step: s.step, screen: s.screen, project_type: pType,
                   session_number: sIdx + 1, draft_save_count: projDraftSaveCount,
-                  steps_completed: lastStep, cumulative_writing_sec: projTotalWritingSec, ...common,
+                  steps_completed: s.step, cumulative_writing_sec: projTotalWritingSec, ...common,
                 });
               }
               add("project_step_abandoned", uid, projCurrentTs + sessionWriteOffset + 10, {
@@ -692,28 +698,49 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
                 path: `/create-project/step${s.step}`, exit_step: s.step, ...common,
               });
               lastStep = s.step;
-              projAbandoned = true;
+              sessionDroppedOff = true;
+              // projStepIdx 는 증가하지 않음 → 다음 세션이 이 단계부터 재개
               break;
             }
+
+            // 단계 성공: 위치 전진
             lastStep = s.step;
+            projStepIdx++;
           }
 
-          if (!projAbandoned && sIdx < projNumSessions - 1) {
-            // 세션 종료 = 임시저장
-            projDraftSaveCount++;
-            job.draftSavedCount += 1;
-            const gapHours = randInt(1, 48);
-            projGapsHours.push(gapHours);
-            add("project_draft_saved", uid, projCurrentTs + sessionWriteOffset + 10, {
-              steps_completed: lastStep, project_type: pType,
-              session_number: sIdx + 1, draft_save_count: projDraftSaveCount,
-              cumulative_writing_sec: projTotalWritingSec,
-              next_session_gap_hours: gapHours, ...common,
-            });
-            projLastSaveTs = projCurrentTs + sessionWriteOffset + 10;
-            projCurrentTs  = projLastSaveTs + gapHours * 3600;
-          } else if (!projAbandoned) {
-            projCurrentTs = projCurrentTs + sessionWriteOffset;
+          if (sessionDroppedOff) {
+            if (sessionSavedDraft && sIdx < projNumSessions - 1) {
+              // 임시저장 후 다음 세션에서 재방문 예정
+              const gapHours = randInt(2, 72);
+              projGapsHours.push(gapHours);
+              projLastSaveTs = projCurrentTs + sessionWriteOffset + 5;
+              projCurrentTs  = projLastSaveTs + gapHours * 3600;
+            } else {
+              // 임시저장 없이 완전 이탈 (또는 세션 소진)
+              projFinallyAbandoned = true;
+            }
+          } else {
+            // 세션 정상 완료
+            if (projStepIdx >= PROJECT_STEPS.length) {
+              // 18단계 완주
+              projCurrentTs = projCurrentTs + sessionWriteOffset;
+            } else if (sIdx < projNumSessions - 1) {
+              // 중간 세션 종료 → 임시저장 후 다음 세션
+              projDraftSaveCount++;
+              job.draftSavedCount += 1;
+              const gapHours = randInt(1, 48);
+              projGapsHours.push(gapHours);
+              add("project_draft_saved", uid, projCurrentTs + sessionWriteOffset + 10, {
+                steps_completed: lastStep, project_type: pType,
+                session_number: sIdx + 1, draft_save_count: projDraftSaveCount,
+                cumulative_writing_sec: projTotalWritingSec,
+                next_session_gap_hours: gapHours, ...common,
+              });
+              projLastSaveTs = projCurrentTs + sessionWriteOffset + 10;
+              projCurrentTs  = projLastSaveTs + gapHours * 3600;
+            } else {
+              projCurrentTs = projCurrentTs + sessionWriteOffset;
+            }
           }
         }
 
