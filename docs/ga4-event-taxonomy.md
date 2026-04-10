@@ -1,6 +1,6 @@
 # ADMarket GA4 · Mixpanel 이벤트 정의서
 
-> 버전: v3.0 | 작성일: 2026-04-08 | 최종수정: 2026-04-10  
+> 버전: v3.1 | 작성일: 2026-04-08 | 최종수정: 2026-04-10  
 > 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
 
 ---
@@ -220,9 +220,22 @@ gtag("event", "login", { method: "email" })   // GA4 표준 이벤트
 | `project_type` | `공고` | 프로젝트 유형 |
 | `session_number` | `2` | 현재 세션 번호 |
 | `steps_completed_so_far` | `7` | 이전 세션까지 완료된 단계 수 |
+| `resume_from_step` | `5` | **재개 시작 단계 번호** — 이탈한 단계부터 재개 시 이탈 단계와 동일, 정상 종료 재개 시 다음 단계 |
 | `draft_save_count` | `1` | 저장 횟수 |
 | `days_since_last_save` | `1.0` | 마지막 저장 후 경과 일수 |
 | `hours_since_last_save` | `24` | 마지막 저장 후 경과 시간 |
+
+**단계 이벤트 공통 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `step` | `5` | 단계 번호 |
+| `screen` | `budget` | 화면 식별자 |
+| `project_type` | `공고` / `1:1` | 프로젝트 유형 |
+| `session_number` | `2` | 세션 번호 |
+| `resumed_from_draft` | `true` | **임시저장 불러오기 후 재개 여부** — 2번째 세션 이후 true |
+| `time_on_step_sec` | `240` | 해당 단계 체류 시간(초) |
+| `cumulative_writing_sec` | `1240` | 누적 작성 시간(초) |
 
 **등록 단계 이벤트 목록 (18단계)**
 
@@ -300,32 +313,58 @@ gtag("event", "login", { method: "email" })   // GA4 표준 이벤트
 
 > 프로젝트 등록(1~3세션) · 포트폴리오 등록(1~4세션) 공통 흐름
 
+### 정상 다회 세션 (세션 사이 자동 저장)
+
 ```
 [세션 1]
-  project_session_started  (session_number: 1)
-  step_1_* → step_6_*
+  project_session_started  (session_number: 1, resume_from_step: 1)
+  step_1_* → step_6_*  (resumed_from_draft: false)
   ↓ 세션 종료 → 자동 저장
   project_draft_saved  (draft_save_count: 1, next_session_gap_hours: 24)
 
   [24시간 경과]
 
 [세션 2]
-  project_draft_opened  (days_since_last_save: 1.0, draft_save_count: 1)
-  project_session_started  (session_number: 2)
-  step_7_* → step_13_*
+  project_draft_opened  (steps_completed_so_far: 6, resume_from_step: 7, days_since_last_save: 1.0)
+  project_session_started  (session_number: 2, resume_from_step: 7)
+  step_7_* → step_13_*  (resumed_from_draft: true)
   ↓ 세션 종료 → 자동 저장
   project_draft_saved  (draft_save_count: 2, next_session_gap_hours: 8)
 
   [8시간 경과]
 
 [세션 3]
-  project_draft_opened  (days_since_last_save: 0.3, draft_save_count: 2)
-  project_session_started  (session_number: 3)
-  step_14_* → step_18_project_details
+  project_draft_opened  (steps_completed_so_far: 13, resume_from_step: 14, days_since_last_save: 0.3)
+  project_session_started  (session_number: 3, resume_from_step: 14)
+  step_14_* → step_18_project_details  (resumed_from_draft: true)
   project_submitted  (total_sessions: 3, total_days: 1.3, total_writing_time_min: 47)
 ```
 
-**이탈 시 흐름**: 이탈 판정 → `draft_saved` (80% 확률) → `step_abandoned` → `page_exit`
+### 이탈 후 중간 단계부터 재개 (핵심 시나리오)
+
+```
+[세션 1]
+  project_session_started  (session_number: 1, resume_from_step: 1)
+  step_1_* → step_5_*  (resumed_from_draft: false)
+  ↓ step_5에서 이탈 판정
+  project_draft_saved  (step: 5, draft_save_count: 1)  ← 이탈 전 저장 (80% 확률)
+  project_step_abandoned  (step: 5)
+  page_exit
+
+  [2~72시간 경과]
+
+[세션 2]
+  project_draft_opened  (steps_completed_so_far: 5, resume_from_step: 5)  ← step 5부터 재개!
+  project_session_started  (session_number: 2, resume_from_step: 5)
+  step_5_* → step_9_*  (resumed_from_draft: true)
+  ...
+```
+
+> **설계 포인트**: 이탈 단계에서 `projStepIdx`를 유지(증가 안 함)하므로 다음 세션은 이탈 단계부터 재시도.
+> `resumed_from_draft: true`로 임시저장 재개 유저를 코호트로 분리 가능.
+
+**이탈 패턴**: 이탈 판정 → `draft_saved` (80% 확률) → `step_abandoned` → `page_exit`
+**완전 이탈**: 임시저장 없거나(20%) 세션 소진 시 → 재방문 없음 (`projFinallyAbandoned`)
 
 ---
 
@@ -753,7 +792,7 @@ site_visit
 | 이벤트 | GA4 | MXP |
 |--------|-----|-----|
 | `step_1_cta_click` ⭐ | ✅ | ✅ |
-| `step_N_화면명` (18단계) | ✅ | ✅ |
+| `step_N_화면명` (18단계) | ✅ page_view | ✅ |
 | `project_session_started` | - | ✅ |
 | `project_draft_saved` ⭐ | ✅ | ✅ |
 | `project_draft_opened` ⭐ | ✅ | ✅ |
@@ -765,7 +804,7 @@ site_visit
 | 이벤트 | GA4 | MXP |
 |--------|-----|-----|
 | `portfolio_session_started` | - | ✅ |
-| `portfolio_section_{id}` (13개) | - | ✅ |
+| `portfolio_section_{id}` (13개) | ✅ page_view | ✅ |
 | `portfolio_draft_saved` ⭐ | ✅ | ✅ |
 | `portfolio_draft_opened` ⭐ | ✅ | ✅ |
 | `portfolio_section_abandoned` | - | ✅ |
@@ -853,7 +892,53 @@ site_visit
 
 ---
 
-## 18. 활성 A/B 실험 목록
+## 18. GA4 Measurement Protocol 시뮬레이션 동작
+
+> 어드민 시뮬레이션이 GA4로 데이터를 전송하는 방식 요약 (개발자 참조용)
+
+### GA4 전송 구조
+
+| 항목 | 값 / 설명 |
+|------|---------|
+| Endpoint | `https://www.google-analytics.com/mp/collect` |
+| 인증 | `measurement_id` + `api_secret` |
+| 요청당 이벤트 | 최대 25개 (GA4 MP 제한) |
+| `client_id` | 시뮬레이션 유저별 고유 (`XXXXXXXXXX.XXXXXXXXXX` 형식) |
+| `session_id` | 유저별 고정 (멀티세션은 동일 session_id 유지) |
+| `timestamp_micros` | 이벤트 발생 시각 (Unix μs, 71시간 이내로 캡 처리) |
+
+### GA4 전송 이벤트 종류
+
+| 이벤트 종류 | 전송 이벤트명 | 목적 |
+|------------|------------|------|
+| 페이지 방문 | `page_view` | GA4 "페이지 및 화면" 보고서에 페이지 경로 집계 |
+| 키 전환 | 커스텀 이벤트명 (예: `project_submitted`) | GA4 "이벤트" 보고서·전환 보고서에 집계 |
+
+> **중요**: step 이벤트(18단계) 및 포트폴리오 섹션 이벤트(13개)는 `page_view`로 전송됨. GA4 "페이지 및 화면" 보고서에서 `/create-project/step1` ~ `/create-project/step18`, `/work/portfolio/register` 경로로 집계 확인 가능.
+
+### page_location 매핑
+
+| 이벤트 유형 | page_location |
+|------------|--------------|
+| `site_visit`, `home_click` | `admarket.co.kr/` |
+| `sso_login`, `login` | `admarket.co.kr/login` |
+| `signup_funnel` step 1~5 | `/signup`, `/signup/email`, `/signup/phone`, `/signup/account-type`, `/signup/job-info` |
+| `step_N_*` | `admarket.co.kr/create-project/stepN` |
+| `portfolio_section_*` | `admarket.co.kr/work/portfolio/register` |
+| `partner_applied` | `admarket.co.kr/partner/detail` |
+| `contract_signed` | `admarket.co.kr/work/contracts` |
+| `review_submitted` | `admarket.co.kr/work/reviews` |
+
+### 주의사항
+
+- GA4 MP는 `timestamp_micros`가 72시간보다 오래된 이벤트를 거부함 → 시뮬레이션 `periodDays` 설정에 관계없이 최대 71시간 이내로 캡 처리
+- GA4 표준 보고서는 데이터 처리에 최대 24~48시간 소요 (실시간 보고서는 즉시 반영)
+- 시뮬레이션 이벤트는 `simulation: "true"` 파라미터를 포함하여 실제 유저 데이터와 구분 가능
+- `first_visit`은 GA4 예약어로 Measurement Protocol 배치 전체를 거부시킴 → **영구 제외**
+
+---
+
+## 19. 활성 A/B 실험 목록
 
 > `assignExperiment(experimentId, variants)` 로 배정, `trackExperimentViewed(experimentId, variant)` 로 노출 기록.  
 > 배정된 variant는 localStorage(`analytics_experiments`)에 고정 저장.
@@ -897,7 +982,7 @@ site_visit
 
 ---
 
-## 19. 미연결 이벤트 (함수 준비 완료, UI 연결 필요)
+## 20. 미연결 이벤트 (함수 준비 완료, UI 연결 필요)
 
 | 이벤트 | 함수 | 연결 예정 위치 | 비고 |
 |--------|------|--------------|------|

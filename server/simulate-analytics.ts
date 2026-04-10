@@ -154,7 +154,7 @@ interface Ga4UserEvents {
   userId: string;
   sessionId: string;
   userProperties: Record<string, { value: unknown }>;
-  events: Array<{ name: string; params: Record<string, unknown> }>;
+  events: Array<{ name: string; params: Record<string, unknown>; timestamp_micros?: number }>;
 }
 
 // GA4 키 이벤트만 전송 (real-time 가시성을 위해 timestamp_micros 생략)
@@ -389,6 +389,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       const entry = ga4Map.get(distinctId);
       if (entry) {
         const pageLocation = derivePageLocation(event, props);
+        // GA4 MP timestamp_micros: 72시간(258,200초) 이내로 캡
+        const GA4_MAX_AGO_SEC = 71 * 3600;
+        const cappedTs = Math.max(ts, Math.floor(Date.now() / 1000) - GA4_MAX_AGO_SEC);
+        const tsMicros = cappedTs * 1_000_000;
 
         // page_view 이벤트 → GA4 '페이지 및 화면' 보고서에 반영
         entry.events.push({
@@ -399,6 +403,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             page_location: pageLocation,
             page_referrer: `${BASE_URL}/`,
           },
+          timestamp_micros: tsMicros,
         });
 
         // 키 전환 이벤트는 custom event도 함께 전송 → GA4 이벤트 보고서에 반영
@@ -413,6 +418,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
               simulation: "true",
               ...props,
             },
+            timestamp_micros: tsMicros,
           });
         }
       }
