@@ -33,6 +33,7 @@ interface SimJob {
   consultingRegisteredCount: number;
   firstVisitCount: number;
   returnVisitCount: number;
+  genderBreakdown: Record<string, number>;
   directEntryBreakdown: Record<string, number>;
   portfolioFunnelBreakdown: Record<number, number>;
   portfolioDropoffBreakdown: Record<number, number>;
@@ -115,12 +116,21 @@ const FUNNEL_ORDER = [
   { key: "referral_sent",         label: "추천 공유",       color: "bg-indigo-400",  aarrr: "Referral" },
 ];
 
+const SIM_CFG_KEY = "admarket_sim_cfg";
+
+function loadSavedCfg(): SimConfig {
+  try {
+    const s = localStorage.getItem(SIM_CFG_KEY);
+    return s ? { ...DEFAULTS, ...JSON.parse(s) } : DEFAULTS;
+  } catch { return DEFAULTS; }
+}
+
 function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?: number }) {
   const [data, setData] = useState<{ jobId: string; job: SimJob } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [cfg, setCfg] = useState<SimConfig>(DEFAULTS);
-  const [dialogCfg, setDialogCfg] = useState<SimConfig>(DEFAULTS);
+  const [cfg, setCfg] = useState<SimConfig>(loadSavedCfg);
+  const [dialogCfg, setDialogCfg] = useState<SimConfig>(loadSavedCfg);
   const [loading, setLoading] = useState(false);
 
   function setD<K extends keyof SimConfig>(key: K, val: SimConfig[K]) {
@@ -147,6 +157,7 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
 
   async function startSim(runCfg: SimConfig) {
     setCfg(runCfg);
+    try { localStorage.setItem(SIM_CFG_KEY, JSON.stringify(runCfg)); } catch {}
     setDialogOpen(false);
     setLoading(true);
     try {
@@ -303,45 +314,20 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
 
             </div>
 
-            {/* AARRR 퍼널 */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-              <p className="font-medium text-gray-800">AARRR 퍼널</p>
-              <div className="space-y-2">
-                {FUNNEL_ORDER.map(({ key, label, color, aarrr }) => {
-                  const count = job?.funnelBreakdown?.[key] ?? 0;
-                  const pct = siteVisit > 0 ? Math.round((count / siteVisit) * 100) : 0;
-                  return (
-                    <div key={key} className="flex items-center gap-2">
-                      {aarrr
-                        ? <span className="w-20 shrink-0 text-[10px] font-semibold text-gray-400 uppercase">{aarrr}</span>
-                        : <span className="w-20 shrink-0" />}
-                      <div className="w-24 text-xs text-gray-600 truncate shrink-0">{label}</div>
-                      <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                        <div className={`${color} h-3 rounded-full transition-all duration-500`}
-                          style={{ width: `${Math.max(pct, count > 0 ? 1 : 0)}%` }} />
-                      </div>
-                      <div className="w-12 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                      <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
-                    </div>
-                  );
-                })}
-              </div>
-              {/* 방문 유형 sub-section */}
-              <div className="pt-1 border-t border-gray-100 space-y-2">
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">방문 유형</p>
-                {(() => {
-                  const first = job?.firstVisitCount  ?? 0;
-                  const ret   = job?.returnVisitCount  ?? 0;
-                  const total = first + ret;
-                  return [
-                    { label: "첫방문", count: first, color: "bg-teal-400"   },
-                    { label: "재방문", count: ret,   color: "bg-orange-400" },
-                  ].map(({ label, count, color }) => {
-                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+            <div className="space-y-4">
+              {/* AARRR 퍼널 */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
+                <p className="font-medium text-gray-800">AARRR 퍼널</p>
+                <div className="space-y-2">
+                  {FUNNEL_ORDER.map(({ key, label, color, aarrr }) => {
+                    const count = job?.funnelBreakdown?.[key] ?? 0;
+                    const pct = siteVisit > 0 ? Math.round((count / siteVisit) * 100) : 0;
                     return (
-                      <div key={label} className="flex items-center gap-2">
-                        <span className="w-20 shrink-0" />
-                        <div className="w-24 text-xs text-gray-600 shrink-0">{label}</div>
+                      <div key={key} className="flex items-center gap-2">
+                        {aarrr
+                          ? <span className="w-20 shrink-0 text-[10px] font-semibold text-gray-400 uppercase">{aarrr}</span>
+                          : <span className="w-20 shrink-0" />}
+                        <div className="w-24 text-xs text-gray-600 truncate shrink-0">{label}</div>
                         <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
                           <div className={`${color} h-3 rounded-full transition-all duration-500`}
                             style={{ width: `${Math.max(pct, count > 0 ? 1 : 0)}%` }} />
@@ -350,14 +336,79 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                         <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
                       </div>
                     );
-                  });
-                })()}
-              </div>
-              {isDone && (
-                <div className="bg-blue-50 rounded-lg px-3 py-2 text-xs text-blue-700">
-                  ✅ GA4 + Mixpanel 전송 완료
+                  })}
                 </div>
-              )}
+                {isDone && (
+                  <div className="bg-blue-50 rounded-lg px-3 py-2 text-xs text-blue-700">
+                    ✅ GA4 + Mixpanel 전송 완료
+                  </div>
+                )}
+              </div>
+
+              {/* 방문 유형 */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
+                <div>
+                  <p className="font-medium text-gray-800">방문 유형</p>
+                  <p className="text-[10px] text-gray-400">GA4 신규 방문자 / 재방문자 기준</p>
+                </div>
+                <div className="space-y-2">
+                  {(() => {
+                    const first = job?.firstVisitCount ?? 0;
+                    const ret   = job?.returnVisitCount ?? 0;
+                    const total = first + ret;
+                    return [
+                      { label: "첫방문", count: first, color: "bg-teal-400"   },
+                      { label: "재방문", count: ret,   color: "bg-orange-400" },
+                    ].map(({ label, count, color }) => {
+                      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                      return (
+                        <div key={label} className="flex items-center gap-3">
+                          <div className="w-14 text-xs text-gray-600 shrink-0">{label}</div>
+                          <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                            <div className={`${color} h-3 rounded-full transition-all duration-500`}
+                              style={{ width: `${Math.max(pct, count > 0 ? 1 : 0)}%` }} />
+                          </div>
+                          <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                          <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+
+              {/* 성별 */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
+                <div>
+                  <p className="font-medium text-gray-800">성별</p>
+                  <p className="text-[10px] text-gray-400">전체 방문자 기준</p>
+                </div>
+                <div className="space-y-2">
+                  {(() => {
+                    const genderBreakdown = job?.genderBreakdown ?? {};
+                    const male   = genderBreakdown["male"]   ?? 0;
+                    const female = genderBreakdown["female"] ?? 0;
+                    const total  = male + female;
+                    return [
+                      { label: "남성", count: male,   color: "bg-blue-400"  },
+                      { label: "여성", count: female, color: "bg-pink-400"  },
+                    ].map(({ label, count, color }) => {
+                      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                      return (
+                        <div key={label} className="flex items-center gap-3">
+                          <div className="w-14 text-xs text-gray-600 shrink-0">{label}</div>
+                          <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                            <div className={`${color} h-3 rounded-full transition-all duration-500`}
+                              style={{ width: `${Math.max(pct, count > 0 ? 1 : 0)}%` }} />
+                          </div>
+                          <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                          <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
             </div>
           </div>
 

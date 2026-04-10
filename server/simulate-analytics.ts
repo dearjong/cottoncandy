@@ -28,6 +28,7 @@ export interface SimJob {
   consultingRegisteredCount: number;
   firstVisitCount: number;
   returnVisitCount: number;
+  genderBreakdown: Record<string, number>;
   directEntryBreakdown: Record<string, number>;
   portfolioFunnelBreakdown: Record<number, number>;
   portfolioDropoffBreakdown: Record<number, number>;
@@ -263,6 +264,7 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     consultingRegisteredCount: 0,
     firstVisitCount: 0,
     returnVisitCount: 0,
+    genderBreakdown: {},
     directEntryBreakdown: {},
     portfolioFunnelBreakdown: {},
     portfolioDropoffBreakdown: {},
@@ -391,10 +393,11 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const geo      = weightedPick(GEO_LIST);
     const isPartner = userType === "agency" || userType === "production";
 
-    // UTM / 지역 집계 (모든 유저)
+    // UTM / 지역 / 성별 집계 (모든 유저)
     utmCount[utm.utm_source] = (utmCount[utm.utm_source] ?? 0) + 1;
     const region = geo.geo_region as string;
     geoCount[region] = (geoCount[region] ?? 0) + 1;
+    job.genderBreakdown[gender] = (job.genderBreakdown[gender] ?? 0) + 1;
 
     const joinSecsAgo = Math.floor(Math.random() * cfg.periodDays * 24 * 3600);
     const baseTs = tsAgo(joinSecsAgo);
