@@ -650,91 +650,134 @@ site_visit
 
 ## 17. 구현 현황 요약
 
-| 이벤트 | GA4 | Mixpanel | 상태 |
-|--------|-----|----------|------|
-| `page_view` | ✅ | ✅ | 완료 |
-| `site_visit` | ✅ | ✅ | 완료 |
-| `signup_funnel` | ✅ | ✅ | 완료 |
-| `signup_complete` | ✅ | ✅ | 완료 |
-| `step_N_화면명` (16단계) | ✅ | ✅ | 완료 |
-| `project_submitted` | ✅ | ✅ | 완료 |
-| `project_viewed` | ✅ | ✅ | 완료 |
-| `partner_applied` | ✅ | ✅ | 완료 |
-| `consulting_inquiry_submitted` | ✅ | ✅ | 완료 |
-| `partner_searched` | ✅ | ✅ | 완료 |
-| `agency_favorited` | ✅ | ✅ | 완료 |
-| `participation_invite_toggled` | ✅ | ✅ | 완료 |
-| `participation_ot_confirmed` | ✅ | ✅ | 완료 |
-| `participation_ot_completed` | ✅ | ✅ | 완료 |
-| `participation_pt_confirmed` | ✅ | ✅ | 완료 |
-| `participation_pt_completed` | ✅ | ✅ | 완료 |
-| `participation_final_selected` | ✅ | ✅ | 완료 (GA4 전환) |
-| `review_saved` | ✅ | ✅ | 완료 |
-| `review_submitted` | ✅ | ✅ | 완료 (GA4 전환) |
-| `review_edited` | ✅ | ✅ | 완료 |
-| `review_completed` | ✅ | ✅ | 완료 |
-| `contract_saved` | ✅ | ✅ | 완료 |
-| `contract_request_sent` | ✅ | ✅ | 완료 |
-| `contract_signed` | ✅ | ✅ | 완료 (GA4 전환, partner_selected 통합) |
-| `contract_cancelled` | ✅ | ✅ | 완료 |
-| `admin_project_approved` | ✅ | ✅ | 완료 |
-| `admin_project_rejected` | ✅ | ✅ | 완료 |
-| `admin_notice_published` | ✅ | ✅ | 완료 |
-| `admin_banner_published` | ✅ | ✅ | 완료 |
-| `admin_notification_sent` | ✅ | ✅ | 완료 |
-| `consulting_message_sent` | ✅ | ✅ | 완료 |
-| `consulting_responded` | ✅ | ✅ | 완료 |
-| `consulting_project_linked` | ✅ | ✅ | 완료 |
-| `proposal_submitted` | ✅ | ✅ | 완료 (`/work/project/proposal/register`) |
-| `partner_selected` | ✅ | ✅ | 완료 — selected_count, company_ids (최종선정 확정 CTA) |
-| ~~`consulting_matched`~~ | - | - | 제거됨 (해당 구조 없음) |
-| ~~`consulting_to_project`~~ | - | - | 제거됨 (전환 아닌 연결 구조) |
-| `admin_member_warned` | ✅ | ✅ | 완료 |
-| `admin_member_suspended` | ✅ | ✅ | 완료 |
-| `admin_member_resumed` | ✅ | ✅ | 완료 |
-| `admin_member_banned` | ✅ | ✅ | 완료 |
-| `mypage_viewed` | ✅ | ✅ | 완료 — page: profile/withdraw/inquiry/notification_settings |
-| `mypage_profile_saved` | ✅ | ✅ | 완료 — 내정보 저장 |
-| `mypage_withdraw_attempted` | ✅ | ✅ | 완료 — reason_count, has_other_text |
-| `mypage_inquiry_submitted` | ✅ | ✅ | 완료 — tab: general/report, has_attachment |
-| `mypage_notification_settings_saved` | ✅ | ✅ | 완료 — app_on_count, email_on_count, sms_on_count |
-| `user_login` | - | ✅ | 완료 — method, user_type (Mixpanel 전용. GA4는 표준 `login` 이벤트 사용) |
-| `home_cta_clicked` | ✅ | ✅ | 완료 — experiment_id, variant (홈 Hero CTA 버튼 클릭) |
-| `experiment_viewed` | ✅ | ✅ | 완료 — experiment_id, variant (A/B 테스트 노출) |
-| `time_on_page` | ✅ | ✅ | 완료 — path, duration_sec (SPA 경로 변경 시) |
-| `page_exit` | ✅ | ✅ | 완료 — path, time_on_page_sec (브라우저 종료/이탈 시) |
-| `referral_sent` | ✅ | ✅ | 완료 — method: copy/share (내정보 → 추천 링크 복사) |
-| `referral_signed_up` | ✅ | ✅ | 완료 — referrer_code (?ref= 파라미터 가입 시 발송) |
-| `activation_achieved` | ✅ | ✅ | 완료 — trigger_event, user_type (첫 핵심 행동 달성 시 자동 발사) |
-| `sso_login` | ✅ | ✅ | 완료 — source: tvcf.co.kr, method: sso |
-| `signup_started` | ✅ | ✅ | 완료 — method: email |
-| `direct_entry` | ✅ | ✅ | 완료 — path, page_label, is_authenticated |
-| `project_session_started` | - | ✅ | 완료 — session_number, steps_completed_so_far |
-| `project_draft_saved` | ✅ | ✅ | 완료 — draft_save_count, steps_completed, cumulative_writing_sec |
-| `project_draft_opened` | ✅ | ✅ | 완료 — draft_save_count, days_since_last_save, hours_since_last_save |
-| `project_step_abandoned` | - | ✅ | 완료 — step, had_draft, time_on_step_sec |
-| `portfolio_session_started` | - | ✅ | 완료 — session_number, sections_completed_so_far |
-| `portfolio_section_{id}` (13개) | - | ✅ | 완료 — section, section_id, time_on_section_sec |
-| `portfolio_draft_saved` | ✅ | ✅ | 완료 — draft_save_count, sections_completed |
-| `portfolio_draft_opened` | ✅ | ✅ | 완료 — draft_save_count, days_since_last_save |
-| `portfolio_section_abandoned` | - | ✅ | 완료 — section, had_draft |
-| `portfolio_registered` | ✅ | ✅ | 완료 — total_sessions, total_writing_time_min |
-| `draft_submitted` | ✅ | ✅ | 완료 |
-| `draft_confirmed` | ✅ | ✅ | 완료 |
-| `deliverable_submitted` | ✅ | ✅ | 완료 |
-| `deliverable_confirmed` | ✅ | ✅ | 완료 |
+> ⭐ = GA4 키 이벤트 (콘솔 전환 등록 대상) | GA4 `-` = Mixpanel 전용
+
+### 유입 · 세션
+| 이벤트 | GA4 | MXP |
+|--------|-----|-----|
+| `page_view` | ✅ | ✅ |
+| `site_visit` ⭐ | ✅ | ✅ |
+| `direct_entry` | ✅ | ✅ |
+| `time_on_page` | ✅ | ✅ |
+| `page_exit` | ✅ | ✅ |
+
+### 인증 · 가입
+| 이벤트 | GA4 | MXP |
+|--------|-----|-----|
+| `sso_login` ⭐ | ✅ | ✅ |
+| `login` ⭐ | ✅ | ✅ |
+| `user_login` (Mixpanel 전용) | - | ✅ |
+| `signup_started` ⭐ | ✅ | ✅ |
+| `signup_funnel` | ✅ | ✅ |
+| `signup_complete` ⭐ | ✅ | ✅ |
+
+### 탐색 · 발견
+| 이벤트 | GA4 | MXP |
+|--------|-----|-----|
+| `project_viewed` | ✅ | ✅ |
+| `partner_searched` | ✅ | ✅ |
+| `agency_favorited` | ✅ | ✅ |
+
+### 프로젝트 등록 퍼널 (의뢰사)
+| 이벤트 | GA4 | MXP |
+|--------|-----|-----|
+| `step_1_cta_click` ⭐ | ✅ | ✅ |
+| `step_N_화면명` (18단계) | ✅ | ✅ |
+| `project_session_started` | - | ✅ |
+| `project_draft_saved` ⭐ | ✅ | ✅ |
+| `project_draft_opened` ⭐ | ✅ | ✅ |
+| `project_step_abandoned` | - | ✅ |
+| `project_submitted` ⭐ | ✅ | ✅ |
+| `consulting_inquiry_submitted` ⭐ | ✅ | ✅ |
+
+### 포트폴리오 등록 퍼널 (파트너사)
+| 이벤트 | GA4 | MXP |
+|--------|-----|-----|
+| `portfolio_session_started` | - | ✅ |
+| `portfolio_section_{id}` (13개) | - | ✅ |
+| `portfolio_draft_saved` ⭐ | ✅ | ✅ |
+| `portfolio_draft_opened` ⭐ | ✅ | ✅ |
+| `portfolio_section_abandoned` | - | ✅ |
+| `portfolio_registered` ⭐ | ✅ | ✅ |
+
+### 지원 · 계약
+| 이벤트 | GA4 | MXP |
+|--------|-----|-----|
+| `partner_applied` ⭐ | ✅ | ✅ |
+| `proposal_submitted` ⭐ | ✅ | ✅ |
+| `partner_selected` ⭐ | ✅ | ✅ |
+| `contract_saved` | ✅ | ✅ |
+| `contract_request_sent` | ✅ | ✅ |
+| `contract_signed` ⭐ | ✅ | ✅ |
+| `contract_cancelled` | ✅ | ✅ |
+
+### 참여현황 (의뢰사)
+| 이벤트 | GA4 | MXP |
+|--------|-----|-----|
+| `participation_invite_toggled` | ✅ | ✅ |
+| `participation_ot_confirmed` | ✅ | ✅ |
+| `participation_ot_completed` | ✅ | ✅ |
+| `participation_pt_confirmed` | ✅ | ✅ |
+| `participation_pt_completed` | ✅ | ✅ |
+| `participation_final_selected` ⭐ | ✅ | ✅ |
+
+### 납품 · 리뷰
+| 이벤트 | GA4 | MXP |
+|--------|-----|-----|
+| `draft_submitted` ⭐ | ✅ | ✅ |
+| `draft_confirmed` ⭐ | ✅ | ✅ |
+| `deliverable_submitted` ⭐ | ✅ | ✅ |
+| `deliverable_confirmed` ⭐ | ✅ | ✅ |
+| `review_saved` | ✅ | ✅ |
+| `review_submitted` ⭐ | ✅ | ✅ |
+| `review_edited` | ✅ | ✅ |
+| `review_completed` | ✅ | ✅ |
+
+### 컨설팅
+| 이벤트 | GA4 | MXP |
+|--------|-----|-----|
+| `consulting_message_sent` | ✅ | ✅ |
+| `consulting_responded` | ✅ | ✅ |
+| `consulting_project_linked` | ✅ | ✅ |
+
+### 관리자 운영
+| 이벤트 | GA4 | MXP |
+|--------|-----|-----|
+| `admin_project_approved` | ✅ | ✅ |
+| `admin_project_rejected` | ✅ | ✅ |
+| `admin_member_warned` | ✅ | ✅ |
+| `admin_member_suspended` | ✅ | ✅ |
+| `admin_member_resumed` | ✅ | ✅ |
+| `admin_member_banned` | ✅ | ✅ |
+| `admin_notice_published` | ✅ | ✅ |
+| `admin_banner_published` | ✅ | ✅ |
+| `admin_notification_sent` | ✅ | ✅ |
+
+### 마이페이지
+| 이벤트 | GA4 | MXP |
+|--------|-----|-----|
+| `mypage_viewed` | ✅ | ✅ |
+| `mypage_profile_saved` | ✅ | ✅ |
+| `mypage_withdraw_attempted` | ✅ | ✅ |
+| `mypage_inquiry_submitted` | ✅ | ✅ |
+| `mypage_notification_settings_saved` | ✅ | ✅ |
+
+### 기타 전환 · 실험
+| 이벤트 | GA4 | MXP |
+|--------|-----|-----|
+| `activation_achieved` ⭐ | ✅ | ✅ |
+| `referral_sent` ⭐ | ✅ | ✅ |
+| `referral_signed_up` | ✅ | ✅ |
+| `home_cta_clicked` | ✅ | ✅ |
+| `experiment_viewed` | ✅ | ✅ |
 
 ### 자동 첨부 프로퍼티 (모든 이벤트 공통)
+
 | 프로퍼티 | 설명 | 소스 |
 |---------|------|------|
-| `utm_source` | 유입 채널 (google, naver 등) | URL 파라미터 → sessionStorage 고정 |
-| `utm_medium` | 매체 (cpc, email 등) | URL 파라미터 |
-| `utm_campaign` | 캠페인명 | URL 파라미터 |
-| `utm_term` | 키워드 | URL 파라미터 |
-| `utm_content` | 광고 소재 구분 | URL 파라미터 |
+| `utm_source` / `utm_medium` / `utm_campaign` | 유입 채널 정보 | URL 파라미터 → sessionStorage 고정 |
 | `user_id` | 로그인 사용자 ID | localStorage |
-| `active_experiments` | 현재 진행 실험 목록 | localStorage |
-| `exp_<id>` | 실험별 배정 variant | localStorage |
+| `active_experiments` / `exp_<id>` | A/B 실험 배정 정보 | localStorage |
 
 ---
 
