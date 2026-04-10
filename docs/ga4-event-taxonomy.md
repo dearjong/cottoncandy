@@ -1,6 +1,6 @@
 # ADMarket GA4 · Mixpanel 이벤트 정의서
 
-> 버전: v2.9 | 작성일: 2026-04-08 | 최종수정: 2026-04-10  
+> 버전: v3.0 | 작성일: 2026-04-08 | 최종수정: 2026-04-10  
 > 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
 
 ---
@@ -459,16 +459,65 @@ gtag("event", "login", { method: "email" })   // GA4 표준 이벤트
 
 ---
 
-## 11. 제작 리뷰 이벤트 (의뢰사)
+## 11. 납품·산출물 이벤트 (파트너사·의뢰사)
 
-> `/work/project/review` — 리뷰 작성이 곧 프로젝트 완료를 의미
+> `/work/project/deliverables` — 파트너사가 산출물을 제출하고 의뢰사가 선택·확정하는 전체 흐름
+
+| 이벤트명 | 발송 주체 | 트리거 | GA4 전환 | 구현 |
+|---------|---------|--------|---------|------|
+| `draft_submitted` | 파트너사 | 제안서 제출하기 클릭 | ✅ 전환 | ✅ 완료 |
+| `draft_confirmed` | 의뢰사 | 제안서 수락 버튼 클릭 | ✅ 전환 | ⏸ 함수 준비, UI 미연결 |
+| `deliverable_submitted` | 파트너사 | "의뢰사에 산출물 선택 요청하기" 팝업 확인 또는 "최종산출물 확정요청" 팝업 확인 | ✅ 전환 | ✅ 완료 |
+| `deliverable_confirmed` | 의뢰사 | "선택된 작품을 최종 산출물로 확정 등록하기" 팝업 확인 | ✅ 전환 | ✅ 완료 |
+
+### 팝업 4종 → 이벤트 매핑
+
+| 팝업명 | 발송 주체 | 이벤트 |
+|--------|---------|--------|
+| 산출물 업로드 완료 및 선택요청 | 파트너사 | `deliverable_submitted` |
+| 최종산출물 확정요청 | 파트너사 | `deliverable_submitted` |
+| 선택완료 및 수정요청 | 의뢰사 | (이벤트 없음 — UX 흐름용) |
+| 최종산출물 선택완료 | 의뢰사 | `deliverable_confirmed` |
+
+**`draft_submitted` 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `project_title` | `[베스트전자] TV 신제품 프로모션` | 프로젝트명 |
+| `concept_count` | `3` | 제출 컨셉 수 |
+| `user_type` | `partner` | 항상 파트너사 |
+
+**`draft_confirmed` 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `project_title` | `[베스트전자] TV 신제품 프로모션` | 프로젝트명 |
+| `user_type` | `advertiser` | 항상 의뢰사 |
+
+**`deliverable_submitted` · `deliverable_confirmed` 공통 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `project_title` | `[베스트전자] TV 신제품 프로모션` | 프로젝트명 |
+| `phase` | `1` / `2` | 산출물 차수 |
+| `user_type` | `partner` / `advertiser` | 발송 주체 |
+
+> **설계 포인트**: `draft_submitted` → `draft_confirmed` → `deliverable_submitted` → `deliverable_confirmed` 순서가 계약 후 납품 완료 퍼널의 핵심 마일스톤.  
+> `draft_confirmed`는 의뢰사가 제안서를 수락할 때 발사 — 현재 함수만 준비, 의뢰사 화면 구현 후 연결 필요.
+
+---
+
+## 11-1. 제작 리뷰 · 프로젝트 완료 이벤트 (의뢰사)
+
+> `/work/project/review` — 리뷰 작성 및 최종 완료가 프로젝트 전체 퍼널의 종점
 
 | 이벤트명 | 트리거 | GA4 전환 | 구현 |
 |---------|--------|---------|------|
 | `review_saved` | 임시저장 버튼 클릭 | - | ✅ 완료 |
-| `review_submitted` | 등록하기 클릭 (프로젝트 완료) | ✅ 전환 | ✅ 완료 |
+| `review_submitted` | 등록하기 클릭 (리뷰 제출) | ✅ 전환 | ✅ 완료 |
 | `review_edited` | 수정 버튼 클릭 (7일 이내) | - | ✅ 완료 |
-| `review_completed` | 완료 버튼 클릭 | - | ✅ 완료 |
+| `review_completed` | 완료 버튼 클릭 (리뷰 잠금) | - | ✅ 완료 |
+| `project_completed` | 완료 버튼 클릭 (프로젝트 최종 종료) | ✅ 전환 | ✅ 완료 |
 
 **`review_submitted` 파라미터** (핵심 전환)
 
@@ -480,7 +529,16 @@ gtag("event", "login", { method: "email" })   // GA4 표준 이벤트
 | `has_text` | `true` | 리뷰 텍스트 작성 여부 |
 | `user_type` | `advertiser` | 항상 의뢰사 |
 
-> **설계 포인트**: `review_submitted` = 프로젝트 완료 전환. GA4 퍼널 마지막 단계 `contract_signed` → `review_submitted`로 이어짐
+**`project_completed` 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `partner_name` | `솜사탕애드` | 파트너 기업명 |
+| `project_title` | `[베스트전자] TV 신제품 프로모션` | 프로젝트명 (있는 경우) |
+| `user_type` | `advertiser` | 항상 의뢰사 |
+
+> **설계 포인트**: `review_submitted`(리뷰 등록)와 `project_completed`(최종 완료 버튼)는 review.tsx `handleComplete`에서 동시 발사.  
+> `review_submitted`는 GA4 퍼널 전환점, `project_completed`는 비즈니스 사이클 종료 지표.
 
 ---
 
@@ -574,7 +632,8 @@ GA4 관리 콘솔 → `activation_achieved`를 전환 이벤트로 추가 마킹
 | `deliverable_confirmed` | 최종 납품물 승인 | 의뢰사 | ✅ |
 | `participation_final_selected` | 최종 파트너 선정 토글 | 의뢰사 | ✅ |
 | `consulting_inquiry_submitted` | 컨설팅 문의 접수 | 의뢰사 | ✅ |
-| `review_submitted` | 제작 리뷰 등록 = 프로젝트 완료 | 의뢰사 | ✅ |
+| `review_submitted` | 제작 리뷰 등록 | 의뢰사 | ✅ |
+| `project_completed` | 프로젝트 최종 완료 종료 | 의뢰사 | ✅ |
 | `activation_achieved` | 첫 핵심 행동 달성 | 공통 | ✅ |
 | `referral_sent` | 지인 추천 발송 | 공통 | ✅ |
 
@@ -584,7 +643,7 @@ GA4 관리 콘솔 → `activation_achieved`를 전환 이벤트로 추가 마킹
 
 ## 15. 퍼널 설계 (GA4 탐색 보고서 / Mixpanel 퍼널)
 
-### 의뢰사 — 공고 프로젝트 퍼널
+### 의뢰사 — 공고 프로젝트 퍼널 (전체 사이클)
 
 ```
 site_visit
@@ -594,7 +653,10 @@ site_visit
         → project_submitted (project_type=공고)
           → participation_final_selected ← 최종 파트너 선정
             → contract_signed
-              → review_submitted          ← 프로젝트 완료
+              → draft_confirmed          ← 제안서 수락 (의뢰사)
+                → deliverable_confirmed  ← 최종 산출물 확정 (의뢰사)
+                  → review_submitted     ← 리뷰 등록
+                    → project_completed  ← 프로젝트 최종 종료
 ```
 
 ### 의뢰사 — 1:1 프로젝트 퍼널
@@ -605,7 +667,10 @@ site_visit
     → step_1_partner_selection
       → project_submitted (project_type=1:1)
         → contract_signed
-          → review_submitted             ← 프로젝트 완료
+          → draft_confirmed
+            → deliverable_confirmed
+              → review_submitted
+                → project_completed     ← 프로젝트 최종 종료
 ```
 
 ### 파트너사 — 지원 퍼널
@@ -617,6 +682,8 @@ site_visit
       → partner_applied                  ← 행동
         → proposal_submitted
           → partner_selected (수주)
+            → draft_submitted            ← 제안서 제출 (파트너사)
+              → deliverable_submitted    ← 산출물 제출 (파트너사)
 ```
 
 ### 컨설팅 퍼널
@@ -643,6 +710,10 @@ site_visit
 | 공고 등록 이탈 단계 파악 | `step_1_*` ~ `step_16_*` → `project_submitted` |
 | 파트너사 발견 → 지원 전환율 | `project_viewed` → `partner_applied` |
 | 매칭 → 계약 전환율 | `participation_final_selected` → `contract_signed` |
+| 계약 → 납품 완료율 | `contract_signed` → `deliverable_confirmed` |
+| 납품 → 프로젝트 종료율 | `deliverable_confirmed` → `project_completed` |
+| 전체 사이클 완주율 | `project_submitted` → `project_completed` |
+| 제안서 수락 소요 시간 | `draft_submitted` → `draft_confirmed` 사이 시간 |
 | 컨설팅 문의 → 응답 완료율 | `consulting_inquiry_submitted` → `consulting_responded` |
 | 대행사 탐색 깊이 | `partner_searched` → `agency_favorited` → `project_submitted` |
 
@@ -722,16 +793,17 @@ site_visit
 | `participation_final_selected` ⭐ | ✅ | ✅ |
 
 ### 납품 · 리뷰
-| 이벤트 | GA4 | MXP |
-|--------|-----|-----|
-| `draft_submitted` ⭐ | ✅ | ✅ |
-| `draft_confirmed` ⭐ | ✅ | ✅ |
-| `deliverable_submitted` ⭐ | ✅ | ✅ |
-| `deliverable_confirmed` ⭐ | ✅ | ✅ |
-| `review_saved` | ✅ | ✅ |
-| `review_submitted` ⭐ | ✅ | ✅ |
-| `review_edited` | ✅ | ✅ |
-| `review_completed` | ✅ | ✅ |
+| 이벤트 | GA4 | MXP | UI 연결 |
+|--------|-----|-----|---------|
+| `draft_submitted` ⭐ | ✅ | ✅ | ✅ proposal-register.tsx |
+| `draft_confirmed` ⭐ | ✅ | ✅ | ⏸ 함수 준비, 의뢰사 UI 미구현 |
+| `deliverable_submitted` ⭐ | ✅ | ✅ | ✅ deliverables.tsx 팝업①② |
+| `deliverable_confirmed` ⭐ | ✅ | ✅ | ✅ deliverables.tsx 팝업④ |
+| `review_saved` | ✅ | ✅ | ✅ review.tsx |
+| `review_submitted` ⭐ | ✅ | ✅ | ✅ review.tsx |
+| `review_edited` | ✅ | ✅ | ✅ review.tsx |
+| `review_completed` | ✅ | ✅ | ✅ review.tsx |
+| `project_completed` ⭐ | ✅ | ✅ | ✅ review.tsx handleComplete |
 
 ### 컨설팅
 | 이벤트 | GA4 | MXP |
@@ -825,4 +897,13 @@ site_visit
 
 ---
 
-*이 문서는 ADMarket 플랫폼 GA4·Mixpanel 설계 기준입니다. 구현 완료 후 이 표를 업데이트하세요.*
+## 19. 미연결 이벤트 (함수 준비 완료, UI 연결 필요)
+
+| 이벤트 | 함수 | 연결 예정 위치 | 비고 |
+|--------|------|--------------|------|
+| `draft_confirmed` | `trackDraftConfirmed` | 의뢰사 제안서 수락 화면 | 해당 화면 미구현 |
+
+---
+
+*이 문서는 ADMarket 플랫폼 GA4·Mixpanel 이벤트 정의 기준입니다. (v3.0 — 2026-04-10)*  
+*전체 퍼널 이벤트 연결 완료: `project_completed` · `deliverable_submitted/confirmed` · `draft_submitted` · `portfolio_registered`*
