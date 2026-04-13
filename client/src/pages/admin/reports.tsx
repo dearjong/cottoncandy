@@ -653,8 +653,9 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
           })()}
 
           {/* AIDA 퍼널 */}
-          {job?.aidaBreakdown && job.aidaBreakdown.attention > 0 && (() => {
-            const { attention, interest, desire, action } = job.aidaBreakdown;
+          {job && (() => {
+            const aida = job.aidaBreakdown ?? { attention: 0, interest: 0, desire: 0, action: 0 };
+            const { attention, interest, desire, action } = aida;
             const stages = [
               {
                 key: "A", label: "Attention", sublabel: "인지",
@@ -702,73 +703,83 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
                   </div>
                 </div>
 
-                {/* 퍼널 바 */}
-                <div className="space-y-3">
-                  {stages.map((s, idx) => {
-                    const pct = attention > 0 ? Math.round((s.count / attention) * 100) : 0;
-                    const prevCount = idx === 0 ? attention : stages[idx - 1].count;
-                    const dropPct = prevCount > 0 ? Math.round(((prevCount - s.count) / prevCount) * 100) : 0;
-                    return (
-                      <div key={s.key} className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-2">
-                            <span className={`${s.badge} text-[10px] font-bold px-1.5 py-0.5 rounded`}>{s.label}</span>
-                            <span className="text-gray-500">{s.sublabel}</span>
-                            <span className="text-gray-300 text-[10px]">— {s.desc}</span>
-                          </div>
-                          <div className="flex items-center gap-3 shrink-0">
-                            {idx > 0 && dropPct > 0 && (
-                              <span className="text-[10px] text-red-400">▼ {dropPct}% 이탈</span>
-                            )}
-                            <span className="font-semibold text-gray-700">{s.count.toLocaleString()}명</span>
-                            <span className="text-gray-400 w-8 text-right">{pct}%</span>
-                          </div>
-                        </div>
-                        <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
-                          <div
-                            className={`${s.color} h-3 rounded-full transition-all duration-700`}
-                            style={{ width: `${Math.max(pct, 1)}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                {attention === 0 && (
+                  <div className="py-6 text-center text-sm text-gray-400">
+                    시뮬레이션을 새로 실행하면 AIDA 데이터가 표시됩니다.
+                  </div>
+                )}
 
-                {/* 전환율 요약 */}
-                <div className="grid grid-cols-3 gap-3 pt-1">
-                  {[
-                    { label: "A→I 전환율", val: attention > 0 ? Math.round((interest / attention) * 100) : 0, color: "text-teal-600" },
-                    { label: "I→D 전환율", val: interest > 0 ? Math.round((desire / interest) * 100) : 0, color: "text-pink-600" },
-                    { label: "D→A 전환율", val: desire > 0 ? Math.round((action / desire) * 100) : 0, color: "text-orange-600" },
-                  ].map((r) => (
-                    <div key={r.label} className="bg-gray-50 rounded-lg p-3 text-center">
-                      <p className={`text-xl font-bold ${r.color}`}>{r.val}%</p>
-                      <p className="text-[10px] text-gray-400 mt-0.5">{r.label}</p>
+                {/* 퍼널 바 + 전환율 + 인사이트 */}
+                {attention > 0 ? (
+                  <>
+                    <div className="space-y-3">
+                      {stages.map((s, idx) => {
+                        const pct = Math.round((s.count / attention) * 100);
+                        const prevCount = idx === 0 ? attention : stages[idx - 1].count;
+                        const dropPct = prevCount > 0 ? Math.round(((prevCount - s.count) / prevCount) * 100) : 0;
+                        return (
+                          <div key={s.key} className="space-y-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className={`${s.badge} text-[10px] font-bold px-1.5 py-0.5 rounded`}>{s.label}</span>
+                                <span className="text-gray-500">{s.sublabel}</span>
+                                <span className="text-gray-300 text-[10px]">— {s.desc}</span>
+                              </div>
+                              <div className="flex items-center gap-3 shrink-0">
+                                {idx > 0 && dropPct > 0 && (
+                                  <span className="text-[10px] text-red-400">▼ {dropPct}% 이탈</span>
+                                )}
+                                <span className="font-semibold text-gray-700">{s.count.toLocaleString()}명</span>
+                                <span className="text-gray-400 w-8 text-right">{pct}%</span>
+                              </div>
+                            </div>
+                            <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                              <div
+                                className={`${s.color} h-3 rounded-full transition-all duration-700`}
+                                style={{ width: `${Math.max(pct, 1)}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
 
-                {/* 가장 낮은 전환 단계 인사이트 */}
-                {(() => {
-                  const rates = [
-                    { label: "Attention → Interest", val: attention > 0 ? interest / attention : 1 },
-                    { label: "Interest → Desire",    val: interest > 0 ? desire   / interest : 1 },
-                    { label: "Desire → Action",      val: desire   > 0 ? action   / desire   : 1 },
-                  ];
-                  const worst = rates.reduce((a, b) => (a.val < b.val ? a : b));
-                  const tips: Record<string, string> = {
-                    "Attention → Interest": "파트너 탐색·공고 상세 유입이 낮습니다. 홈 CTA와 추천 알고리즘을 개선하세요.",
-                    "Interest → Desire":    "관심은 있지만 등록·문의로 이어지지 않습니다. 등록 진입 장벽(복잡성·신뢰)을 낮추세요.",
-                    "Desire → Action":      "등록 시작 후 완료 전환이 낮습니다. 퍼널 중간 이탈 요인(오류·복잡한 단계)을 점검하세요.",
-                  };
-                  return (
-                    <div className="bg-amber-50 rounded-lg px-3 py-2 text-[10px] text-amber-700">
-                      💡 가장 낮은 전환 구간: <strong>{worst.label}</strong> ({Math.round(worst.val * 100)}%)<br />
-                      {tips[worst.label]}
+                    {/* 전환율 요약 */}
+                    <div className="grid grid-cols-3 gap-3 pt-1">
+                      {[
+                        { label: "A→I 전환율", val: Math.round((interest / attention) * 100), color: "text-teal-600" },
+                        { label: "I→D 전환율", val: interest > 0 ? Math.round((desire / interest) * 100) : 0, color: "text-pink-600" },
+                        { label: "D→A 전환율", val: desire > 0 ? Math.round((action / desire) * 100) : 0, color: "text-orange-600" },
+                      ].map((r) => (
+                        <div key={r.label} className="bg-gray-50 rounded-lg p-3 text-center">
+                          <p className={`text-xl font-bold ${r.color}`}>{r.val}%</p>
+                          <p className="text-[10px] text-gray-400 mt-0.5">{r.label}</p>
+                        </div>
+                      ))}
                     </div>
-                  );
-                })()}
+
+                    {/* 가장 낮은 전환 단계 인사이트 */}
+                    {(() => {
+                      const rates = [
+                        { label: "Attention → Interest", val: interest / attention },
+                        { label: "Interest → Desire",    val: interest > 0 ? desire / interest : 1 },
+                        { label: "Desire → Action",      val: desire   > 0 ? action / desire   : 1 },
+                      ];
+                      const worst = rates.reduce((a, b) => (a.val < b.val ? a : b));
+                      const tips: Record<string, string> = {
+                        "Attention → Interest": "파트너 탐색·공고 상세 유입이 낮습니다. 홈 CTA와 추천 알고리즘을 개선하세요.",
+                        "Interest → Desire":    "관심은 있지만 등록·문의로 이어지지 않습니다. 등록 진입 장벽(복잡성·신뢰)을 낮추세요.",
+                        "Desire → Action":      "등록 시작 후 완료 전환이 낮습니다. 퍼널 중간 이탈 요인(오류·복잡한 단계)을 점검하세요.",
+                      };
+                      return (
+                        <div className="bg-amber-50 rounded-lg px-3 py-2 text-[10px] text-amber-700">
+                          💡 가장 낮은 전환 구간: <strong>{worst.label}</strong> ({Math.round(worst.val * 100)}%)<br />
+                          {tips[worst.label]}
+                        </div>
+                      );
+                    })()}
+                  </>
+                ) : null}
               </div>
             );
           })()}
