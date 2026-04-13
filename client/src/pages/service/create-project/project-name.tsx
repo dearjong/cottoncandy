@@ -8,12 +8,15 @@ import { Input } from "@/components/ui/input";
 import { COMMON_MESSAGES } from "@/lib/messages";
 import { getSubtitle } from "@/config/global-events";
 import { trackCreateProjectCta } from "@/lib/analytics";
+import { useAuthGate } from "@/hooks/use-auth-gate";
+import LoginRequiredModal from "@/components/ui/login-required-modal";
 
 export default function Step3() {
   const stepNumber = 3;
   const [projectName, setProjectName] = useState<string>("");
-  const [, setLocation] = useLocation();
-  
+  const [location, setLocation] = useLocation();
+  const { showLoginModal, setShowLoginModal, requireAuth } = useAuthGate();
+
   // 메뉴별 서브타이틀 가져오기 (광고제작 의뢰하기 메뉴)
   const eventInfo = getSubtitle(undefined, 'request');
 
@@ -24,16 +27,17 @@ export default function Step3() {
 
   const handleNext = () => {
     trackCreateProjectCta(location, "next");
-    // Update max visited step
-    const currentMax = parseInt(localStorage.getItem('maxVisitedStep') || '1');
-    if (4 > currentMax) {
-      localStorage.setItem('maxVisitedStep', '4');
-    }
+    requireAuth(() => {
+      const currentMax = parseInt(localStorage.getItem('maxVisitedStep') || '1');
+      if (4 > currentMax) {
+        localStorage.setItem('maxVisitedStep', '4');
+      }
 
-    if (projectName.trim()) {
-      localStorage.setItem('projectName', projectName);
-      setLocation('/create-project/step4');
-    }
+      if (projectName.trim()) {
+        localStorage.setItem('projectName', projectName);
+        setLocation('/create-project/step4');
+      }
+    });
   };
 
   return (
@@ -113,6 +117,9 @@ export default function Step3() {
           </motion.div>
         </div>
       </div>
+      {showLoginModal && (
+        <LoginRequiredModal onClose={() => setShowLoginModal(false)} />
+      )}
     </Layout>
   );
 }
