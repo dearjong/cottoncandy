@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useSearch } from "wouter";
 import { StatisticsDashboard } from "@/components/admin/statistics-dashboard";
 import { PageHeader } from "@/components/admin/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -146,7 +145,7 @@ function loadSavedCfg(): SimConfig {
   } catch { return DEFAULTS; }
 }
 
-function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?: number }) {
+function ActivityTab({ openSignal }: { openSignal?: number }) {
   const [data, setData] = useState<{ jobId: string; job: SimJob } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -161,10 +160,6 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
   function stopPolling() {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
   }
-
-  useEffect(() => {
-    if (autoOpen) { setDialogCfg(cfg); setDialogOpen(true); }
-  }, [autoOpen]);
 
   useEffect(() => {
     if (openSignal && openSignal > 0) { setDialogCfg(cfg); setDialogOpen(true); }
@@ -1179,8 +1174,6 @@ function ActivityTab({ autoOpen, openSignal }: { autoOpen?: boolean; openSignal?
 }
 
 export default function ReportsPage() {
-  const search = useSearch();
-  const autoOpenSim = new URLSearchParams(search).get("simulate") === "1";
   const [activeTab, setActiveTab] = useState("activity");
   const [simSignal, setSimSignal] = useState(0);
   const [simStatus, setSimStatus] = useState<{ progress: number; message: string; status: string } | null>(null);
@@ -1229,7 +1222,7 @@ export default function ReportsPage() {
         </div>
 
         <TabsContent value="activity" className="mt-6">
-          <ActivityTab autoOpen={autoOpenSim} openSignal={simSignal} />
+          <ActivityTab openSignal={simSignal} />
         </TabsContent>
 
         <TabsContent value="platform" className="mt-6">
