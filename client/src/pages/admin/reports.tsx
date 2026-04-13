@@ -204,23 +204,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
     if (openSignal && openSignal > 0) { setDialogCfg(cfg); setDialogOpen(true); }
   }, [openSignal]);
 
-  async function startSim(runCfg: SimConfig) {
-    setCfg(runCfg);
-    try { localStorage.setItem(SIM_CFG_KEY, JSON.stringify(runCfg)); } catch {}
-    setDialogOpen(false);
-    setLoading(true);
-    try {
-      const res = await fetch("/api/admin/simulate/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(runCfg),
-      });
-      await res.json();
-      setLoading(false);
-    } catch {
-      setLoading(false);
-    }
-  }
+  const isRunningRef = useRef(false);
 
   async function fetchLatest() {
     try {
@@ -234,12 +218,41 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
   const isRunning = job && (job.status === "pending" || job.status === "generating" || job.status === "sending");
 
   useEffect(() => {
+    isRunningRef.current = !!isRunning;
+  }, [isRunning]);
+
+  useEffect(() => {
     fetchLatest();
-    const delay = isRunning ? 3000 : 30000;
-    stopPolling();
-    pollRef.current = setInterval(fetchLatest, delay);
+    let lastFetch = Date.now();
+    pollRef.current = setInterval(() => {
+      const delay = isRunningRef.current ? 3000 : 30000;
+      if (Date.now() - lastFetch >= delay) {
+        lastFetch = Date.now();
+        fetchLatest();
+      }
+    }, 1000);
     return () => stopPolling();
-  }, [!!isRunning]);
+  }, []);
+
+  async function startSim(runCfg: SimConfig) {
+    setCfg(runCfg);
+    try { localStorage.setItem(SIM_CFG_KEY, JSON.stringify(runCfg)); } catch {}
+    setDialogOpen(false);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/simulate/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(runCfg),
+      });
+      await res.json();
+      isRunningRef.current = true;
+      await fetchLatest();
+      setLoading(false);
+    } catch {
+      setLoading(false);
+    }
+  }
   const isDone = job?.status === "done";
 
   const totalUsers = job?.totalUsers ?? 0;
@@ -1278,17 +1291,15 @@ export default function ReportsPage() {
   const [simStatus, setSimStatus] = useState<{ progress: number; message: string; status: string } | null>(null);
 
   useEffect(() => {
-    const isActive = simStatus && ["pending", "generating", "sending"].includes(simStatus.status);
-    const delay = isActive ? 3000 : 20000;
     const poll = setInterval(async () => {
       try {
         const res = await fetch("/api/admin/simulate/latest");
         const json = await res.json();
         setSimStatus(json?.job ?? null);
       } catch { /* ignore */ }
-    }, delay);
+    }, 5000);
     return () => clearInterval(poll);
-  }, [!!simStatus && ["pending", "generating", "sending"].includes(simStatus?.status ?? "")]);
+  }, []);
 
   const isRunning = simStatus && ["pending", "generating", "sending"].includes(simStatus.status);
 
