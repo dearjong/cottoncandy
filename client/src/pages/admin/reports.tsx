@@ -145,6 +145,45 @@ function loadSavedCfg(): SimConfig {
   } catch { return DEFAULTS; }
 }
 
+function NoDataCard({ title, subtitle, icon, accent = "gray" }: { title: string; subtitle?: string; icon?: string; accent?: "gray" | "indigo" | "purple" | "blue" | "amber" }) {
+  const headerCls: Record<string, string> = {
+    gray:   "bg-gray-50 border-b border-gray-100",
+    indigo: "bg-indigo-50 border-b border-indigo-100",
+    purple: "bg-purple-50 border-b border-purple-100",
+    blue:   "bg-blue-50 border-b border-blue-100",
+    amber:  "bg-amber-50 border-b border-amber-100",
+  };
+  const titleCls: Record<string, string> = {
+    gray:   "text-gray-700",
+    indigo: "text-indigo-700",
+    purple: "text-purple-700",
+    blue:   "text-blue-700",
+    amber:  "text-amber-700",
+  };
+  const subCls: Record<string, string> = {
+    gray:   "text-gray-400",
+    indigo: "text-indigo-400",
+    purple: "text-purple-400",
+    blue:   "text-blue-400",
+    amber:  "text-amber-400",
+  };
+  return (
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className={`${headerCls[accent]} px-5 py-3 flex items-center gap-2`}>
+        {icon && <span className="text-base">{icon}</span>}
+        <div>
+          <p className={`font-semibold text-sm ${titleCls[accent]}`}>{title}</p>
+          {subtitle && <p className={`text-[10px] ${subCls[accent]}`}>{subtitle}</p>}
+        </div>
+      </div>
+      <div className="flex flex-col items-center justify-center py-10 gap-2">
+        <div className="text-2xl text-gray-200">—</div>
+        <p className="text-xs text-gray-300">시뮬레이션 실행 후 표시됩니다</p>
+      </div>
+    </div>
+  );
+}
+
 function ActivityTab({ openSignal }: { openSignal?: number }) {
   const [data, setData] = useState<{ jobId: string; job: SimJob } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -518,7 +557,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
           })()}
 
           {/* 멀티세션 작성 패턴 */}
-          {job && (job.projectCompletedCount > 0 || job.portfolioCompletedCount > 0) && (() => {
+          {job && (job.projectCompletedCount > 0 || job.portfolioCompletedCount > 0) ? (() => {
             const pjN  = job.projectCompletedCount   || 1;
             const pfN  = job.portfolioCompletedCount || 1;
             const drN  = job.draftOpenedCount        || 1;
@@ -604,10 +643,15 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
                 )}
               </div>
             );
-          })()}
+          })() : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <NoDataCard title="프로젝트 등록 — 멀티세션 패턴" subtitle="완주한 유저 기준 작성 행동 분석" icon="📋" accent="indigo" />
+              <NoDataCard title="포트폴리오 등록 — 멀티세션 패턴" subtitle="완주한 유저 기준 작성 행동 분석" icon="🖼️" accent="purple" />
+            </div>
+          )}
 
           {/* 화면별 평균 체류시간 */}
-          {job && job.dwellSecSum && Object.keys(job.dwellSecSum).length > 0 && (() => {
+          {job && job.dwellSecSum && Object.keys(job.dwellSecSum).length > 0 ? (() => {
             const PAGE_ORDER = ["홈 (/)", "파트너 탐색", "공고 상세", "프로젝트 등록", "포트폴리오 등록", "컨설팅 문의", "계약 화면", "납품/산출물"];
             const PAGE_COLORS: Record<string, string> = {
               "홈 (/)":        "bg-blue-400",
@@ -679,10 +723,12 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
                 })()}
               </div>
             );
-          })()}
+          })() : (
+            <NoDataCard title="화면별 평균 체류시간" subtitle="유저가 각 화면에 머문 평균 시간" icon="⏱️" accent="gray" />
+          )}
 
           {/* AIDA 퍼널 */}
-          {job && (() => {
+          {job ? (() => {
             const aida = job.aidaBreakdown ?? { attention: 0, interest: 0, desire: 0, action: 0 };
             const { attention, interest, desire, action } = aida;
             const stages = [
@@ -811,10 +857,12 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
                 ) : null}
               </div>
             );
-          })()}
+          })() : (
+            <NoDataCard title="AIDA 마케팅 퍼널" subtitle="Attention → Interest → Desire → Action 전환 흐름" icon="📊" accent="gray" />
+          )}
 
           {/* 방문 화면 순위 + 이탈 페이지 순위 */}
-          {job && (job.pageViewBreakdown || job.exitPageBreakdown) && (() => {
+          {job && (job.pageViewBreakdown || job.exitPageBreakdown) ? (() => {
             const PAGE_ORDER = ["홈 (/)", "파트너 탐색", "공고 상세", "프로젝트 등록", "포트폴리오 등록", "컨설팅 문의", "계약 화면", "납품/산출물", "리뷰 등록"];
             const PAGE_COLORS: Record<string, string> = {
               "홈 (/)":         "bg-blue-400",
@@ -923,7 +971,12 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
                 </div>
               </div>
             );
-          })()}
+          })() : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <NoDataCard title="방문 화면 순위" subtitle="유저가 가장 많이 방문한 화면" icon="👁️" accent="blue" />
+              <NoDataCard title="이탈 페이지 순위" subtitle="유저가 마지막으로 머물다 떠난 화면" icon="🚪" accent="amber" />
+            </div>
+          )}
 
           {/* 퍼널 2개 나란히 */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
