@@ -230,14 +230,16 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
     } catch { /* ignore */ }
   }
 
-  useEffect(() => {
-    fetchLatest();
-    pollRef.current = setInterval(fetchLatest, 3000);
-    return () => stopPolling();
-  }, []);
-
   const job = data?.job ?? null;
   const isRunning = job && (job.status === "pending" || job.status === "generating" || job.status === "sending");
+
+  useEffect(() => {
+    fetchLatest();
+    const delay = isRunning ? 3000 : 30000;
+    stopPolling();
+    pollRef.current = setInterval(fetchLatest, delay);
+    return () => stopPolling();
+  }, [!!isRunning]);
   const isDone = job?.status === "done";
 
   const totalUsers = job?.totalUsers ?? 0;
@@ -1276,15 +1278,17 @@ export default function ReportsPage() {
   const [simStatus, setSimStatus] = useState<{ progress: number; message: string; status: string } | null>(null);
 
   useEffect(() => {
+    const isActive = simStatus && ["pending", "generating", "sending"].includes(simStatus.status);
+    const delay = isActive ? 3000 : 20000;
     const poll = setInterval(async () => {
       try {
         const res = await fetch("/api/admin/simulate/latest");
         const json = await res.json();
         setSimStatus(json?.job ?? null);
       } catch { /* ignore */ }
-    }, 3000);
+    }, delay);
     return () => clearInterval(poll);
-  }, []);
+  }, [!!simStatus && ["pending", "generating", "sending"].includes(simStatus?.status ?? "")]);
 
   const isRunning = simStatus && ["pending", "generating", "sending"].includes(simStatus.status);
 
