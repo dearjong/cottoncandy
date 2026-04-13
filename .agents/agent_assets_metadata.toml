@@ -6,3 +6,9 @@ id = "oET8xvmILFhF5v0ndMoQC"
 uri = "file://docs/ga4-event-taxonomy.md"
 type = "text"
 title = "GA4 · Mixpanel 이벤트 정의서 v2.0"
+
+[[outputs]]
+id = "SSvEAGsYR0C_x2tHFyvtR"
+uri = "file://docs/gtm-setup-guide.md"
+type = "text"
+title = "GTM 이벤트 재생성 가이드 (기획자 포트폴리오용)"
