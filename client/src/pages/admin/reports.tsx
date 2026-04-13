@@ -262,7 +262,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
             <div className="space-y-4">
               {/* UTM 유입 채널 */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-                <p className="font-medium text-gray-800">UTM 유입 채널</p>
+                <p className="font-semibold text-pink-700 text-sm">UTM 유입 채널</p>
                 <div className="space-y-2">
                   {[
                     { key: "tvcf",    label: "tvcf.co.kr", color: "bg-pink-500"   },
@@ -289,7 +289,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
 
               {/* 접속 지역 */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-                <p className="font-medium text-gray-800">접속 지역</p>
+                <p className="font-semibold text-teal-700 text-sm">접속 지역</p>
                 <div className="space-y-2">
                   {[
                     { key: "서울",  color: "bg-blue-500"   },
@@ -316,7 +316,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
               {/* 인증 현황 */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
                 <div>
-                  <p className="font-medium text-gray-800">유저 유형</p>
+                  <p className="font-semibold text-blue-700 text-sm">유저 유형</p>
                   <p className="text-[10px] text-gray-400">미로그인 = 전체 - 로그인 유저 합계</p>
                 </div>
                 <div className="space-y-2">
@@ -350,7 +350,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
             <div className="space-y-4">
               {/* AARRR 퍼널 */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-                <p className="font-medium text-gray-800">AARRR 퍼널</p>
+                <p className="font-semibold text-violet-700 text-sm">AARRR 퍼널</p>
                 <div className="space-y-2">
                   {FUNNEL_ORDER.map(({ key, label, color, aarrr }) => {
                     const count = job?.funnelBreakdown?.[key] ?? 0;
@@ -381,7 +381,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
               {/* 방문 유형 */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
                 <div>
-                  <p className="font-medium text-gray-800">방문 유형</p>
+                  <p className="font-semibold text-sky-700 text-sm">방문 유형</p>
                   <p className="text-[10px] text-gray-400">GA4 신규 방문자 / 재방문자 기준</p>
                 </div>
                 <div className="space-y-2">
@@ -418,7 +418,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
             {/* 성별 */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
               <div>
-                <p className="font-medium text-gray-800">성별</p>
+                <p className="font-semibold text-rose-700 text-sm">성별</p>
                 <p className="text-[10px] text-gray-400">전체 방문자 기준</p>
               </div>
               <div className="space-y-2">
@@ -451,7 +451,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
             {/* 직접 유입 / 북마크 랜딩 페이지 */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
               <div>
-                <p className="font-medium text-gray-800">직접 유입 / 북마크 랜딩 페이지</p>
+                <p className="font-semibold text-orange-700 text-sm">직접 유입 / 북마크 랜딩 페이지</p>
                 <p className="text-[10px] text-gray-400">북마크하거나 URL을 직접 입력해 들어온 페이지 분포</p>
               </div>
               <div className="space-y-2">
@@ -514,7 +514,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="font-medium text-gray-800">메인화면 클릭 분석</p>
+                    <p className="font-semibold text-pink-700 text-sm">메인화면 클릭 분석</p>
                     <p className="text-[10px] text-gray-400">홈(/)에서 사용자가 어떤 요소를 눌러 다음 화면으로 이동하는지{total > 0 ? ` — 총 ${total.toLocaleString()}회 클릭` : ""}</p>
                   </div>
                   <div className="text-[10px] text-gray-400 text-right shrink-0 pt-1">
@@ -686,7 +686,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-medium text-gray-800">화면별 평균 체류시간</p>
+                    <p className="font-semibold text-teal-700 text-sm">화면별 평균 체류시간</p>
                     <p className="text-[10px] text-gray-400">유저가 각 화면에서 평균 몇 초를 머물렀는지 — 총 {totalVisits.toLocaleString()}회 페이지뷰 기준</p>
                   </div>
                   <div className="text-[10px] text-gray-400 bg-gray-50 rounded px-2 py-1 shrink-0">
@@ -770,7 +770,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-medium text-gray-800">AIDA 마케팅 퍼널</p>
+                    <p className="font-semibold text-indigo-700 text-sm">AIDA 마케팅 퍼널</p>
                     <p className="text-[10px] text-gray-400">Attention → Interest → Desire → Action 단계별 유저 전환 현황</p>
                   </div>
                   <div className="text-[10px] text-gray-400 bg-gray-50 rounded px-2 py-1 shrink-0">
@@ -985,7 +985,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
-                  <p className="font-medium text-gray-800">프로젝트 등록 단계별 퍼널</p>
+                  <p className="font-semibold text-orange-700 text-sm">프로젝트 등록 단계별 퍼널</p>
                   <p className="text-[10px] text-gray-400">광고주가 어느 단계에서 이탈하는지 확인합니다</p>
                 </div>
                 <div className="flex flex-wrap gap-3 text-xs">
@@ -1049,7 +1049,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
           {/* 포트폴리오 등록 섹션별 퍼널 */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
               <div>
-                <p className="font-medium text-gray-800">포트폴리오 등록 섹션별 퍼널</p>
+                <p className="font-semibold text-purple-700 text-sm">포트폴리오 등록 섹션별 퍼널</p>
                 <p className="text-[10px] text-gray-400">파트너가 어느 섹션에서 포트폴리오 작성을 멈추는지 확인합니다</p>
               </div>
               <div className="space-y-1.5">
