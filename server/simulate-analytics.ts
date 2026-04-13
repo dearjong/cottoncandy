@@ -46,6 +46,7 @@ export interface SimJob {
   dwellCount: Record<string, number>;
   pageViewBreakdown: Record<string, number>;
   exitPageBreakdown: Record<string, number>;
+  aidaBreakdown: { attention: number; interest: number; desire: number; action: number };
   errors: string[];
   startedAt: number;
   completedAt?: number;
@@ -352,6 +353,7 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     dwellCount: {},
     pageViewBreakdown: {},
     exitPageBreakdown: {},
+    aidaBreakdown: { attention: 0, interest: 0, desire: 0, action: 0 },
     errors: [],
     startedAt: Date.now(),
   };
@@ -563,6 +565,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const isPartner = userType === "agency" || userType === "production";
     let didPortfolioReg = false;
     let exitPage = "홈 (/)";
+    let aidaInterest = false;
+    let aidaDesire   = false;
+    let aidaAction   = false;
 
     // 기업명 생성
     const userCompany = userType === "advertiser"
@@ -667,7 +672,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     userTypeCount[userType] = (userTypeCount[userType] ?? 0) + 1;
 
     // 파트너 탐색 페이지 체류 (40% 확률)
-    if (chance(0.40)) { addDwell("파트너 탐색"); exitPage = "파트너 탐색"; }
+    if (chance(0.40)) { addDwell("파트너 탐색"); exitPage = "파트너 탐색"; aidaInterest = true; }
 
     const partnerType = userType === "agency" ? "대행사" : "제작사";
 
@@ -691,11 +696,11 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         add("consulting_inquiry_submitted", uid, projTs, {
           inquiry_type: "new", category, is_first_time: utm.utm_source !== "tvcf", ...common,
         });
-        addDwell("컨설팅 문의"); exitPage = "컨설팅 문의";
+        addDwell("컨설팅 문의"); exitPage = "컨설팅 문의"; aidaDesire = true;
         add("activation_achieved", uid, projTs + 1, { trigger_event: "consulting_inquiry_submitted", ...common });
       } else {
         // 공개(공고) / 비공개(1:1) — 18단계 퍼널 (멀티 세션)
-        exitPage = "프로젝트 등록";
+        exitPage = "프로젝트 등록"; aidaDesire = true;
         job.pageViewBreakdown["프로젝트 등록"] = (job.pageViewBreakdown["프로젝트 등록"] ?? 0) + 1;
         const optionStr = pType === "공고" ? "public" : "private";
         add("step1_cta_click", uid, projTs, { selected_option: optionStr, ...common });
@@ -854,6 +859,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             total_writing_time_sec: projTotalWritingSec,
             total_writing_time_min: Math.round(projTotalWritingSec / 60), ...common,
           });
+          aidaAction = true;
           add("activation_achieved", uid, projCurrentTs + 61, { trigger_event: "project_submitted", ...common });
           if (chance(0.30)) {
             addDwell("계약 화면"); exitPage = "계약 화면";
@@ -879,11 +885,12 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       const projectId  = `proj_${randInt(100, 999)}`;
       const partnerTs  = baseTs + 400;
 
-      addDwell("공고 상세"); exitPage = "공고 상세";
+      addDwell("공고 상세"); exitPage = "공고 상세"; aidaInterest = true;
       add("partner_applied", uid, partnerTs, {
         project_id: projectId, project_type: pick(["공고","1:1"]),
         partner_type: partnerType, is_first_time: utm.utm_source !== "tvcf", ...common,
       });
+      aidaAction = true;
       add("activation_achieved", uid, partnerTs + 1, { trigger_event: "partner_applied", ...common });
 
       // 포트폴리오 등록 퍼널 (멀티 세션)
@@ -943,7 +950,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
               ...common,
             });
 
-            exitPage = "포트폴리오 등록";
+            exitPage = "포트폴리오 등록"; aidaDesire = true;
             job.pageViewBreakdown["포트폴리오 등록"] = (job.pageViewBreakdown["포트폴리오 등록"] ?? 0) + 1;
             job.dwellSecSum["포트폴리오 등록"] = (job.dwellSecSum["포트폴리오 등록"] ?? 0) + secDuration;
             job.dwellCount["포트폴리오 등록"]  = (job.dwellCount["포트폴리오 등록"]  ?? 0) + 1;
@@ -1011,7 +1018,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         }
       }
       if (chance(0.40)) {
-        addDwell("계약 화면"); exitPage = "계약 화면";
+        addDwell("계약 화면"); exitPage = "계약 화면"; aidaAction = true;
         add("contract_signed",       uid, partnerTs +  7 * 86400, { project_id: projectId, partner_type: partnerType, ...common });
         add("draft_submitted",       uid, partnerTs + 14 * 86400, { project_id: projectId, draft_round: 1, category: weightedPick(CATEGORIES), ...common });
         if (chance(0.70)) {
@@ -1158,6 +1165,12 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
     // 이탈 페이지 집계
     job.exitPageBreakdown[exitPage] = (job.exitPageBreakdown[exitPage] ?? 0) + 1;
+
+    // AIDA 단계 집계
+    job.aidaBreakdown.attention += 1;
+    if (aidaInterest) job.aidaBreakdown.interest += 1;
+    if (aidaDesire)   job.aidaBreakdown.desire   += 1;
+    if (aidaAction)   job.aidaBreakdown.action   += 1;
   }
 
   // ── 최소 완주 보장 ─────────────────────────────────────────────────
