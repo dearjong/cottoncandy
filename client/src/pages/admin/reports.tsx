@@ -529,43 +529,77 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
             const avgPfSess      = +(job.pfSessionsSum  / pfN).toFixed(1);
             const avgPfMin       = Math.round(job.pfWritingMinSum  / pfN);
             const avgReturnHours = +(job.draftReturnHoursSum / drN).toFixed(1);
-            const statCell = (label: string, value: string | number, sub?: string) => (
-              <div className="flex flex-col items-center justify-center text-center p-4 bg-gray-50 rounded-xl">
-                <div className="text-xl font-bold text-gray-800">{value}</div>
-                <div className="text-xs text-gray-500 mt-0.5">{label}</div>
-                {sub && <div className="text-[10px] text-gray-400 mt-0.5">{sub}</div>}
-              </div>
-            );
             return (
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
-                <div>
-                  <p className="font-medium text-gray-800">멀티세션 작성 패턴</p>
-                  <p className="text-[10px] text-gray-400">완주한 유저 기준 — 며칠에 걸쳐, 몇 번의 세션으로, 얼마나 작성했는지</p>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-indigo-600">프로젝트 등록 ({job.projectCompletedCount}건 완주)</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {statCell("평균 완주 기간", `${avgProjDays}일`)}
-                      {statCell("평균 세션 수", `${avgProjSess}회`)}
-                      {statCell("평균 작성시간", `${avgProjMin}분`, "갭 제외 순수")}
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* 프로젝트 등록 카드 */}
+                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div className="bg-indigo-50 border-b border-indigo-100 px-5 py-3 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">📋</span>
+                        <div>
+                          <p className="font-semibold text-indigo-800 text-sm">프로젝트 등록 — 멀티세션 패턴</p>
+                          <p className="text-[10px] text-indigo-400">완주한 {job.projectCompletedCount}건 기준</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-5">
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="flex flex-col items-center justify-center text-center p-4 bg-indigo-50 rounded-xl">
+                          <div className="text-xl font-bold text-indigo-700">{avgProjDays}일</div>
+                          <div className="text-xs text-indigo-500 mt-0.5">평균 완주 기간</div>
+                        </div>
+                        <div className="flex flex-col items-center justify-center text-center p-4 bg-indigo-50 rounded-xl">
+                          <div className="text-xl font-bold text-indigo-700">{avgProjSess}회</div>
+                          <div className="text-xs text-indigo-500 mt-0.5">평균 세션 수</div>
+                        </div>
+                        <div className="flex flex-col items-center justify-center text-center p-4 bg-indigo-50 rounded-xl">
+                          <div className="text-xl font-bold text-indigo-700">{avgProjMin}분</div>
+                          <div className="text-xs text-indigo-500 mt-0.5">평균 작성시간</div>
+                          <div className="text-[10px] text-indigo-300 mt-0.5">갭 제외 순수</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-purple-600">포트폴리오 등록 ({job.portfolioCompletedCount}건 완주)</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {statCell("평균 완주 기간", `${avgPfDays}일`)}
-                      {statCell("평균 세션 수", `${avgPfSess}회`)}
-                      {statCell("평균 작성시간", `${avgPfMin}분`, "갭 제외 순수")}
+
+                  {/* 포트폴리오 등록 카드 */}
+                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div className="bg-purple-50 border-b border-purple-100 px-5 py-3 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">🖼️</span>
+                        <div>
+                          <p className="font-semibold text-purple-800 text-sm">포트폴리오 등록 — 멀티세션 패턴</p>
+                          <p className="text-[10px] text-purple-400">완주한 {job.portfolioCompletedCount}건 기준</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-5">
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="flex flex-col items-center justify-center text-center p-4 bg-purple-50 rounded-xl">
+                          <div className="text-xl font-bold text-purple-700">{avgPfDays}일</div>
+                          <div className="text-xs text-purple-500 mt-0.5">평균 완주 기간</div>
+                        </div>
+                        <div className="flex flex-col items-center justify-center text-center p-4 bg-purple-50 rounded-xl">
+                          <div className="text-xl font-bold text-purple-700">{avgPfSess}회</div>
+                          <div className="text-xs text-purple-500 mt-0.5">평균 세션 수</div>
+                        </div>
+                        <div className="flex flex-col items-center justify-center text-center p-4 bg-purple-50 rounded-xl">
+                          <div className="text-xl font-bold text-purple-700">{avgPfMin}분</div>
+                          <div className="text-xs text-purple-500 mt-0.5">평균 작성시간</div>
+                          <div className="text-[10px] text-purple-300 mt-0.5">갭 제외 순수</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                {/* 임시저장 공통 인사이트 */}
                 {job.draftOpenedCount > 0 && (
-                  <div className="flex items-center gap-3 pt-2 border-t border-gray-50 text-xs text-gray-500">
+                  <div className="bg-green-50 border border-green-100 rounded-xl px-5 py-3 flex items-center gap-3 text-xs text-green-700">
                     <span className="w-2 h-2 rounded-full bg-green-400 inline-block shrink-0" />
-                    임시저장 후 평균 <strong className="text-gray-700 mx-0.5">{avgReturnHours}시간</strong> 뒤에 돌아와서 이어서 작성
-                    <span className="text-gray-300">|</span>
-                    총 <strong className="text-gray-700 mx-0.5">{job.draftOpenedCount}회</strong> 재방문
+                    임시저장 후 평균 <strong className="mx-0.5">{avgReturnHours}시간</strong> 뒤에 돌아와서 이어서 작성
+                    <span className="text-green-300">|</span>
+                    총 <strong className="mx-0.5">{job.draftOpenedCount}회</strong> 재방문
                   </div>
                 )}
               </div>
