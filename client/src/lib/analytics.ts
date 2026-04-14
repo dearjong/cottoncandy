@@ -227,13 +227,8 @@ export function publishAnalytics(
   // Mixpanel (제한 없음)
   mixpanel.track(eventName, props);
 
-  // GTM dataLayer — 모든 이벤트를 맞춤 이벤트로 전달
-  if (typeof window !== "undefined") {
-    (window as Window & { dataLayer?: Record<string, unknown>[] }).dataLayer = (window as Window & { dataLayer?: Record<string, unknown>[] }).dataLayer ?? [];
-    (window as Window & { dataLayer: Record<string, unknown>[] }).dataLayer.push({ event: eventName, ...props });
-  }
-
-  // GA4 — 파라미터 값 100자 초과 시 드롭되므로 잘라서 전송
+  // GA4 + GTM — gtag() 단일 경로로 전송 (gtag는 내부적으로 dataLayer 래퍼)
+  // dataLayer.push 별도 호출 시 GTM에서 이벤트가 두 번 찍히므로 제거
   if (typeof gtag !== "undefined") {
     const ga4Props: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(props)) {
