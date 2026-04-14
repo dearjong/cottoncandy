@@ -3,8 +3,8 @@
 | 항목 | 내용 |
 | --- | --- |
 | **문서명** | ADMarket Admin — 알림 트리거 명세 |
-| **버전** | v0.1 |
-| **최종 업데이트** | 2026-04-02 |
+| **버전** | v0.2 |
+| **최종 업데이트** | 2026-04-14 |
 | **참고 원본** | [prd.md](./prd.md) §7, [user-flow-operator.md](./user-flow-operator.md) |
 | **관련 문서** | [admin-state-machine.md](./admin-state-machine.md), [admin-ia.md](./admin-ia.md) |
 
@@ -221,4 +221,4 @@
 
 ---
 
-*문서 버전: v0.1 | 2026-04-02*
+*문서 버전: v0.2 | 2026-04-14*

@@ -3,8 +3,8 @@
 | 항목 | 내용 |
 | --- | --- |
 | **문서명** | ADMarket Admin — 프로젝트 상태 전이 명세 |
-| **버전** | v0.1 |
-| **최종 업데이트** | 2026-04-02 |
+| **버전** | v0.2 |
+| **최종 업데이트** | 2026-04-14 |
 | **원본 참고** | `ADMarket_프로젝트_상태_관리_명세.md`, [prd.md](./prd.md) §5·§부록B |
 | **관련 문서** | [admin-ia.md](./admin-ia.md), [user-flow-operator.md](./user-flow-operator.md) |
 
@@ -95,8 +95,8 @@
 | 승인요청 | `REQUESTED` | 🔵 OWNER | 승인 대기 `/admin/pending-approval` |
 | 승인완료 | `APPROVED` | 🔴 **ADMIN** | 승인 대기 |
 | 승인반려 | `REJECTED` | 🔴 **ADMIN** | 승인 대기 |
-| 접수중 | `PROPOSAL_OPEN` | 🔵 OWNER / 🟢 SYSTEM | 공고 프로젝트 |
-| 접수마감 | `PROPOSAL_CLOSED` | 🔵 OWNER / 🟢 SYSTEM | 공고 프로젝트 |
+| 접수중 | `PROPOSAL_OPEN` | 🔵 OWNER / 🟢 SYSTEM | 공고 프로젝트 `/admin/project_list/public` |
+| 접수마감 | `PROPOSAL_CLOSED` | 🔵 OWNER / 🟢 SYSTEM | 공고 프로젝트 `/admin/project_list/public` |
 | OT 예정 | `OT_SCHEDULED` | 🔵 OWNER | — |
 | OT 완료 | `OT_COMPLETED` | 🔵 OWNER | — |
 | 제안서 제출 대기 | `PROPOSAL_SUBMIT` | 🟢 SYSTEM | — |
@@ -187,7 +187,7 @@
 | 3 | 중단 요청 **승인** | `STOPPED.ADMIN_CHECKING` | `STOPPED.ADMIN_CONFIRMED` | `/admin/stop-cancel` |
 | 4 | 취소 요청 **승인** | `CANCELLED.ADMIN_CHECKING` | `CANCELLED.ADMIN_CONFIRMED` | `/admin/stop-cancel` |
 | 5 | 중단/취소 요청 **반려** | `*.ADMIN_CHECKING` | 이전 진행 상태로 복귀 | `/admin/stop-cancel` |
-| 6 | 노출 **숨김** 처리 | `PUBLIC` / `PRIVATE` | `HIDDEN` | 신고 관리, 전체 프로젝트 |
+| 6 | 노출 **숨김** 처리 | `PUBLIC` / `PRIVATE` | `HIDDEN` | 신고 관리 `/admin/reports-management` |
 | 7 | 기업 인증 **승인** | 인증대기 | 인증완료 | `/admin/company-verification` |
 | 8 | 기업 인증 **반려** | 인증대기 | 반려 (재신청 가능) | `/admin/company-verification` |
 
@@ -276,4 +276,4 @@ graph TD
 
 ---
 
-*문서 버전: v0.1 | 2026-04-02*
+*문서 버전: v0.2 | 2026-04-14*
