@@ -293,6 +293,7 @@ export interface SimConfig {
   // 퍼널 인원 (절대 수)
   projectRegCount: number;
   portfolioRegCount: number;
+  partnerApplyCount: number;
   // 완주 최소 보장
   minProjectCompletions: number;
   minPortfolioCompletions: number;
@@ -309,6 +310,7 @@ export const DEFAULT_CONFIG: SimConfig = {
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
   projectRegCount: 60,
   portfolioRegCount: 200,
+  partnerApplyCount: 150,
   minProjectCompletions: 5,
   minPortfolioCompletions: 5,
 };
@@ -552,8 +554,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     }
   }
 
-  let projRegDone = 0;
-  let pfRegDone   = 0;
+  let projRegDone        = 0;
+  let pfRegDone          = 0;
+  let partnerApplyDone   = 0;
 
   for (let i = 1; i <= userCount; i++) {
     const uid      = `sim_user_${String(i).padStart(4, "0")}`;
@@ -880,8 +883,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       }
     }
 
-    // 파트너: 공고 지원 흐름 (22%)
-    if (isPartner && chance(0.22)) {
+    // 파트너: 공고 지원 흐름 (partnerApplyCount 기준)
+    if (isPartner && partnerApplyDone < cfg.partnerApplyCount) {
+      partnerApplyDone++;
       const projectId  = `proj_${randInt(100, 999)}`;
       const partnerTs  = baseTs + 400;
 

@@ -66,6 +66,7 @@ interface SimConfig {
   pctSeoul: number; pctGyeonggi: number; pctLocal: number; pctAbroad: number;
   projectRegCount: number;
   portfolioRegCount: number;
+  partnerApplyCount: number;
   minProjectCompletions: number;
   minPortfolioCompletions: number;
 }
@@ -80,6 +81,7 @@ const DEFAULTS: SimConfig = {
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
   projectRegCount: 60,
   portfolioRegCount: 200,
+  partnerApplyCount: 150,
   minProjectCompletions: 5,
   minPortfolioCompletions: 5,
 };
@@ -1244,6 +1246,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
                     <div className="flex gap-2 items-end">
                       <NumInput label="프로젝트 등록"  value={dialogCfg.projectRegCount}  onChange={(v) => setD("projectRegCount", v)}  min={0} max={10000} unit="명" />
                       <NumInput label="포트폴리오 등록" value={dialogCfg.portfolioRegCount} onChange={(v) => setD("portfolioRegCount", v)} min={0} max={10000} unit="명" />
+                      <NumInput label="공고 지원"       value={dialogCfg.partnerApplyCount} onChange={(v) => setD("partnerApplyCount", v)} min={0} max={10000} unit="명" />
                     </div>
                   </div>
                 </td>
