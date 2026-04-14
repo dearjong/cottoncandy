@@ -175,6 +175,10 @@ const GA4_KEY_EVENTS = new Set([
   "deliverable_submitted", "deliverable_confirmed",
   "project_completed", "review_submitted", "referral_sent",
   "activation_achieved",
+  "participation_invite_toggled",
+  "participation_ot_confirmed", "participation_ot_completed",
+  "participation_pt_confirmed", "participation_pt_completed",
+  "participation_final_selected",
 ]);
 
 const GA4_DEBUG_ENDPOINT = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${GA4_MEASUREMENT_ID}&api_secret=${GA4_API_SECRET}`;
@@ -220,6 +224,12 @@ function derivePageLocation(event: string, props: Record<string, unknown>): stri
   if (event === "consulting_inquiry_submitted") return `${BASE_URL}/work/consulting`;
   if (event === "referral_sent") return `${BASE_URL}/work/home`;
   if (event === "activation_achieved") return `${BASE_URL}/work/home`;
+  if (["participation_invite_toggled", "participation_ot_confirmed", "participation_ot_completed",
+       "participation_pt_confirmed", "participation_pt_completed", "participation_final_selected"].includes(event))
+    return `${BASE_URL}/work/participation`;
+  if (["draft_submitted", "draft_confirmed"].includes(event)) return `${BASE_URL}/work/proposals`;
+  if (["deliverable_submitted", "deliverable_confirmed"].includes(event)) return `${BASE_URL}/work/deliverables`;
+  if (event === "project_completed") return `${BASE_URL}/work/projects`;
   return `${BASE_URL}/`;
 }
 
@@ -455,6 +465,24 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     job.dwellSecSum[page] = (job.dwellSecSum[page] ?? 0) + sec;
     job.dwellCount[page]  = (job.dwellCount[page]  ?? 0) + 1;
     job.pageViewBreakdown[page] = (job.pageViewBreakdown[page] ?? 0) + 1;
+  }
+
+  // GA4 전용 페이지뷰 (Mixpanel 이벤트 없이 GA4 '페이지 및 화면' 보고서에만 반영)
+  function addGa4PageView(distinctId: string, path: string, ts: number) {
+    const entry = ga4Map.get(distinctId);
+    if (!entry) return;
+    const GA4_MAX_AGO_SEC = 71 * 3600;
+    const cappedTs = Math.max(ts, Math.floor(Date.now() / 1000) - GA4_MAX_AGO_SEC);
+    entry.events.push({
+      name: "page_view",
+      params: {
+        session_id: entry.sessionId,
+        engagement_time_msec: randInt(300, 10000),
+        page_location: `${BASE_URL}${path}`,
+        page_referrer: `${BASE_URL}/`,
+      },
+      timestamp_micros: cappedTs * 1_000_000,
+    });
   }
 
   function initGa4User(distinctId: string, userId: string, userProps: Record<string, unknown>) {
@@ -889,6 +917,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       const projectId  = `proj_${randInt(100, 999)}`;
       const partnerTs  = baseTs + 400;
 
+      // 공고 탐색 → 공고 상세 → 지원서 작성 페이지뷰 시퀀스
+      addGa4PageView(uid, "/partner", partnerTs - 240);
+      addGa4PageView(uid, "/partner/detail", partnerTs - 120);
+      addGa4PageView(uid, "/partner/apply", partnerTs - 30);
       addDwell("공고 상세"); exitPage = "공고 상세"; aidaInterest = true;
       add("partner_applied", uid, partnerTs, {
         project_id: projectId, project_type: pick(["공고","1:1"]),
@@ -896,6 +928,43 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       });
       aidaAction = true;
       add("activation_achieved", uid, partnerTs + 1, { trigger_event: "partner_applied", ...common });
+
+      // 참여현황 흐름: OT → PT → 최종 선정
+      const inviteTs = partnerTs + 2 * 86400;
+      addGa4PageView(uid, "/work/participation", inviteTs);
+      add("participation_invite_toggled", uid, inviteTs + 600, {
+        project_id: projectId, partner_type: partnerType, action: "accepted", ...common,
+      });
+      if (chance(0.80)) {
+        const otTs = inviteTs + 2 * 86400;
+        addGa4PageView(uid, "/work/participation", otTs);
+        add("participation_ot_confirmed", uid, otTs + 300, {
+          project_id: projectId, partner_type: partnerType, ...common,
+        });
+        if (chance(0.85)) {
+          add("participation_ot_completed", uid, otTs + 86400, {
+            project_id: projectId, partner_type: partnerType, ...common,
+          });
+          if (chance(0.75)) {
+            const ptTs = otTs + 3 * 86400;
+            addGa4PageView(uid, "/work/participation", ptTs);
+            add("participation_pt_confirmed", uid, ptTs + 300, {
+              project_id: projectId, partner_type: partnerType, ...common,
+            });
+            if (chance(0.80)) {
+              add("participation_pt_completed", uid, ptTs + 86400, {
+                project_id: projectId, partner_type: partnerType, ...common,
+              });
+              if (chance(0.70)) {
+                addGa4PageView(uid, "/work/participation", ptTs + 2 * 86400);
+                add("participation_final_selected", uid, ptTs + 2 * 86400 + 1800, {
+                  project_id: projectId, partner_type: partnerType, ...common,
+                });
+              }
+            }
+          }
+        }
+      }
 
       // 포트폴리오 등록 퍼널 (멀티 세션)
       if (!didPortfolioReg && pfRegDone < cfg.portfolioRegCount) {
