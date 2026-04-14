@@ -78,8 +78,8 @@ const DEFAULTS: SimConfig = {
   pctMale: 45,       pctFemale: 55,
   pct20s: 10,        pct30s: 35,           pct40s: 35,          pct50s: 20,
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
-  projectRegCount: 30,
-  portfolioRegCount: 100,
+  projectRegCount: 60,
+  portfolioRegCount: 200,
   minProjectCompletions: 5,
   minPortfolioCompletions: 5,
 };

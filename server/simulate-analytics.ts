@@ -307,8 +307,8 @@ export const DEFAULT_CONFIG: SimConfig = {
   pctMale: 45, pctFemale: 55,
   pct20s: 10, pct30s: 35, pct40s: 35, pct50s: 20,
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
-  projectRegCount: 30,
-  portfolioRegCount: 50,
+  projectRegCount: 60,
+  portfolioRegCount: 200,
   minProjectCompletions: 5,
   minPortfolioCompletions: 5,
 };
@@ -1091,6 +1091,11 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             cumulative_writing_sec: pfTotalWritingSec2 + secDuration2,
             ...common,
           });
+
+          exitPage = "포트폴리오 등록"; aidaDesire = true;
+          job.pageViewBreakdown["포트폴리오 등록"] = (job.pageViewBreakdown["포트폴리오 등록"] ?? 0) + 1;
+          job.dwellSecSum["포트폴리오 등록"] = (job.dwellSecSum["포트폴리오 등록"] ?? 0) + secDuration2;
+          job.dwellCount["포트폴리오 등록"]  = (job.dwellCount["포트폴리오 등록"]  ?? 0) + 1;
 
           pfSessionWriteOffset2 += secDuration2;
           pfTotalWritingSec2    += secDuration2;
