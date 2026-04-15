@@ -100,6 +100,8 @@ import AdminProjects from "@/pages/admin/projects";
 import AdminMembers from "@/pages/admin/members";
 import AdminCommunication from "@/pages/admin/communication";
 import AdminReports from "@/pages/admin/reports";
+import AdminReportsPlatform from "@/pages/admin/reports/platform";
+import AdminReportsEventLog from "@/pages/admin/reports/eventlog";
 import AdminAnnouncements from "@/pages/admin/announcements";
 import AdminSettings from "@/pages/admin/admin-settings";
 import AdminSettingsPlatform from "@/pages/admin/settings/platform";
@@ -578,6 +580,12 @@ function Router() {
       </Route>
       <Route path="/admin/reports">
         <AdminLayout><AdminReports /></AdminLayout>
+      </Route>
+      <Route path="/admin/reports/platform">
+        <AdminLayout><AdminReportsPlatform /></AdminLayout>
+      </Route>
+      <Route path="/admin/reports/eventlog">
+        <AdminLayout><AdminReportsEventLog /></AdminLayout>
       </Route>
       <Route path="/admin/announcements">
         <AdminLayout><AdminAnnouncements /></AdminLayout>

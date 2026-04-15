@@ -102,6 +102,11 @@ const operationsMenuItems = [
 ]
 
 const statsParentItem = { title: "통계/리포트", url: "/admin/reports", icon: TrendingUp }
+const statsSubMenuItems = [
+  { title: "활동현황", url: "/admin/reports", icon: Activity },
+  { title: "플랫폼 현황", url: "/admin/reports/platform", icon: BarChart3 },
+  { title: "이벤트 로그", url: "/admin/reports/eventlog", icon: MousePointerClick },
+]
 
 // 시스템(설정) 메뉴
 const systemSettingsParentItem = { title: "시스템 설정", url: "/admin/settings", icon: Settings }
@@ -178,7 +183,10 @@ export function AppSidebar() {
       (p) => !["COMPLETE", "ADMIN_CHECKING", "ADMIN_CONFIRMED", "CANCELLED", "STOPPED"].includes(p.status)
     ).length,
   }), [])
-  const isStatsSectionActive = useMemo(() => location === statsParentItem.url, [location])
+  const isStatsSectionActive = useMemo(
+    () => statsSubMenuItems.some((item) => location === item.url),
+    [location]
+  )
   const isSystemSectionActive = useMemo(
     () => systemSettingsMenuItems.some((item) => location === item.url),
     [location]
@@ -190,6 +198,7 @@ export function AppSidebar() {
   const [memberOpen, setMemberOpen] = useState<boolean>(true)
   // 하위가 있는 그룹은 기본 접힘 가능. 부모 라벨 클릭 시 펼침 + 하위 화면 진입 시 일부 자동 펼침.
   const [operationsOpen, setOperationsOpen] = useState<boolean>(false)
+  const [statsOpen, setStatsOpen] = useState<boolean>(false)
   const [systemOpen, setSystemOpen] = useState<boolean>(false)
   const [securityOpen, setSecurityOpen] = useState<boolean>(false)
 
@@ -203,6 +212,9 @@ export function AppSidebar() {
   useEffect(() => {
     if (isMemberSectionActive) setMemberOpen(true)
   }, [isMemberSectionActive])
+  useEffect(() => {
+    if (isStatsSectionActive) setStatsOpen(true)
+  }, [isStatsSectionActive])
   useEffect(() => {
     if (isSystemSectionActive) setSystemOpen(true)
   }, [isSystemSectionActive])
@@ -520,11 +532,39 @@ export function AppSidebar() {
                   isActive={isStatsSectionActive}
                   data-testid={`nav-${statsParentItem.title.toLowerCase().replace(/\s+/g, '-')}`}
                 >
-                  <Link href={statsParentItem.url}>
+                  <Link href={statsParentItem.url} onClick={() => setStatsOpen(true)}>
                     <statsParentItem.icon />
                     <span>{statsParentItem.title}</span>
                   </Link>
                 </SidebarMenuButton>
+                <SidebarMenuAction
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setStatsOpen((prev) => !prev)
+                  }}
+                  aria-label={statsOpen ? "통계/리포트 메뉴 접기" : "통계/리포트 메뉴 펼치기"}
+                  title={statsOpen ? "접기" : "펼치기"}
+                >
+                  {statsOpen ? <ChevronDown /> : <ChevronRight />}
+                </SidebarMenuAction>
+                {statsOpen && (
+                  <SidebarMenuSub>
+                    {statsSubMenuItems.map((item) => (
+                      <SidebarMenuSubItem key={item.title}>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={location === item.url}
+                          data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+                        >
+                          <Link href={item.url}>
+                            <SubNavLabel>{item.title}</SubNavLabel>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                )}
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>

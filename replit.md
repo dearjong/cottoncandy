@@ -48,7 +48,7 @@ ADMarket는 광고주(의뢰사)와 광고 제작사(파트너)를 연결하는 
 - **Security/Audit**: Security Data
 
 ### Key Admin Pages and Components
-- **Admin Pages**: dashboard, calendar, progress, various project lists, contracts, reviews, consulting, member/company management, CS tools, reports, system settings, security.
+- **Admin Pages**: dashboard, calendar, progress, various project lists, contracts, reviews, consulting, member/company management, CS tools, reports (sub-menu: 활동현황/플랫폼현황/이벤트로그), system settings, security.
 - **Admin Components**: `app-sidebar`, `admin-layout`, `admin-alerts`, `page-header`, `period-filter`, `notice-banner-management`, `project-management`, `AdminMainTabs`.
 
 ### User Onboarding Flow

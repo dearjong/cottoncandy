@@ -1290,7 +1290,6 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
 }
 
 export default function ReportsPage() {
-  const [activeTab, setActiveTab] = useState("activity");
   const [simSignal, setSimSignal] = useState(0);
   const [simStatus, setSimStatus] = useState<{ progress: number; message: string; status: string } | null>(null);
 
@@ -1309,47 +1308,26 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <PageHeader title="통계/리포트" description="플랫폼 성과 데이터와 상세 리포트를 확인하세요" hidePeriodFilter />
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="flex items-center gap-3 min-w-0">
-          <TabsList className="bg-gray-100 shrink-0">
-            <TabsTrigger value="activity">활동현황</TabsTrigger>
-            <TabsTrigger value="platform">플랫폼 현황</TabsTrigger>
-            <TabsTrigger value="eventlog">이벤트 로그</TabsTrigger>
-          </TabsList>
-          {activeTab === "activity" && (
-            <>
-              <Button
-                className="btn-pink-compact text-xs h-7 py-0 px-3 shrink-0"
-                onClick={() => setSimSignal(s => s + 1)}
-                disabled={!!isRunning}
-              >
-                시뮬레이션 설정 및 실행
-              </Button>
-              {isRunning && simStatus && (
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <span className="text-[11px] text-gray-500 shrink-0 whitespace-nowrap">{simStatus.message}</span>
-                  <Progress value={simStatus.progress} className="h-1.5 flex-1" />
-                  <span className="text-[11px] font-semibold text-pink-600 shrink-0">{simStatus.progress}%</span>
-                </div>
-              )}
-            </>
+      <div className="flex items-center justify-between gap-3">
+        <PageHeader title="활동현황" description="시뮬레이션 데이터와 주요 활동 지표를 확인하세요" hidePeriodFilter />
+        <div className="flex items-center gap-3 shrink-0">
+          <Button
+            className="btn-pink-compact text-xs h-7 py-0 px-3"
+            onClick={() => setSimSignal(s => s + 1)}
+            disabled={!!isRunning}
+          >
+            시뮬레이션 설정 및 실행
+          </Button>
+          {isRunning && simStatus && (
+            <div className="flex items-center gap-2 min-w-0 max-w-xs">
+              <span className="text-[11px] text-gray-500 shrink-0 whitespace-nowrap">{simStatus.message}</span>
+              <Progress value={simStatus.progress} className="h-1.5 flex-1" />
+              <span className="text-[11px] font-semibold text-pink-600 shrink-0">{simStatus.progress}%</span>
+            </div>
           )}
         </div>
-
-        <TabsContent value="activity" className="mt-6">
-          <ActivityTab openSignal={simSignal} />
-        </TabsContent>
-
-        <TabsContent value="platform" className="mt-6">
-          <StatisticsDashboard />
-        </TabsContent>
-
-        <TabsContent value="eventlog" className="mt-6">
-          <EventLogTab />
-        </TabsContent>
-      </Tabs>
+      </div>
+      <ActivityTab openSignal={simSignal} />
     </div>
   );
 }
