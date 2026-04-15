@@ -549,64 +549,67 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
           <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-4">
-              {/* 유입 경로 (referrer 도메인 기준) */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-                <div>
-                  <p className="font-semibold text-pink-700 text-sm">유입 경로</p>
-                  <p className="text-xs text-gray-400 mt-0.5">어느 사이트에서 왔는지 — 유료·무료 구분 없이 원천 도메인 기준</p>
-                </div>
-                <div className="space-y-2">
-                  {[
-                    { key: "tvcf.co.kr",   label: "tvcf.co.kr",  color: "bg-pink-500"   },
-                    { key: "naver.com",    label: "naver.com",   color: "bg-green-500"  },
-                    { key: "google.com",   label: "google.com",  color: "bg-blue-400"   },
-                    { key: "kakao.com",    label: "kakao.com",   color: "bg-yellow-400" },
-                    { key: "daum.net",     label: "daum.net",    color: "bg-orange-400" },
-                    { key: "(직접 유입)",   label: "직접 유입",    color: "bg-gray-400"   },
-                  ].map(({ key, label, color }) => {
-                    const count = referrerBreakdown[key] ?? 0;
-                    const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
-                    return (
-                      <div key={key} className="flex items-center gap-3">
-                        <div className="w-20 text-xs text-gray-600 shrink-0">{label}</div>
-                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                          <div className={`${color} h-3 rounded-full`} style={{ width: `${pct}%` }} />
+              {/* 유입 경로 + UTM 유입 채널 나란히 */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* 유입 경로 (referrer 도메인 기준) */}
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
+                  <div>
+                    <p className="font-semibold text-pink-700 text-sm">유입 경로</p>
+                    <p className="text-xs text-gray-400 mt-0.5">원천 도메인 기준</p>
+                  </div>
+                  <div className="space-y-2">
+                    {[
+                      { key: "tvcf.co.kr",  label: "tvcf.co.kr", color: "bg-pink-500"   },
+                      { key: "naver.com",   label: "naver.com",  color: "bg-green-500"  },
+                      { key: "google.com",  label: "google.com", color: "bg-blue-400"   },
+                      { key: "kakao.com",   label: "kakao.com",  color: "bg-yellow-400" },
+                      { key: "daum.net",    label: "daum.net",   color: "bg-orange-400" },
+                      { key: "(직접 유입)",  label: "직접 유입",   color: "bg-gray-400"   },
+                    ].map(({ key, label, color }) => {
+                      const count = referrerBreakdown[key] ?? 0;
+                      const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
+                      return (
+                        <div key={key} className="flex items-center gap-2">
+                          <div className="w-16 text-xs text-gray-600 shrink-0 truncate">{label}</div>
+                          <div className="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                            <div className={`${color} h-2.5 rounded-full`} style={{ width: `${pct}%` }} />
+                          </div>
+                          <div className="w-8 text-right text-xs font-medium text-gray-700">{count}</div>
+                          <div className="w-7 text-right text-xs text-gray-400">{pct}%</div>
                         </div>
-                        <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                        <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
 
-              {/* UTM 유입 채널 (유료광고) */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-                <div>
-                  <p className="font-semibold text-indigo-700 text-sm">UTM 유입 채널 <span className="text-gray-400 font-normal">(유료광고)</span></p>
-                  <p className="text-xs text-gray-400 mt-0.5">광고 집행 시 UTM 파라미터로 추적한 채널</p>
-                </div>
-                <div className="space-y-2">
-                  {[
-                    { key: "tvcf.co.kr", label: "tvcf.co.kr", color: "bg-pink-500"   },
-                    { key: "google",  label: "Google",     color: "bg-blue-400"   },
-                    { key: "naver",   label: "Naver",      color: "bg-green-500"  },
-                    { key: "kakao",   label: "Kakao",      color: "bg-yellow-400" },
-                    { key: "organic", label: "Organic",    color: "bg-gray-400"   },
-                  ].map(({ key, label, color }) => {
-                    const count = utmBreakdown[key] ?? 0;
-                    const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
-                    return (
-                      <div key={key} className="flex items-center gap-3">
-                        <div className="w-20 text-xs text-gray-600 shrink-0">{label}</div>
-                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                          <div className={`${color} h-3 rounded-full`} style={{ width: `${pct}%` }} />
+                {/* UTM 유입 채널 (유료광고) */}
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
+                  <div>
+                    <p className="font-semibold text-indigo-700 text-sm">UTM 유입 채널</p>
+                    <p className="text-xs text-gray-400 mt-0.5">유료광고 파라미터 기준</p>
+                  </div>
+                  <div className="space-y-2">
+                    {[
+                      { key: "tvcf.co.kr", label: "tvcf.co.kr", color: "bg-pink-500"   },
+                      { key: "google",     label: "Google",      color: "bg-blue-400"   },
+                      { key: "naver",      label: "Naver",       color: "bg-green-500"  },
+                      { key: "kakao",      label: "Kakao",       color: "bg-yellow-400" },
+                      { key: "organic",    label: "Organic",     color: "bg-gray-400"   },
+                    ].map(({ key, label, color }) => {
+                      const count = utmBreakdown[key] ?? 0;
+                      const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
+                      return (
+                        <div key={key} className="flex items-center gap-2">
+                          <div className="w-16 text-xs text-gray-600 shrink-0 truncate">{label}</div>
+                          <div className="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                            <div className={`${color} h-2.5 rounded-full`} style={{ width: `${pct}%` }} />
+                          </div>
+                          <div className="w-8 text-right text-xs font-medium text-gray-700">{count}</div>
+                          <div className="w-7 text-right text-xs text-gray-400">{pct}%</div>
                         </div>
-                        <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                        <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
