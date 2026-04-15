@@ -1384,16 +1384,16 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       const sUid = `sim_gp_${k}`;
       job.projectCompletedCount += 1;
       job.projectTypeBreakdown["public"] = (job.projectTypeBreakdown["public"] ?? 0) + 1;
-      job.projDaysSum += 3; job.projSessionsSum += 2; job.projWritingMinSum += 90;
+      job.projDaysSum += 5; job.projSessionsSum += 3; job.projWritingMinSum += 120;
       const projTs = synTs + k * 3600;
       let writeOffset = 0;
-      // 18단계 전체 step 이벤트 생성 — 2세션으로 나눠 방문회차 분포 반영
-      // 1세션: 단계 1~11 (1회차), 2세션: 단계 12~18 (2회차)
-      const SESSION1_CUT = 11;
+      // 18단계 전체 step 이벤트 생성 — 3세션으로 나눠 방문회차 분포 반영
+      // 1회차: 단계 1~8, 2회차: 단계 9~14, 3회차: 단계 15~18
+      const S1_CUT = 8;
+      const S2_CUT = 14;
       for (const s of PROJECT_STEPS) {
         const dur = s.step <= 3 ? 60 : s.step <= 12 ? 180 : 60;
-        const synVisit = s.step <= SESSION1_CUT ? 1 : 2;
-        const synSession = synVisit;
+        const synVisit = s.step <= S1_CUT ? 1 : s.step <= S2_CUT ? 2 : 3;
         stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
         if (!job.stepFunnelByType["public"]) job.stepFunnelByType["public"] = {};
         job.stepFunnelByType["public"][s.step] = (job.stepFunnelByType["public"][s.step] ?? 0) + 1;
@@ -1401,7 +1401,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         job.visitFunnelBreakdown[synVisit][s.step] = (job.visitFunnelBreakdown[synVisit][s.step] ?? 0) + 1;
         add(`step_${s.step}_${s.screen}`, sUid, projTs + writeOffset, {
           step: s.step, screen: s.screen, project_type: "public",
-          session_number: synSession, resumed_from_draft: synSession > 1,
+          session_number: synVisit, resumed_from_draft: synVisit > 1,
           time_on_step_sec: dur, cumulative_writing_sec: writeOffset + dur,
           ...synthCommon,
         });
@@ -1409,8 +1409,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       }
       add("project_submitted", sUid, projTs + writeOffset + 30, {
         project_id: `gp_${k}`, project_type: "public", category: "영상광고",
-        budget_range: "500-1000만", total_sessions: 2, total_hours: 72, total_days: 3,
-        avg_session_gap_hours: 36, total_writing_time_sec: writeOffset, total_writing_time_min: Math.round(writeOffset / 60),
+        budget_range: "500-1000만", total_sessions: 3, total_hours: 120, total_days: 5,
+        avg_session_gap_hours: 40, total_writing_time_sec: writeOffset, total_writing_time_min: Math.round(writeOffset / 60),
         ...synthCommon,
       });
     }
