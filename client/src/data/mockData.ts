@@ -623,16 +623,16 @@ export const MOCK_NOTIFICATION_LOGS = [
 
 // --- Support: Inquiries ---
 export const MOCK_ALL_INQUIRIES = [
-  { id: 'INQ-001', category: '결제', title: '결제 수단 추가 문의', user: '홍길동', userType: 'CLIENT', company: '(주)테스트', date: '2024-11-06 14:00', status: 'WAITING' as const },
-  { id: 'INQ-002', category: '기능', title: '프로젝트 삭제 방법', user: '김파트너', userType: 'PARTNER', company: '제작사A', date: '2024-11-06 12:30', status: 'ANSWERED' as const },
-  { id: 'INQ-003', category: '기타', title: '영수증 발행 요청', user: '이의뢰', userType: 'CLIENT', company: '광고주B', date: '2024-11-06 11:00', status: 'WAITING' as const },
-  { id: 'INQ-004', category: '계약', title: '계약서 수정 가능한가요?', user: '박광고', userType: 'CLIENT', company: '(주)광고기획사', date: '2024-11-06 10:20', status: 'WAITING' as const },
-  { id: 'INQ-005', category: '정산', title: '정산 일정 확인 요청', user: '최제작', userType: 'PARTNER', company: '영상제작소', date: '2024-11-05 17:40', status: 'ANSWERED' as const },
-  { id: 'INQ-006', category: '회원', title: '회사 정보 수정 방법', user: '정브랜드', userType: 'CLIENT', company: '브랜드코리아', date: '2024-11-05 15:10', status: 'ANSWERED' as const },
-  { id: 'INQ-007', category: '프로젝트', title: '비공개 프로젝트 전환 문의', user: '강미디어', userType: 'CLIENT', company: '미디어그룹', date: '2024-11-05 13:50', status: 'WAITING' as const },
-  { id: 'INQ-008', category: '결제', title: '세금계산서 발행 요청', user: '윤크리에이티브', userType: 'PARTNER', company: '크리에이티브스튜디오', date: '2024-11-05 11:00', status: 'WAITING' as const },
-  { id: 'INQ-009', category: '기능', title: '포트폴리오 업로드 오류', user: '임디렉터', userType: 'PARTNER', company: '디렉팅랩', date: '2024-11-04 16:30', status: 'ANSWERED' as const },
-  { id: 'INQ-010', category: '기타', title: '서비스 이용 약관 문의', user: '오마케팅', userType: 'CLIENT', company: '(주)마케팅파트너스', date: '2024-11-04 14:00', status: 'WAITING' as const },
+  { id: 'INQ-001', category: '결제', title: '결제 수단 추가 문의', user: '홍길동', userType: 'CLIENT', company: '(주)테스트', date: '2024-11-06 14:00', status: 'WAITING' as const, content: '안녕하세요. 현재 카드 결제만 지원되는 것 같은데, 계좌이체나 간편결제(카카오페이 등)도 추가될 예정인지 문의드립니다. 프로젝트 예산이 커서 결제 수단이 다양하면 좋겠습니다.', answer: '' },
+  { id: 'INQ-002', category: '기능', title: '프로젝트 삭제 방법', user: '김파트너', userType: 'PARTNER', company: '제작사A', date: '2024-11-06 12:30', status: 'ANSWERED' as const, content: '등록한 프로젝트를 삭제하고 싶은데 삭제 버튼을 찾을 수가 없습니다. 어떻게 하면 되나요? 잘못 등록한 공고를 빠르게 삭제해야 합니다.', answer: '안녕하세요, 고객님. 프로젝트 삭제는 프로젝트 상세 페이지 우측 상단 [설정] 메뉴에서 가능합니다. 단, 진행 중인 프로젝트는 상대방 동의 후 취소 절차를 거쳐야 합니다. 추가 문의는 언제든지 연락 주세요.' },
+  { id: 'INQ-003', category: '기타', title: '영수증 발행 요청', user: '이의뢰', userType: 'CLIENT', company: '광고주B', date: '2024-11-06 11:00', status: 'WAITING' as const, content: '지난달 결제 건에 대해 영수증(현금영수증)을 발행받고 싶습니다. 결제 내역 페이지에서 발행 버튼이 보이지 않아 문의드립니다. 사업자 번호로 발행 부탁드립니다.', answer: '' },
+  { id: 'INQ-004', category: '계약', title: '계약서 수정 가능한가요?', user: '박광고', userType: 'CLIENT', company: '(주)광고기획사', date: '2024-11-06 10:20', status: 'WAITING' as const, content: '계약서에 납기일 조항을 일부 수정하고 싶은데, 서명 전에 수정이 가능한지요? 수행사 측과 협의가 된 내용을 반영하고 싶습니다. 수정 가능하다면 방법도 알려주세요.', answer: '' },
+  { id: 'INQ-005', category: '정산', title: '정산 일정 확인 요청', user: '최제작', userType: 'PARTNER', company: '영상제작소', date: '2024-11-05 17:40', status: 'ANSWERED' as const, content: '이번 달 정산이 언제 처리되는지 확인하고 싶습니다. 프로젝트 완료 후 2주가 지났는데 아직 정산이 안 된 것 같아서요. 정산 주기와 현재 상태를 알려주시면 감사하겠습니다.', answer: '안녕하세요. 확인 결과 해당 건은 의뢰사 검수 완료 후 정산 처리 대기 중입니다. 정산은 검수 완료일로부터 영업일 기준 7일 이내 처리되며, 현재 11월 10일 정산 예정입니다. 불편을 드려 죄송합니다.' },
+  { id: 'INQ-006', category: '회원', title: '회사 정보 수정 방법', user: '정브랜드', userType: 'CLIENT', company: '브랜드코리아', date: '2024-11-05 15:10', status: 'ANSWERED' as const, content: '회사가 이전하여 주소와 대표 전화번호를 변경해야 합니다. 마이페이지에서 수정이 가능한지, 아니면 별도 서류 제출이 필요한지 안내 부탁드립니다.', answer: '안녕하세요. 회사 기본 정보(주소, 전화번호)는 마이페이지 > 기업 정보 관리 메뉴에서 직접 수정하실 수 있습니다. 단, 사업자등록번호 및 법인명 변경은 서류 제출이 필요하며 고객센터로 별도 문의 바랍니다.' },
+  { id: 'INQ-007', category: '프로젝트', title: '비공개 프로젝트 전환 문의', user: '강미디어', userType: 'CLIENT', company: '미디어그룹', date: '2024-11-05 13:50', status: 'WAITING' as const, content: '현재 공개로 등록된 프로젝트를 비공개(1:1 지정)로 전환하고 싶습니다. 이미 지원자가 있는 상태에서 전환이 가능한지, 기존 지원자에게는 어떻게 안내되는지 알고 싶습니다.', answer: '' },
+  { id: 'INQ-008', category: '결제', title: '세금계산서 발행 요청', user: '윤크리에이티브', userType: 'PARTNER', company: '크리에이티브스튜디오', date: '2024-11-05 11:00', status: 'WAITING' as const, content: '10월 프로젝트 대금에 대한 세금계산서를 발행해 주셨으면 합니다. 저희 회사 사업자번호는 123-45-67890이며, 담당자 이메일로 전송 요청드립니다.', answer: '' },
+  { id: 'INQ-009', category: '기능', title: '포트폴리오 업로드 오류', user: '임디렉터', userType: 'PARTNER', company: '디렉팅랩', date: '2024-11-04 16:30', status: 'ANSWERED' as const, content: '포트폴리오에 영상 파일(MP4)을 업로드하려고 하는데 계속 오류가 발생합니다. 파일 크기는 250MB이고, 형식도 MP4인데 "지원하지 않는 형식"이라는 메시지가 뜹니다. 확인 부탁드립니다.', answer: '안녕하세요. 현재 포트폴리오 영상 업로드 용량 제한은 200MB입니다. 파일 크기를 200MB 이하로 압축하시거나, YouTube/Vimeo 링크 첨부 방식을 활용해 주세요. 불편을 드려 대단히 죄송합니다.' },
+  { id: 'INQ-010', category: '기타', title: '서비스 이용 약관 문의', user: '오마케팅', userType: 'CLIENT', company: '(주)마케팅파트너스', date: '2024-11-04 14:00', status: 'WAITING' as const, content: '서비스 이용약관 중 분쟁 해결 조항(제15조)의 해석이 모호하여 문의드립니다. 구체적으로 플랫폼이 중재에 개입하는 기준과 절차가 어떻게 되는지 상세히 안내해 주시면 감사하겠습니다.', answer: '' },
 ];
 
 // --- Support: Disputes ---
