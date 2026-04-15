@@ -104,7 +104,7 @@ function NumInput({ label, value, onChange, min = 0, max = 100, unit = "%" }: {
 }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-[10px] text-gray-400 leading-tight">{label}</span>
+      <span className="text-[10px] text-gray-400 leading-tight whitespace-pre-line">{label}</span>
       <div className="flex items-center gap-1">
         <input
           type="number" min={min} max={max} value={value}
@@ -447,7 +447,7 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                       <NumInput label="Google"     value={dialogCfg.pctGoogle}   onChange={(v) => setD("pctGoogle", v)} />
                       <NumInput label="Naver"      value={dialogCfg.pctNaver}    onChange={(v) => setD("pctNaver", v)} />
                       <NumInput label="Kakao"      value={dialogCfg.pctKakao}    onChange={(v) => setD("pctKakao", v)} />
-                      <NumInput label="자연검색"    value={dialogCfg.pctOrganic}  onChange={(v) => setD("pctOrganic", v)} />
+                      <NumInput label={"Organic\n(비광고)"}    value={dialogCfg.pctOrganic}  onChange={(v) => setD("pctOrganic", v)} />
                     </div>
                   </td>
                   <td className="py-1 pl-4 text-right align-middle">
@@ -620,13 +620,13 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                       { key: "google",     label: "Google",      color: "bg-blue-400"   },
                       { key: "naver",      label: "Naver",       color: "bg-green-500"  },
                       { key: "kakao",      label: "Kakao",       color: "bg-yellow-400" },
-                      { key: "organic",    label: "자연검색(비광고)", color: "bg-gray-400"   },
+                      { key: "organic",    label: "Organic\n(비광고)", color: "bg-gray-400"   },
                     ].map(({ key, label, color }) => {
                       const count = utmBreakdown[key] ?? 0;
                       const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
                       return (
                         <div key={key} className="flex items-center gap-2">
-                          <div className="w-16 text-xs text-gray-600 shrink-0 truncate">{label}</div>
+                          <div className="w-20 text-xs text-gray-600 shrink-0 whitespace-pre-line leading-tight">{label}</div>
                           <div className="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
                             <div className={`${color} h-2.5 rounded-full`} style={{ width: `${pct}%` }} />
                           </div>
