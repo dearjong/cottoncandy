@@ -19,6 +19,7 @@ export interface SimJob {
   funnelBreakdown: Record<string, number>;
   utmBreakdown: Record<string, number>;
   channelBreakdown: Record<string, number>;
+  referrerBreakdown: Record<string, number>;
   userTypeBreakdown: Record<string, number>;
   geoBreakdown: Record<string, number>;
   stepFunnelBreakdown: Record<number, number>;
@@ -340,6 +341,7 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     funnelBreakdown: {},
     utmBreakdown: {},
     channelBreakdown: {},
+    referrerBreakdown: {},
     userTypeBreakdown: {},
     geoBreakdown: {},
     stepFunnelBreakdown: {},
@@ -703,6 +705,19 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     utmCount[utm.utm_source] = (utmCount[utm.utm_source] ?? 0) + 1;
     const ch = utm.channel as string;
     job.channelBreakdown[ch] = (job.channelBreakdown[ch] ?? 0) + 1;
+
+    // 유입 referrer 도메인 집계 (referrer 생성 전에 source 기반으로 결정)
+    const refDomainMap: Record<string, string> = {
+      "tvcf.co.kr": "tvcf.co.kr",
+      "google": "google.com",
+      "naver": "naver.com",
+      "kakao": "kakao.com",
+    };
+    const refDomain = refDomainMap[utm.utm_source as string] ??
+      (utm.utm_source === "organic"
+        ? ["naver.com", "google.com", "daum.net"][Math.floor(Math.random() * 3)]
+        : "(직접 유입)");
+    job.referrerBreakdown[refDomain] = (job.referrerBreakdown[refDomain] ?? 0) + 1;
     const region = geo.geo_region;
     geoCount[region] = (geoCount[region] ?? 0) + 1;
     job.genderBreakdown[gender] = (job.genderBreakdown[gender] ?? 0) + 1;

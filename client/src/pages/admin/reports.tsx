@@ -21,6 +21,7 @@ interface SimJob {
   funnelBreakdown: Record<string, number>;
   utmBreakdown: Record<string, number>;
   channelBreakdown: Record<string, number>;
+  referrerBreakdown: Record<string, number>;
   userTypeBreakdown: Record<string, number>;
   geoBreakdown: Record<string, number>;
   stepFunnelBreakdown: Record<number, number>;
@@ -306,6 +307,7 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
   const siteVisit = job?.funnelBreakdown?.["site_visit"] ?? 0;
   const utmBreakdown = job?.utmBreakdown ?? {};
   const channelBreakdown = job?.channelBreakdown ?? {};
+  const referrerBreakdown = job?.referrerBreakdown ?? {};
   const userTypeBreakdown = job?.userTypeBreakdown ?? {};
   const geoBreakdown = job?.geoBreakdown ?? {};
 
@@ -547,28 +549,26 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
           <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-4">
-              {/* 유입 경로 (channel 기준) */}
+              {/* 유입 경로 (referrer 도메인 기준) */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
                 <div>
                   <p className="font-semibold text-pink-700 text-sm">유입 경로</p>
-                  <p className="text-xs text-gray-400 mt-0.5">광고 여부와 무관하게 실제 유입 채널 유형</p>
+                  <p className="text-xs text-gray-400 mt-0.5">어느 사이트에서 왔는지 — 유료·무료 구분 없이 원천 도메인 기준</p>
                 </div>
                 <div className="space-y-2">
                   {[
-                    { key: "referral", label: "레퍼럴",    color: "bg-pink-500",   desc: "외부 사이트 링크 (tvcf 등)" },
-                    { key: "paid",     label: "유료광고",   color: "bg-blue-400",   desc: "Google·Naver 검색광고" },
-                    { key: "social",   label: "소셜",       color: "bg-yellow-400", desc: "카카오·SNS" },
-                    { key: "organic",  label: "자연검색",   color: "bg-green-400",  desc: "검색엔진 자연 결과" },
-                    { key: "direct",   label: "직접 유입",  color: "bg-gray-400",   desc: "URL 직접 입력·북마크" },
-                  ].map(({ key, label, color, desc }) => {
-                    const count = channelBreakdown[key] ?? 0;
+                    { key: "tvcf.co.kr",   label: "tvcf.co.kr",  color: "bg-pink-500"   },
+                    { key: "naver.com",    label: "naver.com",   color: "bg-green-500"  },
+                    { key: "google.com",   label: "google.com",  color: "bg-blue-400"   },
+                    { key: "kakao.com",    label: "kakao.com",   color: "bg-yellow-400" },
+                    { key: "daum.net",     label: "daum.net",    color: "bg-orange-400" },
+                    { key: "(직접 유입)",   label: "직접 유입",    color: "bg-gray-400"   },
+                  ].map(({ key, label, color }) => {
+                    const count = referrerBreakdown[key] ?? 0;
                     const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
                     return (
                       <div key={key} className="flex items-center gap-3">
-                        <div className="w-16 shrink-0">
-                          <div className="text-xs text-gray-700 font-medium">{label}</div>
-                          <div className="text-[10px] text-gray-400">{desc}</div>
-                        </div>
+                        <div className="w-20 text-xs text-gray-600 shrink-0">{label}</div>
                         <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
                           <div className={`${color} h-3 rounded-full`} style={{ width: `${pct}%` }} />
                         </div>
