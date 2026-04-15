@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "wouter";
 import { StatisticsDashboard } from "@/components/admin/statistics-dashboard";
 import { PageHeader } from "@/components/admin/page-header";
 import { EventLogTab } from "@/pages/admin/event-log";
@@ -1564,6 +1563,7 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
 
 export default function ReportsPage() {
   const [openSignal, setOpenSignal] = useState(0);
+  const [runSignal, setRunSignal] = useState(0);
   const [simStatus, setSimStatus] = useState<{ progress: number; message: string; status: string } | null>(null);
 
   useEffect(() => {
@@ -1590,13 +1590,15 @@ export default function ReportsPage() {
             <span className="text-[11px] font-semibold text-pink-600 shrink-0">{simStatus.progress}%</span>
           </div>
         )}
-        <Link href="/admin/simulate">
-          <Button variant="outline" className="text-xs h-7 py-0 px-3 shrink-0">
-            시뮬레이션 설정
-          </Button>
-        </Link>
+        <Button
+          className="btn-pink-compact text-xs h-7 py-0 px-3 shrink-0"
+          onClick={() => setRunSignal(s => s + 1)}
+          disabled={!!isRunning}
+        >
+          시뮬레이션 실행
+        </Button>
       </div>
-      <ActivityTab openSignal={openSignal} />
+      <ActivityTab openSignal={openSignal} runSignal={runSignal} />
     </div>
   );
 }
