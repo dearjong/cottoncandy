@@ -680,7 +680,15 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   let partnerApplyDone   = 0;
 
   for (let i = 1; i <= userCount; i++) {
-    const uid      = `sim_user_${String(i).padStart(4, "0")}`;
+    // guest 여부를 uid 결정 전에 미리 판단
+    const preRoll           = Math.random() * 100;
+    const preSsoThr         = cfg.pctSsoLogin;
+    const preManualThr      = preSsoThr + cfg.pctManualLogin;
+    const preSignupThr      = preManualThr + cfg.pctSignup;
+    const preIsGuest        = preRoll >= preSignupThr;
+    const uid      = preIsGuest
+      ? `sim_guest_${String(i).padStart(4, "0")}`
+      : `sim_user_${String(i).padStart(4, "0")}`;
     const userType = weightedPick(USER_TYPE_LIST);
     const gender   = weightedPick(GENDERS);
     const ageGroup = weightedPick(AGE_GROUPS);
@@ -771,7 +779,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
     // ── 인증 결정 (직접 % 기반) ───────────────────────────
     let isAuthenticated = false;
-    const roll = Math.random() * 100;
+    const roll = preRoll;
     const ssoThreshold     = cfg.pctSsoLogin;
     const manualThreshold  = ssoThreshold + cfg.pctManualLogin;
     const signupThreshold  = manualThreshold + cfg.pctSignup;
@@ -810,10 +818,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
     // ── 핵심행동: 인증 완료 유저만 ─────────────────────
     if (!isAuthenticated) {
-      // 비회원 방문자 → guest_XXXX 로 Mixpanel People 등록
-      const guestId = `guest_${String(i).padStart(4, "0")}`;
+      // 비회원 방문자 → sim_guest_XXXX (uid) 로 Mixpanel People 등록
       registerMixpanelPeople(uid, {
-        $name:        guestId,
+        $name:        uid,
         user_type:    "guest",
         gender,
         age_group:    ageGroup,
