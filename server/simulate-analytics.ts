@@ -457,6 +457,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
         // 키 전환 이벤트는 custom event도 함께 전송 → GA4 이벤트 보고서에 반영
         if (GA4_KEY_EVENTS.has(event)) {
+          // GA4는 $로 시작하는 파라미터명 허용 안 함 → 필터링
+          const ga4Props = Object.fromEntries(
+            Object.entries(props).filter(([k]) => !k.startsWith("$"))
+          );
           entry.events.push({
             name: event,
             params: {
@@ -465,7 +469,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
               page_location: pageLocation,
               page_referrer: `${BASE_URL}/`,
               simulation: "true",
-              ...props,
+              ...ga4Props,
             },
             timestamp_micros: tsMicros,
           });
@@ -1294,10 +1298,24 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       job.projectCompletedCount += 1;
       job.projectTypeBreakdown["공고"] = (job.projectTypeBreakdown["공고"] ?? 0) + 1;
       job.projDaysSum += 3; job.projSessionsSum += 2; job.projWritingMinSum += 90;
-      add("project_submitted", sUid, synTs + k * 3600, {
+      const projTs = synTs + k * 3600;
+      let writeOffset = 0;
+      // 18단계 전체 step 이벤트 생성 (단계별 퍼널에 반영됨)
+      for (const s of PROJECT_STEPS) {
+        const dur = s.step <= 3 ? 60 : s.step <= 12 ? 180 : 60;
+        stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
+        add(`step_${s.step}_${s.screen}`, sUid, projTs + writeOffset, {
+          step: s.step, screen: s.screen, project_type: "공고",
+          session_number: 1, resumed_from_draft: false,
+          time_on_step_sec: dur, cumulative_writing_sec: writeOffset + dur,
+          ...synthCommon,
+        });
+        writeOffset += dur;
+      }
+      add("project_submitted", sUid, projTs + writeOffset + 30, {
         project_id: `gp_${k}`, project_type: "공고", category: "영상광고",
         budget_range: "500-1000만", total_sessions: 2, total_hours: 72, total_days: 3,
-        avg_session_gap_hours: 36, total_writing_time_sec: 5400, total_writing_time_min: 90,
+        avg_session_gap_hours: 36, total_writing_time_sec: writeOffset, total_writing_time_min: Math.round(writeOffset / 60),
         ...synthCommon,
       });
     }
@@ -1310,10 +1328,23 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       const sUid = `sim_gpf_${k}`;
       job.portfolioCompletedCount += 1;
       job.pfDaysSum += 5; job.pfSessionsSum += 3; job.pfWritingMinSum += 120;
-      add("portfolio_registered", sUid, synTs + k * 3600, {
+      const pfTs = synTs + k * 3600;
+      let pfWriteOffset = 0;
+      // 13개 섹션 전체 이벤트 생성 (섹션별 퍼널에 반영됨)
+      for (const sec of PORTFOLIO_SECTIONS) {
+        const dur = 120;
+        add(`portfolio_section_${sec.id}`, sUid, pfTs + pfWriteOffset, {
+          section: sec.id, section_step: sec.step, section_title: sec.title,
+          session_number: 1, time_on_section_sec: dur,
+          cumulative_writing_sec: pfWriteOffset + dur,
+          ...pfSynthCommon,
+        });
+        pfWriteOffset += dur;
+      }
+      add("portfolio_registered", sUid, pfTs + pfWriteOffset + 30, {
         portfolio_id: `gpf_${k}`, category: "영상광고", partner_type: "production",
         total_sessions: 3, total_hours: 120, total_days: 5, avg_session_gap_hours: 40,
-        total_writing_time_sec: 7200, total_writing_time_min: 120,
+        total_writing_time_sec: pfWriteOffset, total_writing_time_min: Math.round(pfWriteOffset / 60),
         ...pfSynthCommon,
       });
     }
