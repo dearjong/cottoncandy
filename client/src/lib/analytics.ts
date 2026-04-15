@@ -288,7 +288,7 @@ function maskEmail(email: string): string {
 export function identifyUser(props: {
   userId: string;
   userName?: string;
-  userType?: "advertiser" | "partner" | "admin";
+  userType?: "advertiser" | "agency" | "production" | "admin";
   email?: string;
 }) {
   const { userId, userType, email } = props;
@@ -355,7 +355,7 @@ export function reIdentifyIfLoggedIn() {
  */
 export function trackLogin(props: {
   method?: "email" | "naver" | "google" | "admin";
-  user_type?: "advertiser" | "partner" | "admin";
+  user_type?: "advertiser" | "agency" | "production" | "admin";
 }) {
   // GA4: 표준 login 이벤트 (BigQuery / 전환 분석에 활용 가능)
   if (typeof gtag !== "undefined") {
@@ -395,7 +395,7 @@ export function trackSignupFunnelStep(
 }
 
 /** 이메일 인증까지 완료 시 */
-export function trackSignupComplete(userType?: "advertiser" | "partner") {
+export function trackSignupComplete(userType?: "advertiser" | "agency" | "production") {
   publishAnalytics("signup_complete", {
     user_type: userType ?? "unknown",
   });
@@ -457,7 +457,7 @@ function checkFirstTime(key: string): boolean {
  */
 export function trackActivationAchieved(props: {
   trigger_event: "project_submitted" | "partner_applied";
-  user_type: "advertiser" | "partner";
+  user_type: "advertiser" | "agency" | "production";
 }) {
   publishAnalytics("activation_achieved", props);
 }
@@ -507,7 +507,7 @@ export function trackConsultingInquirySubmitted(props: {
 export function trackProjectViewed(props: {
   project_id: string;
   project_type: "공고" | "1:1";
-  user_type?: "advertiser" | "partner" | "guest";
+  user_type?: "advertiser" | "agency" | "production" | "guest";
 }) {
   publishAnalytics("project_viewed", props);
 }
@@ -744,7 +744,7 @@ export function trackConsultingProjectLinked(props: {
  * 회원가입 초기 화면에서 유형을 결정하는 순간 호출.
  */
 export function trackSignupTypeSelected(props: {
-  user_type: "advertiser" | "partner";
+  user_type: "advertiser" | "agency" | "production";
   partner_type?: "agency" | "production";
 }) {
   publishAnalytics("signup_type_selected", props);
@@ -760,7 +760,7 @@ export function trackCompanyRegistered(props: {
 }) {
   publishAnalytics("company_registered", {
     ...props,
-    user_type: props.company_type === "advertiser" ? "advertiser" : "partner",
+    user_type: props.company_type,
   });
 }
 

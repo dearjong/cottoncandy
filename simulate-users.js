@@ -10,6 +10,15 @@ const MIXPANEL_TOKEN = "B32D8265A148455CB07F704BE7A648AA";
 const GA4_ENDPOINT = `https://www.google-analytics.com/mp/collect?measurement_id=${GA4_MEASUREMENT_ID}&api_secret=${GA4_API_SECRET}`;
 const MIXPANEL_ENDPOINT = "https://api.mixpanel.com/track";
 
+// 타임아웃 있는 fetch (기본 5초)
+function fetchWithTimeout(url, options, ms = 5000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { ...options, signal: controller.signal })
+    .catch(() => {})
+    .finally(() => clearTimeout(id));
+}
+
 const TOTAL_USERS = 1000;
 const NOW = Date.now();
 const MAX_HOURS_BACK = 69; // GA4 72시간 제한 안전 마진
@@ -99,11 +108,11 @@ async function ga4(clientId, userId, eventName, params, tsMs) {
       },
     }],
   };
-  await fetch(GA4_ENDPOINT, {
+  await fetchWithTimeout(GA4_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
-  }).catch(() => {});
+  });
 }
 
 async function mixpanel(userId, eventName, props, tsMs) {
@@ -117,11 +126,11 @@ async function mixpanel(userId, eventName, props, tsMs) {
       ...props,
     },
   }];
-  await fetch(MIXPANEL_ENDPOINT, {
+  await fetchWithTimeout(MIXPANEL_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
-  }).catch(() => {});
+  });
 }
 
 async function emit(clientId, userId, name, params, ts) {
@@ -138,11 +147,11 @@ async function setMixpanelProfile(userId, profileProps) {
     $distinct_id: userId,
     $set: profileProps,
   }];
-  await fetch("https://api.mixpanel.com/engage#profile-set", {
+  await fetchWithTimeout("https://api.mixpanel.com/engage#profile-set", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
-  }).catch(() => {});
+  });
 }
 
 // ── 유저 행동 시뮬레이션 ─────────────────────────────
@@ -340,9 +349,9 @@ async function main() {
   console.log(`📊 Mixpanel: ${MIXPANEL_TOKEN}`);
   console.log(`⏱️  최근 ${MAX_HOURS_BACK}시간 데이터 분산\n`);
 
-  const BATCH = 20;                // 동시 처리 수
-  const DELAY_MIN_MS = 50;         // 배치 간 최소 딜레이
-  const DELAY_MAX_MS = 150;        // 배치 간 최대 딜레이
+  const BATCH = 5;                 // 동시 처리 수
+  const DELAY_MIN_MS = 200;        // 배치 간 최소 딜레이
+  const DELAY_MAX_MS = 500;        // 배치 간 최대 딜레이
   let done = 0;
 
   for (let i = 0; i < TOTAL_USERS; i += BATCH) {
