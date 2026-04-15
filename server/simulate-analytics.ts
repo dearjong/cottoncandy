@@ -311,7 +311,7 @@ export interface SimConfig {
 
 export const DEFAULT_CONFIG: SimConfig = {
   userCount: 1000,
-  periodSecs: 86400,
+  periodSecs: 600,
   pctAdvertiser: 5, pctAgency: 30, pctProduction: 65,
   pctTvcf: 85, pctGoogle: 5, pctNaver: 5, pctKakao: 3, pctOrganic: 2,
   pctSsoLogin: 17, pctManualLogin: 17, pctSignup: 3,

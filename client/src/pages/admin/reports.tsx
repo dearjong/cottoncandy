@@ -83,7 +83,7 @@ interface SimConfig {
 }
 
 const DEFAULTS: SimConfig = {
-  userCount: 1000, periodSecs: 86400,
+  userCount: 1000, periodSecs: 600,
   pctAdvertiser: 10, pctAgency: 30,       pctProduction: 60,
   pctTvcf: 85,       pctGoogle: 5,         pctNaver: 5,        pctKakao: 3,   pctOrganic: 2,
   pctSsoLogin: 17,   pctManualLogin: 17,   pctSignup: 3,
