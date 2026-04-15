@@ -407,7 +407,16 @@ function genReferrer(utmSource: string): string {
         ? `https://pf.kakao.com/_xmxadmk/posts/${Math.floor(Math.random()*90000)+10000}`
         : `https://story.kakao.com/admarket_official/${Math.floor(Math.random()*90000)+10000}`;
     }
-    default: return ""; // organic = direct
+    case "organic": {
+      // Organic = 검색엔진에서 자연 유입 (UTM 없음, 검색 referrer 있음)
+      const searchEngines = [
+        `https://search.naver.com/search.naver?query=${q}`,
+        `https://www.google.com/search?q=${q}&hl=ko`,
+        `https://search.daum.net/search?q=${q}`,
+      ];
+      return searchEngines[Math.floor(Math.random() * searchEngines.length)];
+    }
+    default: return ""; // direct = URL 직접 입력 / 북마크
   }
 }
 
