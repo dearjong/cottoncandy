@@ -237,7 +237,6 @@ async function simulateUser(i) {
     await emit(clientId, userId, "sso_login", { source: "tvcf.co.kr", method: "sso", ...base }, next(500, 2000));
     await setMixpanelProfile(userId, {
       $email: genMaskedEmail(),
-      $name: "",
       gender, age_group: ageGroup, user_type: userType, account_type: "sso",
       $city: location.$city, $region: location.$region, $country_code: location.$country_code,
       geo_region: location.geo_region,
@@ -270,7 +269,6 @@ async function simulateUser(i) {
 
           await setMixpanelProfile(userId, {
             $email: genMaskedEmail(),
-            $name: "",
             gender, age_group: ageGroup, user_type: userType, account_type: accountType,
             $city: location.$city, $region: location.$region, $country_code: location.$country_code,
             geo_region: location.geo_region,
