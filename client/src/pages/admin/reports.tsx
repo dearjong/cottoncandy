@@ -196,7 +196,7 @@ function NoDataCard({ title, subtitle, icon, accent = "gray" }: { title: string;
   );
 }
 
-function ActivityTab({ openSignal }: { openSignal?: number }) {
+function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal?: number }) {
   const [data, setData] = useState<{ jobId: string; job: SimJob } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [activeSubTab, setActiveSubTab] = useState<"settings" | "status">("status");
@@ -246,6 +246,10 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
   useEffect(() => {
     if (openSignal && openSignal > 0) { setDialogCfg(cfg); setActiveSubTab("settings"); }
   }, [openSignal]);
+
+  useEffect(() => {
+    if (runSignal && runSignal > 0) { startSim(dialogCfg); }
+  }, [runSignal]);
 
   const isRunningRef = useRef(false);
 
@@ -533,15 +537,6 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
               ⚠ 실행 시 실제 GA4 + Mixpanel 계정에 가상 이벤트가 추가됩니다.
             </div>
 
-            <div className="flex justify-end gap-2 pt-1">
-              <Button
-                className="bg-pink-600 hover:bg-pink-700 text-white"
-                onClick={() => startSim(dialogCfg)}
-                disabled={!!isRunning || loading}
-              >
-                {loading ? "시작 중..." : `▶ ${dialogCfg.userCount.toLocaleString()}명 / ${PERIOD_OPTIONS.find(o => o.secs === dialogCfg.periodSecs)?.label ?? ""} 시작`}
-              </Button>
-            </div>
         </div>
       )}
 
@@ -1450,7 +1445,8 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
 }
 
 export default function ReportsPage() {
-  const [simSignal, setSimSignal] = useState(0);
+  const [openSignal, setOpenSignal] = useState(0);
+  const [runSignal, setRunSignal] = useState(0);
 
   return (
     <div className="space-y-4 p-6">
@@ -1458,12 +1454,12 @@ export default function ReportsPage() {
         <PageHeader title="활동현황" description="시뮬레이션 데이터와 주요 활동 지표를 확인하세요" hidePeriodFilter />
         <Button
           className="btn-pink-compact text-xs h-7 py-0 px-3 shrink-0"
-          onClick={() => setSimSignal(s => s + 1)}
+          onClick={() => setRunSignal(s => s + 1)}
         >
-          시뮬레이션 설정
+          시뮬레이션 실행
         </Button>
       </div>
-      <ActivityTab openSignal={simSignal} />
+      <ActivityTab openSignal={openSignal} runSignal={runSignal} />
     </div>
   );
 }
