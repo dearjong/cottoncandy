@@ -396,17 +396,17 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
             {/* 설정 테이블 */}
             <table className="w-full text-xs border-collapse">
               <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="text-left py-1 pr-4 text-[10px] font-medium text-gray-400 w-24">구분</th>
-                  <th className="text-left py-1 text-[10px] font-medium text-gray-400">항목별 비율</th>
-                  <th className="text-right py-1 pl-4 text-[10px] font-medium text-gray-400 w-16">합계</th>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-2 pr-4 text-xs font-semibold text-gray-500 w-28">구분</th>
+                  <th className="text-left py-2 text-xs font-semibold text-gray-500">항목별 비율</th>
+                  <th className="text-right py-2 pl-4 text-xs font-semibold text-gray-500 w-16">합계</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-100">
                 <tr>
-                  <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">
+                  <td className="py-2 pr-4 font-semibold text-gray-700 align-middle text-sm">
                     인증 현황
-                    <div className="text-[9px] font-normal text-gray-400">방문자 기준</div>
+                    <div className="text-[10px] font-normal text-gray-400">방문자 기준</div>
                   </td>
                   <td className="py-1">
                     <div className="flex flex-wrap gap-2 items-end">
@@ -421,9 +421,9 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">
+                  <td className="py-2 pr-4 font-semibold text-gray-700 align-middle text-sm">
                     유저 타입
-                    <div className="text-[9px] font-normal text-gray-400">로그인 유저</div>
+                    <div className="text-[10px] font-normal text-gray-400">로그인 유저</div>
                   </td>
                   <td className="py-1">
                     <div className="flex flex-wrap gap-2 items-end">
@@ -437,9 +437,9 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">
+                  <td className="py-2 pr-4 font-semibold text-gray-700 align-middle text-sm">
                     유입 채널
-                    <div className="text-[9px] font-normal text-gray-400">UTM · 자사 포함</div>
+                    <div className="text-[10px] font-normal text-gray-400">UTM · 자사 포함</div>
                   </td>
                   <td className="py-1">
                     <div className="flex flex-wrap gap-2 items-end">
@@ -455,7 +455,7 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">성별·연령대</td>
+                  <td className="py-2 pr-4 font-semibold text-gray-700 align-top text-sm pt-2">성별·연령대</td>
                   <td className="py-1">
                     <div className="flex flex-wrap gap-x-6 gap-y-1 items-end">
                       <div className="flex gap-2 items-end">
@@ -475,9 +475,9 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                   <td className="py-1 pl-4 align-middle" />
                 </tr>
                 <tr>
-                  <td className="py-1.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">
+                  <td className="py-2 pr-4 font-semibold text-gray-700 align-middle text-sm">
                     접속 지역
-                    <div className="text-[9px] font-normal text-gray-400">방문자 기준</div>
+                    <div className="text-[10px] font-normal text-gray-400">방문자 기준</div>
                   </td>
                   <td className="py-1.5">
                     <div className="flex gap-2 items-end">
@@ -492,9 +492,9 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-1.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">
+                  <td className="py-2 pr-4 font-semibold text-gray-700 align-middle text-sm">
                     활동 인원
-                    <div className="text-[9px] font-normal text-gray-400">행동 전환 목표</div>
+                    <div className="text-[10px] font-normal text-gray-400">행동 전환 목표</div>
                   </td>
                   <td className="py-1.5">
                     <div className="flex gap-2 items-end">
@@ -506,9 +506,9 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                   <td className="py-1.5 pl-4 align-middle" />
                 </tr>
                 <tr>
-                  <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">
+                  <td className="py-2 pr-4 font-semibold text-gray-700 align-top text-sm pt-2">
                     완주 최소 보장
-                    <div className="text-[9px] font-normal text-gray-400">부족하면 자동 보충</div>
+                    <div className="text-[10px] font-normal text-gray-400">부족하면 자동 보충</div>
                   </td>
                   <td className="py-1">
                     <div className="flex gap-2 items-end">
