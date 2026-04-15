@@ -1,6 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { startSimulation, getSimJob, getLatestSimJob, DEFAULT_CONFIG, type SimConfig } from "./simulate-analytics";
 import {
   projectDataSchema,
@@ -368,6 +371,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const latest = getLatestSimJob();
     if (!latest) return res.json(null);
     res.json(latest);
+  });
+
+  // GET /api/admin/simulate/code — simulate-analytics.ts 소스 반환
+  const SIM_CODE_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "simulate-analytics.ts");
+  app.get("/api/admin/simulate/code", (_req, res) => {
+    try {
+      const code = fs.readFileSync(SIM_CODE_PATH, "utf8");
+      res.json({ code });
+    } catch (e) {
+      res.status(500).json({ error: "파일 읽기 실패" });
+    }
+  });
+
+  // POST /api/admin/simulate/code — simulate-analytics.ts 소스 저장
+  app.post("/api/admin/simulate/code", (req, res) => {
+    try {
+      const { code } = req.body ?? {};
+      if (typeof code !== "string" || code.trim().length === 0) {
+        return res.status(400).json({ error: "code 필드가 필요합니다" });
+      }
+      fs.writeFileSync(SIM_CODE_PATH, code, "utf8");
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(500).json({ error: "파일 저장 실패" });
+    }
   });
 
   const httpServer = createServer(app);

@@ -204,6 +204,36 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
   const [dialogCfg, setDialogCfg] = useState<SimConfig>(loadSavedCfg);
   const [loading, setLoading] = useState(false);
   const [projTypeFilter, setProjTypeFilter] = useState<"all" | "public" | "private" | "consulting">("all");
+  const [codeEditorOpen, setCodeEditorOpen] = useState(false);
+  const [simCode, setSimCode] = useState<string>("");
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeSaving, setCodeSaving] = useState(false);
+  const [codeSaveMsg, setCodeSaveMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  async function loadSimCode() {
+    setCodeLoading(true);
+    try {
+      const res = await fetch("/api/admin/simulate/code");
+      const json = await res.json();
+      setSimCode(json.code ?? "");
+    } catch { setSimCode("// 코드 로드 실패"); }
+    finally { setCodeLoading(false); }
+  }
+
+  async function saveSimCode() {
+    setCodeSaving(true);
+    setCodeSaveMsg(null);
+    try {
+      const res = await fetch("/api/admin/simulate/code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: simCode }),
+      });
+      if (res.ok) { setCodeSaveMsg({ ok: true, text: "저장 완료 — 다음 실행부터 반영됩니다" }); }
+      else { const j = await res.json(); setCodeSaveMsg({ ok: false, text: j.error ?? "저장 실패" }); }
+    } catch { setCodeSaveMsg({ ok: false, text: "네트워크 오류" }); }
+    finally { setCodeSaving(false); }
+  }
 
   function setD<K extends keyof SimConfig>(key: K, val: SimConfig[K]) {
     setDialogCfg((prev) => ({ ...prev, [key]: val }));
@@ -436,6 +466,59 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
                 </tr>
               </tbody>
             </table>
+
+            {/* 코드 에디터 섹션 */}
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <button
+                className="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-left"
+                onClick={() => {
+                  const next = !codeEditorOpen;
+                  setCodeEditorOpen(next);
+                  if (next && simCode === "") loadSimCode();
+                }}
+              >
+                <span className="text-xs font-semibold text-gray-600 font-mono">{"{ }"} 실행 코드 편집</span>
+                <span className="text-[10px] text-gray-400">{codeEditorOpen ? "▲ 접기" : "▼ 펼치기"}</span>
+              </button>
+
+              {codeEditorOpen && (
+                <div className="p-3 space-y-2 bg-white">
+                  {codeLoading ? (
+                    <div className="text-xs text-gray-400 py-6 text-center">코드 로딩 중...</div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[10px] text-gray-400 font-mono">server/simulate-analytics.ts</p>
+                        <div className="flex items-center gap-2">
+                          <button onClick={loadSimCode} className="text-[10px] text-blue-500 hover:underline">↺ 새로고침</button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-6 text-[10px] px-2"
+                            onClick={saveSimCode}
+                            disabled={codeSaving}
+                          >
+                            {codeSaving ? "저장 중..." : "💾 저장"}
+                          </Button>
+                        </div>
+                      </div>
+                      <textarea
+                        value={simCode}
+                        onChange={(e) => { setSimCode(e.target.value); setCodeSaveMsg(null); }}
+                        spellCheck={false}
+                        className="w-full h-96 text-[11px] font-mono bg-gray-950 text-green-300 rounded p-3 resize-y border-0 outline-none leading-relaxed"
+                        style={{ tabSize: 2 }}
+                      />
+                      {codeSaveMsg && (
+                        <p className={`text-[10px] ${codeSaveMsg.ok ? "text-green-600" : "text-red-500"}`}>
+                          {codeSaveMsg.ok ? "✓" : "✗"} {codeSaveMsg.text}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
 
             <div className="text-[10px] text-amber-600 bg-amber-50 border border-amber-100 rounded px-2 py-1">
               ⚠ 실행 시 실제 GA4 + Mixpanel 계정에 가상 이벤트가 추가됩니다.
