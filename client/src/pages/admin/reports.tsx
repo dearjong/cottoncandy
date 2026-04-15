@@ -437,10 +437,13 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">UTM 유입</td>
+                  <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">
+                    유입 채널
+                    <div className="text-[9px] font-normal text-gray-400">UTM · 자사 포함</div>
+                  </td>
                   <td className="py-1">
                     <div className="flex flex-wrap gap-2 items-end">
-                      <NumInput label="tvcf.co.kr" value={dialogCfg.pctTvcf}    onChange={(v) => setD("pctTvcf", v)} />
+                      <NumInput label="자사(tvcf)" value={dialogCfg.pctTvcf}    onChange={(v) => setD("pctTvcf", v)} />
                       <NumInput label="Google"     value={dialogCfg.pctGoogle}   onChange={(v) => setD("pctGoogle", v)} />
                       <NumInput label="Naver"      value={dialogCfg.pctNaver}    onChange={(v) => setD("pctNaver", v)} />
                       <NumInput label="Kakao"      value={dialogCfg.pctKakao}    onChange={(v) => setD("pctKakao", v)} />
@@ -614,7 +617,6 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                   </div>
                   <div className="space-y-2">
                     {[
-                      { key: "tvcf.co.kr", label: "tvcf.co.kr", color: "bg-pink-500"   },
                       { key: "google",     label: "Google",      color: "bg-blue-400"   },
                       { key: "naver",      label: "Naver",       color: "bg-green-500"  },
                       { key: "kakao",      label: "Kakao",       color: "bg-yellow-400" },
