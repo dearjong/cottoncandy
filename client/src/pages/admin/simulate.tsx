@@ -250,7 +250,7 @@ export default function AdminSimulatePage() {
                   <Select value={String(dialogCfg.userCount)} onValueChange={(v) => setD("userCount", Number(v))}>
                     <SelectTrigger className="w-32 h-8 text-xs border-gray-200"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {[100, 300, 500, 1000, 2000, 3000, 5000, 10000].map((n) => (
+                      {[100, 200, 300, 500, 1000, 2000, 3000, 5000, 10000].map((n) => (
                         <SelectItem key={n} value={String(n)}>{n.toLocaleString()}명</SelectItem>
                       ))}
                     </SelectContent>

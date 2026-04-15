@@ -148,7 +148,7 @@ const FUNNEL_ORDER = [
   { key: "referral_sent",         label: "추천 공유",       color: "bg-indigo-400",  aarrr: "Referral" },
 ];
 
-const SIM_CFG_KEY = "admarket_sim_cfg_v2";
+const SIM_CFG_KEY = "admarket_sim_cfg_v3";
 
 function loadSavedCfg(): SimConfig {
   try {
@@ -347,7 +347,7 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                 <Select value={String(dialogCfg.userCount)} onValueChange={(v) => setD("userCount", Number(v))}>
                   <SelectTrigger className="w-28 h-8 text-xs border-gray-200"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {[100, 300, 500, 1000, 2000, 3000, 5000, 10000].map((n) => (
+                    {[100, 200, 300, 500, 1000, 2000, 3000, 5000, 10000].map((n) => (
                       <SelectItem key={n} value={String(n)}>{n.toLocaleString()}명</SelectItem>
                     ))}
                   </SelectContent>
