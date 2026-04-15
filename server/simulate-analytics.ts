@@ -753,15 +753,15 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       const budget    = pick(BUDGET_RANGES);
       const projectId = `proj_${randInt(100, 999)}`;
       const pType     = weightedPick([
-        { value: "공고"    as const, weight: 45 },
-        { value: "1:1"     as const, weight: 30 },
-        { value: "컨설팅"  as const, weight: 25 },
+        { value: "public"     as const, weight: 45 },
+        { value: "private"    as const, weight: 30 },
+        { value: "consulting" as const, weight: 25 },
       ]);
 
       // 컨설팅 의뢰 경로 (18단계 퍼널 없음)
-      if (pType === "컨설팅") {
+      if (pType === "consulting") {
         job.consultingRegisteredCount += 1;
-        job.projectTypeBreakdown["컨설팅"] = (job.projectTypeBreakdown["컨설팅"] ?? 0) + 1;
+        job.projectTypeBreakdown["consulting"] = (job.projectTypeBreakdown["consulting"] ?? 0) + 1;
         add("consulting_inquiry_submitted", uid, projTs, {
           inquiry_type: "new", category, is_first_time: utm.utm_source !== "tvcf.co.kr", ...common,
         });
@@ -771,7 +771,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         // 공개(공고) / 비공개(1:1) — 18단계 퍼널 (멀티 세션)
         exitPage = "프로젝트 등록"; aidaDesire = true;
         job.pageViewBreakdown["프로젝트 등록"] = (job.pageViewBreakdown["프로젝트 등록"] ?? 0) + 1;
-        const optionStr = pType === "공고" ? "public" : "private";
+        const optionStr = pType === "public" ? "public" : "private";
         add("step1_cta_click", uid, projTs, { selected_option: optionStr, ...common });
 
         const projNumSessions = weightedPick([
@@ -965,7 +965,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       addGa4PageView(uid, "/partner/apply", partnerTs - 30);
       addDwell("공고 상세"); exitPage = "공고 상세"; aidaInterest = true;
       add("partner_applied", uid, partnerTs, {
-        project_id: projectId, project_type: pick(["공고","1:1"]),
+        project_id: projectId, project_type: pick(["public","private"]),
         partner_type: partnerType, is_first_time: utm.utm_source !== "tvcf.co.kr", ...common,
       });
       aidaAction = true;
@@ -1306,7 +1306,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     for (let k = 0; k < needed; k++) {
       const sUid = `sim_gp_${k}`;
       job.projectCompletedCount += 1;
-      job.projectTypeBreakdown["공고"] = (job.projectTypeBreakdown["공고"] ?? 0) + 1;
+      job.projectTypeBreakdown["public"] = (job.projectTypeBreakdown["public"] ?? 0) + 1;
       job.projDaysSum += 3; job.projSessionsSum += 2; job.projWritingMinSum += 90;
       const projTs = synTs + k * 3600;
       let writeOffset = 0;
@@ -1314,10 +1314,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       for (const s of PROJECT_STEPS) {
         const dur = s.step <= 3 ? 60 : s.step <= 12 ? 180 : 60;
         stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
-        if (!job.stepFunnelByType["공고"]) job.stepFunnelByType["공고"] = {};
-        job.stepFunnelByType["공고"][s.step] = (job.stepFunnelByType["공고"][s.step] ?? 0) + 1;
+        if (!job.stepFunnelByType["public"]) job.stepFunnelByType["public"] = {};
+        job.stepFunnelByType["public"][s.step] = (job.stepFunnelByType["public"][s.step] ?? 0) + 1;
         add(`step_${s.step}_${s.screen}`, sUid, projTs + writeOffset, {
-          step: s.step, screen: s.screen, project_type: "공고",
+          step: s.step, screen: s.screen, project_type: "public",
           session_number: 1, resumed_from_draft: false,
           time_on_step_sec: dur, cumulative_writing_sec: writeOffset + dur,
           ...synthCommon,
@@ -1325,7 +1325,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         writeOffset += dur;
       }
       add("project_submitted", sUid, projTs + writeOffset + 30, {
-        project_id: `gp_${k}`, project_type: "공고", category: "영상광고",
+        project_id: `gp_${k}`, project_type: "public", category: "영상광고",
         budget_range: "500-1000만", total_sessions: 2, total_hours: 72, total_days: 3,
         avg_session_gap_hours: 36, total_writing_time_sec: writeOffset, total_writing_time_min: Math.round(writeOffset / 60),
         ...synthCommon,

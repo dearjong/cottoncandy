@@ -206,7 +206,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
   const [cfg, setCfg] = useState<SimConfig>(loadSavedCfg);
   const [dialogCfg, setDialogCfg] = useState<SimConfig>(loadSavedCfg);
   const [loading, setLoading] = useState(false);
-  const [projTypeFilter, setProjTypeFilter] = useState<"전체" | "공고" | "1:1" | "컨설팅">("전체");
+  const [projTypeFilter, setProjTypeFilter] = useState<"all" | "public" | "private" | "consulting">("all");
 
   function setD<K extends keyof SimConfig>(key: K, val: SimConfig[K]) {
     setDialogCfg((prev) => ({ ...prev, [key]: val }));
@@ -1022,18 +1022,19 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
 
               {/* 의뢰 유형 필터 탭 */}
               <div className="flex items-center gap-1.5 flex-wrap">
-                {(["전체", "공고", "1:1", "컨설팅"] as const).map((type) => {
-                  const count = type === "전체"
-                    ? (job?.projectTypeBreakdown?.["공고"] ?? 0) + (job?.projectTypeBreakdown?.["1:1"] ?? 0) + (job?.consultingRegisteredCount ?? 0)
-                    : type === "컨설팅"
+                {(["all", "public", "private", "consulting"] as const).map((type) => {
+                  const labelMap: Record<string, string> = { all: "전체", public: "공개", private: "비공개", consulting: "컨설팅" };
+                  const count = type === "all"
+                    ? (job?.projectTypeBreakdown?.["public"] ?? 0) + (job?.projectTypeBreakdown?.["private"] ?? 0) + (job?.consultingRegisteredCount ?? 0)
+                    : type === "consulting"
                     ? (job?.consultingRegisteredCount ?? 0)
                     : (job?.projectTypeBreakdown?.[type] ?? 0);
                   const active = projTypeFilter === type;
                   const colorMap: Record<string, string> = {
-                    "전체": active ? "bg-orange-500 text-white border-orange-500" : "border-gray-200 text-gray-500 hover:border-orange-300 hover:text-orange-600",
-                    "공고": active ? "bg-blue-500 text-white border-blue-500" : "border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600",
-                    "1:1": active ? "bg-violet-500 text-white border-violet-500" : "border-gray-200 text-gray-500 hover:border-violet-300 hover:text-violet-600",
-                    "컨설팅": active ? "bg-pink-500 text-white border-pink-500" : "border-gray-200 text-gray-500 hover:border-pink-300 hover:text-pink-600",
+                    "all":        active ? "bg-orange-500 text-white border-orange-500" : "border-gray-200 text-gray-500 hover:border-orange-300 hover:text-orange-600",
+                    "public":     active ? "bg-blue-500 text-white border-blue-500"     : "border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600",
+                    "private":    active ? "bg-violet-500 text-white border-violet-500" : "border-gray-200 text-gray-500 hover:border-violet-300 hover:text-violet-600",
+                    "consulting": active ? "bg-pink-500 text-white border-pink-500"     : "border-gray-200 text-gray-500 hover:border-pink-300 hover:text-pink-600",
                   };
                   return (
                     <button
@@ -1041,7 +1042,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
                       onClick={() => setProjTypeFilter(type)}
                       className={`text-xs px-3 py-1 rounded-full border font-medium transition-all ${colorMap[type]}`}
                     >
-                      {type === "1:1" ? "비공개(1:1)" : type} {count > 0 && <span className="opacity-80">{count}건</span>}
+                      {labelMap[type]} {count > 0 && <span className="opacity-80">{count}건</span>}
                     </button>
                   );
                 })}
@@ -1057,7 +1058,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
               </div>
 
               {/* 컨설팅 선택 시: 단계 없는 요약 */}
-              {projTypeFilter === "컨설팅" ? (
+              {projTypeFilter === "consulting" ? (
                 <div className="space-y-3">
                   <div className="bg-pink-50 border border-pink-100 rounded-lg p-4 text-sm text-pink-800">
                     <p className="font-semibold mb-1">컨설팅 문의 현황</p>
@@ -1071,7 +1072,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
                     <div className="bg-gray-50 rounded-lg p-3 text-center">
                       <p className="text-xl font-bold text-gray-700">
                         {(() => {
-                          const total = (job?.projectTypeBreakdown?.["공고"] ?? 0) + (job?.projectTypeBreakdown?.["1:1"] ?? 0) + (job?.consultingRegisteredCount ?? 0);
+                          const total = (job?.projectTypeBreakdown?.["public"] ?? 0) + (job?.projectTypeBreakdown?.["private"] ?? 0) + (job?.consultingRegisteredCount ?? 0);
                           return total > 0 ? Math.round(((job?.consultingRegisteredCount ?? 0) / total) * 100) + "%" : "—";
                         })()}
                       </p>
@@ -1082,10 +1083,10 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
               ) : (
                 <div className="space-y-1.5">
                   {Array.from({ length: 18 }, (_, i) => i + 1).map((step) => {
-                    const stepFunnel = projTypeFilter === "전체"
+                    const stepFunnel = projTypeFilter === "all"
                       ? (job?.stepFunnelBreakdown ?? {})
                       : (job?.stepFunnelByType?.[projTypeFilter] ?? {});
-                    const stepDropoff = projTypeFilter === "전체"
+                    const stepDropoff = projTypeFilter === "all"
                       ? (job?.stepDropoffBreakdown ?? {})
                       : (job?.stepDropoffByType?.[projTypeFilter] ?? {});
                     const reached = stepFunnel[step] ?? 0;
@@ -1093,7 +1094,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
                     const pct = Math.round((reached / Math.max(...Object.values(stepFunnel), 1)) * 100);
                     const dropPct = reached > 0 ? Math.round((dropped / reached) * 100) : 0;
                     const isHighDropoff = dropPct >= 15;
-                    const barColor = projTypeFilter === "공고" ? "bg-blue-400" : projTypeFilter === "1:1" ? "bg-violet-400" : "bg-indigo-400";
+                    const barColor = projTypeFilter === "public" ? "bg-blue-400" : projTypeFilter === "private" ? "bg-violet-400" : "bg-indigo-400";
                     return (
                       <div key={step} className="flex items-center gap-2">
                         <div className="w-5 text-[10px] text-gray-400 text-right shrink-0">{step}</div>
