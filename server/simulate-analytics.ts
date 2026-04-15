@@ -809,7 +809,24 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     }
 
     // ── 핵심행동: 인증 완료 유저만 ─────────────────────
-    if (!isAuthenticated) continue;
+    if (!isAuthenticated) {
+      // 비회원 방문자 → guest_XXXX 로 Mixpanel People 등록
+      const guestId = `guest_${String(i).padStart(4, "0")}`;
+      registerMixpanelPeople(uid, {
+        $name:        guestId,
+        user_type:    "guest",
+        gender,
+        age_group:    ageGroup,
+        geo_region:   geo.geo_region,
+        $city:        geo.mp_city,
+        $region:      geo.mp_region,
+        $country_code: geo.mp_country_code,
+        channel:      utm.channel,
+        last_seen:    new Date(baseTs * 1000).toISOString(),
+        simulation:   true,
+      });
+      continue;
+    }
 
     // 유저 타입 집계 (인증된 유저만 — 미로그인은 total - sum으로 계산)
     userTypeCount[userType] = (userTypeCount[userType] ?? 0) + 1;
