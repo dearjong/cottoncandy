@@ -45,6 +45,7 @@ interface SimJob {
   directEntryBreakdown: Record<string, number>;
   portfolioFunnelBreakdown: Record<number, number>;
   portfolioDropoffBreakdown: Record<number, number>;
+  visitFunnelBreakdown: Record<number, Record<number, number>>;
   homeClickBreakdown: Record<string, number>;
   dwellSecSum: Record<string, number>;
   dwellCount: Record<string, number>;
@@ -204,6 +205,7 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
   const [dialogCfg, setDialogCfg] = useState<SimConfig>(loadSavedCfg);
   const [loading, setLoading] = useState(false);
   const [projTypeFilter, setProjTypeFilter] = useState<"all" | "public" | "private" | "consulting">("all");
+  const [visitFilter, setVisitFilter] = useState<0 | 1 | 2 | 3 | 4>(0); // 0=전체
   const [codeEditorOpen, setCodeEditorOpen] = useState(false);
   const [simCode, setSimCode] = useState<string>("");
   const [codeLoading, setCodeLoading] = useState(false);
@@ -1312,6 +1314,46 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                 </span>
               </div>
 
+              {/* 방문 회차 필터 */}
+              {projTypeFilter !== "consulting" && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-gray-400 shrink-0">방문 회차</span>
+                  {([0, 1, 2, 3, 4] as const).map((v) => {
+                    const label = v === 0 ? "전체" : v === 4 ? "4회차+" : `${v}회차`;
+                    const visitData = v === 0 ? null : (job?.visitFunnelBreakdown?.[v] ?? {});
+                    const visitTotal = visitData ? Object.values(visitData).reduce((a, b) => a + b, 0) : null;
+                    const active = visitFilter === v;
+                    const colors: Record<number, string> = {
+                      0: active ? "bg-gray-600 text-white border-gray-600" : "border-gray-200 text-gray-500 hover:border-gray-400",
+                      1: active ? "bg-emerald-500 text-white border-emerald-500" : "border-gray-200 text-gray-500 hover:border-emerald-300 hover:text-emerald-600",
+                      2: active ? "bg-cyan-500 text-white border-cyan-500" : "border-gray-200 text-gray-500 hover:border-cyan-300 hover:text-cyan-600",
+                      3: active ? "bg-amber-500 text-white border-amber-500" : "border-gray-200 text-gray-500 hover:border-amber-300 hover:text-amber-600",
+                      4: active ? "bg-rose-500 text-white border-rose-500" : "border-gray-200 text-gray-500 hover:border-rose-300 hover:text-rose-600",
+                    };
+                    return (
+                      <button
+                        key={v}
+                        onClick={() => setVisitFilter(v)}
+                        className={`text-xs px-2.5 py-0.5 rounded-full border font-medium transition-all ${colors[v]}`}
+                      >
+                        {label}
+                        {visitTotal !== null && visitTotal > 0 && (
+                          <span className="opacity-80 ml-0.5">{visitTotal}</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                  {visitFilter > 0 && (
+                    <span className="text-[10px] text-gray-400 ml-1">
+                      {visitFilter === 1 && "처음 방문 — 주로 1~6단계"}
+                      {visitFilter === 2 && "2번째 방문 — 중반 작성 구간"}
+                      {visitFilter === 3 && "3번째 방문 — 마무리 단계"}
+                      {visitFilter === 4 && "4회차 이상 — 완주 집중 구간"}
+                    </span>
+                  )}
+                </div>
+              )}
+
               {/* 컨설팅 선택 시: 단계 없는 요약 */}
               {projTypeFilter === "consulting" ? (
                 <div className="space-y-3">
@@ -1338,18 +1380,26 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
               ) : (
                 <div className="space-y-1.5">
                   {Array.from({ length: 18 }, (_, i) => i + 1).map((step) => {
-                    const stepFunnel = projTypeFilter === "all"
+                    const baseStepFunnel = projTypeFilter === "all"
                       ? (job?.stepFunnelBreakdown ?? {})
                       : (job?.stepFunnelByType?.[projTypeFilter] ?? {});
-                    const stepDropoff = projTypeFilter === "all"
+                    const baseStepDropoff = projTypeFilter === "all"
                       ? (job?.stepDropoffBreakdown ?? {})
                       : (job?.stepDropoffByType?.[projTypeFilter] ?? {});
+                    // 방문 회차 필터 적용 (visitFilter > 0이면 visitFunnelBreakdown 사용)
+                    const stepFunnel = visitFilter > 0
+                      ? (job?.visitFunnelBreakdown?.[visitFilter] ?? {})
+                      : baseStepFunnel;
+                    const stepDropoff = visitFilter > 0 ? {} : baseStepDropoff;
                     const reached = stepFunnel[step] ?? 0;
                     const dropped = stepDropoff[step] ?? 0;
                     const pct = Math.round((reached / Math.max(...Object.values(stepFunnel), 1)) * 100);
                     const dropPct = reached > 0 ? Math.round((dropped / reached) * 100) : 0;
                     const isHighDropoff = dropPct >= 15;
-                    const barColor = projTypeFilter === "public" ? "bg-blue-400" : projTypeFilter === "private" ? "bg-violet-400" : "bg-indigo-400";
+                    const visitBarColors: Record<number, string> = { 1: "bg-emerald-400", 2: "bg-cyan-400", 3: "bg-amber-400", 4: "bg-rose-400" };
+                    const barColor = visitFilter > 0
+                      ? (visitBarColors[visitFilter] ?? "bg-indigo-400")
+                      : projTypeFilter === "public" ? "bg-blue-400" : projTypeFilter === "private" ? "bg-violet-400" : "bg-indigo-400";
                     return (
                       <div key={step} className="flex items-center gap-2">
                         <div className="w-5 text-[10px] text-gray-400 text-right shrink-0">{step}</div>

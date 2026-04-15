@@ -43,6 +43,7 @@ export interface SimJob {
   directEntryBreakdown: Record<string, number>;
   portfolioFunnelBreakdown: Record<number, number>;
   portfolioDropoffBreakdown: Record<number, number>;
+  visitFunnelBreakdown: Record<number, Record<number, number>>;
   homeClickBreakdown: Record<string, number>;
   dwellSecSum: Record<string, number>;
   dwellCount: Record<string, number>;
@@ -369,6 +370,7 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     dwellCount: {},
     pageViewBreakdown: {},
     exitPageBreakdown: {},
+    visitFunnelBreakdown: {},
     aidaBreakdown: { attention: 0, interest: 0, desire: 0, action: 0 },
     errors: [],
     startedAt: Date.now(),
@@ -827,6 +829,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
             if (!job.stepFunnelByType[pType]) job.stepFunnelByType[pType] = {};
             job.stepFunnelByType[pType][s.step] = (job.stepFunnelByType[pType][s.step] ?? 0) + 1;
+            // 방문 회차별 집계 (1~3회차, 4회차+)
+            const visitNum = Math.min(sIdx + 1, 4);
+            if (!job.visitFunnelBreakdown[visitNum]) job.visitFunnelBreakdown[visitNum] = {};
+            job.visitFunnelBreakdown[visitNum][s.step] = (job.visitFunnelBreakdown[visitNum][s.step] ?? 0) + 1;
             add(`step_${s.step}_${s.screen}`, uid, projCurrentTs + sessionWriteOffset + 10, {
               step: s.step, screen: s.screen, project_type: pType,
               session_number: sIdx + 1,
@@ -1316,6 +1322,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
         if (!job.stepFunnelByType["public"]) job.stepFunnelByType["public"] = {};
         job.stepFunnelByType["public"][s.step] = (job.stepFunnelByType["public"][s.step] ?? 0) + 1;
+        if (!job.visitFunnelBreakdown[1]) job.visitFunnelBreakdown[1] = {};
+        job.visitFunnelBreakdown[1][s.step] = (job.visitFunnelBreakdown[1][s.step] ?? 0) + 1;
         add(`step_${s.step}_${s.screen}`, sUid, projTs + writeOffset, {
           step: s.step, screen: s.screen, project_type: "public",
           session_number: 1, resumed_from_draft: false,
