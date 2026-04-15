@@ -1387,17 +1387,21 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       job.projDaysSum += 3; job.projSessionsSum += 2; job.projWritingMinSum += 90;
       const projTs = synTs + k * 3600;
       let writeOffset = 0;
-      // 18단계 전체 step 이벤트 생성 (단계별 퍼널에 반영됨)
+      // 18단계 전체 step 이벤트 생성 — 2세션으로 나눠 방문회차 분포 반영
+      // 1세션: 단계 1~11 (1회차), 2세션: 단계 12~18 (2회차)
+      const SESSION1_CUT = 11;
       for (const s of PROJECT_STEPS) {
         const dur = s.step <= 3 ? 60 : s.step <= 12 ? 180 : 60;
+        const synVisit = s.step <= SESSION1_CUT ? 1 : 2;
+        const synSession = synVisit;
         stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
         if (!job.stepFunnelByType["public"]) job.stepFunnelByType["public"] = {};
         job.stepFunnelByType["public"][s.step] = (job.stepFunnelByType["public"][s.step] ?? 0) + 1;
-        if (!job.visitFunnelBreakdown[1]) job.visitFunnelBreakdown[1] = {};
-        job.visitFunnelBreakdown[1][s.step] = (job.visitFunnelBreakdown[1][s.step] ?? 0) + 1;
+        if (!job.visitFunnelBreakdown[synVisit]) job.visitFunnelBreakdown[synVisit] = {};
+        job.visitFunnelBreakdown[synVisit][s.step] = (job.visitFunnelBreakdown[synVisit][s.step] ?? 0) + 1;
         add(`step_${s.step}_${s.screen}`, sUid, projTs + writeOffset, {
           step: s.step, screen: s.screen, project_type: "public",
-          session_number: 1, resumed_from_draft: false,
+          session_number: synSession, resumed_from_draft: synSession > 1,
           time_on_step_sec: dur, cumulative_writing_sec: writeOffset + dur,
           ...synthCommon,
         });
