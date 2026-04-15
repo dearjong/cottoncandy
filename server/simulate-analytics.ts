@@ -653,6 +653,37 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   const PARTNER_COMPANIES = ["솜사탕애드","마케팅에이전시","크리에이티브랩","광고제작소","미디어웍스","픽셀스튜디오","비주얼팩토리","아이디어뱅크","크리에이티브허브","영상스튜디오","광고창작소","미디어플러스","콘텐츠랩","영상팩토리","디자인스튜디오","브랜드에이전시","멀티미디어","그래픽하우스","모션웍스","퍼블리셔스"];
   const EMAIL_DOMAINS = ["naver.com","gmail.com","kakao.com","daum.net","nate.com","hanmail.net"];
 
+  // 한국 이름 (성 + 이름 쌍)
+  const KR_LAST  = ["김","이","박","최","정","강","조","윤","장","임","한","오","서","신","권","황","안","송","류","전","홍","고","문","양","손"];
+  const KR_FIRST_M = ["민준","서준","도윤","예준","시우","하준","지호","준서","준우","현우","지훈","건우","우진","선호","서진","민재","현준","이준","재원","수호"];
+  const KR_FIRST_F = ["서연","서윤","지우","서현","하은","하윤","민서","지유","지민","수아","지아","채원","소윤","예은","윤서","다은","수빈","예린","나은","아린"];
+  function randomKrName(g: string) {
+    const last  = KR_LAST[Math.floor(Math.random() * KR_LAST.length)];
+    const first = g === "female"
+      ? KR_FIRST_F[Math.floor(Math.random() * KR_FIRST_F.length)]
+      : KR_FIRST_M[Math.floor(Math.random() * KR_FIRST_M.length)];
+    return last + first;
+  }
+  // 이름 기반 이메일 ID 생성 (로마자 변환 근사치)
+  const KR_ROMANIZE: Record<string, string> = {
+    "김":"kim","이":"lee","박":"park","최":"choi","정":"jung","강":"kang","조":"jo","윤":"yoon","장":"jang","임":"lim",
+    "한":"han","오":"oh","서":"seo","신":"shin","권":"kwon","황":"hwang","안":"ahn","송":"song","류":"ryu","전":"jeon",
+    "홍":"hong","고":"ko","문":"moon","양":"yang","손":"son",
+    "민준":"minjun","서준":"seojun","도윤":"doyoon","예준":"yejun","시우":"siwoo","하준":"hajun","지호":"jiho","준서":"junseo",
+    "준우":"junwoo","현우":"hyunwoo","지훈":"jihoon","건우":"gunwoo","우진":"woojin","선호":"sunho","서진":"seojin",
+    "민재":"minjae","현준":"hyunjun","이준":"leejun","재원":"jaewon","수호":"suho",
+    "서연":"seoyeon","서윤":"seoyoon","지우":"jiwoo","서현":"seohyun","하은":"haeun","하윤":"hayoon","민서":"minseo",
+    "지유":"jiyu","지민":"jimin","수아":"sooah","지아":"jia","채원":"chaewon","소윤":"soyoon","예은":"yeeun",
+    "윤서":"yunseo","다은":"daeun","수빈":"subin","예린":"yerin","나은":"naeun","아린":"arin",
+  };
+  function nameToEmail(fullName: string) {
+    const last  = fullName.slice(0, 1);
+    const first = fullName.slice(1);
+    const ro = (KR_ROMANIZE[last] ?? "user") + (KR_ROMANIZE[first] ?? Math.floor(Math.random()*900+100).toString());
+    const domain = EMAIL_DOMAINS[Math.floor(Math.random() * EMAIL_DOMAINS.length)];
+    return `${ro}@${domain}`;
+  }
+
   // Mixpanel People 프로필 배치
   const mpPeople: Array<Record<string, unknown>> = [];
 
@@ -711,7 +742,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       ? pick(ADVERTISER_COMPANIES)
       : pick(PARTNER_COMPANIES);
 
-    const simEmail = `${uid}@${EMAIL_DOMAINS[Math.floor(Math.random() * EMAIL_DOMAINS.length)]}`;
+    const krName   = randomKrName(gender);
+    const simEmail = nameToEmail(krName);
 
     // UTM / channel / 지역 / 성별 집계 (모든 유저)
     utmCount[utm.utm_source] = (utmCount[utm.utm_source] ?? 0) + 1;
@@ -751,7 +783,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     // Mixpanel People 프로필 등록
     registerMixpanelPeople(uid, {
       $email:       simEmail,
-      $name:        uid,
+      $name:        krName,
       $city:        geo.mp_city,
       $region:      geo.mp_region,
       $country_code: geo.mp_country_code,
@@ -824,7 +856,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     if (!isAuthenticated) {
       // 비회원 방문자 → sim_guest_XXXX (uid) 로 Mixpanel People 등록
       registerMixpanelPeople(uid, {
-        $name:        uid,
+        $name:        krName,
         user_type:    "guest",
         gender,
         age_group:    ageGroup,
