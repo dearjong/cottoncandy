@@ -199,7 +199,7 @@ function NoDataCard({ title, subtitle, icon, accent = "gray" }: { title: string;
 function ActivityTab({ openSignal }: { openSignal?: number }) {
   const [data, setData] = useState<{ jobId: string; job: SimJob } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [activeSubTab, setActiveSubTab] = useState<"settings" | "status">("status");
   const [cfg, setCfg] = useState<SimConfig>(loadSavedCfg);
   const [dialogCfg, setDialogCfg] = useState<SimConfig>(loadSavedCfg);
   const [loading, setLoading] = useState(false);
@@ -244,7 +244,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
   }
 
   useEffect(() => {
-    if (openSignal && openSignal > 0) { setDialogCfg(cfg); setSettingsOpen(true); }
+    if (openSignal && openSignal > 0) { setDialogCfg(cfg); setActiveSubTab("settings"); }
   }, [openSignal]);
 
   const isRunningRef = useRef(false);
@@ -280,7 +280,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
   async function startSim(runCfg: SimConfig) {
     setCfg(runCfg);
     try { localStorage.setItem(SIM_CFG_KEY, JSON.stringify(runCfg)); } catch {}
-    setSettingsOpen(false);
+    setActiveSubTab("status");
     setLoading(true);
     try {
       const res = await fetch("/api/admin/simulate/start", {
@@ -312,18 +312,27 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
   const dGeoSum    = dialogCfg.pctSeoul + dialogCfg.pctGyeonggi + dialogCfg.pctLocal + dialogCfg.pctAbroad;
 
   return (
-    <div className="space-y-6">
+    <div>
+      {/* 서브 탭 헤더 */}
+      <div className="flex items-center border-b border-gray-200 mb-6">
+        {(["settings", "status"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveSubTab(tab)}
+            className={`px-5 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              activeSubTab === tab
+                ? "border-pink-600 text-pink-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            {tab === "settings" ? "시뮬레이션 설정" : "활동 현황"}
+          </button>
+        ))}
+      </div>
 
-      {/* 인라인 시뮬레이션 설정 패널 */}
-      {settingsOpen && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-          {/* 패널 헤더 */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-            <p className="font-semibold text-gray-700 text-sm">시뮬레이션 설정</p>
-            <button onClick={() => setSettingsOpen(false)} className="text-gray-400 hover:text-gray-600 text-lg leading-none">✕</button>
-          </div>
-
-          <div className="p-5 space-y-4">
+      {/* ── 설정 탭 ── */}
+      {activeSubTab === "settings" && (
+        <div className="space-y-4">
             {/* 기본 설정 행 */}
             <div className="flex items-center gap-6 pb-3 border-b border-gray-100">
               <div className="flex items-center gap-2">
@@ -525,7 +534,6 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
             </div>
 
             <div className="flex justify-end gap-2 pt-1">
-              <Button variant="outline" onClick={() => setSettingsOpen(false)}>닫기</Button>
               <Button
                 className="bg-pink-600 hover:bg-pink-700 text-white"
                 onClick={() => startSim(dialogCfg)}
@@ -534,13 +542,21 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
                 {loading ? "시작 중..." : `▶ ${dialogCfg.userCount.toLocaleString()}명 / ${PERIOD_OPTIONS.find(o => o.secs === dialogCfg.periodSecs)?.label ?? ""} 시작`}
               </Button>
             </div>
-          </div>
         </div>
       )}
 
-      {/* 항상 표시되는 차트들 */}
-      {(
-        <>
+      {/* ── 현황 탭 ── */}
+      {activeSubTab === "status" && (
+        <div className="space-y-6">
+          {/* 진행 상황 바 */}
+          {isRunning && job && (
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-3 flex items-center gap-4">
+              <span className="text-xs text-gray-500 shrink-0">{job.message}</span>
+              <Progress value={job.progress} className="flex-1 h-2" />
+              <span className="text-xs font-semibold text-pink-600 shrink-0">{job.progress}%</span>
+            </div>
+          )}
+          <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-4">
               {/* UTM 유입 채널 */}
@@ -1426,50 +1442,26 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
             </div>
 
           </div>{/* /퍼널 2열 grid */}
-        </>
+          </>
+        </div>
       )}
-
     </div>
   );
 }
 
 export default function ReportsPage() {
   const [simSignal, setSimSignal] = useState(0);
-  const [simStatus, setSimStatus] = useState<{ progress: number; message: string; status: string } | null>(null);
-
-  useEffect(() => {
-    const poll = setInterval(async () => {
-      try {
-        const res = await fetch("/api/admin/simulate/latest");
-        const json = await res.json();
-        setSimStatus(json?.job ?? null);
-      } catch { /* ignore */ }
-    }, 5000);
-    return () => clearInterval(poll);
-  }, []);
-
-  const isRunning = simStatus && ["pending", "generating", "sending"].includes(simStatus.status);
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 p-6">
       <div className="flex items-center justify-between gap-3">
         <PageHeader title="활동현황" description="시뮬레이션 데이터와 주요 활동 지표를 확인하세요" hidePeriodFilter />
-        <div className="flex items-center gap-3 shrink-0">
-          <Button
-            className="btn-pink-compact text-xs h-7 py-0 px-3"
-            onClick={() => setSimSignal(s => s + 1)}
-            disabled={!!isRunning}
-          >
-            시뮬레이션 설정 및 실행
-          </Button>
-          {isRunning && simStatus && (
-            <div className="flex items-center gap-2 min-w-0 max-w-xs">
-              <span className="text-[11px] text-gray-500 shrink-0 whitespace-nowrap">{simStatus.message}</span>
-              <Progress value={simStatus.progress} className="h-1.5 flex-1" />
-              <span className="text-[11px] font-semibold text-pink-600 shrink-0">{simStatus.progress}%</span>
-            </div>
-          )}
-        </div>
+        <Button
+          className="btn-pink-compact text-xs h-7 py-0 px-3 shrink-0"
+          onClick={() => setSimSignal(s => s + 1)}
+        >
+          시뮬레이션 설정
+        </Button>
       </div>
       <ActivityTab openSignal={simSignal} />
     </div>
