@@ -83,7 +83,7 @@ interface SimConfig {
 }
 
 const DEFAULTS: SimConfig = {
-  userCount: 1000, periodSecs: 600,
+  userCount: 200, periodSecs: 600,
   pctAdvertiser: 10, pctAgency: 30,       pctProduction: 60,
   pctTvcf: 85,       pctGoogle: 5,         pctNaver: 5,        pctKakao: 3,   pctOrganic: 2,
   pctSsoLogin: 17,   pctManualLogin: 17,   pctSignup: 3,
@@ -135,15 +135,12 @@ const FUNNEL_ORDER = [
   { key: "sso_login",             label: "SSO 로그인",      color: "bg-pink-400",    aarrr: "" },
   { key: "login",                 label: "수동 로그인",     color: "bg-rose-400",    aarrr: "" },
   { key: "signup_complete",       label: "가입 완료",       color: "bg-orange-400",  aarrr: "Activation" },
-  { key: "activation_achieved",   label: "핵심행동 달성",   color: "bg-yellow-400",  aarrr: "" },
   { key: "portfolio_registered",  label: "포트폴리오 등록", color: "bg-purple-400",  aarrr: "" },
   { key: "project_submitted",     label: "프로젝트 등록",   color: "bg-green-400",   aarrr: "" },
   { key: "partner_applied",       label: "공고 지원",       color: "bg-teal-400",    aarrr: "" },
   { key: "contract_signed",       label: "계약 체결",       color: "bg-emerald-500", aarrr: "Revenue" },
-  { key: "draft_submitted",       label: "시안 등록",       color: "bg-sky-400",     aarrr: "" },
-  { key: "draft_confirmed",       label: "시안 확정",       color: "bg-sky-500",     aarrr: "" },
+  { key: "draft_reviewed",        label: "시안 확정",       color: "bg-sky-500",     aarrr: "" },
   { key: "deliverable_submitted", label: "산출물 등록",     color: "bg-violet-400",  aarrr: "" },
-  { key: "deliverable_confirmed", label: "산출물 확정",     color: "bg-violet-500",  aarrr: "" },
   { key: "project_completed",     label: "프로젝트 완료",   color: "bg-pink-500",    aarrr: "" },
   { key: "review_submitted",      label: "리뷰 등록",       color: "bg-gray-400",    aarrr: "" },
   { key: "referral_sent",         label: "추천 공유",       color: "bg-indigo-400",  aarrr: "Referral" },

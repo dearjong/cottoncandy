@@ -172,12 +172,10 @@ const GA4_KEY_EVENTS = new Set([
   "signup_started", "signup_complete",
   "portfolio_registered", "project_submitted",
   "partner_applied", "contract_signed",
-  "project_draft_saved", "project_draft_opened",
-  "portfolio_draft_saved", "portfolio_draft_opened",
-  "draft_submitted", "draft_confirmed",
-  "deliverable_submitted", "deliverable_confirmed",
+  "project_draft_opened", "portfolio_draft_opened",
+  "draft_reviewed",
+  "deliverable_submitted",
   "project_completed", "review_submitted", "referral_sent",
-  "activation_achieved",
   "participation_invite_toggled",
   "participation_ot_confirmed", "participation_ot_completed",
   "participation_pt_confirmed", "participation_pt_completed",
@@ -230,8 +228,8 @@ function derivePageLocation(event: string, props: Record<string, unknown>): stri
   if (["participation_invite_toggled", "participation_ot_confirmed", "participation_ot_completed",
        "participation_pt_confirmed", "participation_pt_completed", "participation_final_selected"].includes(event))
     return `${BASE_URL}/work/participation`;
-  if (["draft_submitted", "draft_confirmed"].includes(event)) return `${BASE_URL}/work/proposals`;
-  if (["deliverable_submitted", "deliverable_confirmed"].includes(event)) return `${BASE_URL}/work/deliverables`;
+  if (event === "draft_reviewed") return `${BASE_URL}/work/proposals`;
+  if (event === "deliverable_submitted") return `${BASE_URL}/work/deliverables`;
   if (event === "project_completed") return `${BASE_URL}/work/projects`;
   return `${BASE_URL}/`;
 }
@@ -313,7 +311,7 @@ export interface SimConfig {
 }
 
 export const DEFAULT_CONFIG: SimConfig = {
-  userCount: 1000,
+  userCount: 200,
   periodSecs: 600,
   pctAdvertiser: 5, pctAgency: 30, pctProduction: 65,
   pctTvcf: 85, pctGoogle: 5, pctNaver: 5, pctKakao: 3, pctOrganic: 2,
@@ -321,11 +319,11 @@ export const DEFAULT_CONFIG: SimConfig = {
   pctMale: 45, pctFemale: 55,
   pct20s: 10, pct30s: 35, pct40s: 35, pct50s: 20,
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
-  projectRegCount: 60,
-  portfolioRegCount: 200,
-  partnerApplyCount: 150,
-  minProjectCompletions: 5,
-  minPortfolioCompletions: 5,
+  projectRegCount: 12,
+  portfolioRegCount: 40,
+  partnerApplyCount: 30,
+  minProjectCompletions: 3,
+  minPortfolioCompletions: 3,
 };
 
 export async function startSimulation(cfg: SimConfig): Promise<string> {
@@ -683,12 +681,11 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     add("site_visit", uid, baseTs, { path: "/", is_new_visitor: isNewVisitor, ...common });
     addDwell("홈 (/)");
 
-    // ── 메인화면 클릭 이벤트 (모든 방문자) ──────────────────
-    const homeClickN = randInt(1, 4);
-    for (let c = 0; c < homeClickN; c++) {
+    // ── 메인화면 클릭 이벤트 (50% 확률, 1회만) ──────────────────
+    if (chance(0.50)) {
       const el = weightedPick(HOME_CLICK_ELEMENTS);
       job.homeClickBreakdown[el] = (job.homeClickBreakdown[el] ?? 0) + 1;
-      add("home_click", uid, baseTs + 5 + c * 20, { element: el, ...common });
+      add("home_click", uid, baseTs + 5, { element: el, ...common });
     }
 
     // ── 인증 결정 (직접 % 기반) ───────────────────────────
@@ -722,18 +719,12 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     }
     // else: 미로그인 (roll >= signupThreshold)
 
-    // ── 직접 유입 / 북마크 추적 ────────────────────────
-    // 재방문(직접 유입) 확률: 인증 유저 40%, 미인증 유저 20%
+    // ── 직접 유입 / 북마크 집계 (이벤트 전송 없이 카운트만) ────────────────────────
     if (chance(isAuthenticated ? 0.40 : 0.20)) {
-      // 인증 유저는 내부 페이지로, 미인증은 공개 페이지 위주
       const landingPage = isAuthenticated
         ? weightedPick(DIRECT_LANDING_PAGES.map((p) => ({ value: p, weight: p.weight })))
         : weightedPick(DIRECT_LANDING_PAGES.filter((p) => ["홈","파트너 찾기","프로젝트 등록"].includes(p.label)).map((p) => ({ value: p, weight: p.weight })));
       directCount[landingPage.path] = (directCount[landingPage.path] ?? 0) + 1;
-      add("direct_entry", uid, baseTs + 5, {
-        path: landingPage.path, page_label: landingPage.label,
-        is_authenticated: isAuthenticated, referrer: "direct", ...common,
-      });
     }
 
     // ── 핵심행동: 인증 완료 유저만 ─────────────────────
@@ -768,7 +759,6 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           inquiry_type: "new", category, is_first_time: utm.utm_source !== "tvcf.co.kr", ...common,
         });
         addDwell("컨설팅 문의"); exitPage = "컨설팅 문의"; aidaDesire = true;
-        add("activation_achieved", uid, projTs + 1, { trigger_event: "consulting_inquiry_submitted", ...common });
       } else {
         // 공개(공고) / 비공개(1:1) — 18단계 퍼널 (멀티 세션)
         exitPage = "프로젝트 등록"; aidaDesire = true;
@@ -852,24 +842,16 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
               stepDropoff[s.step] = (stepDropoff[s.step] ?? 0) + 1;
               if (!job.stepDropoffByType[pType]) job.stepDropoffByType[pType] = {};
               job.stepDropoffByType[pType][s.step] = (job.stepDropoffByType[pType][s.step] ?? 0) + 1;
-              // 이탈 전 임시저장 (80% 확률)
+              // 이탈 전 임시저장 (80% 확률) — 카운트만 집계
               if (chance(0.80)) {
                 projDraftSaveCount++;
                 job.draftSavedCount += 1;
                 sessionSavedDraft = true;
-                add("project_draft_saved", uid, projCurrentTs + sessionWriteOffset + 5, {
-                  step: s.step, screen: s.screen, project_type: pType,
-                  session_number: sIdx + 1, draft_save_count: projDraftSaveCount,
-                  steps_completed: s.step, cumulative_writing_sec: projTotalWritingSec, ...common,
-                });
               }
               add("project_step_abandoned", uid, projCurrentTs + sessionWriteOffset + 10, {
                 step: s.step, screen: s.screen, project_type: pType,
                 had_draft: projDraftSaveCount > 0, session_number: sIdx + 1,
                 time_on_step_sec: stepDuration, cumulative_writing_sec: projTotalWritingSec, ...common,
-              });
-              add("page_exit", uid, projCurrentTs + sessionWriteOffset + 15, {
-                path: `/create-project/step${s.step}`, exit_step: s.step, ...common,
               });
               lastStep = s.step;
               sessionDroppedOff = true;
@@ -899,17 +881,11 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
               // 18단계 완주
               projCurrentTs = projCurrentTs + sessionWriteOffset;
             } else if (sIdx < projNumSessions - 1) {
-              // 중간 세션 종료 → 임시저장 후 다음 세션
+              // 중간 세션 종료 → 임시저장 후 다음 세션 (카운트만 집계)
               projDraftSaveCount++;
               job.draftSavedCount += 1;
               const gapHours = randInt(1, 48);
               projGapsHours.push(gapHours);
-              add("project_draft_saved", uid, projCurrentTs + sessionWriteOffset + 10, {
-                steps_completed: lastStep, project_type: pType,
-                session_number: sIdx + 1, draft_save_count: projDraftSaveCount,
-                cumulative_writing_sec: projTotalWritingSec,
-                next_session_gap_hours: gapHours, ...common,
-              });
               projLastSaveTs = projCurrentTs + sessionWriteOffset + 10;
               projCurrentTs  = projLastSaveTs + gapHours * 3600;
             } else {
@@ -939,7 +915,6 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             total_writing_time_min: Math.round(projTotalWritingSec / 60), ...common,
           });
           aidaAction = true;
-          add("activation_achieved", uid, projCurrentTs + 61, { trigger_event: "project_submitted", ...common });
           if (chance(0.30)) {
             addDwell("계약 화면"); exitPage = "계약 화면";
             add("contract_signed", uid, projCurrentTs + 7 * 86400, {
@@ -975,7 +950,6 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         partner_type: partnerType, is_first_time: utm.utm_source !== "tvcf.co.kr", ...common,
       });
       aidaAction = true;
-      add("activation_achieved", uid, partnerTs + 1, { trigger_event: "partner_applied", ...common });
 
       // 참여현황 흐름: OT → PT → 최종 선정
       const inviteTs = partnerTs + 2 * 86400;
@@ -1083,19 +1057,11 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
               pfDropoff[sec.step] = (pfDropoff[sec.step] ?? 0) + 1;
               if (chance(0.80)) {
                 pfDraftSaveCount++;
-                add("portfolio_draft_saved", uid, pfCurrentTs + pfSessionWriteOffset + 5, {
-                  sections_completed: pfLastSection, partner_type: partnerType,
-                  session_number: sIdx + 1, draft_save_count: pfDraftSaveCount,
-                  cumulative_writing_sec: pfTotalWritingSec, ...common,
-                });
               }
               add("portfolio_section_abandoned", uid, pfCurrentTs + pfSessionWriteOffset + 10, {
                 section: sec.step, section_id: sec.id, partner_type: partnerType,
                 session_number: sIdx + 1, had_draft: pfDraftSaveCount > 0,
                 time_on_section_sec: secDuration, cumulative_writing_sec: pfTotalWritingSec, ...common,
-              });
-              add("page_exit", uid, pfCurrentTs + pfSessionWriteOffset + 15, {
-                path: "/work/portfolio", exit_section: sec.step, exit_section_id: sec.id, ...common,
               });
               pfLastSection = sec.step;
               pfAbandoned = true;
@@ -1108,12 +1074,6 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             pfDraftSaveCount++;
             const gapHours = randInt(1, 72);
             pfGapsHours.push(gapHours);
-            add("portfolio_draft_saved", uid, pfCurrentTs + pfSessionWriteOffset + 10, {
-              sections_completed: pfLastSection, partner_type: partnerType,
-              session_number: sIdx + 1, draft_save_count: pfDraftSaveCount,
-              cumulative_writing_sec: pfTotalWritingSec,
-              next_session_gap_hours: gapHours, ...common,
-            });
             pfCurrentTs = pfCurrentTs + pfSessionWriteOffset + gapHours * 3600;
           } else if (!pfAbandoned) {
             pfCurrentTs = pfCurrentTs + pfSessionWriteOffset;
@@ -1141,16 +1101,14 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       }
       if (chance(0.40)) {
         addDwell("계약 화면"); exitPage = "계약 화면"; aidaAction = true;
-        add("contract_signed",       uid, partnerTs +  7 * 86400, { project_id: projectId, partner_type: partnerType, ...common });
-        add("draft_submitted",       uid, partnerTs + 14 * 86400, { project_id: projectId, draft_round: 1, category: weightedPick(CATEGORIES), ...common });
+        add("contract_signed",   uid, partnerTs +  7 * 86400, { project_id: projectId, partner_type: partnerType, ...common });
         if (chance(0.70)) {
-          add("draft_confirmed",     uid, partnerTs + 16 * 86400, { project_id: projectId, draft_round: 1, ...common });
+          add("draft_reviewed", uid, partnerTs + 16 * 86400, { project_id: projectId, draft_round: 1, category: weightedPick(CATEGORIES), ...common });
           if (chance(0.80)) {
             addDwell("납품/산출물"); exitPage = "납품/산출물";
             add("deliverable_submitted", uid, partnerTs + 25 * 86400, { project_id: projectId, category: weightedPick(CATEGORIES), ...common });
             if (chance(0.85)) {
-              add("deliverable_confirmed", uid, partnerTs + 27 * 86400, { project_id: projectId, ...common });
-              add("project_completed",     uid, partnerTs + 28 * 86400, { project_id: projectId, partner_type: partnerType, category: weightedPick(CATEGORIES), ...common });
+              add("project_completed", uid, partnerTs + 28 * 86400, { project_id: projectId, partner_type: partnerType, category: weightedPick(CATEGORIES), ...common });
             }
           }
         }
@@ -1227,19 +1185,11 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             pfDropoff[sec.step] = (pfDropoff[sec.step] ?? 0) + 1;
             if (chance(0.80)) {
               pfDraftSaveCount2++;
-              add("portfolio_draft_saved", uid, pfCurrentTs2 + pfSessionWriteOffset2 + 5, {
-                sections_completed: pfLastSection2, partner_type: partnerType,
-                session_number: sIdx + 1, draft_save_count: pfDraftSaveCount2,
-                cumulative_writing_sec: pfTotalWritingSec2, ...common,
-              });
             }
             add("portfolio_section_abandoned", uid, pfCurrentTs2 + pfSessionWriteOffset2 + 10, {
               section: sec.step, section_id: sec.id, partner_type: partnerType,
               session_number: sIdx + 1, had_draft: pfDraftSaveCount2 > 0,
               time_on_section_sec: secDuration2, cumulative_writing_sec: pfTotalWritingSec2, ...common,
-            });
-            add("page_exit", uid, pfCurrentTs2 + pfSessionWriteOffset2 + 15, {
-              path: "/work/portfolio", exit_section: sec.step, exit_section_id: sec.id, ...common,
             });
             pfLastSection2 = sec.step;
             pfAbandoned2 = true;
@@ -1252,12 +1202,6 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           pfDraftSaveCount2++;
           const gapHours2 = randInt(1, 72);
           pfGapsHours2.push(gapHours2);
-          add("portfolio_draft_saved", uid, pfCurrentTs2 + pfSessionWriteOffset2 + 10, {
-            sections_completed: pfLastSection2, partner_type: partnerType,
-            session_number: sIdx + 1, draft_save_count: pfDraftSaveCount2,
-            cumulative_writing_sec: pfTotalWritingSec2,
-            next_session_gap_hours: gapHours2, ...common,
-          });
           pfCurrentTs2 = pfCurrentTs2 + pfSessionWriteOffset2 + gapHours2 * 3600;
         } else if (!pfAbandoned2) {
           pfCurrentTs2 = pfCurrentTs2 + pfSessionWriteOffset2;

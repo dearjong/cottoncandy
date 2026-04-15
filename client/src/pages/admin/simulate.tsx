@@ -49,7 +49,7 @@ interface SimConfig {
 }
 
 const DEFAULTS: SimConfig = {
-  userCount: 1000,
+  userCount: 200,
   periodSecs: 600,
   pctAdvertiser: 10, pctAgency: 30, pctProduction: 60,
   pctTvcf: 85, pctGoogle: 5, pctNaver: 5, pctKakao: 3, pctOrganic: 2,
@@ -57,9 +57,9 @@ const DEFAULTS: SimConfig = {
   pctMale: 60, pctFemale: 40,
   pct20s: 10, pct30s: 35, pct40s: 35, pct50s: 20,
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
-  projectRegCount: 30,
-  partnerApplyCount: 150,
-  portfolioRegCount: 100,
+  projectRegCount: 12,
+  partnerApplyCount: 30,
+  portfolioRegCount: 40,
 };
 
 function NumInput({ label, value, onChange, min = 0, max = 100, unit = "%" }: {
