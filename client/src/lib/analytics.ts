@@ -269,10 +269,10 @@ function anonymizeId(input: string): string {
   return "usr_" + (h >>> 0).toString(16).padStart(8, "0");
 }
 
-/** 이메일에서 도메인 부분만 추출 (예: naver.com) */
-function emailDomain(email: string): string {
+/** 이메일을 마스킹 처리 (예: ***@naver.com) */
+function maskEmail(email: string): string {
   const parts = email.split("@");
-  return parts.length === 2 ? parts[1] : "";
+  return parts.length === 2 ? `***@${parts[1]}` : "";
 }
 
 /**
@@ -298,7 +298,7 @@ export function identifyUser(props: {
 
   // 두 플랫폼에 동일하게 전송할 사용자 속성
   const userProps = {
-    email_domain: email ? emailDomain(email) : "",
+    email: email ? maskEmail(email) : "",
     user_type: userType ?? "unknown",
     last_login: new Date().toISOString(),
   };
