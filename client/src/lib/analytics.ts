@@ -258,9 +258,32 @@ export function publishAnalytics(
 // ─── 사용자 식별 (로그인/가입 시점 1회) ───────────────────────
 
 /**
+ * 이메일·이름 등 식별 가능한 값을 익명 ID로 변환.
+ * 동일 입력 → 동일 출력(결정론적), 역변환 불가.
+ */
+function anonymizeId(input: string): string {
+  let h = 5381;
+  for (let i = 0; i < input.length; i++) {
+    h = Math.imul(h, 33) ^ input.charCodeAt(i);
+  }
+  return "usr_" + (h >>> 0).toString(16).padStart(8, "0");
+}
+
+/** 이메일에서 도메인 부분만 추출 (예: naver.com) */
+function emailDomain(email: string): string {
+  const parts = email.split("@");
+  return parts.length === 2 ? parts[1] : "";
+}
+
+/**
  * 로그인 또는 회원가입 완료 시 호출.
  * Mixpanel.identify() + people.set() + GA4 user_properties 설정.
  * 이후 모든 이벤트에 user_id가 자동으로 붙음.
+ *
+ * 개인정보 처리 원칙:
+ *  - distinct_id: 이메일/이름을 해시한 익명 ID (역추적 불가)
+ *  - $email: 도메인만 저장 (예: naver.com)
+ *  - $name: 전송하지 않음
  */
 export function identifyUser(props: {
   userId: string;
@@ -268,30 +291,32 @@ export function identifyUser(props: {
   userType?: "advertiser" | "partner" | "admin";
   email?: string;
 }) {
-  const { userId, userName, userType, email } = props;
+  const { userId, userType, email } = props;
 
-  // Mixpanel: 디바이스 익명 ID → 실 사용자 ID로 연결
-  mixpanel.identify(userId);
+  // 식별 가능 정보를 익명 ID로 변환
+  const anonId = anonymizeId(userId);
+
+  // Mixpanel: 디바이스 익명 ID → 해시된 사용자 ID로 연결
+  mixpanel.identify(anonId);
   mixpanel.people.set({
-    $name: userName ?? userId,
-    $email: email ?? "",
+    email_domain: email ? emailDomain(email) : "",
     user_type: userType ?? "unknown",
     last_login: new Date().toISOString(),
   });
 
-  // GA4: User-ID 기능 활성화 — config 방식으로 설정해야 User Explorer·Cohort 탐색 가능
+  // GA4: User-ID 기능 활성화 (해시된 ID 사용)
   if (typeof gtag !== "undefined") {
     gtag("config", "G-MG1WSR89E1", {
-      user_id: userId,
+      user_id: anonId,
     });
     gtag("set", "user_properties", {
       user_type: userType ?? "unknown",
     });
   }
 
-  // localStorage에 저장 → 새로고침 후 재식별에 활용
+  // localStorage에 저장 → 새로고침 후 재식별에 활용 (이미 익명화된 ID)
   try {
-    localStorage.setItem("analytics_user_id", userId);
+    localStorage.setItem("analytics_user_id", anonId);
     localStorage.setItem("analytics_user_type", userType ?? "unknown");
   } catch {/* ignore */}
 }

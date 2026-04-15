@@ -113,7 +113,7 @@ export default function Login() {
     localStorage.setItem('userName', '이꽃별');
     localStorage.setItem('userType', '의뢰');
     localStorage.setItem('userMode', 'request');
-    identifyUser({ userId: `user-${email}`, userName: "이꽃별", userType: "advertiser", email });
+    identifyUser({ userId: `user-${email}`, userType: "advertiser", email });
     trackLogin({ method: "email", user_type: "advertiser" });
     setLocation('/work/home');
   };

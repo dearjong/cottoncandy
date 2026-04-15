@@ -19,7 +19,7 @@ export default function SignupPhone() {
       trackReferralSignedUp({ referrer_code: refCode });
     }
     trackSignupComplete();
-    identifyUser({ userId: "user-이꽃별", userName: "이꽃별", userType: "advertiser", email: "kkotbyul@example.com" });
+    identifyUser({ userId: "user-test@cottoncandy.kr", userType: "advertiser", email: "test@cottoncandy.kr" });
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('userName', '이꽃별');
     localStorage.setItem('userType', '의뢰');
