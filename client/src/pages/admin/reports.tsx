@@ -92,9 +92,9 @@ const DEFAULTS: SimConfig = {
   pctMale: 45,       pctFemale: 55,
   pct20s: 10,        pct30s: 35,           pct40s: 35,          pct50s: 20,
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
-  projectRegCount: 60,
-  portfolioRegCount: 200,
-  partnerApplyCount: 150,
+  projectRegCount: 12,
+  portfolioRegCount: 40,
+  partnerApplyCount: 30,
   minProjectCompletions: 5,
   minPortfolioCompletions: 5,
 };
@@ -148,7 +148,7 @@ const FUNNEL_ORDER = [
   { key: "referral_sent",         label: "추천 공유",       color: "bg-indigo-400",  aarrr: "Referral" },
 ];
 
-const SIM_CFG_KEY = "admarket_sim_cfg";
+const SIM_CFG_KEY = "admarket_sim_cfg_v2";
 
 function loadSavedCfg(): SimConfig {
   try {
