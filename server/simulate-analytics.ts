@@ -317,7 +317,7 @@ export const DEFAULT_CONFIG: SimConfig = {
   periodSecs: 600,
   pctAdvertiser: 5, pctAgency: 30, pctProduction: 65,
   pctTvcf: 85, pctGoogle: 5, pctNaver: 5, pctKakao: 3, pctOrganic: 2,
-  pctSsoLogin: 17, pctManualLogin: 17, pctSignup: 3,
+  pctSsoLogin: 20, pctManualLogin: 15, pctSignup: 5,
   pctMale: 45, pctFemale: 55,
   pct20s: 10, pct30s: 35, pct40s: 35, pct50s: 20,
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,

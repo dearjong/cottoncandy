@@ -88,7 +88,7 @@ const DEFAULTS: SimConfig = {
   userCount: 200, periodSecs: 600,
   pctAdvertiser: 10, pctAgency: 30,       pctProduction: 60,
   pctTvcf: 85,       pctGoogle: 5,         pctNaver: 5,        pctKakao: 3,   pctOrganic: 2,
-  pctSsoLogin: 17,   pctManualLogin: 17,   pctSignup: 3,
+  pctSsoLogin: 20,   pctManualLogin: 15,   pctSignup: 5,
   pctMale: 45,       pctFemale: 55,
   pct20s: 10,        pct30s: 35,           pct40s: 35,          pct50s: 20,
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
@@ -246,6 +246,27 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
     setDialogCfg((prev) => ({ ...prev, [key]: val }));
   }
 
+  // 비회원 % 직접 입력 시 → SSO/수동/신규가입 비율 유지하며 자동 조정
+  function setGuestPct(newGuest: number) {
+    const clamped = Math.min(100, Math.max(0, newGuest));
+    const loginTotal = 100 - clamped;
+    setDialogCfg((prev) => {
+      const { pctSsoLogin, pctManualLogin, pctSignup } = prev;
+      const curSum = pctSsoLogin + pctManualLogin + pctSignup;
+      if (curSum === 0) {
+        // 기존 합계가 0이면 균등 분배
+        const each = Math.round(loginTotal / 3);
+        return { ...prev, pctSsoLogin: each, pctManualLogin: each, pctSignup: loginTotal - each * 2 };
+      }
+      // 기존 비율 유지하며 스케일
+      const scale = loginTotal / curSum;
+      const sso  = Math.round(pctSsoLogin    * scale);
+      const man  = Math.round(pctManualLogin  * scale);
+      const sig  = loginTotal - sso - man;
+      return { ...prev, pctSsoLogin: sso, pctManualLogin: man, pctSignup: Math.max(0, sig) };
+    });
+  }
+
   function stopPolling() {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
   }
@@ -389,17 +410,14 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                   </td>
                   <td className="py-1">
                     <div className="flex flex-wrap gap-2 items-end">
+                      <NumInput label="비회원"      value={Math.max(0, 100 - dLoginSum)} onChange={(v) => setGuestPct(v)} />
                       <NumInput label="SSO 로그인"  value={dialogCfg.pctSsoLogin}    onChange={(v) => setD("pctSsoLogin", v)} />
                       <NumInput label="수동 로그인"  value={dialogCfg.pctManualLogin} onChange={(v) => setD("pctManualLogin", v)} />
                       <NumInput label="신규 가입"    value={dialogCfg.pctSignup}      onChange={(v) => setD("pctSignup", v)} />
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[10px] text-gray-400">미로그인</span>
-                        <span className="text-xs font-semibold text-gray-700">{Math.max(0, 100 - dLoginSum)}%</span>
-                      </div>
                     </div>
                   </td>
                   <td className="py-1 pl-4 text-right align-middle">
-                    <span className={`font-semibold ${dLoginSum > 100 ? "text-red-500" : "text-gray-400"}`}>{dLoginSum}%</span>
+                    <span className={`font-semibold ${dLoginSum > 100 ? "text-red-500" : "text-gray-400"}`}>100%</span>
                   </td>
                 </tr>
                 <tr>
