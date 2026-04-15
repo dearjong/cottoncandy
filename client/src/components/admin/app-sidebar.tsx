@@ -105,7 +105,6 @@ const statsParentItem = { title: "통계/리포트", url: "/admin/reports", icon
 const statsSubMenuItems = [
   { title: "활동현황", url: "/admin/reports", icon: Activity },
   { title: "플랫폼 현황", url: "/admin/reports/platform", icon: BarChart3 },
-  { title: "이벤트 로그", url: "/admin/reports/eventlog", icon: MousePointerClick },
 ]
 
 // 시스템(설정) 메뉴

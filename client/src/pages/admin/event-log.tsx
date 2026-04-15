@@ -367,8 +367,7 @@ export function EventLogTab() {
         return (
           ev.parsed.label.toLowerCase().includes(q) ||
           ev.parsed.detail.toLowerCase().includes(q) ||
-          ev.eventName.toLowerCase().includes(q) ||
-          (ev.userId ?? "").toLowerCase().includes(q)
+          ev.eventName.toLowerCase().includes(q)
         );
       }
       return true;
@@ -492,13 +491,12 @@ export function EventLogTab() {
               <TableHead className="w-20">유저</TableHead>
               <TableHead className="w-44">이벤트</TableHead>
               <TableHead>세부 내용</TableHead>
-              <TableHead className="w-28 text-right">유저 ID</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-gray-400 py-16">
+                <TableCell colSpan={5} className="text-center text-gray-400 py-16">
                   이벤트가 없습니다. 홈 화면에서 버튼을 눌러보세요.
                 </TableCell>
               </TableRow>
@@ -524,11 +522,6 @@ export function EventLogTab() {
                     </TableCell>
                     <TableCell className="font-medium text-sm">{ev.parsed.label}</TableCell>
                     <TableCell className="text-sm text-gray-600">{ev.parsed.detail || "—"}</TableCell>
-                    <TableCell className="text-right text-xs text-gray-400 font-mono truncate max-w-28">
-                      {ev.userId ? (
-                        <span title={ev.userId}>{ev.userId.slice(0, 12)}</span>
-                      ) : "—"}
-                    </TableCell>
                   </TableRow>
                 );
               })
