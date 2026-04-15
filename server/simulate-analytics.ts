@@ -430,6 +430,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   ga4Validated = false; // 매 job마다 재검증
   job.status = "generating";
   job.message = "가상 사용자 이벤트 생성 중...";
+  // 실행마다 고유한 짧은 run prefix (jobId 앞 8자)
+  const runPrefix = jobId.replace(/-/g, "").slice(0, 8);
 
   const { userCount } = cfg;
   const events: MpEvent[] = [];
@@ -689,8 +691,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const preSignupThr      = preManualThr + cfg.pctSignup;
     const preIsGuest        = preRoll >= preSignupThr;
     const uid      = preIsGuest
-      ? `sim_guest_${String(i).padStart(4, "0")}`
-      : `sim_user_${String(i).padStart(4, "0")}`;
+      ? `sim_guest_${runPrefix}_${String(i).padStart(4, "0")}`
+      : `sim_user_${runPrefix}_${String(i).padStart(4, "0")}`;
     const userType = weightedPick(USER_TYPE_LIST);
     const gender   = weightedPick(GENDERS);
     const ageGroup = weightedPick(AGE_GROUPS);
