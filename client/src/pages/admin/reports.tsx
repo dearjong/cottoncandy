@@ -315,7 +315,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
     <div>
       {/* 서브 탭 헤더 */}
       <div className="flex items-center border-b border-gray-200 mb-6">
-        {(["settings", "status"] as const).map((tab) => (
+        {(["status", "settings"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveSubTab(tab)}
