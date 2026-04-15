@@ -149,6 +149,7 @@ const FUNNEL_ORDER = [
 ];
 
 const SIM_CFG_KEY = "admarket_sim_cfg";
+const SIM_CFG_VERSION = 4;
 const VALID_COUNTS = [100, 200, 300, 500, 1000, 2000, 3000, 5000, 10000];
 
 function loadSavedCfg(): SimConfig {
@@ -156,7 +157,7 @@ function loadSavedCfg(): SimConfig {
     const s = localStorage.getItem(SIM_CFG_KEY);
     if (!s) return DEFAULTS;
     const parsed = JSON.parse(s);
-    // userCount가 유효한 옵션이 아니면 기본값으로 리셋
+    if (parsed._v !== SIM_CFG_VERSION) return DEFAULTS;
     if (!VALID_COUNTS.includes(parsed.userCount)) return DEFAULTS;
     return { ...DEFAULTS, ...parsed };
   } catch { return DEFAULTS; }
@@ -289,7 +290,7 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
 
   async function startSim(runCfg: SimConfig) {
     setCfg(runCfg);
-    try { localStorage.setItem(SIM_CFG_KEY, JSON.stringify(runCfg)); } catch {}
+    try { localStorage.setItem(SIM_CFG_KEY, JSON.stringify({ ...runCfg, _v: SIM_CFG_VERSION })); } catch {}
     setActiveSubTab("status");
     setLoading(true);
     try {
