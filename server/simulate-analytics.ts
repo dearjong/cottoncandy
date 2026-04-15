@@ -692,8 +692,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const preSignupThr      = preManualThr + cfg.pctSignup;
     const preIsGuest        = preRoll >= preSignupThr;
     const uid      = preIsGuest
-      ? `sim_guest_${runPrefix}_${String(i).padStart(4, "0")}`
-      : `sim_user_${runPrefix}_${String(i).padStart(4, "0")}`;
+      ? `test_guest_${runPrefix}_${String(i).padStart(4, "0")}`
+      : `test_user_${runPrefix}_${String(i).padStart(4, "0")}`;
     const userType = weightedPick(USER_TYPE_LIST);
     const gender   = weightedPick(GENDERS);
     const ageGroup = weightedPick(AGE_GROUPS);
@@ -712,7 +712,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       ? pick(ADVERTISER_COMPANIES)
       : pick(PARTNER_COMPANIES);
 
-    const simEmail = `${uid}@aaa.co.kr`;
+    const simEmail = `${uid}@${EMAIL_DOMAINS[Math.floor(Math.random() * EMAIL_DOMAINS.length)]}`;
 
     // UTM / channel / 지역 / 성별 집계 (모든 유저)
     utmCount[utm.utm_source] = (utmCount[utm.utm_source] ?? 0) + 1;
@@ -823,7 +823,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
     // ── 핵심행동: 인증 완료 유저만 ─────────────────────
     if (!isAuthenticated) {
-      // 비회원 방문자 → sim_guest_XXXX (uid) 로 Mixpanel People 등록
+      // 비회원 방문자 → test_guest_XXXX (uid) 로 Mixpanel People 등록
       registerMixpanelPeople(uid, {
         $name:        uid,
         user_type:    "guest",
