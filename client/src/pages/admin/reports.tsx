@@ -148,12 +148,17 @@ const FUNNEL_ORDER = [
   { key: "referral_sent",         label: "추천 공유",       color: "bg-indigo-400",  aarrr: "Referral" },
 ];
 
-const SIM_CFG_KEY = "admarket_sim_cfg_v3";
+const SIM_CFG_KEY = "admarket_sim_cfg";
+const VALID_COUNTS = [100, 200, 300, 500, 1000, 2000, 3000, 5000, 10000];
 
 function loadSavedCfg(): SimConfig {
   try {
     const s = localStorage.getItem(SIM_CFG_KEY);
-    return s ? { ...DEFAULTS, ...JSON.parse(s) } : DEFAULTS;
+    if (!s) return DEFAULTS;
+    const parsed = JSON.parse(s);
+    // userCount가 유효한 옵션이 아니면 기본값으로 리셋
+    if (!VALID_COUNTS.includes(parsed.userCount)) return DEFAULTS;
+    return { ...DEFAULTS, ...parsed };
   } catch { return DEFAULTS; }
 }
 
