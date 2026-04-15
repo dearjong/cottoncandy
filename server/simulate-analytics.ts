@@ -287,7 +287,7 @@ async function sendGa4UserBatch(entry: Ga4UserEvents): Promise<string | null> {
 
 export interface SimConfig {
   userCount: number;
-  periodDays: number;           // 이벤트를 분산할 기간 (일수)
+  periodSecs: number;           // 이벤트를 분산할 기간 (초)
   // 로그인 유저 내 구성 (합계 100%)
   pctAdvertiser: number; pctAgency: number; pctProduction: number;
   // UTM 유입 (합계 100%)
@@ -311,7 +311,7 @@ export interface SimConfig {
 
 export const DEFAULT_CONFIG: SimConfig = {
   userCount: 1000,
-  periodDays: 3,
+  periodSecs: 86400,
   pctAdvertiser: 5, pctAgency: 30, pctProduction: 65,
   pctTvcf: 85, pctGoogle: 5, pctNaver: 5, pctKakao: 3, pctOrganic: 2,
   pctSsoLogin: 17, pctManualLogin: 17, pctSignup: 3,
@@ -638,7 +638,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     geoCount[region] = (geoCount[region] ?? 0) + 1;
     job.genderBreakdown[gender] = (job.genderBreakdown[gender] ?? 0) + 1;
 
-    const joinSecsAgo = Math.floor(Math.random() * cfg.periodDays * 24 * 3600);
+    const joinSecsAgo = cfg.periodSecs > 0 ? Math.floor(Math.random() * cfg.periodSecs) : 0;
     const baseTs = tsAgo(joinSecsAgo);
 
     const referrer = genReferrer(utm.utm_source as string);

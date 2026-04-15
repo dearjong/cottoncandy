@@ -57,8 +57,18 @@ interface SimJob {
   completedAt?: number;
 }
 
+const PERIOD_OPTIONS = [
+  { secs: 0,      label: "즉시" },
+  { secs: 600,    label: "10분 분산" },
+  { secs: 1800,   label: "30분 분산" },
+  { secs: 3600,   label: "1시간 분산" },
+  { secs: 86400,  label: "1일 분산" },
+  { secs: 259200, label: "3일 분산" },
+  { secs: 604800, label: "7일 분산" },
+];
+
 interface SimConfig {
-  userCount: number; periodDays: number;
+  userCount: number; periodSecs: number;
   pctAdvertiser: number; pctAgency: number; pctProduction: number;
   pctTvcf: number; pctGoogle: number; pctNaver: number; pctKakao: number; pctOrganic: number;
   pctSsoLogin: number; pctManualLogin: number; pctSignup: number;
@@ -73,7 +83,7 @@ interface SimConfig {
 }
 
 const DEFAULTS: SimConfig = {
-  userCount: 1000, periodDays: 3,
+  userCount: 1000, periodSecs: 86400,
   pctAdvertiser: 10, pctAgency: 30,       pctProduction: 60,
   pctTvcf: 85,       pctGoogle: 5,         pctNaver: 5,        pctKakao: 3,   pctOrganic: 2,
   pctSsoLogin: 17,   pctManualLogin: 17,   pctSignup: 3,
@@ -1141,11 +1151,11 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 whitespace-nowrap">이벤트 분산 기간</span>
-              <Select value={String(dialogCfg.periodDays)} onValueChange={(v) => setD("periodDays", Number(v))}>
+              <Select value={String(dialogCfg.periodSecs)} onValueChange={(v) => setD("periodSecs", Number(v))}>
                 <SelectTrigger className="w-28 h-8 text-xs border-gray-200"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {[1, 2, 3, 7, 14, 30, 60, 90].map((d) => (
-                    <SelectItem key={d} value={String(d)}>{d}일간 분산</SelectItem>
+                  {PERIOD_OPTIONS.map(({ secs, label }) => (
+                    <SelectItem key={secs} value={String(secs)}>{label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -1280,7 +1290,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
               onClick={() => startSim(dialogCfg)}
               disabled={!!isRunning || loading}
             >
-              {loading ? "시작 중..." : `▶ ${dialogCfg.userCount.toLocaleString()}명 / ${dialogCfg.periodDays}일간 분산 시작`}
+              {loading ? "시작 중..." : `▶ ${dialogCfg.userCount.toLocaleString()}명 / ${PERIOD_OPTIONS.find(o => o.secs === dialogCfg.periodSecs)?.label ?? ""} 시작`}
             </Button>
           </DialogFooter>
         </DialogContent>

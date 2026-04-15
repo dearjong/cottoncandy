@@ -24,9 +24,19 @@ interface SimJob {
   completedAt?: number;
 }
 
+const PERIOD_OPTIONS = [
+  { secs: 0,      label: "즉시" },
+  { secs: 600,    label: "10분 분산" },
+  { secs: 1800,   label: "30분 분산" },
+  { secs: 3600,   label: "1시간 분산" },
+  { secs: 86400,  label: "1일 분산" },
+  { secs: 259200, label: "3일 분산" },
+  { secs: 604800, label: "7일 분산" },
+];
+
 interface SimConfig {
   userCount: number;
-  periodDays: number;
+  periodSecs: number;
   pctAdvertiser: number; pctAgency: number; pctProduction: number;
   pctTvcf: number; pctGoogle: number; pctNaver: number; pctKakao: number; pctOrganic: number;
   pctSsoLogin: number; pctManualLogin: number; pctSignup: number;
@@ -39,7 +49,7 @@ interface SimConfig {
 
 const DEFAULTS: SimConfig = {
   userCount: 1000,
-  periodDays: 3,
+  periodSecs: 86400,
   pctAdvertiser: 10, pctAgency: 30, pctProduction: 60,
   pctTvcf: 85, pctGoogle: 5, pctNaver: 5, pctKakao: 3, pctOrganic: 2,
   pctSsoLogin: 17, pctManualLogin: 17, pctSignup: 3,
@@ -154,7 +164,7 @@ export default function AdminSimulatePage() {
             <span>
               마지막 실행: <span className="text-gray-600 font-medium">{new Date(job.startedAt).toLocaleString("ko-KR")}</span>
               {" · "}
-              <span className="text-gray-600 font-medium">{cfg.userCount.toLocaleString()}명 / 최근 {cfg.periodDays}일</span>
+              <span className="text-gray-600 font-medium">{cfg.userCount.toLocaleString()}명 / {PERIOD_OPTIONS.find(o => o.secs === cfg.periodSecs)?.label ?? ""}</span>
             </span>
           ) : "아직 실행된 시뮬레이션이 없습니다."}
         </div>
@@ -246,11 +256,11 @@ export default function AdminSimulatePage() {
                 </div>
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[10px] text-gray-400 leading-tight">이벤트 기간</span>
-                  <Select value={String(dialogCfg.periodDays)} onValueChange={(v) => setD("periodDays", Number(v))}>
+                  <Select value={String(dialogCfg.periodSecs)} onValueChange={(v) => setD("periodSecs", Number(v))}>
                     <SelectTrigger className="w-32 h-8 text-xs border-gray-200"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {[1, 2, 3, 7, 14, 30, 60, 90].map((d) => (
-                        <SelectItem key={d} value={String(d)}>최근 {d}일</SelectItem>
+                      {PERIOD_OPTIONS.map(({ secs, label }) => (
+                        <SelectItem key={secs} value={String(secs)}>{label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -393,7 +403,7 @@ export default function AdminSimulatePage() {
               onClick={() => startSim(dialogCfg)}
               disabled={!!isRunning || loading}
             >
-              {loading ? "시작 중..." : `▶ ${dialogCfg.userCount.toLocaleString()}명 / 최근 ${dialogCfg.periodDays}일 시작`}
+              {loading ? "시작 중..." : `▶ ${dialogCfg.userCount.toLocaleString()}명 / ${PERIOD_OPTIONS.find(o => o.secs === dialogCfg.periodSecs)?.label ?? ""} 시작`}
             </Button>
           </DialogFooter>
         </DialogContent>

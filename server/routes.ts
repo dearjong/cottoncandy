@@ -313,11 +313,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/simulate/start", async (req, res) => {
     try {
       const b = req.body ?? {};
-      const num = (key: keyof SimConfig, min: number, max: number) =>
-        Math.min(max, Math.max(min, parseInt(String(b[key] ?? DEFAULT_CONFIG[key]), 10) || DEFAULT_CONFIG[key] as number));
+      const num = (key: keyof SimConfig, min: number, max: number) => {
+        const parsed = parseInt(String(b[key] ?? ""), 10);
+        const val = Number.isNaN(parsed) ? DEFAULT_CONFIG[key] as number : parsed;
+        return Math.min(max, Math.max(min, val));
+      };
       const cfg: SimConfig = {
         userCount:        num("userCount", 10, 10000),
-        periodDays:       num("periodDays", 1, 90),
+        periodSecs:       num("periodSecs", 0, 604800),
         pctAdvertiser:    num("pctAdvertiser", 0, 100),
         pctAgency:        num("pctAgency", 0, 100),
         pctProduction:    num("pctProduction", 0, 100),
