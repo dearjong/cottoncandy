@@ -178,7 +178,7 @@ function genMaskedEmail() { return `***@${pick(EMAIL_DOMAINS)}`; }
 
 // UTM 유입 채널 (가중치 배열)
 const UTM_SOURCES = [
-  ...Array(85).fill({ utm_source: "tvcf",    utm_medium: "banner",   channel: "referral", utm_campaign: "admarket_launch" }), // 85%
+  ...Array(85).fill({ utm_source: "tvcf.co.kr", utm_medium: "banner", channel: "referral", utm_campaign: "admarket_launch" }), // 85%
   ...Array(5).fill({  utm_source: "google",  utm_medium: "cpc",      channel: "paid" }),    // 5%
   ...Array(5).fill({  utm_source: "naver",   utm_medium: "cpc",      channel: "paid" }),    // 5%
   ...Array(3).fill({  utm_source: "kakao",   utm_medium: "social",   channel: "social" }),  // 3%
@@ -230,7 +230,7 @@ async function simulateUser(i) {
 
   // ── 인증 결정 ──────────────────────────────────────
   let isAuthenticated = false;
-  const isTvcf = utmSource.utm_source === "tvcf";
+  const isTvcf = utmSource.utm_source === "tvcf.co.kr";
 
   // SSO: tvcf.co.kr 유입 유저 중 50%는 이미 로그인 상태로 진입
   if (isTvcf && chance(0.50)) {

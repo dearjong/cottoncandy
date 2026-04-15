@@ -283,7 +283,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
                 <p className="font-semibold text-pink-700 text-sm">UTM 유입 채널</p>
                 <div className="space-y-2">
                   {[
-                    { key: "tvcf",    label: "tvcf.co.kr", color: "bg-pink-500"   },
+                    { key: "tvcf.co.kr", label: "tvcf.co.kr", color: "bg-pink-500"   },
                     { key: "google",  label: "Google",     color: "bg-blue-400"   },
                     { key: "naver",   label: "Naver",      color: "bg-green-500"  },
                     { key: "kakao",   label: "Kakao",      color: "bg-yellow-400" },

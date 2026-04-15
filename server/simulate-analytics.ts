@@ -514,7 +514,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   ];
 
   const UTM_LIST = [
-    { value: { utm_source: "tvcf",    utm_medium: "banner",   channel: "referral", utm_campaign: "admarket_launch" }, weight: cfg.pctTvcf    },
+    { value: { utm_source: "tvcf.co.kr", utm_medium: "banner", channel: "referral", utm_campaign: "admarket_launch" }, weight: cfg.pctTvcf    },
     { value: { utm_source: "google",  utm_medium: "cpc",      channel: "paid" },                                      weight: cfg.pctGoogle  },
     { value: { utm_source: "naver",   utm_medium: "cpc",      channel: "paid" },                                      weight: cfg.pctNaver   },
     { value: { utm_source: "kakao",   utm_medium: "social",   channel: "social" },                                    weight: cfg.pctKakao   },
@@ -725,7 +725,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         job.consultingRegisteredCount += 1;
         job.projectTypeBreakdown["컨설팅"] = (job.projectTypeBreakdown["컨설팅"] ?? 0) + 1;
         add("consulting_inquiry_submitted", uid, projTs, {
-          inquiry_type: "new", category, is_first_time: utm.utm_source !== "tvcf", ...common,
+          inquiry_type: "new", category, is_first_time: utm.utm_source !== "tvcf.co.kr", ...common,
         });
         addDwell("컨설팅 문의"); exitPage = "컨설팅 문의"; aidaDesire = true;
         add("activation_achieved", uid, projTs + 1, { trigger_event: "consulting_inquiry_submitted", ...common });
@@ -884,7 +884,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           job.projWritingMinSum += Math.round(projTotalWritingSec / 60);
           add("project_submitted", uid, projCurrentTs + 10, {
             project_id: projectId, project_type: pType,
-            category, budget_range: budget, is_first_time: utm.utm_source !== "tvcf",
+            category, budget_range: budget, is_first_time: utm.utm_source !== "tvcf.co.kr",
             total_sessions: projTotalSessions, total_hours: projTotalHours,
             total_days: projTotalDays, avg_session_gap_hours: projAvgGap,
             total_writing_time_sec: projTotalWritingSec,
@@ -924,7 +924,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       addDwell("공고 상세"); exitPage = "공고 상세"; aidaInterest = true;
       add("partner_applied", uid, partnerTs, {
         project_id: projectId, project_type: pick(["공고","1:1"]),
-        partner_type: partnerType, is_first_time: utm.utm_source !== "tvcf", ...common,
+        partner_type: partnerType, is_first_time: utm.utm_source !== "tvcf.co.kr", ...common,
       });
       aidaAction = true;
       add("activation_achieved", uid, partnerTs + 1, { trigger_event: "partner_applied", ...common });
@@ -1255,7 +1255,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   const minProjComplete = cfg.minProjectCompletions ?? 5;
   const minPfComplete   = cfg.minPortfolioCompletions ?? 5;
   const synTs = Math.floor(Date.now() / 1000) - 86400;
-  const synthCommon = { user_type: "advertiser", utm_source: "tvcf", geo: "서울", gender: "male", age_group: "30s" };
+  const synthCommon = { user_type: "advertiser", utm_source: "tvcf.co.kr", geo: "서울", gender: "male", age_group: "30s" };
 
   if (job.projectCompletedCount < minProjComplete) {
     const needed = minProjComplete - job.projectCompletedCount;
@@ -1273,7 +1273,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     }
   }
 
-  const pfSynthCommon = { user_type: "production", utm_source: "tvcf", geo: "서울", gender: "male", age_group: "30s" };
+  const pfSynthCommon = { user_type: "production", utm_source: "tvcf.co.kr", geo: "서울", gender: "male", age_group: "30s" };
   if (job.portfolioCompletedCount < minPfComplete) {
     const needed = minPfComplete - job.portfolioCompletedCount;
     for (let k = 0; k < needed; k++) {
