@@ -475,24 +475,35 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                   <td className="py-1 pl-4 align-middle" />
                 </tr>
                 <tr>
-                  <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">지역·활동인원</td>
-                  <td className="py-1">
-                    <div className="flex flex-wrap gap-x-6 gap-y-1 items-end">
-                      <div className="flex gap-2 items-end">
-                        <NumInput label="서울"  value={dialogCfg.pctSeoul}    onChange={(v) => setD("pctSeoul", v)} />
-                        <NumInput label="경기"  value={dialogCfg.pctGyeonggi} onChange={(v) => setD("pctGyeonggi", v)} />
-                        <NumInput label="지방"  value={dialogCfg.pctLocal}    onChange={(v) => setD("pctLocal", v)} />
-                        <NumInput label="해외"  value={dialogCfg.pctAbroad}   onChange={(v) => setD("pctAbroad", v)} />
-                        <span className={`text-[10px] font-semibold pb-1 ${dGeoSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dGeoSum}%</span>
-                      </div>
-                      <div className="flex gap-2 items-end">
-                        <NumInput label="프로젝트 등록"  value={dialogCfg.projectRegCount}  onChange={(v) => setD("projectRegCount", v)}  min={0} max={10000} unit="명" />
-                        <NumInput label="포트폴리오 등록" value={dialogCfg.portfolioRegCount} onChange={(v) => setD("portfolioRegCount", v)} min={0} max={10000} unit="명" />
-                        <NumInput label="공고 지원"       value={dialogCfg.partnerApplyCount} onChange={(v) => setD("partnerApplyCount", v)} min={0} max={10000} unit="명" />
-                      </div>
+                  <td className="py-1.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">
+                    접속 지역
+                    <div className="text-[9px] font-normal text-gray-400">방문자 기준</div>
+                  </td>
+                  <td className="py-1.5">
+                    <div className="flex gap-2 items-end">
+                      <NumInput label="서울"  value={dialogCfg.pctSeoul}    onChange={(v) => setD("pctSeoul", v)} />
+                      <NumInput label="경기"  value={dialogCfg.pctGyeonggi} onChange={(v) => setD("pctGyeonggi", v)} />
+                      <NumInput label="지방"  value={dialogCfg.pctLocal}    onChange={(v) => setD("pctLocal", v)} />
+                      <NumInput label="해외"  value={dialogCfg.pctAbroad}   onChange={(v) => setD("pctAbroad", v)} />
                     </div>
                   </td>
-                  <td className="py-1 pl-4 align-middle" />
+                  <td className="py-1.5 pl-4 text-right align-middle">
+                    <span className={`font-semibold ${dGeoSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dGeoSum}%</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-1.5 pr-4 font-medium text-gray-600 align-middle text-[11px]">
+                    활동 인원
+                    <div className="text-[9px] font-normal text-gray-400">행동 전환 목표</div>
+                  </td>
+                  <td className="py-1.5">
+                    <div className="flex gap-2 items-end">
+                      <NumInput label="프로젝트 등록"  value={dialogCfg.projectRegCount}  onChange={(v) => setD("projectRegCount", v)}  min={0} max={10000} unit="명" />
+                      <NumInput label="포트폴리오 등록" value={dialogCfg.portfolioRegCount} onChange={(v) => setD("portfolioRegCount", v)} min={0} max={10000} unit="명" />
+                      <NumInput label="공고 지원"       value={dialogCfg.partnerApplyCount} onChange={(v) => setD("partnerApplyCount", v)} min={0} max={10000} unit="명" />
+                    </div>
+                  </td>
+                  <td className="py-1.5 pl-4 align-middle" />
                 </tr>
                 <tr>
                   <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">
