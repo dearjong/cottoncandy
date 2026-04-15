@@ -296,23 +296,21 @@ export function identifyUser(props: {
   // 식별 가능 정보를 익명 ID로 변환
   const anonId = anonymizeId(userId);
 
-  // Mixpanel: 디바이스 익명 ID → 해시된 사용자 ID로 연결
-  mixpanel.identify(anonId);
-  mixpanel.people.set({
+  // 두 플랫폼에 동일하게 전송할 사용자 속성
+  const userProps = {
     email_domain: email ? emailDomain(email) : "",
     user_type: userType ?? "unknown",
     last_login: new Date().toISOString(),
-  });
+  };
 
-  // GA4: User-ID 기능 활성화 (해시된 ID 사용)
+  // Mixpanel
+  mixpanel.identify(anonId);
+  mixpanel.people.set(userProps);
+
+  // GA4 (동일 속성)
   if (typeof gtag !== "undefined") {
-    gtag("config", "G-MG1WSR89E1", {
-      user_id: anonId,
-    });
-    gtag("set", "user_properties", {
-      user_type: userType ?? "unknown",
-      email_domain: email ? emailDomain(email) : "",
-    });
+    gtag("config", "G-MG1WSR89E1", { user_id: anonId });
+    gtag("set", "user_properties", userProps);
   }
 
   // localStorage에 저장 → 새로고침 후 재식별에 활용 (이미 익명화된 ID)
