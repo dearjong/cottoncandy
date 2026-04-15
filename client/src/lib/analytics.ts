@@ -1096,16 +1096,8 @@ export function FunnelRouteListener() {
   }, []);
 
   useEffect(() => {
-    // 경로가 바뀔 때 이전 페이지의 체류시간 + 스크롤 깊이 전송
+    // 경로가 바뀔 때 상태 초기화 (time_on_page 전송 제거 — 피드 노이즈 감소)
     if (prevPath.current !== path) {
-      const duration = Math.round((Date.now() - pageEnterTime.current) / 1000);
-      if (duration > 0) {
-        publishAnalytics("time_on_page", {
-          path: prevPath.current,
-          duration_sec: duration,
-          max_scroll_pct: maxScrollPct.current,
-        });
-      }
       prevPath.current = path;
       pageEnterTime.current = Date.now();
       maxScrollPct.current = 0;
