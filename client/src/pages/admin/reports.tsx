@@ -585,7 +585,7 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                 {/* UTM 유입 채널 (유료광고) */}
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
                   <div>
-                    <p className="font-semibold text-indigo-700 text-sm">UTM 유입 채널</p>
+                    <p className="font-semibold text-indigo-700 text-sm">UTM 유입 채널<span className="text-gray-400 font-normal">(유료광고)</span></p>
                     <p className="text-xs text-gray-400 mt-0.5">유료광고 파라미터 기준</p>
                   </div>
                   <div className="space-y-2">
