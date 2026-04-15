@@ -7,9 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/components/ui/dialog";
-import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 
@@ -202,7 +199,7 @@ function NoDataCard({ title, subtitle, icon, accent = "gray" }: { title: string;
 function ActivityTab({ openSignal }: { openSignal?: number }) {
   const [data, setData] = useState<{ jobId: string; job: SimJob } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [cfg, setCfg] = useState<SimConfig>(loadSavedCfg);
   const [dialogCfg, setDialogCfg] = useState<SimConfig>(loadSavedCfg);
   const [loading, setLoading] = useState(false);
@@ -217,7 +214,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
   }
 
   useEffect(() => {
-    if (openSignal && openSignal > 0) { setDialogCfg(cfg); setDialogOpen(true); }
+    if (openSignal && openSignal > 0) { setDialogCfg(cfg); setSettingsOpen(true); }
   }, [openSignal]);
 
   const isRunningRef = useRef(false);
@@ -253,7 +250,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
   async function startSim(runCfg: SimConfig) {
     setCfg(runCfg);
     try { localStorage.setItem(SIM_CFG_KEY, JSON.stringify(runCfg)); } catch {}
-    setDialogOpen(false);
+    setSettingsOpen(false);
     setLoading(true);
     try {
       const res = await fetch("/api/admin/simulate/start", {
@@ -286,6 +283,178 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
 
   return (
     <div className="space-y-6">
+
+      {/* 인라인 시뮬레이션 설정 패널 */}
+      {settingsOpen && (
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          {/* 패널 헤더 */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+            <p className="font-semibold text-gray-700 text-sm">시뮬레이션 설정</p>
+            <button onClick={() => setSettingsOpen(false)} className="text-gray-400 hover:text-gray-600 text-lg leading-none">✕</button>
+          </div>
+
+          <div className="p-5 space-y-4">
+            {/* 기본 설정 행 */}
+            <div className="flex items-center gap-6 pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500 whitespace-nowrap">가상 사용자</span>
+                <Select value={String(dialogCfg.userCount)} onValueChange={(v) => setD("userCount", Number(v))}>
+                  <SelectTrigger className="w-28 h-8 text-xs border-gray-200"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {[100, 300, 500, 1000, 2000, 3000, 5000, 10000].map((n) => (
+                      <SelectItem key={n} value={String(n)}>{n.toLocaleString()}명</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500 whitespace-nowrap">이벤트 분산 기간</span>
+                <Select value={String(dialogCfg.periodSecs)} onValueChange={(v) => setD("periodSecs", Number(v))}>
+                  <SelectTrigger className="w-28 h-8 text-xs border-gray-200"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {PERIOD_OPTIONS.map(({ secs, label }) => (
+                      <SelectItem key={secs} value={String(secs)}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* 설정 테이블 */}
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left py-1 pr-4 text-[10px] font-medium text-gray-400 w-24">구분</th>
+                  <th className="text-left py-1 text-[10px] font-medium text-gray-400">항목별 비율</th>
+                  <th className="text-right py-1 pl-4 text-[10px] font-medium text-gray-400 w-16">합계</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                <tr>
+                  <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">
+                    인증 현황
+                    <div className="text-[9px] font-normal text-gray-400">방문자 기준</div>
+                  </td>
+                  <td className="py-1">
+                    <div className="flex flex-wrap gap-2 items-end">
+                      <NumInput label="SSO 로그인"  value={dialogCfg.pctSsoLogin}    onChange={(v) => setD("pctSsoLogin", v)} />
+                      <NumInput label="수동 로그인"  value={dialogCfg.pctManualLogin} onChange={(v) => setD("pctManualLogin", v)} />
+                      <NumInput label="신규 가입"    value={dialogCfg.pctSignup}      onChange={(v) => setD("pctSignup", v)} />
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[10px] text-gray-400">미로그인</span>
+                        <span className="text-xs font-semibold text-gray-700">{Math.max(0, 100 - dLoginSum)}%</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-1 pl-4 text-right align-middle">
+                    <span className={`font-semibold ${dLoginSum > 100 ? "text-red-500" : "text-gray-400"}`}>{dLoginSum}%</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">
+                    유저 타입
+                    <div className="text-[9px] font-normal text-gray-400">로그인 유저</div>
+                  </td>
+                  <td className="py-1">
+                    <div className="flex flex-wrap gap-2 items-end">
+                      <NumInput label="광고주" value={dialogCfg.pctAdvertiser} onChange={(v) => setD("pctAdvertiser", v)} />
+                      <NumInput label="대행사" value={dialogCfg.pctAgency}     onChange={(v) => setD("pctAgency", v)} />
+                      <NumInput label="제작사" value={dialogCfg.pctProduction} onChange={(v) => setD("pctProduction", v)} />
+                    </div>
+                  </td>
+                  <td className="py-1 pl-4 text-right align-middle">
+                    <span className={`font-semibold ${dUserSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dUserSum}%</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">UTM 유입</td>
+                  <td className="py-1">
+                    <div className="flex flex-wrap gap-2 items-end">
+                      <NumInput label="tvcf.co.kr" value={dialogCfg.pctTvcf}    onChange={(v) => setD("pctTvcf", v)} />
+                      <NumInput label="Google"     value={dialogCfg.pctGoogle}   onChange={(v) => setD("pctGoogle", v)} />
+                      <NumInput label="Naver"      value={dialogCfg.pctNaver}    onChange={(v) => setD("pctNaver", v)} />
+                      <NumInput label="Kakao"      value={dialogCfg.pctKakao}    onChange={(v) => setD("pctKakao", v)} />
+                      <NumInput label="Organic"    value={dialogCfg.pctOrganic}  onChange={(v) => setD("pctOrganic", v)} />
+                    </div>
+                  </td>
+                  <td className="py-1 pl-4 text-right align-middle">
+                    <span className={`font-semibold ${dUtmSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dUtmSum}%</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">성별·연령대</td>
+                  <td className="py-1">
+                    <div className="flex flex-wrap gap-x-6 gap-y-1 items-end">
+                      <div className="flex gap-2 items-end">
+                        <NumInput label="여성" value={dialogCfg.pctFemale} onChange={(v) => setD("pctFemale", v)} />
+                        <NumInput label="남성" value={dialogCfg.pctMale}   onChange={(v) => setD("pctMale", v)} />
+                        <span className={`text-[10px] font-semibold pb-1 ${dGenderSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dGenderSum}%</span>
+                      </div>
+                      <div className="flex gap-2 items-end">
+                        <NumInput label="20대" value={dialogCfg.pct20s} onChange={(v) => setD("pct20s", v)} />
+                        <NumInput label="30대" value={dialogCfg.pct30s} onChange={(v) => setD("pct30s", v)} />
+                        <NumInput label="40대" value={dialogCfg.pct40s} onChange={(v) => setD("pct40s", v)} />
+                        <NumInput label="50대" value={dialogCfg.pct50s} onChange={(v) => setD("pct50s", v)} />
+                        <span className={`text-[10px] font-semibold pb-1 ${dAgeSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dAgeSum}%</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-1 pl-4 align-middle" />
+                </tr>
+                <tr>
+                  <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">지역·활동인원</td>
+                  <td className="py-1">
+                    <div className="flex flex-wrap gap-x-6 gap-y-1 items-end">
+                      <div className="flex gap-2 items-end">
+                        <NumInput label="서울"  value={dialogCfg.pctSeoul}    onChange={(v) => setD("pctSeoul", v)} />
+                        <NumInput label="경기"  value={dialogCfg.pctGyeonggi} onChange={(v) => setD("pctGyeonggi", v)} />
+                        <NumInput label="지방"  value={dialogCfg.pctLocal}    onChange={(v) => setD("pctLocal", v)} />
+                        <NumInput label="해외"  value={dialogCfg.pctAbroad}   onChange={(v) => setD("pctAbroad", v)} />
+                        <span className={`text-[10px] font-semibold pb-1 ${dGeoSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dGeoSum}%</span>
+                      </div>
+                      <div className="flex gap-2 items-end">
+                        <NumInput label="프로젝트 등록"  value={dialogCfg.projectRegCount}  onChange={(v) => setD("projectRegCount", v)}  min={0} max={10000} unit="명" />
+                        <NumInput label="포트폴리오 등록" value={dialogCfg.portfolioRegCount} onChange={(v) => setD("portfolioRegCount", v)} min={0} max={10000} unit="명" />
+                        <NumInput label="공고 지원"       value={dialogCfg.partnerApplyCount} onChange={(v) => setD("partnerApplyCount", v)} min={0} max={10000} unit="명" />
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-1 pl-4 align-middle" />
+                </tr>
+                <tr>
+                  <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">
+                    완주 최소 보장
+                    <div className="text-[9px] font-normal text-gray-400">부족하면 자동 보충</div>
+                  </td>
+                  <td className="py-1">
+                    <div className="flex gap-2 items-end">
+                      <NumInput label="프로젝트 최소" value={dialogCfg.minProjectCompletions}  onChange={(v) => setD("minProjectCompletions", v)}  min={0} max={1000} unit="건" />
+                      <NumInput label="포트폴리오 최소" value={dialogCfg.minPortfolioCompletions} onChange={(v) => setD("minPortfolioCompletions", v)} min={0} max={1000} unit="건" />
+                    </div>
+                  </td>
+                  <td className="py-1 pl-4 align-middle" />
+                </tr>
+              </tbody>
+            </table>
+
+            <div className="text-[10px] text-amber-600 bg-amber-50 border border-amber-100 rounded px-2 py-1">
+              ⚠ 실행 시 실제 GA4 + Mixpanel 계정에 가상 이벤트가 추가됩니다.
+            </div>
+
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" onClick={() => setSettingsOpen(false)}>닫기</Button>
+              <Button
+                className="bg-pink-600 hover:bg-pink-700 text-white"
+                onClick={() => startSim(dialogCfg)}
+                disabled={!!isRunning || loading}
+              >
+                {loading ? "시작 중..." : `▶ ${dialogCfg.userCount.toLocaleString()}명 / ${PERIOD_OPTIONS.find(o => o.secs === dialogCfg.periodSecs)?.label ?? ""} 시작`}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 항상 표시되는 차트들 */}
       {(
         <>
@@ -1177,172 +1346,6 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
         </>
       )}
 
-      {/* 시뮬레이션 설정 다이얼로그 */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader className="pb-2">
-            <DialogTitle>시뮬레이션 설정</DialogTitle>
-          </DialogHeader>
-
-          {/* 기본 설정 행 */}
-          <div className="flex items-center gap-6 pb-3 border-b border-gray-100">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 whitespace-nowrap">가상 사용자</span>
-              <Select value={String(dialogCfg.userCount)} onValueChange={(v) => setD("userCount", Number(v))}>
-                <SelectTrigger className="w-28 h-8 text-xs border-gray-200"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {[100, 300, 500, 1000, 2000, 3000, 5000, 10000].map((n) => (
-                    <SelectItem key={n} value={String(n)}>{n.toLocaleString()}명</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 whitespace-nowrap">이벤트 분산 기간</span>
-              <Select value={String(dialogCfg.periodSecs)} onValueChange={(v) => setD("periodSecs", Number(v))}>
-                <SelectTrigger className="w-28 h-8 text-xs border-gray-200"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {PERIOD_OPTIONS.map(({ secs, label }) => (
-                    <SelectItem key={secs} value={String(secs)}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* 설정 테이블 */}
-          <table className="w-full text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left py-1 pr-4 text-[10px] font-medium text-gray-400 w-24">구분</th>
-                <th className="text-left py-1 text-[10px] font-medium text-gray-400">항목별 비율</th>
-                <th className="text-right py-1 pl-4 text-[10px] font-medium text-gray-400 w-16">합계</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              <tr>
-                <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">
-                  인증 현황
-                  <div className="text-[9px] font-normal text-gray-400">방문자 기준</div>
-                </td>
-                <td className="py-1">
-                  <div className="flex flex-wrap gap-2 items-end">
-                    <NumInput label="SSO 로그인"  value={dialogCfg.pctSsoLogin}    onChange={(v) => setD("pctSsoLogin", v)} />
-                    <NumInput label="수동 로그인"  value={dialogCfg.pctManualLogin} onChange={(v) => setD("pctManualLogin", v)} />
-                    <NumInput label="신규 가입"    value={dialogCfg.pctSignup}      onChange={(v) => setD("pctSignup", v)} />
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[10px] text-gray-400">미로그인</span>
-                      <span className="text-xs font-semibold text-gray-700">{Math.max(0, 100 - dLoginSum)}%</span>
-                    </div>
-                  </div>
-                </td>
-                <td className="py-1 pl-4 text-right align-middle">
-                  <span className={`font-semibold ${dLoginSum > 100 ? "text-red-500" : "text-gray-400"}`}>{dLoginSum}%</span>
-                </td>
-              </tr>
-              <tr>
-                <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">
-                  유저 타입
-                  <div className="text-[9px] font-normal text-gray-400">로그인 유저</div>
-                </td>
-                <td className="py-1">
-                  <div className="flex flex-wrap gap-2 items-end">
-                    <NumInput label="광고주" value={dialogCfg.pctAdvertiser} onChange={(v) => setD("pctAdvertiser", v)} />
-                    <NumInput label="대행사" value={dialogCfg.pctAgency}     onChange={(v) => setD("pctAgency", v)} />
-                    <NumInput label="제작사" value={dialogCfg.pctProduction} onChange={(v) => setD("pctProduction", v)} />
-                  </div>
-                </td>
-                <td className="py-1 pl-4 text-right align-middle">
-                  <span className={`font-semibold ${dUserSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dUserSum}%</span>
-                </td>
-              </tr>
-              <tr>
-                <td className="py-1 pr-4 font-medium text-gray-600 align-middle text-[11px]">UTM 유입</td>
-                <td className="py-1">
-                  <div className="flex flex-wrap gap-2 items-end">
-                    <NumInput label="tvcf.co.kr" value={dialogCfg.pctTvcf}    onChange={(v) => setD("pctTvcf", v)} />
-                    <NumInput label="Google"     value={dialogCfg.pctGoogle}   onChange={(v) => setD("pctGoogle", v)} />
-                    <NumInput label="Naver"      value={dialogCfg.pctNaver}    onChange={(v) => setD("pctNaver", v)} />
-                    <NumInput label="Kakao"      value={dialogCfg.pctKakao}    onChange={(v) => setD("pctKakao", v)} />
-                    <NumInput label="Organic"    value={dialogCfg.pctOrganic}  onChange={(v) => setD("pctOrganic", v)} />
-                  </div>
-                </td>
-                <td className="py-1 pl-4 text-right align-middle">
-                  <span className={`font-semibold ${dUtmSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dUtmSum}%</span>
-                </td>
-              </tr>
-              <tr>
-                <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">성별·연령대</td>
-                <td className="py-1">
-                  <div className="flex flex-wrap gap-x-6 gap-y-1 items-end">
-                    <div className="flex gap-2 items-end">
-                      <NumInput label="여성" value={dialogCfg.pctFemale} onChange={(v) => setD("pctFemale", v)} />
-                      <NumInput label="남성" value={dialogCfg.pctMale}   onChange={(v) => setD("pctMale", v)} />
-                      <span className={`text-[10px] font-semibold pb-1 ${dGenderSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dGenderSum}%</span>
-                    </div>
-                    <div className="flex gap-2 items-end">
-                      <NumInput label="20대" value={dialogCfg.pct20s} onChange={(v) => setD("pct20s", v)} />
-                      <NumInput label="30대" value={dialogCfg.pct30s} onChange={(v) => setD("pct30s", v)} />
-                      <NumInput label="40대" value={dialogCfg.pct40s} onChange={(v) => setD("pct40s", v)} />
-                      <NumInput label="50대" value={dialogCfg.pct50s} onChange={(v) => setD("pct50s", v)} />
-                      <span className={`text-[10px] font-semibold pb-1 ${dAgeSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dAgeSum}%</span>
-                    </div>
-                  </div>
-                </td>
-                <td className="py-1 pl-4 align-middle" />
-              </tr>
-              <tr>
-                <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">지역·활동인원</td>
-                <td className="py-1">
-                  <div className="flex flex-wrap gap-x-6 gap-y-1 items-end">
-                    <div className="flex gap-2 items-end">
-                      <NumInput label="서울"  value={dialogCfg.pctSeoul}    onChange={(v) => setD("pctSeoul", v)} />
-                      <NumInput label="경기"  value={dialogCfg.pctGyeonggi} onChange={(v) => setD("pctGyeonggi", v)} />
-                      <NumInput label="지방"  value={dialogCfg.pctLocal}    onChange={(v) => setD("pctLocal", v)} />
-                      <NumInput label="해외"  value={dialogCfg.pctAbroad}   onChange={(v) => setD("pctAbroad", v)} />
-                      <span className={`text-[10px] font-semibold pb-1 ${dGeoSum === 100 ? "text-green-600" : "text-amber-500"}`}>{dGeoSum}%</span>
-                    </div>
-                    <div className="flex gap-2 items-end">
-                      <NumInput label="프로젝트 등록"  value={dialogCfg.projectRegCount}  onChange={(v) => setD("projectRegCount", v)}  min={0} max={10000} unit="명" />
-                      <NumInput label="포트폴리오 등록" value={dialogCfg.portfolioRegCount} onChange={(v) => setD("portfolioRegCount", v)} min={0} max={10000} unit="명" />
-                      <NumInput label="공고 지원"       value={dialogCfg.partnerApplyCount} onChange={(v) => setD("partnerApplyCount", v)} min={0} max={10000} unit="명" />
-                    </div>
-                  </div>
-                </td>
-                <td className="py-1 pl-4 align-middle" />
-              </tr>
-              <tr>
-                <td className="py-1 pr-4 font-medium text-gray-600 align-top text-[11px] pt-1.5">
-                  완주 최소 보장
-                  <div className="text-[9px] font-normal text-gray-400">부족하면 자동 보충</div>
-                </td>
-                <td className="py-1">
-                  <div className="flex gap-2 items-end">
-                    <NumInput label="프로젝트 최소" value={dialogCfg.minProjectCompletions}  onChange={(v) => setD("minProjectCompletions", v)}  min={0} max={1000} unit="건" />
-                    <NumInput label="포트폴리오 최소" value={dialogCfg.minPortfolioCompletions} onChange={(v) => setD("minPortfolioCompletions", v)} min={0} max={1000} unit="건" />
-                  </div>
-                </td>
-                <td className="py-1 pl-4 align-middle" />
-              </tr>
-            </tbody>
-          </table>
-
-          <div className="text-[10px] text-amber-600 bg-amber-50 border border-amber-100 rounded px-2 py-1">
-            ⚠ 실행 시 실제 GA4 + Mixpanel 계정에 가상 이벤트가 추가됩니다.
-          </div>
-
-          <DialogFooter className="gap-2 pt-1">
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>취소</Button>
-            <Button
-              className="bg-pink-600 hover:bg-pink-700 text-white"
-              onClick={() => startSim(dialogCfg)}
-              disabled={!!isRunning || loading}
-            >
-              {loading ? "시작 중..." : `▶ ${dialogCfg.userCount.toLocaleString()}명 / ${PERIOD_OPTIONS.find(o => o.secs === dialogCfg.periodSecs)?.label ?? ""} 시작`}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
