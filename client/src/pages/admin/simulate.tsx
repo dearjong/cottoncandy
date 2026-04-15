@@ -45,6 +45,7 @@ interface SimConfig {
   pctSeoul: number; pctGyeonggi: number; pctLocal: number; pctAbroad: number;
   projectRegCount: number;
   portfolioRegCount: number;
+  partnerApplyCount: number;
 }
 
 const DEFAULTS: SimConfig = {
@@ -57,6 +58,7 @@ const DEFAULTS: SimConfig = {
   pct20s: 10, pct30s: 35, pct40s: 35, pct50s: 20,
   pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
   projectRegCount: 30,
+  partnerApplyCount: 150,
   portfolioRegCount: 100,
 };
 

@@ -344,6 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pctAbroad:        num("pctAbroad", 0, 100),
         projectRegCount:          num("projectRegCount", 0, 10000),
         portfolioRegCount:        num("portfolioRegCount", 0, 10000),
+        partnerApplyCount:        num("partnerApplyCount", 0, 10000),
         minProjectCompletions:    num("minProjectCompletions", 0, 10000),
         minPortfolioCompletions:  num("minPortfolioCompletions", 0, 10000),
       };
