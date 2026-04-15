@@ -30,7 +30,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   <Link href="/admin/reports">
                     <Button variant="outline" size="sm">
                       <FlaskConical className="h-4 w-4 mr-2" />
-                      시뮬레이션 설정
+                      사용자 시뮬레이션
                     </Button>
                   </Link>
                   <Link href="/">
