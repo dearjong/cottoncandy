@@ -39,6 +39,8 @@ interface SimJob {
   pfSessionsSum: number;
   pfWritingMinSum: number;
   projectTypeBreakdown: Record<string, number>;
+  stepFunnelByType: Record<string, Record<number, number>>;
+  stepDropoffByType: Record<string, Record<number, number>>;
   consultingRegisteredCount: number;
   firstVisitCount: number;
   returnVisitCount: number;
@@ -204,6 +206,7 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
   const [cfg, setCfg] = useState<SimConfig>(loadSavedCfg);
   const [dialogCfg, setDialogCfg] = useState<SimConfig>(loadSavedCfg);
   const [loading, setLoading] = useState(false);
+  const [projTypeFilter, setProjTypeFilter] = useState<"전체" | "공고" | "1:1" | "컨설팅">("전체");
 
   function setD<K extends keyof SimConfig>(key: K, val: SimConfig[K]) {
     setDialogCfg((prev) => ({ ...prev, [key]: val }));
@@ -1011,67 +1014,111 @@ function ActivityTab({ openSignal }: { openSignal?: number }) {
 
           {/* 프로젝트 등록 단계별 퍼널 */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div>
-                  <p className="font-semibold text-orange-700 text-sm">프로젝트 등록 단계별 퍼널</p>
-                  <p className="text-[10px] text-gray-400">광고주가 어느 단계에서 이탈하는지 확인합니다</p>
-                </div>
-                <div className="flex flex-wrap gap-3 text-xs">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-blue-400 inline-block" />
-                    공고 <strong>{job?.projectTypeBreakdown?.["공고"] ?? 0}건</strong>
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-violet-400 inline-block" />
-                    1:1 비공개 <strong>{job?.projectTypeBreakdown?.["1:1"] ?? 0}건</strong>
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-pink-400 inline-block" />
-                    컨설팅 <strong>{job?.consultingRegisteredCount ?? 0}건</strong>
-                  </span>
-                  <span className="text-gray-200">|</span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-indigo-400 inline-block" />
-                    임시저장 <strong>{job?.draftSavedCount ?? 0}건</strong>
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
-                    불러오기 <strong>{job?.draftOpenedCount ?? 0}건</strong>
-                  </span>
-                </div>
+              {/* 헤더 */}
+              <div>
+                <p className="font-semibold text-orange-700 text-sm">프로젝트 등록 단계별 퍼널</p>
+                <p className="text-[10px] text-gray-400">광고주가 어느 단계에서 이탈하는지 확인합니다</p>
               </div>
-              <div className="space-y-1.5">
-                {Array.from({ length: 18 }, (_, i) => i + 1).map((step) => {
-                  const stepFunnel = job?.stepFunnelBreakdown ?? {};
-                  const reached = stepFunnel[step] ?? 0;
-                  const dropped = (job?.stepDropoffBreakdown ?? {})[step] ?? 0;
-                  const pct = Math.round((reached / Math.max(...Object.values(stepFunnel), 1)) * 100);
-                  const dropPct = reached > 0 ? Math.round((dropped / reached) * 100) : 0;
-                  const isHighDropoff = dropPct >= 15;
+
+              {/* 의뢰 유형 필터 탭 */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {(["전체", "공고", "1:1", "컨설팅"] as const).map((type) => {
+                  const count = type === "전체"
+                    ? (job?.projectTypeBreakdown?.["공고"] ?? 0) + (job?.projectTypeBreakdown?.["1:1"] ?? 0) + (job?.consultingRegisteredCount ?? 0)
+                    : type === "컨설팅"
+                    ? (job?.consultingRegisteredCount ?? 0)
+                    : (job?.projectTypeBreakdown?.[type] ?? 0);
+                  const active = projTypeFilter === type;
+                  const colorMap: Record<string, string> = {
+                    "전체": active ? "bg-orange-500 text-white border-orange-500" : "border-gray-200 text-gray-500 hover:border-orange-300 hover:text-orange-600",
+                    "공고": active ? "bg-blue-500 text-white border-blue-500" : "border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600",
+                    "1:1": active ? "bg-violet-500 text-white border-violet-500" : "border-gray-200 text-gray-500 hover:border-violet-300 hover:text-violet-600",
+                    "컨설팅": active ? "bg-pink-500 text-white border-pink-500" : "border-gray-200 text-gray-500 hover:border-pink-300 hover:text-pink-600",
+                  };
                   return (
-                    <div key={step} className="flex items-center gap-2">
-                      <div className="w-5 text-[10px] text-gray-400 text-right shrink-0">{step}</div>
-                      <div className="w-28 text-xs text-gray-600 truncate shrink-0">{PROJECT_STEP_LABELS[step]}</div>
-                      <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                        <div className="bg-indigo-400 h-3 rounded-full transition-all duration-500"
-                          style={{ width: `${Math.max(pct, reached > 0 ? 2 : 0)}%` }} />
-                      </div>
-                      <div className="w-12 text-right text-xs font-medium text-gray-700">{reached.toLocaleString()}</div>
-                      {dropped > 0 ? (
-                        <div className={`w-20 text-right text-xs ${isHighDropoff ? "text-red-500 font-semibold" : "text-amber-500"}`}>
-                          -{dropped} ({dropPct}%)
-                        </div>
-                      ) : (
-                        <div className="w-20 text-right text-xs text-gray-300">—</div>
-                      )}
-                    </div>
+                    <button
+                      key={type}
+                      onClick={() => setProjTypeFilter(type)}
+                      className={`text-xs px-3 py-1 rounded-full border font-medium transition-all ${colorMap[type]}`}
+                    >
+                      {type === "1:1" ? "비공개(1:1)" : type} {count > 0 && <span className="opacity-80">{count}건</span>}
+                    </button>
                   );
                 })}
+                <span className="text-gray-200 mx-1">|</span>
+                <span className="flex items-center gap-1 text-xs text-gray-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 inline-block" />
+                  임시저장 {job?.draftSavedCount ?? 0}건
+                </span>
+                <span className="flex items-center gap-1 text-xs text-gray-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
+                  불러오기 {job?.draftOpenedCount ?? 0}건
+                </span>
               </div>
-              <div className="flex items-center gap-3 text-[10px] text-gray-400 pt-1">
-                <span><span className="text-red-500 font-semibold">빨간색</span> = 이탈률 15% 이상</span>
-                <span><span className="text-amber-500">주황색</span> = 일부 이탈</span>
-              </div>
+
+              {/* 컨설팅 선택 시: 단계 없는 요약 */}
+              {projTypeFilter === "컨설팅" ? (
+                <div className="space-y-3">
+                  <div className="bg-pink-50 border border-pink-100 rounded-lg p-4 text-sm text-pink-800">
+                    <p className="font-semibold mb-1">컨설팅 문의 현황</p>
+                    <p className="text-[11px] text-pink-600">컨설팅은 18단계 등록 프로세스 없이 직접 문의로 접수됩니다.</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-gray-50 rounded-lg p-3 text-center">
+                      <p className="text-xl font-bold text-pink-600">{job?.consultingRegisteredCount ?? 0}</p>
+                      <p className="text-[11px] text-gray-500 mt-0.5">총 컨설팅 접수</p>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3 text-center">
+                      <p className="text-xl font-bold text-gray-700">
+                        {(() => {
+                          const total = (job?.projectTypeBreakdown?.["공고"] ?? 0) + (job?.projectTypeBreakdown?.["1:1"] ?? 0) + (job?.consultingRegisteredCount ?? 0);
+                          return total > 0 ? Math.round(((job?.consultingRegisteredCount ?? 0) / total) * 100) + "%" : "—";
+                        })()}
+                      </p>
+                      <p className="text-[11px] text-gray-500 mt-0.5">전체 의뢰 중 비중</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {Array.from({ length: 18 }, (_, i) => i + 1).map((step) => {
+                    const stepFunnel = projTypeFilter === "전체"
+                      ? (job?.stepFunnelBreakdown ?? {})
+                      : (job?.stepFunnelByType?.[projTypeFilter] ?? {});
+                    const stepDropoff = projTypeFilter === "전체"
+                      ? (job?.stepDropoffBreakdown ?? {})
+                      : (job?.stepDropoffByType?.[projTypeFilter] ?? {});
+                    const reached = stepFunnel[step] ?? 0;
+                    const dropped = stepDropoff[step] ?? 0;
+                    const pct = Math.round((reached / Math.max(...Object.values(stepFunnel), 1)) * 100);
+                    const dropPct = reached > 0 ? Math.round((dropped / reached) * 100) : 0;
+                    const isHighDropoff = dropPct >= 15;
+                    const barColor = projTypeFilter === "공고" ? "bg-blue-400" : projTypeFilter === "1:1" ? "bg-violet-400" : "bg-indigo-400";
+                    return (
+                      <div key={step} className="flex items-center gap-2">
+                        <div className="w-5 text-[10px] text-gray-400 text-right shrink-0">{step}</div>
+                        <div className="w-28 text-xs text-gray-600 truncate shrink-0">{PROJECT_STEP_LABELS[step]}</div>
+                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                          <div className={`${barColor} h-3 rounded-full transition-all duration-500`}
+                            style={{ width: `${Math.max(pct, reached > 0 ? 2 : 0)}%` }} />
+                        </div>
+                        <div className="w-12 text-right text-xs font-medium text-gray-700">{reached.toLocaleString()}</div>
+                        {dropped > 0 ? (
+                          <div className={`w-20 text-right text-xs ${isHighDropoff ? "text-red-500 font-semibold" : "text-amber-500"}`}>
+                            -{dropped} ({dropPct}%)
+                          </div>
+                        ) : (
+                          <div className="w-20 text-right text-xs text-gray-300">—</div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  <div className="flex items-center gap-3 text-[10px] text-gray-400 pt-1">
+                    <span><span className="text-red-500 font-semibold">빨간색</span> = 이탈률 15% 이상</span>
+                    <span><span className="text-amber-500">주황색</span> = 일부 이탈</span>
+                  </div>
+                </div>
+              )}
             </div>
 
           {/* 포트폴리오 등록 섹션별 퍼널 */}

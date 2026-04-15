@@ -34,6 +34,8 @@ export interface SimJob {
   pfSessionsSum: number;
   pfWritingMinSum: number;
   projectTypeBreakdown: Record<string, number>;
+  stepFunnelByType: Record<string, Record<number, number>>;
+  stepDropoffByType: Record<string, Record<number, number>>;
   consultingRegisteredCount: number;
   firstVisitCount: number;
   returnVisitCount: number;
@@ -353,6 +355,8 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     pfSessionsSum: 0,
     pfWritingMinSum: 0,
     projectTypeBreakdown: {},
+    stepFunnelByType: {},
+    stepDropoffByType: {},
     consultingRegisteredCount: 0,
     firstVisitCount: 0,
     returnVisitCount: 0,
@@ -821,6 +825,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
               : randInt(30, 120);
 
             stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
+            if (!job.stepFunnelByType[pType]) job.stepFunnelByType[pType] = {};
+            job.stepFunnelByType[pType][s.step] = (job.stepFunnelByType[pType][s.step] ?? 0) + 1;
             add(`step_${s.step}_${s.screen}`, uid, projCurrentTs + sessionWriteOffset + 10, {
               step: s.step, screen: s.screen, project_type: pType,
               session_number: sIdx + 1,
@@ -838,6 +844,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             // 이탈 판정
             if (s.step < 18 && !chance(s.passRate)) {
               stepDropoff[s.step] = (stepDropoff[s.step] ?? 0) + 1;
+              if (!job.stepDropoffByType[pType]) job.stepDropoffByType[pType] = {};
+              job.stepDropoffByType[pType][s.step] = (job.stepDropoffByType[pType][s.step] ?? 0) + 1;
               // 이탈 전 임시저장 (80% 확률)
               if (chance(0.80)) {
                 projDraftSaveCount++;
@@ -1306,6 +1314,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       for (const s of PROJECT_STEPS) {
         const dur = s.step <= 3 ? 60 : s.step <= 12 ? 180 : 60;
         stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
+        if (!job.stepFunnelByType["공고"]) job.stepFunnelByType["공고"] = {};
+        job.stepFunnelByType["공고"][s.step] = (job.stepFunnelByType["공고"][s.step] ?? 0) + 1;
         add(`step_${s.step}_${s.screen}`, sUid, projTs + writeOffset, {
           step: s.step, screen: s.screen, project_type: "공고",
           session_number: 1, resumed_from_draft: false,
