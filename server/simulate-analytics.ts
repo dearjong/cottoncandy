@@ -1373,8 +1373,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   }
 
   // ── 최소 완주 보장 ─────────────────────────────────────────────────
-  const minProjComplete = cfg.minProjectCompletions ?? 5;
-  const minPfComplete   = cfg.minPortfolioCompletions ?? 5;
+  // userCount 기준 0.5% 자동 비례 (100명→1건, 200명→1건, 1000명→5건)
+  const minProjComplete = Math.max(1, Math.round(cfg.userCount * 0.005));
+  // 포트폴리오는 production 유저 비중 높아 프로젝트 2배 비율
+  const minPfComplete   = Math.max(1, Math.round(cfg.userCount * 0.01));
   const synTs = Math.floor(Date.now() / 1000) - 86400;
   const synthCommon = { user_type: "advertiser", utm_source: "tvcf.co.kr", geo: "서울", gender: "male", age_group: "30s" };
 
