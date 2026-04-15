@@ -46,6 +46,7 @@ export interface SimJob {
   portfolioFunnelBreakdown: Record<number, number>;
   portfolioDropoffBreakdown: Record<number, number>;
   visitFunnelBreakdown: Record<number, Record<number, number>>;
+  pfVisitFunnelBreakdown: Record<number, Record<number, number>>;
   homeClickBreakdown: Record<string, number>;
   dwellSecSum: Record<string, number>;
   dwellCount: Record<string, number>;
@@ -367,6 +368,7 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     directEntryBreakdown: {},
     portfolioFunnelBreakdown: {},
     portfolioDropoffBreakdown: {},
+    pfVisitFunnelBreakdown: {},
     homeClickBreakdown: {},
     dwellSecSum: {},
     dwellCount: {},
@@ -1121,9 +1123,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         didPortfolioReg = true;
         const pfTs = partnerTs + 100;
 
+        // 포트폴리오도 최소 2세션 — 1회차에서 전체 완주 없음
         const pfNumSessions = weightedPick([
-          { value: 1, weight: 15 }, { value: 2, weight: 35 },
-          { value: 3, weight: 30 }, { value: 4, weight: 20 },
+          { value: 2, weight: 45 }, { value: 3, weight: 35 }, { value: 4, weight: 20 },
         ]);
         const pfSecsPerSession  = Math.ceil(13 / pfNumSessions);
         let pfCurrentTs         = pfTs;
@@ -1165,6 +1167,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             const secDuration = [1,2,3].includes(sec.step) ? randInt(60, 180) : randInt(180, 600);
 
             pfFunnel[sec.step] = (pfFunnel[sec.step] ?? 0) + 1;
+            const pfVisitNum = Math.min(sIdx + 1, 4);
+            if (!job.pfVisitFunnelBreakdown[pfVisitNum]) job.pfVisitFunnelBreakdown[pfVisitNum] = {};
+            job.pfVisitFunnelBreakdown[pfVisitNum][sec.step] = (job.pfVisitFunnelBreakdown[pfVisitNum][sec.step] ?? 0) + 1;
             add(`portfolio_section_${sec.id}`, uid, pfCurrentTs + pfSessionWriteOffset + 10, {
               section: sec.step, section_id: sec.id, partner_type: partnerType,
               session_number: sIdx + 1,
@@ -1427,13 +1432,20 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       job.pfDaysSum += 5; job.pfSessionsSum += 3; job.pfWritingMinSum += 120;
       const pfTs = synTs + k * 3600;
       let pfWriteOffset = 0;
-      // 13개 섹션 전체 이벤트 생성 (섹션별 퍼널에 반영됨)
+      // 13개 섹션 전체 이벤트 생성 — 3세션 분할
+      // 1회차: 섹션 1~5, 2회차: 섹션 6~10, 3회차: 섹션 11~13
+      const PF_S1_CUT = 5;
+      const PF_S2_CUT = 10;
       for (const sec of PORTFOLIO_SECTIONS) {
         const dur = 120;
+        const pfSynVisit = sec.step <= PF_S1_CUT ? 1 : sec.step <= PF_S2_CUT ? 2 : 3;
+        job.portfolioFunnelBreakdown[sec.step] = (job.portfolioFunnelBreakdown[sec.step] ?? 0) + 1;
+        if (!job.pfVisitFunnelBreakdown[pfSynVisit]) job.pfVisitFunnelBreakdown[pfSynVisit] = {};
+        job.pfVisitFunnelBreakdown[pfSynVisit][sec.step] = (job.pfVisitFunnelBreakdown[pfSynVisit][sec.step] ?? 0) + 1;
         add(`portfolio_section_${sec.id}`, sUid, pfTs + pfWriteOffset, {
-          section: sec.id, section_step: sec.step, section_title: sec.title,
-          session_number: 1, time_on_section_sec: dur,
-          cumulative_writing_sec: pfWriteOffset + dur,
+          section: sec.step, section_id: sec.id, partner_type: "production",
+          session_number: pfSynVisit, resumed_from_draft: pfSynVisit > 1,
+          time_on_section_sec: dur, cumulative_writing_sec: pfWriteOffset + dur,
           ...pfSynthCommon,
         });
         pfWriteOffset += dur;

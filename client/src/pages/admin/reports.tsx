@@ -47,6 +47,7 @@ interface SimJob {
   directEntryBreakdown: Record<string, number>;
   portfolioFunnelBreakdown: Record<number, number>;
   portfolioDropoffBreakdown: Record<number, number>;
+  pfVisitFunnelBreakdown: Record<number, Record<number, number>>;
   visitFunnelBreakdown: Record<number, Record<number, number>>;
   homeClickBreakdown: Record<string, number>;
   dwellSecSum: Record<string, number>;
@@ -211,6 +212,7 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
   const [loading, setLoading] = useState(false);
   const [projTypeFilter, setProjTypeFilter] = useState<"all" | "public" | "private" | "consulting">("all");
   const [visitFilter, setVisitFilter] = useState<0 | 1 | 2 | 3 | 4>(0); // 0=전체
+  const [pfVisitFilter, setPfVisitFilter] = useState<0 | 1 | 2 | 3 | 4>(0); // 포트폴리오 방문 회차
   const [codeEditorOpen, setCodeEditorOpen] = useState(false);
   const [simCode, setSimCode] = useState<string>("");
   const [codeLoading, setCodeLoading] = useState(false);
@@ -1508,10 +1510,44 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                 <p className="font-semibold text-purple-700 text-sm">포트폴리오 등록 섹션별 퍼널</p>
                 <p className="text-[10px] text-gray-400">파트너가 어느 섹션에서 포트폴리오 작성을 멈추는지 확인합니다</p>
               </div>
+              {/* 방문 회차 필터 */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-gray-400 shrink-0">방문 회차</span>
+                {([0, 1, 2, 3, 4] as const).map((v) => {
+                  const label = v === 0 ? "전체" : v === 4 ? "4회차+" : `${v}회차`;
+                  const visitData = v === 0 ? null : (job?.pfVisitFunnelBreakdown?.[v] ?? {});
+                  const visitTotal = visitData ? Object.values(visitData).reduce((a, b) => a + b, 0) : null;
+                  const active = pfVisitFilter === v;
+                  const colors: Record<number, string> = {
+                    0: active ? "bg-gray-600 text-white border-gray-600" : "border-gray-200 text-gray-500 hover:border-gray-400",
+                    1: active ? "bg-emerald-500 text-white border-emerald-500" : "border-gray-200 text-gray-500 hover:border-emerald-300 hover:text-emerald-600",
+                    2: active ? "bg-cyan-500 text-white border-cyan-500" : "border-gray-200 text-gray-500 hover:border-cyan-300 hover:text-cyan-600",
+                    3: active ? "bg-amber-500 text-white border-amber-500" : "border-gray-200 text-gray-500 hover:border-amber-300 hover:text-amber-600",
+                    4: active ? "bg-rose-500 text-white border-rose-500" : "border-gray-200 text-gray-500 hover:border-rose-300 hover:text-rose-600",
+                  };
+                  return (
+                    <button key={v} onClick={() => setPfVisitFilter(v)}
+                      className={`text-xs px-2.5 py-0.5 rounded-full border font-medium transition-all ${colors[v]}`}>
+                      {label}
+                      {visitTotal !== null && visitTotal > 0 && <span className="opacity-80 ml-0.5">{visitTotal}</span>}
+                    </button>
+                  );
+                })}
+                {pfVisitFilter > 0 && (
+                  <span className="text-[10px] text-gray-400 ml-1">
+                    {pfVisitFilter === 1 && "처음 방문 — 초반 섹션"}
+                    {pfVisitFilter === 2 && "2번째 방문 — 중반 섹션"}
+                    {pfVisitFilter === 3 && "3번째 방문 — 마무리 섹션"}
+                    {pfVisitFilter === 4 && "4회차 이상"}
+                  </span>
+                )}
+              </div>
               <div className="space-y-1.5">
                 {(() => {
-                  const pfFunnel = job?.portfolioFunnelBreakdown ?? {};
-                  const pfDropoff = job?.portfolioDropoffBreakdown ?? {};
+                  const pfFunnel = pfVisitFilter > 0
+                    ? (job?.pfVisitFunnelBreakdown?.[pfVisitFilter] ?? {})
+                    : (job?.portfolioFunnelBreakdown ?? {});
+                  const pfDropoff = pfVisitFilter > 0 ? {} : (job?.portfolioDropoffBreakdown ?? {});
                   const PORTFOLIO_LABELS: Record<number, string> = {
                     1: "기업 정보", 2: "담당자 정보", 3: "경험·특화 분야",
                     4: "광고 목적별 분야", 5: "제작 기법별 분야", 6: "대표 광고주",
