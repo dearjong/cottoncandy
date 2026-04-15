@@ -116,18 +116,6 @@ export default function WorkflowSettlementPage() {
             </table>
           </div>
         </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <Button variant="outline" size="default" className="border-gray-300">
-            수행사에 최종 정산 완료 확정요청
-          </Button>
-          <Button size="default" className="bg-pink-600 hover:bg-pink-700">
-            최종 정산 완료 확정
-          </Button>
-          <Button variant="outline" size="default" className="border-gray-300">
-            정산정보 저장
-          </Button>
-        </div>
       </div>
     </div>
   )
