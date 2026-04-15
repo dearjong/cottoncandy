@@ -340,9 +340,9 @@ async function main() {
   console.log(`📊 Mixpanel: ${MIXPANEL_TOKEN}`);
   console.log(`⏱️  최근 ${MAX_HOURS_BACK}시간 데이터 분산\n`);
 
-  const BATCH = 5;                 // 동시 처리 수 줄여서 몰림 방지
-  const DELAY_MIN_MS = 300;        // 배치 간 최소 딜레이
-  const DELAY_MAX_MS = 900;        // 배치 간 최대 딜레이 (자연스러운 유입처럼)
+  const BATCH = 20;                // 동시 처리 수
+  const DELAY_MIN_MS = 50;         // 배치 간 최소 딜레이
+  const DELAY_MAX_MS = 150;        // 배치 간 최대 딜레이
   let done = 0;
 
   for (let i = 0; i < TOTAL_USERS; i += BATCH) {
