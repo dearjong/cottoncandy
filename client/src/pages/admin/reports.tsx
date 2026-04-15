@@ -20,6 +20,7 @@ interface SimJob {
   totalBatches: number;
   funnelBreakdown: Record<string, number>;
   utmBreakdown: Record<string, number>;
+  channelBreakdown: Record<string, number>;
   userTypeBreakdown: Record<string, number>;
   geoBreakdown: Record<string, number>;
   stepFunnelBreakdown: Record<number, number>;
@@ -304,6 +305,7 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
   const totalUsers = job?.totalUsers ?? 0;
   const siteVisit = job?.funnelBreakdown?.["site_visit"] ?? 0;
   const utmBreakdown = job?.utmBreakdown ?? {};
+  const channelBreakdown = job?.channelBreakdown ?? {};
   const userTypeBreakdown = job?.userTypeBreakdown ?? {};
   const geoBreakdown = job?.geoBreakdown ?? {};
 
@@ -545,9 +547,45 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
           <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-4">
-              {/* UTM 유입 채널 */}
+              {/* 유입 경로 (channel 기준) */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
-                <p className="font-semibold text-pink-700 text-sm">UTM 유입 채널</p>
+                <div>
+                  <p className="font-semibold text-pink-700 text-sm">유입 경로</p>
+                  <p className="text-xs text-gray-400 mt-0.5">광고 여부와 무관하게 실제 유입 채널 유형</p>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { key: "referral", label: "레퍼럴",    color: "bg-pink-500",   desc: "외부 사이트 링크 (tvcf 등)" },
+                    { key: "paid",     label: "유료광고",   color: "bg-blue-400",   desc: "Google·Naver 검색광고" },
+                    { key: "social",   label: "소셜",       color: "bg-yellow-400", desc: "카카오·SNS" },
+                    { key: "organic",  label: "자연검색",   color: "bg-green-400",  desc: "검색엔진 자연 결과" },
+                    { key: "direct",   label: "직접 유입",  color: "bg-gray-400",   desc: "URL 직접 입력·북마크" },
+                  ].map(({ key, label, color, desc }) => {
+                    const count = channelBreakdown[key] ?? 0;
+                    const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
+                    return (
+                      <div key={key} className="flex items-center gap-3">
+                        <div className="w-16 shrink-0">
+                          <div className="text-xs text-gray-700 font-medium">{label}</div>
+                          <div className="text-[10px] text-gray-400">{desc}</div>
+                        </div>
+                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                          <div className={`${color} h-3 rounded-full`} style={{ width: `${pct}%` }} />
+                        </div>
+                        <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                        <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* UTM 유입 채널 (유료광고) */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
+                <div>
+                  <p className="font-semibold text-indigo-700 text-sm">UTM 유입 채널 <span className="text-gray-400 font-normal">(유료광고)</span></p>
+                  <p className="text-xs text-gray-400 mt-0.5">광고 집행 시 UTM 파라미터로 추적한 채널</p>
+                </div>
                 <div className="space-y-2">
                   {[
                     { key: "tvcf.co.kr", label: "tvcf.co.kr", color: "bg-pink-500"   },

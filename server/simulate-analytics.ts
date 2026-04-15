@@ -18,6 +18,7 @@ export interface SimJob {
   totalBatches: number;
   funnelBreakdown: Record<string, number>;
   utmBreakdown: Record<string, number>;
+  channelBreakdown: Record<string, number>;
   userTypeBreakdown: Record<string, number>;
   geoBreakdown: Record<string, number>;
   stepFunnelBreakdown: Record<number, number>;
@@ -338,6 +339,7 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
     totalBatches: 0,
     funnelBreakdown: {},
     utmBreakdown: {},
+    channelBreakdown: {},
     userTypeBreakdown: {},
     geoBreakdown: {},
     stepFunnelBreakdown: {},
@@ -697,8 +699,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
     const simEmail = `${uid}@${EMAIL_DOMAINS[Math.floor(Math.random() * EMAIL_DOMAINS.length)]}`;
 
-    // UTM / 지역 / 성별 집계 (모든 유저)
+    // UTM / channel / 지역 / 성별 집계 (모든 유저)
     utmCount[utm.utm_source] = (utmCount[utm.utm_source] ?? 0) + 1;
+    const ch = utm.channel as string;
+    job.channelBreakdown[ch] = (job.channelBreakdown[ch] ?? 0) + 1;
     const region = geo.geo_region;
     geoCount[region] = (geoCount[region] ?? 0) + 1;
     job.genderBreakdown[gender] = (job.genderBreakdown[gender] ?? 0) + 1;
