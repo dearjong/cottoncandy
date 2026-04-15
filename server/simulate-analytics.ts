@@ -871,12 +871,12 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         const optionStr = pType === "public" ? "public" : "private";
         add("step1_cta_click", uid, projTs, { selected_option: optionStr, ...common });
 
+        // 18단계 작성은 1회차에 전부 끝내기 어려움 — 최소 2세션
         const projNumSessions = weightedPick([
-          { value: 1, weight: 25 }, { value: 2, weight: 45 }, { value: 3, weight: 30 },
+          { value: 2, weight: 60 }, { value: 3, weight: 40 },
         ]);
         // 세션별 처리 스텝 수 — 현실적 분포 (1회차에 앞부분 집중, 마무리는 2회차+)
         const sessionStepLimits: number[] = (() => {
-          if (projNumSessions === 1) return [18];
           if (projNumSessions === 2) {
             // 1회차: 8~13단계까지 (중간부터 저장 후 이탈), 2회차: 나머지 전부
             const s1 = weightedPick([
