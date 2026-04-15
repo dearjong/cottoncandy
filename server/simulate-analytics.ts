@@ -1014,6 +1014,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         let pfCurrentTs         = pfTs;
         let pfLastSection       = 0;
         let pfAbandoned         = false;
+        const pfWillComplete    = chance(2 / 3); // 시작한 사람 중 2/3 완주
         let pfTotalSessions     = 0;
         let pfTotalWritingSec   = 0;
         let pfDraftSaveCount    = 0;
@@ -1064,7 +1065,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             pfSessionWriteOffset += secDuration;
             pfTotalWritingSec    += secDuration;
 
-            if (sec.step < 13 && !chance(sec.passRate)) {
+            if (!pfWillComplete && sec.step < 13 && !chance(sec.passRate)) {
               pfDropoff[sec.step] = (pfDropoff[sec.step] ?? 0) + 1;
               if (chance(0.80)) {
                 pfDraftSaveCount++;
@@ -1156,6 +1157,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       let pfCurrentTs2          = pfTs2;
       let pfLastSection2        = 0;
       let pfAbandoned2          = false;
+      const pfWillComplete2     = chance(2 / 3); // 시작한 사람 중 2/3 완주
       let pfTotalSessions2      = 0;
       let pfTotalWritingSec2    = 0;
       let pfDraftSaveCount2     = 0;
@@ -1207,7 +1209,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           pfSessionWriteOffset2 += secDuration2;
           pfTotalWritingSec2    += secDuration2;
 
-          if (sec.step < 13 && !chance(sec.passRate)) {
+          if (!pfWillComplete2 && sec.step < 13 && !chance(sec.passRate)) {
             pfDropoff[sec.step] = (pfDropoff[sec.step] ?? 0) + 1;
             if (chance(0.80)) {
               pfDraftSaveCount2++;
