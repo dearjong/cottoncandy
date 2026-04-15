@@ -874,7 +874,28 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         const projNumSessions = weightedPick([
           { value: 1, weight: 25 }, { value: 2, weight: 45 }, { value: 3, weight: 30 },
         ]);
-        const projStepsPerSession = Math.ceil(18 / projNumSessions);
+        // 세션별 처리 스텝 수 — 현실적 분포 (1회차에 앞부분 집중, 마무리는 2회차+)
+        const sessionStepLimits: number[] = (() => {
+          if (projNumSessions === 1) return [18];
+          if (projNumSessions === 2) {
+            // 1회차: 8~13단계까지 (중간부터 저장 후 이탈), 2회차: 나머지 전부
+            const s1 = weightedPick([
+              { value: 8, weight: 10 }, { value: 9, weight: 20 }, { value: 10, weight: 28 },
+              { value: 11, weight: 22 }, { value: 12, weight: 13 }, { value: 13, weight: 7 },
+            ]);
+            return [s1, 18]; // 2회차는 남은 전 단계 커버
+          }
+          // 3세션: 1회차 6~10단계, 2회차 4~7단계, 3회차 나머지
+          const s1 = weightedPick([
+            { value: 6, weight: 15 }, { value: 7, weight: 22 }, { value: 8, weight: 28 },
+            { value: 9, weight: 22 }, { value: 10, weight: 13 },
+          ]);
+          const s2 = weightedPick([
+            { value: 4, weight: 20 }, { value: 5, weight: 35 },
+            { value: 6, weight: 30 }, { value: 7, weight: 15 },
+          ]);
+          return [s1, s2, 18];
+        })();
         let projStepIdx          = 0;  // PROJECT_STEPS 배열 내 현재 위치 (0-based)
         let projCurrentTs        = projTs;
         let lastStep             = 0;
@@ -913,8 +934,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             project_type: pType, cumulative_writing_sec: projTotalWritingSec, ...common,
           });
 
-          // 이 세션 담당 스텝: projStepIdx 위치부터 최대 projStepsPerSession개
-          const sessionSteps = PROJECT_STEPS.slice(projStepIdx, projStepIdx + projStepsPerSession);
+          // 이 세션 담당 스텝: projStepIdx 위치부터 이 세션의 한도만큼
+          const sessionLimit = sessionStepLimits[sIdx] ?? 18;
+          const sessionSteps = PROJECT_STEPS.slice(projStepIdx, projStepIdx + sessionLimit);
 
           for (const s of sessionSteps) {
             const stepDuration = s.step <= 3 ? randInt(45, 120)
