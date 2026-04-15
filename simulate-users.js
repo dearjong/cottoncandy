@@ -10,8 +10,8 @@ const MIXPANEL_TOKEN = "B32D8265A148455CB07F704BE7A648AA";
 const GA4_ENDPOINT = `https://www.google-analytics.com/mp/collect?measurement_id=${GA4_MEASUREMENT_ID}&api_secret=${GA4_API_SECRET}`;
 const MIXPANEL_ENDPOINT = "https://api.mixpanel.com/track";
 
-// 타임아웃 있는 fetch (기본 5초)
-function fetchWithTimeout(url, options, ms = 5000) {
+// 타임아웃 있는 fetch (기본 3초)
+function fetchWithTimeout(url, options, ms = 3000) {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), ms);
   return fetch(url, { ...options, signal: controller.signal })
