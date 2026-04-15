@@ -543,14 +543,6 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
       {/* ── 현황 탭 ── */}
       {activeSubTab === "status" && (
         <div className="space-y-6">
-          {/* 진행 상황 바 */}
-          {isRunning && job && (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-3 flex items-center gap-4">
-              <span className="text-xs text-gray-500 shrink-0">{job.message}</span>
-              <Progress value={job.progress} className="flex-1 h-2" />
-              <span className="text-xs font-semibold text-pink-600 shrink-0">{job.progress}%</span>
-            </div>
-          )}
           <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-4">
@@ -1447,14 +1439,36 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
 export default function ReportsPage() {
   const [openSignal, setOpenSignal] = useState(0);
   const [runSignal, setRunSignal] = useState(0);
+  const [simStatus, setSimStatus] = useState<{ progress: number; message: string; status: string } | null>(null);
+
+  useEffect(() => {
+    const poll = setInterval(async () => {
+      try {
+        const res = await fetch("/api/admin/simulate/latest");
+        const json = await res.json();
+        setSimStatus(json?.job ?? null);
+      } catch { /* ignore */ }
+    }, 3000);
+    return () => clearInterval(poll);
+  }, []);
+
+  const isRunning = simStatus && ["pending", "generating", "sending"].includes(simStatus.status);
 
   return (
     <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-4">
         <PageHeader title="활동현황" description="시뮬레이션 데이터와 주요 활동 지표를 확인하세요" hidePeriodFilter />
+        {isRunning && simStatus && (
+          <div className="flex-1 flex items-center gap-3 min-w-0">
+            <span className="text-[11px] text-gray-500 shrink-0 whitespace-nowrap">{simStatus.message}</span>
+            <Progress value={simStatus.progress} className="flex-1 h-1.5" />
+            <span className="text-[11px] font-semibold text-pink-600 shrink-0">{simStatus.progress}%</span>
+          </div>
+        )}
         <Button
           className="btn-pink-compact text-xs h-7 py-0 px-3 shrink-0"
           onClick={() => setRunSignal(s => s + 1)}
+          disabled={!!isRunning}
         >
           시뮬레이션 실행
         </Button>
