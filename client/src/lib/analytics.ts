@@ -302,7 +302,7 @@ export function identifyUser(props: {
   // Mixpanel — 예약 필드($email, $name)를 덮어써서 이전 개인정보 제거
   mixpanel.identify(anonId);
   mixpanel.people.set({
-    $email: maskedEmail,
+    ...(maskedEmail ? { $email: maskedEmail } : {}),
     $name: "",
     user_type: userType ?? "unknown",
     last_login: now,
