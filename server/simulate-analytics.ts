@@ -556,11 +556,55 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     { value: { utm_source: "organic", utm_medium: "organic",  channel: "organic" },                                   weight: cfg.pctOrganic },
   ];
 
+  // 서울 구 목록 (랜덤 도시로 활용)
+  const SEOUL_DISTRICTS = ["강남구","서초구","마포구","송파구","종로구","중구","용산구","영등포구","성동구","광진구"];
+  // 경기도 도시
+  const GYEONGGI_CITIES = ["수원시","성남시","고양시","안양시","부천시","용인시","화성시","남양주시","평택시","의정부시"];
+  // 지방 도시/지역 (균등 분산)
+  const LOCAL_ENTRIES = [
+    { city: "부산", region: "부산광역시" },
+    { city: "인천", region: "인천광역시" },
+    { city: "대구", region: "대구광역시" },
+    { city: "대전", region: "대전광역시" },
+    { city: "광주", region: "광주광역시" },
+    { city: "울산", region: "울산광역시" },
+    { city: "세종", region: "세종특별자치시" },
+    { city: "전주", region: "전라북도" },
+    { city: "청주", region: "충청북도" },
+    { city: "창원", region: "경상남도" },
+  ];
+  // 해외 도시
+  const ABROAD_ENTRIES = [
+    { city: "Tokyo", region: "Tokyo", country_code: "JP" },
+    { city: "New York", region: "New York", country_code: "US" },
+    { city: "Los Angeles", region: "California", country_code: "US" },
+    { city: "Singapore", region: "Singapore", country_code: "SG" },
+    { city: "Hong Kong", region: "Hong Kong", country_code: "HK" },
+  ];
+
+  function pickGeo(geoRegion: string): { geo_region: string; mp_city: string; mp_region: string; mp_country_code: string } {
+    if (geoRegion === "서울") {
+      const district = SEOUL_DISTRICTS[Math.floor(Math.random() * SEOUL_DISTRICTS.length)];
+      return { geo_region: "서울", mp_city: `서울 ${district}`, mp_region: "서울특별시", mp_country_code: "KR" };
+    }
+    if (geoRegion === "경기도") {
+      const city = GYEONGGI_CITIES[Math.floor(Math.random() * GYEONGGI_CITIES.length)];
+      return { geo_region: "경기도", mp_city: city, mp_region: "경기도", mp_country_code: "KR" };
+    }
+    if (geoRegion === "지방") {
+      const entry = LOCAL_ENTRIES[Math.floor(Math.random() * LOCAL_ENTRIES.length)];
+      return { geo_region: "지방", mp_city: entry.city, mp_region: entry.region, mp_country_code: "KR" };
+    }
+    // 해외
+    const entry = ABROAD_ENTRIES[Math.floor(Math.random() * ABROAD_ENTRIES.length)];
+    return { geo_region: "해외", mp_city: entry.city, mp_region: entry.region, mp_country_code: entry.country_code };
+  }
+
   const GEO_LIST = [
-    { value: { geo_region: "서울" },  weight: cfg.pctSeoul    },
-    { value: { geo_region: "경기도" }, weight: cfg.pctGyeonggi },
-    { value: { geo_region: "지방" },  weight: cfg.pctLocal    },
-    { value: { geo_region: "해외" },  weight: cfg.pctAbroad   },
+    { value: "서울",  weight: cfg.pctSeoul    },
+    { value: "경기도", weight: cfg.pctGyeonggi },
+    { value: "지방",  weight: cfg.pctLocal    },
+    { value: "해외",  weight: cfg.pctAbroad   },
   ];
 
   const HOME_CLICK_ELEMENTS = [
@@ -590,6 +634,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   // ── 기업명 풀 ──────────────────────────────────────
   const ADVERTISER_COMPANIES = ["삼성전자","LG전자","현대자동차","SK텔레콤","롯데그룹","CJ그룹","GS칼텍스","포스코","한화그룹","코카콜라코리아","맥도날드코리아","네이버","카카오","쿠팡","배달의민족","하이트진로","오뚜기","농심","풀무원","빙그레","아모레퍼시픽","LG생활건강","이니스프리","신세계백화점","롯데백화점","현대백화점","KB국민은행","신한은행","우리은행","하나은행"];
   const PARTNER_COMPANIES = ["솜사탕애드","마케팅에이전시","크리에이티브랩","광고제작소","미디어웍스","픽셀스튜디오","비주얼팩토리","아이디어뱅크","크리에이티브허브","영상스튜디오","광고창작소","미디어플러스","콘텐츠랩","영상팩토리","디자인스튜디오","브랜드에이전시","멀티미디어","그래픽하우스","모션웍스","퍼블리셔스"];
+  const EMAIL_DOMAINS = ["naver.com","gmail.com","kakao.com","daum.net","nate.com","hanmail.net"];
 
   // Mixpanel People 프로필 배치
   const mpPeople: Array<Record<string, unknown>> = [];
@@ -627,7 +672,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const gender   = weightedPick(GENDERS);
     const ageGroup = weightedPick(AGE_GROUPS);
     const utm      = weightedPick(UTM_LIST);
-    const geo      = weightedPick(GEO_LIST);
+    const geoKey   = weightedPick(GEO_LIST);
+    const geo      = pickGeo(geoKey);
     const isPartner = userType === "agency" || userType === "production";
     let didPortfolioReg = false;
     let exitPage = "홈 (/)";
@@ -640,9 +686,11 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       ? pick(ADVERTISER_COMPANIES)
       : pick(PARTNER_COMPANIES);
 
+    const simEmail = `${uid}@${EMAIL_DOMAINS[Math.floor(Math.random() * EMAIL_DOMAINS.length)]}`;
+
     // UTM / 지역 / 성별 집계 (모든 유저)
     utmCount[utm.utm_source] = (utmCount[utm.utm_source] ?? 0) + 1;
-    const region = geo.geo_region as string;
+    const region = geo.geo_region;
     geoCount[region] = (geoCount[region] ?? 0) + 1;
     job.genderBreakdown[gender] = (job.genderBreakdown[gender] ?? 0) + 1;
 
@@ -655,13 +703,18 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       gender,
       age_group: ageGroup,
       ...utm,
-      ...geo,
+      geo_region: geo.geo_region,
       page_referrer: referrer,
       $referrer: referrer,
     };
 
     // Mixpanel People 프로필 등록
     registerMixpanelPeople(uid, {
+      $email:       simEmail,
+      $name:        uid,
+      $city:        geo.mp_city,
+      $region:      geo.mp_region,
+      $country_code: geo.mp_country_code,
       user_type:    userType,
       user_company: userCompany,
       gender,
