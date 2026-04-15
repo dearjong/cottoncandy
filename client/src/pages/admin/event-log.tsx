@@ -305,7 +305,7 @@ function fmt(dateStr?: string) {
 
 const PAGE_SIZE_OPTIONS = [20, 50, 100];
 
-export default function EventLogPage() {
+export function EventLogTab() {
   const [filter, setFilter] = useState("all");
   const [userTypeFilter, setUserTypeFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -378,13 +378,7 @@ export default function EventLogPage() {
   const rows = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   return (
-    <div className="space-y-6 p-6">
-      <PageHeader
-        title="클릭 이벤트 로그"
-        description="홈 카테고리·카드·FAQ·GNB 등 사용자 클릭을 실시간으로 확인합니다"
-        hidePeriodFilter
-      />
-
+    <div className="space-y-4">
       {/* 컨트롤 바 */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-3">
         {/* 1행: 카테고리 + 유저타입 + 검색 + 버튼들 */}
@@ -604,6 +598,19 @@ export default function EventLogPage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+export default function EventLogPage() {
+  return (
+    <div className="space-y-6 p-6">
+      <PageHeader
+        title="클릭 이벤트 로그"
+        description="홈 카테고리·카드·FAQ·GNB 등 사용자 클릭을 실시간으로 확인합니다"
+        hidePeriodFilter
+      />
+      <EventLogTab />
     </div>
   );
 }

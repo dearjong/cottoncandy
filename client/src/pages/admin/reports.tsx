@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { StatisticsDashboard } from "@/components/admin/statistics-dashboard";
 import { PageHeader } from "@/components/admin/page-header";
+import { EventLogTab } from "@/pages/admin/event-log";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -1315,6 +1316,7 @@ export default function ReportsPage() {
           <TabsList className="bg-gray-100 shrink-0">
             <TabsTrigger value="activity">활동현황</TabsTrigger>
             <TabsTrigger value="platform">플랫폼 현황</TabsTrigger>
+            <TabsTrigger value="eventlog">이벤트 로그</TabsTrigger>
           </TabsList>
           {activeTab === "activity" && (
             <>
@@ -1342,6 +1344,10 @@ export default function ReportsPage() {
 
         <TabsContent value="platform" className="mt-6">
           <StatisticsDashboard />
+        </TabsContent>
+
+        <TabsContent value="eventlog" className="mt-6">
+          <EventLogTab />
         </TabsContent>
       </Tabs>
     </div>
