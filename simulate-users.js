@@ -164,6 +164,17 @@ const USER_TYPES = [
 ];
 const GENDERS    = ["male","female"]; // 남 50% / 여 50%
 const AGE_GROUPS = ["20s","30s","30s","30s","40s","40s","50s"]; // 30-40대 중심
+const EMAIL_DOMAINS = [
+  ...Array(35).fill("naver.com"),
+  ...Array(20).fill("gmail.com"),
+  ...Array(15).fill("kakao.com"),
+  ...Array(10).fill("hanmail.net"),
+  ...Array(8).fill("daum.net"),
+  ...Array(5).fill("nate.com"),
+  ...Array(4).fill("icloud.com"),
+  ...Array(3).fill("outlook.com"),
+];
+function genMaskedEmail() { return `***@${pick(EMAIL_DOMAINS)}`; }
 
 // UTM 유입 채널 (가중치 배열)
 const UTM_SOURCES = [
@@ -225,6 +236,8 @@ async function simulateUser(i) {
   if (isTvcf && chance(0.50)) {
     await emit(clientId, userId, "sso_login", { source: "tvcf.co.kr", method: "sso", ...base }, next(500, 2000));
     await setMixpanelProfile(userId, {
+      $email: genMaskedEmail(),
+      $name: "",
       gender, age_group: ageGroup, user_type: userType, account_type: "sso",
       $city: location.$city, $region: location.$region, $country_code: location.$country_code,
       geo_region: location.geo_region,
@@ -256,6 +269,8 @@ async function simulateUser(i) {
           await emit(clientId, userId, "signup_complete", { account_type: accountType, ...base }, next(1000, 3000));
 
           await setMixpanelProfile(userId, {
+            $email: genMaskedEmail(),
+            $name: "",
             gender, age_group: ageGroup, user_type: userType, account_type: accountType,
             $city: location.$city, $region: location.$region, $country_code: location.$country_code,
             geo_region: location.geo_region,
