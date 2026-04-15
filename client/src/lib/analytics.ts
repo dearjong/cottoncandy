@@ -311,6 +311,7 @@ export function identifyUser(props: {
     });
     gtag("set", "user_properties", {
       user_type: userType ?? "unknown",
+      email_domain: email ? emailDomain(email) : "",
     });
   }
 
