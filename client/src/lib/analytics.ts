@@ -377,6 +377,19 @@ export function trackSiteVisitOnce(path: string) {
     sessionStorage.setItem(SITE_VISIT_SESSION_KEY, "1");
     const traffic = captureTrafficSource();
     publishAnalytics("site_visit", { path, ...traffic });
+
+    // 비회원 방문자: Mixpanel People 프로필 생성 (guest_xxx)
+    // 로그인 시 identifyUser()가 호출되면 자동으로 실제 ID로 병합됨
+    const isLoggedIn = !!localStorage.getItem("analytics_user_id");
+    if (!isLoggedIn && typeof mixpanel !== "undefined") {
+      const distinctId = mixpanel.get_distinct_id?.() ?? "";
+      const shortId = distinctId.replace(/^\$device:/, "").slice(-8);
+      mixpanel.people.set({
+        $name: `guest_${shortId}`,
+        user_type: "guest",
+        last_seen: new Date().toISOString(),
+      });
+    }
   } catch {
     const traffic = captureTrafficSource();
     publishAnalytics("site_visit", { path, ...traffic });
