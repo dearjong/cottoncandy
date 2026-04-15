@@ -296,21 +296,26 @@ export function identifyUser(props: {
   // 식별 가능 정보를 익명 ID로 변환
   const anonId = anonymizeId(userId);
 
-  // 두 플랫폼에 동일하게 전송할 사용자 속성
-  const userProps = {
-    email: email ? maskEmail(email) : "",
-    user_type: userType ?? "unknown",
-    last_login: new Date().toISOString(),
-  };
+  const maskedEmail = email ? maskEmail(email) : "";
+  const now = new Date().toISOString();
 
-  // Mixpanel
+  // Mixpanel — 예약 필드($email, $name)를 덮어써서 이전 개인정보 제거
   mixpanel.identify(anonId);
-  mixpanel.people.set(userProps);
+  mixpanel.people.set({
+    $email: maskedEmail,
+    $name: "",
+    user_type: userType ?? "unknown",
+    last_login: now,
+  });
 
-  // GA4 (동일 속성)
+  // GA4
   if (typeof gtag !== "undefined") {
     gtag("config", "G-MG1WSR89E1", { user_id: anonId });
-    gtag("set", "user_properties", userProps);
+    gtag("set", "user_properties", {
+      email: maskedEmail,
+      user_type: userType ?? "unknown",
+      last_login: now,
+    });
   }
 
   // localStorage에 저장 → 새로고침 후 재식별에 활용 (이미 익명화된 ID)
@@ -328,6 +333,12 @@ export function reIdentifyIfLoggedIn() {
   try {
     const userId = localStorage.getItem("analytics_user_id");
     const userType = localStorage.getItem("analytics_user_type");
+    // usr_ 접두어가 없으면 anonymize 이전 값 → 무시하고 삭제
+    if (userId && !userId.startsWith("usr_")) {
+      localStorage.removeItem("analytics_user_id");
+      localStorage.removeItem("analytics_user_type");
+      return;
+    }
     if (userId) {
       mixpanel.identify(userId);
       if (typeof gtag !== "undefined") {
