@@ -380,6 +380,33 @@ export async function startSimulation(cfg: SimConfig): Promise<string> {
   return jobId;
 }
 
+const SEARCH_TERMS_KO = ["영상%20제작", "브랜드%20광고", "광고%20영상", "CF%20제작사", "마케팅%20영상"];
+const TVCF_PAGES = [
+  () => `https://www.tvcf.co.kr/AdView/adview.asp?id=${Math.floor(Math.random()*90000)+10000}`,
+  () => `https://www.tvcf.co.kr/BestAd/BestAdList.asp`,
+  () => `https://www.tvcf.co.kr/news/article.asp?no=${Math.floor(Math.random()*9000)+1000}`,
+  () => `https://www.tvcf.co.kr/AdView/AdViewList.asp?category=CF`,
+];
+function genReferrer(utmSource: string): string {
+  const q = SEARCH_TERMS_KO[Math.floor(Math.random() * SEARCH_TERMS_KO.length)];
+  switch (utmSource) {
+    case "tvcf.co.kr": return TVCF_PAGES[Math.floor(Math.random() * TVCF_PAGES.length)]();
+    case "google":  return `https://www.google.com/search?q=${q}&hl=ko`;
+    case "naver": {
+      const r = Math.random();
+      if (r < 0.5) return `https://search.naver.com/search.naver?query=${q}`;
+      if (r < 0.8) return `https://cafe.naver.com/adfilm/${Math.floor(Math.random()*900000)+100000}`;
+      return `https://blog.naver.com/ad_creator_kr/${Math.floor(Math.random()*10000000)+220000000}`;
+    }
+    case "kakao": {
+      return Math.random() < 0.5
+        ? `https://pf.kakao.com/_xmxadmk/posts/${Math.floor(Math.random()*90000)+10000}`
+        : `https://story.kakao.com/admarket_official/${Math.floor(Math.random()*90000)+10000}`;
+    }
+    default: return ""; // organic = direct
+  }
+}
+
 async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   ga4Validated = false; // 매 job마다 재검증
   job.status = "generating";
@@ -614,12 +641,15 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const joinSecsAgo = Math.floor(Math.random() * cfg.periodDays * 24 * 3600);
     const baseTs = tsAgo(joinSecsAgo);
 
+    const referrer = genReferrer(utm.utm_source as string);
     const common: Record<string, unknown> = {
       user_type: userType,
       gender,
       age_group: ageGroup,
       ...utm,
       ...geo,
+      page_referrer: referrer,
+      $referrer: referrer,
     };
 
     // Mixpanel People 프로필 등록
