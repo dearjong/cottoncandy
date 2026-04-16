@@ -445,10 +445,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   const directCount = job.directEntryBreakdown;
   const pfFunnel = job.portfolioFunnelBreakdown;
   const pfDropoff = job.portfolioDropoffBreakdown;
+  const jobStartSec = Math.floor(Date.now() / 1000);
 
   function add(event: string, distinctId: string, ts: number, props: Record<string, unknown>) {
-    const nowSec = Math.floor(Date.now() / 1000);
-    const cappedTs = Math.min(ts, nowSec - 60);
+    const cappedTs = Math.min(ts, jobStartSec - 60);
     events.push({
       event,
       properties: { token: MIXPANEL_TOKEN, distinct_id: distinctId, time: cappedTs, simulation: true, ...props },
