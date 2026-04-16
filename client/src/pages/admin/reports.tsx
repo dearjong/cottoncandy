@@ -86,7 +86,7 @@ interface SimConfig {
 }
 
 const DEFAULTS: SimConfig = {
-  userCount: 200, periodSecs: 600,
+  userCount: 10, periodSecs: 0,
   pctAdvertiser: 10, pctAgency: 30,       pctProduction: 60,
   pctTvcf: 85,       pctGoogle: 5,         pctNaver: 5,        pctKakao: 3,   pctOrganic: 2,
   pctSsoLogin: 20,   pctManualLogin: 15,   pctSignup: 5,
@@ -150,7 +150,7 @@ const FUNNEL_ORDER = [
 ];
 
 const SIM_CFG_KEY = "admarket_sim_cfg";
-const SIM_CFG_VERSION = 4;
+const SIM_CFG_VERSION = 5;
 const VALID_COUNTS = [10, 100, 200, 300, 500, 1000, 2000, 3000, 5000, 10000];
 
 function loadSavedCfg(): SimConfig {
