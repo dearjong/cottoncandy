@@ -447,9 +447,11 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   const pfDropoff = job.portfolioDropoffBreakdown;
 
   function add(event: string, distinctId: string, ts: number, props: Record<string, unknown>) {
+    const nowSec = Math.floor(Date.now() / 1000);
+    const cappedTs = Math.min(ts, nowSec - 60);
     events.push({
       event,
-      properties: { token: MIXPANEL_TOKEN, distinct_id: distinctId, time: ts, simulation: true, ...props },
+      properties: { token: MIXPANEL_TOKEN, distinct_id: distinctId, time: cappedTs, simulation: true, ...props },
     });
     funnel[event] = (funnel[event] ?? 0) + 1;
 
