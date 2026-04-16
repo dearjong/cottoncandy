@@ -328,7 +328,7 @@ export const DEFAULT_CONFIG: SimConfig = {
   pctSsoLogin: 20, pctManualLogin: 15, pctSignup: 5,
   pctMale: 45, pctFemale: 55,
   pct20s: 10, pct30s: 35, pct40s: 35, pct50s: 20,
-  pctSeoul: 35, pctGyeonggi: 20, pctLocal: 40, pctAbroad: 5,
+  pctSeoul: 87, pctGyeonggi: 8, pctLocal: 4, pctAbroad: 1,
   projectRegCount: 12,
   portfolioRegCount: 40,
   partnerApplyCount: 30,
