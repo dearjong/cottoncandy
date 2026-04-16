@@ -702,25 +702,23 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3">
                 <p className="font-semibold text-teal-700 text-sm">접속 지역</p>
                 <div className="space-y-2">
-                  {[
-                    { key: "서울",  color: "bg-blue-500"   },
-                    { key: "경기도", color: "bg-blue-400"   },
-                    { key: "지방",  color: "bg-purple-400" },
-                    { key: "해외",  color: "bg-indigo-400" },
-                  ].map(({ key, color }) => {
-                    const count = geoBreakdown[key] ?? 0;
-                    const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
-                    return (
-                      <div key={key} className="flex items-center gap-3">
-                        <div className="w-16 text-xs text-gray-600 shrink-0">{key}</div>
-                        <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                          <div className={`${color} h-3 rounded-full`} style={{ width: `${pct}%` }} />
+                  {(() => {
+                    const colors = ["bg-blue-500","bg-blue-400","bg-purple-400","bg-indigo-400","bg-teal-400","bg-pink-400"];
+                    const entries = Object.entries(geoBreakdown).sort((a, b) => b[1] - a[1]);
+                    return entries.map(([key, count], idx) => {
+                      const pct = totalUsers > 0 ? Math.round((count / totalUsers) * 100) : 0;
+                      return (
+                        <div key={key} className="flex items-center gap-3">
+                          <div className="w-16 text-xs text-gray-600 shrink-0">{key}</div>
+                          <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                            <div className={`${colors[idx % colors.length]} h-3 rounded-full`} style={{ width: `${pct}%` }} />
+                          </div>
+                          <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
+                          <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
                         </div>
-                        <div className="w-10 text-right text-xs font-medium text-gray-700">{count.toLocaleString()}</div>
-                        <div className="w-8 text-right text-xs text-gray-400">{pct}%</div>
-                      </div>
-                    );
-                  })}
+                      );
+                    });
+                  })()}
                 </div>
               </div>
 
