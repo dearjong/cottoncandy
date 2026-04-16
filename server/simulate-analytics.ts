@@ -735,7 +735,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     geoCount[region] = (geoCount[region] ?? 0) + 1;
     job.genderBreakdown[gender] = (job.genderBreakdown[gender] ?? 0) + 1;
 
-    const joinSecsAgo = cfg.periodSecs > 0 ? Math.floor(Math.random() * cfg.periodSecs) : 0;
+    const joinSecsAgo = cfg.periodSecs > 0 ? Math.floor(Math.random() * cfg.periodSecs) : 7200;
     const baseTs = tsAgo(joinSecsAgo);
 
     const referrer = genReferrer(utm.utm_source as string);
