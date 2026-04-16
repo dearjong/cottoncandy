@@ -334,8 +334,8 @@ export const DEFAULT_CONFIG: SimConfig = {
   partnerApplyCount: 30,
   minProjectCompletions: 3,
   minPortfolioCompletions: 3,
-  pctPublic: 30,
-  pctPrivate: 40,
+  pctPublic: 28,
+  pctPrivate: 42,
   pctConsulting: 30,
 };
 

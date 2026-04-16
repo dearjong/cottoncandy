@@ -104,8 +104,8 @@ const DEFAULTS: SimConfig = {
   partnerApplyCount: 30,
   minProjectCompletions: 5,
   minPortfolioCompletions: 5,
-  pctPublic: 30,
-  pctPrivate: 40,
+  pctPublic: 28,
+  pctPrivate: 42,
   pctConsulting: 30,
   mixpanelToken: "a6d30eeef83cda0e513f6b3ea08a0b3d",
   ga4MeasurementId: "G-SR7QGTY3K9",
@@ -162,7 +162,7 @@ const FUNNEL_ORDER = [
 ];
 
 const SIM_CFG_KEY = "admarket_sim_cfg";
-const SIM_CFG_VERSION = 7;
+const SIM_CFG_VERSION = 8;
 const VALID_COUNTS = [10, 100, 200, 300, 500, 1000, 2000, 3000, 5000, 10000];
 
 function loadSavedCfg(): SimConfig {
