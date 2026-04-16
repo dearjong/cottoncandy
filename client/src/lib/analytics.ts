@@ -350,6 +350,31 @@ export function reIdentifyIfLoggedIn() {
 }
 
 /**
+ * 로그인 시작 이벤트 — 이메일 다음 버튼 클릭 또는 SSO 버튼 클릭 시점.
+ * 로그인 완료(trackLogin / trackSsoLogin)와 쌍으로 사용해 퍼널 이탈률 측정.
+ */
+export function trackLoginStarted(props: {
+  method: "email" | "naver" | "google";
+}) {
+  publishAnalytics("login_started", { method: props.method });
+}
+
+/**
+ * SSO 로그인 완료 이벤트 — OAuth 콜백 또는 SSO 버튼 처리 완료 시점.
+ */
+export function trackSsoLogin(props: {
+  method: "naver" | "google";
+  source?: string;
+  user_type?: "advertiser" | "agency" | "production";
+}) {
+  publishAnalytics("sso_login", {
+    method: props.method,
+    source: props.source ?? props.method,
+    user_type: props.user_type ?? "advertiser",
+  });
+}
+
+/**
  * 로그인 완료 이벤트 — GA4 표준 `login` 이벤트 + Mixpanel 커스텀 이벤트.
  * identifyUser() 호출 직후 함께 사용할 것.
  */

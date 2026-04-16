@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { getSubtitle } from "@/config/global-events";
-import { identifyUser, trackLogin } from "@/lib/analytics";
+import { identifyUser, trackLogin, trackLoginStarted, trackSsoLogin } from "@/lib/analytics";
 import memberImage from "@assets/로그인 회원_1759381986859.png";
 import nonMemberImage from "@assets/로그인 비회원_1759381986859.png";
 import googleLogo from "@assets/Logo_Google_1759383453744.png";
@@ -104,6 +104,7 @@ export default function Login() {
 
   const handleEmailNext = () => {
     if (!validateEmail(email)) return;
+    trackLoginStarted({ method: "email" });
     setLoginStep(2);
   };
 
@@ -281,7 +282,17 @@ export default function Login() {
 
                       <div className="space-y-2">
                         <Button
-                          onClick={() => console.log('네이버 로그인')}
+                          onClick={() => {
+                            trackLoginStarted({ method: "naver" });
+                            identifyUser({ userId: `naver-${Date.now()}`, userType: "advertiser" });
+                            trackSsoLogin({ method: "naver", user_type: "advertiser" });
+                            trackLogin({ method: "naver", user_type: "advertiser" });
+                            localStorage.setItem('isLoggedIn', 'true');
+                            localStorage.setItem('userName', '이꽃별');
+                            localStorage.setItem('userType', '의뢰');
+                            localStorage.setItem('userMode', 'request');
+                            setLocation('/work/home');
+                          }}
                           className="btn-white"
                           data-testid="button-naver"
                         >
@@ -289,7 +300,17 @@ export default function Login() {
                           네이버 로그인
                         </Button>
                         <Button
-                          onClick={() => console.log('구글 로그인')}
+                          onClick={() => {
+                            trackLoginStarted({ method: "google" });
+                            identifyUser({ userId: `google-${Date.now()}`, userType: "advertiser" });
+                            trackSsoLogin({ method: "google", user_type: "advertiser" });
+                            trackLogin({ method: "google", user_type: "advertiser" });
+                            localStorage.setItem('isLoggedIn', 'true');
+                            localStorage.setItem('userName', '이꽃별');
+                            localStorage.setItem('userType', '의뢰');
+                            localStorage.setItem('userMode', 'request');
+                            setLocation('/work/home');
+                          }}
                           className="btn-white"
                           data-testid="button-google"
                         >
