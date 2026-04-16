@@ -226,6 +226,7 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
   const [visitFilter, setVisitFilter] = useState<0 | 1 | 2 | 3 | 4>(0); // 0=전체
   const [pfVisitFilter, setPfVisitFilter] = useState<0 | 1 | 2 | 3 | 4>(0); // 포트폴리오 방문 회차
   const [codeEditorOpen, setCodeEditorOpen] = useState(false);
+  const [tokenOpen, setTokenOpen] = useState(false);
   const [simCode, setSimCode] = useState<string>("");
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeSaving, setCodeSaving] = useState(false);
@@ -554,38 +555,47 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                     <div className="text-[10px] font-normal text-gray-400">비워두면 기본값 사용</div>
                   </td>
                   <td className="py-1" colSpan={2}>
-                    <div className="flex flex-col gap-2">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[10px] text-gray-400">Mixpanel Token</span>
-                        <input
-                          type="text"
-                          value={dialogCfg.mixpanelToken}
-                          onChange={(e) => setD("mixpanelToken", e.target.value)}
-                          placeholder="Mixpanel 프로젝트 토큰"
-                          className="w-80 border border-gray-200 rounded px-2 py-1 text-xs text-gray-800 font-mono focus:outline-none focus:ring-1 focus:ring-pink-300"
-                        />
+                    <button
+                      type="button"
+                      onClick={() => setTokenOpen(o => !o)}
+                      className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 border border-gray-200 rounded px-2.5 py-1 bg-gray-50 hover:bg-gray-100 transition-colors"
+                    >
+                      <span>{tokenOpen ? "▲ 숨기기" : "▼ 토큰 보기"}</span>
+                    </button>
+                    {tokenOpen && (
+                      <div className="flex flex-col gap-2 mt-2">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[10px] text-gray-400">Mixpanel Token</span>
+                          <input
+                            type="text"
+                            value={dialogCfg.mixpanelToken}
+                            onChange={(e) => setD("mixpanelToken", e.target.value)}
+                            placeholder="Mixpanel 프로젝트 토큰"
+                            className="w-80 border border-gray-200 rounded px-2 py-1 text-xs text-gray-800 font-mono focus:outline-none focus:ring-1 focus:ring-pink-300"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[10px] text-gray-400">GA4 Measurement ID</span>
+                          <input
+                            type="text"
+                            value={dialogCfg.ga4MeasurementId}
+                            onChange={(e) => setD("ga4MeasurementId", e.target.value)}
+                            placeholder="G-XXXXXXXXXX"
+                            className="w-80 border border-gray-200 rounded px-2 py-1 text-xs text-gray-800 font-mono focus:outline-none focus:ring-1 focus:ring-pink-300"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[10px] text-gray-400">GA4 API 비밀번호</span>
+                          <input
+                            type="text"
+                            value={dialogCfg.ga4ApiSecret}
+                            onChange={(e) => setD("ga4ApiSecret", e.target.value)}
+                            placeholder="GA4 API Secret"
+                            className="w-80 border border-gray-200 rounded px-2 py-1 text-xs text-gray-800 font-mono focus:outline-none focus:ring-1 focus:ring-pink-300"
+                          />
+                        </div>
                       </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[10px] text-gray-400">GA4 Measurement ID</span>
-                        <input
-                          type="text"
-                          value={dialogCfg.ga4MeasurementId}
-                          onChange={(e) => setD("ga4MeasurementId", e.target.value)}
-                          placeholder="G-XXXXXXXXXX"
-                          className="w-80 border border-gray-200 rounded px-2 py-1 text-xs text-gray-800 font-mono focus:outline-none focus:ring-1 focus:ring-pink-300"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[10px] text-gray-400">GA4 API 비밀번호</span>
-                        <input
-                          type="text"
-                          value={dialogCfg.ga4ApiSecret}
-                          onChange={(e) => setD("ga4ApiSecret", e.target.value)}
-                          placeholder="GA4 API Secret"
-                          className="w-80 border border-gray-200 rounded px-2 py-1 text-xs text-gray-800 font-mono focus:outline-none focus:ring-1 focus:ring-pink-300"
-                        />
-                      </div>
-                    </div>
+                    )}
                   </td>
                 </tr>
               </tbody>
