@@ -1062,6 +1062,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           job.projDaysSum     += projTotalDays;
           job.projSessionsSum += projTotalSessions;
           job.projWritingMinSum += Math.round(projTotalWritingSec / 60);
+          const daysSinceSignup  = +((projCurrentTs + 10 - baseTs) / 86400).toFixed(1);
+          const hoursSinceSignup = Math.round((projCurrentTs + 10 - baseTs) / 3600);
           add("project_submitted", uid, projCurrentTs + 10, {
             project_id: projectId, project_type: pType,
             registration_type: pType,
@@ -1069,7 +1071,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             total_sessions: projTotalSessions, total_hours: projTotalHours,
             total_days: projTotalDays, avg_session_gap_hours: projAvgGap,
             total_writing_time_sec: projTotalWritingSec,
-            total_writing_time_min: Math.round(projTotalWritingSec / 60), ...common,
+            total_writing_time_min: Math.round(projTotalWritingSec / 60),
+            days_since_signup: daysSinceSignup,
+            hours_since_signup: hoursSinceSignup,
+            ...common,
           });
           aidaAction = true;
           if (chance(0.30)) {
@@ -1460,6 +1465,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           project_id: `gp_${k}`, project_type: gpType, registration_type: gpType, category: "영상광고",
           budget_range: "500-1000만", total_sessions: 3, total_hours: 120, total_days: 5,
           avg_session_gap_hours: 40, total_writing_time_sec: writeOffset, total_writing_time_min: Math.round(writeOffset / 60),
+          days_since_signup: 3 + k,
+          hours_since_signup: (3 + k) * 24,
           ...synthCommon,
         });
       }
