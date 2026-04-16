@@ -743,8 +743,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         ? ["naver.com", "google.com", "daum.net"][Math.floor(Math.random() * 3)]
         : "(직접 유입)");
     job.referrerBreakdown[refDomain] = (job.referrerBreakdown[refDomain] ?? 0) + 1;
-    const region = geo.geo_region;
-    geoCount[region] = (geoCount[region] ?? 0) + 1;
+    geoCount[geoKey] = (geoCount[geoKey] ?? 0) + 1;
     job.genderBreakdown[gender] = (job.genderBreakdown[gender] ?? 0) + 1;
 
     const joinSecsAgo = cfg.periodSecs > 0 ? Math.floor(Math.random() * cfg.periodSecs) : 7200;
