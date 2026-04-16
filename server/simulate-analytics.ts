@@ -726,7 +726,12 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const manualThreshold = ssoThreshold + cfg.pctManualLogin;
     const signupThreshold = manualThreshold + cfg.pctSignup;
 
-    if (userType === "advertiser" && projRegDone < cfg.projectRegCount) {
+    // project_submit: 광고주 90% / 대행사 4% / 제작사 0.6% — 세 유형 모두 등록 가능
+    const projSubmitProb =
+      userType === "advertiser" ? 0.90 :
+      userType === "agency"     ? 0.04 : 0.006;
+
+    if (projRegDone < cfg.projectRegCount && chance(projSubmitProb)) {
       journeyType = "project_submit"; projRegDone++;
     } else if (isPartner && partnerApplyDone < cfg.partnerApplyCount) {
       journeyType = "partner_apply"; partnerApplyDone++;
