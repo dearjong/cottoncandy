@@ -1399,41 +1399,55 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   const synTs = Math.floor(Date.now() / 1000) - 86400;
   const synthCommon = { user_type: "advertiser", utm_source: "tvcf.co.kr", geo: "서울", gender: "male", age_group: "30s" };
 
-  if (job.projectCompletedCount < minProjComplete) {
-    const needed = minProjComplete - job.projectCompletedCount;
+  // 3가지 유형 각각 최소 1건 보장 (전체 minProjComplete 도 충족)
+  const minProjCompleteTotal = Math.max(3, minProjComplete);
+  if (job.projectCompletedCount < minProjCompleteTotal) {
+    const needed = minProjCompleteTotal - job.projectCompletedCount;
+    // public / private / consulting 순환 배분
+    const GP_TYPES = ["public", "private", "consulting"] as const;
     for (let k = 0; k < needed; k++) {
+      const gpType = GP_TYPES[k % 3];
       const sUid = `sim_gp_${k}`;
-      job.projectCompletedCount += 1;
-      job.projectTypeBreakdown["public"] = (job.projectTypeBreakdown["public"] ?? 0) + 1;
-      job.projDaysSum += 5; job.projSessionsSum += 3; job.projWritingMinSum += 120;
       const projTs = synTs + k * 3600;
-      let writeOffset = 0;
-      // 18단계 전체 step 이벤트 생성 — 3세션으로 나눠 방문회차 분포 반영
-      // 1회차: 단계 1~8, 2회차: 단계 9~14, 3회차: 단계 15~18
-      const S1_CUT = 8;
-      const S2_CUT = 14;
-      for (const s of PROJECT_STEPS) {
-        const dur = s.step <= 3 ? 60 : s.step <= 12 ? 180 : 60;
-        const synVisit = s.step <= S1_CUT ? 1 : s.step <= S2_CUT ? 2 : 3;
-        stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
-        if (!job.stepFunnelByType["public"]) job.stepFunnelByType["public"] = {};
-        job.stepFunnelByType["public"][s.step] = (job.stepFunnelByType["public"][s.step] ?? 0) + 1;
-        if (!job.visitFunnelBreakdown[synVisit]) job.visitFunnelBreakdown[synVisit] = {};
-        job.visitFunnelBreakdown[synVisit][s.step] = (job.visitFunnelBreakdown[synVisit][s.step] ?? 0) + 1;
-        add(`step_${s.step}_${s.screen}`, sUid, projTs + writeOffset, {
-          step: s.step, screen: s.screen, project_type: "public",
-          session_number: synVisit, resumed_from_draft: synVisit > 1,
-          time_on_step_sec: dur, cumulative_writing_sec: writeOffset + dur,
+
+      if (gpType === "consulting") {
+        // 컨설팅: 단계 퍼널 없이 바로 의뢰 접수
+        job.consultingRegisteredCount += 1;
+        job.projectTypeBreakdown["consulting"] = (job.projectTypeBreakdown["consulting"] ?? 0) + 1;
+        add("consulting_inquiry_submitted", sUid, projTs, {
+          inquiry_type: "new", category: "영상광고", is_first_time: true, ...synthCommon,
+        });
+      } else {
+        // public / private: 18단계 퍼널 생성
+        job.projectCompletedCount += 1;
+        job.projectTypeBreakdown[gpType] = (job.projectTypeBreakdown[gpType] ?? 0) + 1;
+        job.projDaysSum += 5; job.projSessionsSum += 3; job.projWritingMinSum += 120;
+        let writeOffset = 0;
+        const S1_CUT = 8;
+        const S2_CUT = 14;
+        for (const s of PROJECT_STEPS) {
+          const dur = s.step <= 3 ? 60 : s.step <= 12 ? 180 : 60;
+          const synVisit = s.step <= S1_CUT ? 1 : s.step <= S2_CUT ? 2 : 3;
+          stepFunnel[s.step] = (stepFunnel[s.step] ?? 0) + 1;
+          if (!job.stepFunnelByType[gpType]) job.stepFunnelByType[gpType] = {};
+          job.stepFunnelByType[gpType][s.step] = (job.stepFunnelByType[gpType][s.step] ?? 0) + 1;
+          if (!job.visitFunnelBreakdown[synVisit]) job.visitFunnelBreakdown[synVisit] = {};
+          job.visitFunnelBreakdown[synVisit][s.step] = (job.visitFunnelBreakdown[synVisit][s.step] ?? 0) + 1;
+          add(`step_${s.step}_${s.screen}`, sUid, projTs + writeOffset, {
+            step: s.step, screen: s.screen, project_type: gpType,
+            session_number: synVisit, resumed_from_draft: synVisit > 1,
+            time_on_step_sec: dur, cumulative_writing_sec: writeOffset + dur,
+            ...synthCommon,
+          });
+          writeOffset += dur;
+        }
+        add("project_submitted", sUid, projTs + writeOffset + 30, {
+          project_id: `gp_${k}`, project_type: gpType, category: "영상광고",
+          budget_range: "500-1000만", total_sessions: 3, total_hours: 120, total_days: 5,
+          avg_session_gap_hours: 40, total_writing_time_sec: writeOffset, total_writing_time_min: Math.round(writeOffset / 60),
           ...synthCommon,
         });
-        writeOffset += dur;
       }
-      add("project_submitted", sUid, projTs + writeOffset + 30, {
-        project_id: `gp_${k}`, project_type: "public", category: "영상광고",
-        budget_range: "500-1000만", total_sessions: 3, total_hours: 120, total_days: 5,
-        avg_session_gap_hours: 40, total_writing_time_sec: writeOffset, total_writing_time_min: Math.round(writeOffset / 60),
-        ...synthCommon,
-      });
     }
   }
 
