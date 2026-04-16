@@ -939,6 +939,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         let projDraftSaveCount   = 0;
         let projLastSaveTs       = projTs;
         let projFinallyAbandoned = false; // 임시저장 없이 완전 이탈
+        let step3Ts              = projTs; // step3(프로젝트명) 저장 시점 (기본: projTs)
 
         for (let sIdx = 0; sIdx < projNumSessions && projStepIdx < PROJECT_STEPS.length && !projFinallyAbandoned; sIdx++) {
           projTotalSessions++;
@@ -1021,6 +1022,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             }
 
             // 단계 성공: 위치 전진
+            if (s.step === 3) step3Ts = projCurrentTs + sessionWriteOffset + 10;
             lastStep = s.step;
             projStepIdx++;
           }
@@ -1067,8 +1069,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           job.projDaysSum     += projTotalDays;
           job.projSessionsSum += projTotalSessions;
           job.projWritingMinSum += Math.round(projTotalWritingSec / 60);
-          const daysSinceSignup  = +((projCurrentTs + 10 - baseTs) / 86400).toFixed(1);
-          const hoursSinceSignup = Math.round((projCurrentTs + 10 - baseTs) / 3600);
+          const draftToSubmitHours = Math.round((projCurrentTs + 10 - step3Ts) / 3600);
+          const draftToSubmitDays  = +(draftToSubmitHours / 24).toFixed(1);
           add("project_submitted", uid, projCurrentTs + 10, {
             project_id: projectId, project_type: pType,
             registration_type: pType,
@@ -1077,8 +1079,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             total_days: projTotalDays, avg_session_gap_hours: projAvgGap,
             total_writing_time_sec: projTotalWritingSec,
             total_writing_time_min: Math.round(projTotalWritingSec / 60),
-            days_since_signup: daysSinceSignup,
-            hours_since_signup: hoursSinceSignup,
+            draft_to_submit_days: draftToSubmitDays,
+            draft_to_submit_hours: draftToSubmitHours,
             ...common,
           });
           aidaAction = true;
@@ -1470,8 +1472,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           project_id: `gp_${k}`, project_type: gpType, registration_type: gpType, category: "영상광고",
           budget_range: "500-1000만", total_sessions: 3, total_hours: 120, total_days: 5,
           avg_session_gap_hours: 40, total_writing_time_sec: writeOffset, total_writing_time_min: Math.round(writeOffset / 60),
-          days_since_signup: 3 + k,
-          hours_since_signup: (3 + k) * 24,
+          draft_to_submit_days: 2 + k,
+          draft_to_submit_hours: (2 + k) * 24,
           ...synthCommon,
         });
       }
