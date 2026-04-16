@@ -877,7 +877,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         job.consultingRegisteredCount += 1;
         job.projectTypeBreakdown["consulting"] = (job.projectTypeBreakdown["consulting"] ?? 0) + 1;
         add("consulting_inquiry_submitted", uid, projTs, {
-          inquiry_type: "new", category, is_first_time: utm.utm_source !== "tvcf.co.kr", ...common,
+          inquiry_type: "new", category, is_first_time: utm.utm_source !== "tvcf.co.kr",
+          registration_type: "consulting", ...common,
         });
         addDwell("컨설팅 문의"); exitPage = "컨설팅 문의"; aidaDesire = true;
       } else {
@@ -1051,6 +1052,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           job.projWritingMinSum += Math.round(projTotalWritingSec / 60);
           add("project_submitted", uid, projCurrentTs + 10, {
             project_id: projectId, project_type: pType,
+            registration_type: pType,
             category, budget_range: budget, is_first_time: utm.utm_source !== "tvcf.co.kr",
             total_sessions: projTotalSessions, total_hours: projTotalHours,
             total_days: projTotalDays, avg_session_gap_hours: projAvgGap,
@@ -1415,7 +1417,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         job.consultingRegisteredCount += 1;
         job.projectTypeBreakdown["consulting"] = (job.projectTypeBreakdown["consulting"] ?? 0) + 1;
         add("consulting_inquiry_submitted", sUid, projTs, {
-          inquiry_type: "new", category: "영상광고", is_first_time: true, ...synthCommon,
+          inquiry_type: "new", category: "영상광고", is_first_time: true,
+          registration_type: "consulting", ...synthCommon,
         });
       } else {
         // public / private: 18단계 퍼널 생성
@@ -1442,7 +1445,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           writeOffset += dur;
         }
         add("project_submitted", sUid, projTs + writeOffset + 30, {
-          project_id: `gp_${k}`, project_type: gpType, category: "영상광고",
+          project_id: `gp_${k}`, project_type: gpType, registration_type: gpType, category: "영상광고",
           budget_range: "500-1000만", total_sessions: 3, total_hours: 120, total_days: 5,
           avg_session_gap_hours: 40, total_writing_time_sec: writeOffset, total_writing_time_min: Math.round(writeOffset / 60),
           ...synthCommon,
