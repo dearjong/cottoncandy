@@ -171,7 +171,7 @@ interface Ga4UserEvents {
 // GA4 키 이벤트만 전송 (real-time 가시성을 위해 timestamp_micros 생략)
 // ⚠ first_visit은 GA4 예약어라 배치 전체 거부됨 → 제외
 const GA4_KEY_EVENTS = new Set([
-  "site_visit", "sso_login", "login",
+  "site_visit", "login_started", "sso_login", "login",
   "signup_started", "signup_complete",
   "portfolio_registered", "project_submitted",
   "partner_applied", "contract_signed",
@@ -195,7 +195,7 @@ function derivePageLocation(event: string, props: Record<string, unknown>): stri
   // 홈
   if (["site_visit", "home_click", "step1_cta_click"].includes(event)) return `${BASE_URL}/`;
   // 로그인/회원가입
-  if (["sso_login", "login"].includes(event)) return `${BASE_URL}/login`;
+  if (["login_started", "sso_login", "login"].includes(event)) return `${BASE_URL}/login`;
   if (event === "signup_started") return `${BASE_URL}/signup`;
   if (event === "signup_funnel") {
     const step = Number(props.step ?? 1);
@@ -864,13 +864,23 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         add("signup_funnel", uid, baseTs + 400, { step: 5, step_name: "job_info", path: "/signup/job-info", ...common });
       }
     } else if (journeyType === "sso_login") {
-      addGa4PageView(uid, "/login",     baseTs + 30);
-      addGa4PageView(uid, "/work/home", baseTs + 90);
-      add("sso_login", uid, baseTs + 30, { source: "tvcf.co.kr", method: "sso", ...common });
+      // 로그인 시작 (항상 발생)
+      addGa4PageView(uid, "/login", baseTs + 30);
+      add("login_started", uid, baseTs + 30, { method: "sso", source: "tvcf.co.kr", ...common });
+      // 완료 85% — 나머지 15%는 SSO 리다이렉트 실패/차단으로 이탈
+      if (chance(0.85)) {
+        addGa4PageView(uid, "/work/home", baseTs + 90);
+        add("sso_login", uid, baseTs + 60, { source: "tvcf.co.kr", method: "sso", ...common });
+      }
     } else if (journeyType === "manual_login") {
-      addGa4PageView(uid, "/login",     baseTs + 60);
-      addGa4PageView(uid, "/work/home", baseTs + 150);
-      add("login", uid, baseTs + 120, { method: "email", source: "direct", ...common });
+      // 로그인 시작 (항상 발생)
+      addGa4PageView(uid, "/login", baseTs + 60);
+      add("login_started", uid, baseTs + 60, { method: "email", source: "direct", ...common });
+      // 완료 80% — 나머지 20%는 비밀번호 실패·포기로 이탈
+      if (chance(0.80)) {
+        addGa4PageView(uid, "/work/home", baseTs + 150);
+        add("login", uid, baseTs + 120, { method: "email", source: "direct", ...common });
+      }
     }
     // visitor: 인증 이벤트 없음
 
