@@ -592,29 +592,29 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   ];
   // 해외 도시
   const ABROAD_ENTRIES = [
-    { city: "Tokyo", region: "Tokyo", country_code: "JP" },
-    { city: "New York", region: "New York", country_code: "US" },
-    { city: "Los Angeles", region: "California", country_code: "US" },
-    { city: "Singapore", region: "Singapore", country_code: "SG" },
-    { city: "Hong Kong", region: "Hong Kong", country_code: "HK" },
+    { city: "Tokyo", region: "Tokyo", country_code: "JP", country: "Japan" },
+    { city: "New York", region: "New York", country_code: "US", country: "United States" },
+    { city: "Los Angeles", region: "California", country_code: "US", country: "United States" },
+    { city: "Singapore", region: "Singapore", country_code: "SG", country: "Singapore" },
+    { city: "Hong Kong", region: "Hong Kong", country_code: "HK", country: "Hong Kong" },
   ];
 
-  function pickGeo(geoRegion: string): { geo_region: string; mp_city: string; mp_region: string; mp_country_code: string } {
+  function pickGeo(geoRegion: string): { geo_region: string; mp_city: string; mp_region: string; mp_country_code: string; mp_country: string } {
     if (geoRegion === "서울") {
       const district = SEOUL_DISTRICTS[Math.floor(Math.random() * SEOUL_DISTRICTS.length)];
-      return { geo_region: "Seoul", mp_city: district, mp_region: "Seoul", mp_country_code: "KR" };
+      return { geo_region: "Seoul", mp_city: district, mp_region: "Seoul", mp_country_code: "KR", mp_country: "South Korea" };
     }
     if (geoRegion === "경기도") {
       const city = GYEONGGI_CITIES[Math.floor(Math.random() * GYEONGGI_CITIES.length)];
-      return { geo_region: "Gyeonggi-do", mp_city: city, mp_region: "Gyeonggi-do", mp_country_code: "KR" };
+      return { geo_region: "Gyeonggi-do", mp_city: city, mp_region: "Gyeonggi-do", mp_country_code: "KR", mp_country: "South Korea" };
     }
     if (geoRegion === "지방") {
       const entry = LOCAL_ENTRIES[Math.floor(Math.random() * LOCAL_ENTRIES.length)];
-      return { geo_region: "Regional", mp_city: entry.city, mp_region: entry.region, mp_country_code: "KR" };
+      return { geo_region: "Regional", mp_city: entry.city, mp_region: entry.region, mp_country_code: "KR", mp_country: "South Korea" };
     }
     // 해외
     const entry = ABROAD_ENTRIES[Math.floor(Math.random() * ABROAD_ENTRIES.length)];
-    return { geo_region: "International", mp_city: entry.city, mp_region: entry.region, mp_country_code: entry.country_code };
+    return { geo_region: "International", mp_city: entry.city, mp_region: entry.region, mp_country_code: entry.country_code, mp_country: entry.country };
   }
 
   const GEO_LIST = [
@@ -750,6 +750,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       $city: geo.mp_city,
       $region: geo.mp_region,
       $country_code: geo.mp_country_code,
+      mp_country_code: geo.mp_country_code,
+      mp_country: geo.mp_country,
       $os: simOs,
       $browser: simBrowser,
       page_referrer: referrer,
