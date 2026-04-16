@@ -885,6 +885,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       if (!isNewSignup) {
         add("signup_started", uid, baseTs + 30,  { method: "email", ...common });
         add("signup_complete", uid, baseTs + 250, { ...common });
+        isNewSignup = true;
       }
       const projTs    = baseTs + 600;
       const category  = weightedPick(CATEGORIES);
@@ -1113,6 +1114,11 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     // 파트너: 공고 지원 흐름 (partnerApplyCount 기준)
     if (isPartner && partnerApplyDone < cfg.partnerApplyCount) {
       partnerApplyDone++;
+      if (!isNewSignup) {
+        add("signup_started", uid, baseTs + 30,  { method: "email", ...common });
+        add("signup_complete", uid, baseTs + 250, { ...common });
+        isNewSignup = true;
+      }
       const projectId  = `proj_${randInt(100, 999)}`;
       const partnerTs  = baseTs + 400;
 
@@ -1298,6 +1304,11 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     if (isPartner && !didPortfolioReg && pfRegDone < cfg.portfolioRegCount) {
       pfRegDone++;
       didPortfolioReg = true;
+      if (!isNewSignup) {
+        add("signup_started", uid, baseTs + 30,  { method: "email", ...common });
+        add("signup_complete", uid, baseTs + 250, { ...common });
+        isNewSignup = true;
+      }
       const pfTs2 = baseTs + 500;
 
       const pfNumSessions2 = weightedPick([
