@@ -5,8 +5,8 @@ import googleLogo from "@assets/Logo_Google_1759383453744.png";
 
 export default function LoginGoogle() {
   const [, setLocation] = useLocation();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("test@cottoncandy.kr");
+  const [password, setPassword] = useState("test1234!");
   const [step, setStep] = useState<"email" | "password">("email");
 
   const handleEmailNext = () => {

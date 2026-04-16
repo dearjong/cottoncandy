@@ -4,8 +4,8 @@ import { identifyUser, trackLogin, trackSsoLogin } from "@/lib/analytics";
 
 export default function LoginNaver() {
   const [, setLocation] = useLocation();
-  const [id, setId] = useState("");
-  const [password, setPassword] = useState("");
+  const [id, setId] = useState("tvcfad");
+  const [password, setPassword] = useState("test1234!");
   const [tab, setTab] = useState<"id" | "otp" | "qr">("id");
   const [keepLogin, setKeepLogin] = useState(false);
   const [ipProtect, setIpProtect] = useState(true);
