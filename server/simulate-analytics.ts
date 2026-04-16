@@ -699,7 +699,6 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   }
 
   let projRegDone        = 0;
-  let signupProjDone     = 0;  // 신규 가입자 전용 프로젝트 등록 슬롯
   let pfRegDone          = 0;
   let partnerApplyDone   = 0;
 
@@ -880,15 +879,13 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const partnerType = userType === "agency" ? "agency" : "production";
 
     // 광고주: 프로젝트 등록 — 18단계 퍼널
-    // 신규 가입 광고주는 전환 퍼널 검증을 위해 별도 슬롯(최대 25%) 사용
-    const signupProjBudget = Math.max(2, Math.ceil(cfg.projectRegCount * 0.25));
-    const canRegisterProj  = userType === "advertiser" && (
-      projRegDone < cfg.projectRegCount ||
-      (isNewSignup && signupProjDone < signupProjBudget)
-    );
-    if (canRegisterProj) {
-      if (isNewSignup && projRegDone >= cfg.projectRegCount) { signupProjDone++; }
-      else { projRegDone++; }
+    if (userType === "advertiser" && projRegDone < cfg.projectRegCount) {
+      projRegDone++;
+      // 가입 이벤트가 없는 유저도 퍼널 연결을 위해 signup 이벤트 추가
+      if (!isNewSignup) {
+        add("signup_started", uid, baseTs + 30,  { method: "email", ...common });
+        add("signup_complete", uid, baseTs + 250, { ...common });
+      }
       const projTs    = baseTs + 600;
       const category  = weightedPick(CATEGORIES);
       const budget    = pick(BUDGET_RANGES);
