@@ -83,6 +83,9 @@ interface SimConfig {
   partnerApplyCount: number;
   minProjectCompletions: number;
   minPortfolioCompletions: number;
+  pctPublic: number;
+  pctPrivate: number;
+  pctConsulting: number;
   mixpanelToken: string;
   ga4MeasurementId: string;
   ga4ApiSecret: string;
@@ -101,6 +104,9 @@ const DEFAULTS: SimConfig = {
   partnerApplyCount: 30,
   minProjectCompletions: 5,
   minPortfolioCompletions: 5,
+  pctPublic: 30,
+  pctPrivate: 40,
+  pctConsulting: 30,
   mixpanelToken: "a6d30eeef83cda0e513f6b3ea08a0b3d",
   ga4MeasurementId: "G-SR7QGTY3K9",
   ga4ApiSecret: "yEU6R3P9SWe5z9_Foa7XWA",
@@ -156,7 +162,7 @@ const FUNNEL_ORDER = [
 ];
 
 const SIM_CFG_KEY = "admarket_sim_cfg";
-const SIM_CFG_VERSION = 6;
+const SIM_CFG_VERSION = 7;
 const VALID_COUNTS = [10, 100, 200, 300, 500, 1000, 2000, 3000, 5000, 10000];
 
 function loadSavedCfg(): SimConfig {
@@ -512,6 +518,22 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                     </div>
                   </td>
                   <td className="py-1.5 pl-4 align-middle" />
+                </tr>
+                <tr>
+                  <td className="py-2 pr-4 font-semibold text-gray-700 align-top text-sm pt-2">
+                    프로젝트 유형 비율
+                    <div className="text-[10px] font-normal text-gray-400">합계 무관 (가중치)</div>
+                  </td>
+                  <td className="py-1">
+                    <div className="flex gap-2 items-end">
+                      <NumInput label="공개" value={dialogCfg.pctPublic}     onChange={(v) => setD("pctPublic", v)}     min={0} max={100} unit="" />
+                      <NumInput label="비공개" value={dialogCfg.pctPrivate}  onChange={(v) => setD("pctPrivate", v)}    min={0} max={100} unit="" />
+                      <NumInput label="컨설팅" value={dialogCfg.pctConsulting} onChange={(v) => setD("pctConsulting", v)} min={0} max={100} unit="" />
+                    </div>
+                  </td>
+                  <td className="py-1 pl-4 align-middle text-xs text-gray-400">
+                    {dialogCfg.pctPublic}:{dialogCfg.pctPrivate}:{dialogCfg.pctConsulting}
+                  </td>
                 </tr>
                 <tr>
                   <td className="py-2 pr-4 font-semibold text-gray-700 align-top text-sm pt-2">

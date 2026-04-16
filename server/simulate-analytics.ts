@@ -311,6 +311,9 @@ export interface SimConfig {
   // 완주 최소 보장
   minProjectCompletions: number;
   minPortfolioCompletions: number;
+  pctPublic: number;
+  pctPrivate: number;
+  pctConsulting: number;
   // 토큰 (선택 — 미입력 시 기본값 사용)
   mixpanelToken?: string;
   ga4MeasurementId?: string;
@@ -331,6 +334,9 @@ export const DEFAULT_CONFIG: SimConfig = {
   partnerApplyCount: 30,
   minProjectCompletions: 3,
   minPortfolioCompletions: 3,
+  pctPublic: 30,
+  pctPrivate: 40,
+  pctConsulting: 30,
 };
 
 export async function startSimulation(cfg: SimConfig): Promise<string> {
@@ -878,9 +884,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       const budget    = pick(BUDGET_RANGES);
       const projectId = `proj_${randInt(100, 999)}`;
       const pType     = weightedPick([
-        { value: "public"     as const, weight: 45 },
-        { value: "private"    as const, weight: 30 },
-        { value: "consulting" as const, weight: 25 },
+        { value: "public"     as const, weight: cfg.pctPublic    },
+        { value: "private"    as const, weight: cfg.pctPrivate   },
+        { value: "consulting" as const, weight: cfg.pctConsulting },
       ]);
 
       // 컨설팅 의뢰 경로 (18단계 퍼널 없음)
