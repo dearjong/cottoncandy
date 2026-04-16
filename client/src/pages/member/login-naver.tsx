@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { identifyUser, trackLogin, trackSsoLogin } from "@/lib/analytics";
+import { identifyUser, trackLogin, trackSsoLogin, publishAnalytics } from "@/lib/analytics";
 
 export default function LoginNaver() {
   const [, setLocation] = useLocation();
@@ -9,6 +9,17 @@ export default function LoginNaver() {
   const [tab, setTab] = useState<"id" | "otp" | "qr">("id");
   const [keepLogin, setKeepLogin] = useState(false);
   const [ipProtect, setIpProtect] = useState(true);
+
+  // 퍼널 1단계: 네이버 로그인 화면 진입
+  useEffect(() => {
+    publishAnalytics("naver_form_viewed", { method: "naver" });
+  }, []);
+
+  const handleTabSwitch = (newTab: "id" | "otp" | "qr") => {
+    setTab(newTab);
+    // 퍼널 2단계(선택): 로그인 방식 전환 추적
+    publishAnalytics("naver_tab_switched", { from: tab, to: newTab });
+  };
 
   const handleLogin = () => {
     if (!id || !password) return;
@@ -50,7 +61,7 @@ export default function LoginNaver() {
             ].map((t) => (
               <button
                 key={t.key}
-                onClick={() => setTab(t.key as "id" | "otp" | "qr")}
+                onClick={() => handleTabSwitch(t.key as "id" | "otp" | "qr")}
                 className={`flex-1 py-3 text-sm font-medium border-r last:border-r-0 border-gray-300 transition-colors ${
                   tab === t.key
                     ? "bg-white text-gray-900 font-bold"

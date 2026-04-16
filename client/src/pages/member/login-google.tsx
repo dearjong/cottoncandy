@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { identifyUser, trackLogin, trackSsoLogin } from "@/lib/analytics";
+import { identifyUser, trackLogin, trackSsoLogin, publishAnalytics } from "@/lib/analytics";
 import googleLogo from "@assets/Logo_Google_1759383453744.png";
 
 export default function LoginGoogle() {
@@ -9,8 +9,15 @@ export default function LoginGoogle() {
   const [password, setPassword] = useState("test1234!");
   const [step, setStep] = useState<"email" | "password">("email");
 
+  // 퍼널 1단계: 구글 로그인 화면 진입
+  useEffect(() => {
+    publishAnalytics("google_form_viewed", { method: "google" });
+  }, []);
+
   const handleEmailNext = () => {
     if (!email) return;
+    // 퍼널 2단계: 이메일 입력 완료 → 비밀번호 단계 진입
+    publishAnalytics("google_email_submitted", { email });
     setStep("password");
   };
 
