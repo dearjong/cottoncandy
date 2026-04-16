@@ -1,4 +1,4 @@
-const MIXPANEL_TOKEN = "a6d30eeef83cda0e513f6b3ea08a0b3d";
+const MIXPANEL_TOKEN = "B32D8265A148455CB07F704BE7A648AA";
 const MIXPANEL_URL = "https://api.mixpanel.com/track";
 const BATCH_SIZE = 50;
 
