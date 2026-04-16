@@ -841,6 +841,12 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     // ── 4. 인증 이벤트 — 여정 타입 기반으로 순서대로 전송 ───────────
     if (isNewSignup) {
       // 신규 가입: project_submit / partner_apply / portfolio_reg / signup_only
+      // GA4 가입 화면 페이지뷰 시퀀스
+      addGa4PageView(uid, "/signup",              baseTs + 35);
+      addGa4PageView(uid, "/signup/email",         baseTs + 120);
+      addGa4PageView(uid, "/signup/phone",         baseTs + 200);
+      addGa4PageView(uid, "/signup/account-type",  baseTs + 300);
+
       add("signup_started", uid, baseTs + 30,  { method: "email", ...common });
       add("signup_funnel",  uid, baseTs + 35,  { step: 1, step_name: "account", path: "/signup", ...common });
       add("signup_funnel",  uid, baseTs + 120, { step: 2, step_name: "email",   path: "/signup/email", ...common });
@@ -849,11 +855,16 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       const accountType = chance(0.68) ? "personal" : "corporate";
       add("signup_funnel",  uid, baseTs + 300, { step: 4, step_name: "account_type", path: "/signup/account-type", ...common });
       if (accountType === "corporate" && chance(0.62)) {
+        addGa4PageView(uid, "/signup/job-info", baseTs + 400);
         add("signup_funnel", uid, baseTs + 400, { step: 5, step_name: "job_info", path: "/signup/job-info", ...common });
       }
     } else if (journeyType === "sso_login") {
+      addGa4PageView(uid, "/login",     baseTs + 30);
+      addGa4PageView(uid, "/work/home", baseTs + 90);
       add("sso_login", uid, baseTs + 30, { source: "tvcf.co.kr", method: "sso", ...common });
     } else if (journeyType === "manual_login") {
+      addGa4PageView(uid, "/login",     baseTs + 60);
+      addGa4PageView(uid, "/work/home", baseTs + 150);
       add("login", uid, baseTs + 120, { method: "email", source: "direct", ...common });
     }
     // visitor: 인증 이벤트 없음
@@ -887,9 +898,6 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
     // 유저 타입 집계 (인증된 유저만 — 미로그인은 total - sum으로 계산)
     userTypeCount[userType] = (userTypeCount[userType] ?? 0) + 1;
-
-    // 파트너 탐색 페이지 체류 (40% 확률)
-    if (chance(0.40)) { addDwell("파트너 탐색"); exitPage = "파트너 탐색"; aidaInterest = true; }
 
     const partnerType = userType === "agency" ? "agency" : "production";
 
@@ -1001,6 +1009,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             const visitNum = Math.min(sIdx + 1, 4);
             if (!job.visitFunnelBreakdown[visitNum]) job.visitFunnelBreakdown[visitNum] = {};
             job.visitFunnelBreakdown[visitNum][s.step] = (job.visitFunnelBreakdown[visitNum][s.step] ?? 0) + 1;
+            addGa4PageView(uid, `/create-project/step${s.step}`, projCurrentTs + sessionWriteOffset + 10);
             add(`step_${s.step}_${s.screen}`, uid, projCurrentTs + sessionWriteOffset + 10, {
               step: s.step, screen: s.screen, project_type: pType,
               session_number: sIdx + 1,
@@ -1126,9 +1135,10 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
 
       // 공고 탐색 → 공고 상세 → 지원서 작성 페이지뷰 시퀀스
       addGa4PageView(uid, "/partner", partnerTs - 240);
+      addDwell("파트너 탐색"); aidaInterest = true;
       addGa4PageView(uid, "/partner/detail", partnerTs - 120);
       addGa4PageView(uid, "/partner/apply", partnerTs - 30);
-      addDwell("공고 상세"); exitPage = "공고 상세"; aidaInterest = true;
+      addDwell("공고 상세"); exitPage = "공고 상세";
       add("partner_applied", uid, partnerTs, {
         project_id: projectId, project_type: pick(["public","private"]),
         partner_type: partnerType, is_first_time: utm.utm_source !== "tvcf.co.kr", ...common,
@@ -1211,6 +1221,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             });
           }
 
+          addGa4PageView(uid, "/work/portfolio/register", pfCurrentTs + 5);
           add("portfolio_session_started", uid, pfCurrentTs + 5, {
             session_number: sIdx + 1, sections_completed_so_far: pfLastSection,
             partner_type: partnerType, cumulative_writing_sec: pfTotalWritingSec, ...common,
@@ -1339,6 +1350,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           });
         }
 
+        addGa4PageView(uid, "/work/portfolio/register", pfCurrentTs2 + 5);
         add("portfolio_session_started", uid, pfCurrentTs2 + 5, {
           session_number: sIdx + 1, sections_completed_so_far: pfLastSection2,
           partner_type: partnerType, cumulative_writing_sec: pfTotalWritingSec2, ...common,
