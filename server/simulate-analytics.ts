@@ -431,7 +431,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   job.status = "generating";
   job.message = "가상 사용자 이벤트 생성 중...";
   // 실행마다 고유한 짧은 run prefix (jobId 앞 8자)
-  const runPrefix = jobId.replace(/-/g, "").slice(0, 8);
+  const runPrefix = jobId.replace(/-/g, "").slice(0, 4);
 
   const { userCount } = cfg;
   const events: MpEvent[] = [];
@@ -749,21 +749,23 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       $referrer: referrer,
     };
 
-    // Mixpanel People 프로필 등록
-    registerMixpanelPeople(uid, {
-      $email:       simEmail,
-      $name:        uid,
-      $city:        geo.mp_city,
-      $region:      geo.mp_region,
-      $country_code: geo.mp_country_code,
-      user_type:    userType,
-      user_company: userCompany,
-      gender,
-      age_group:    ageGroup,
-      geo_region:   geo.geo_region,
-      utm_source:   utm.utm_source,
-      simulation:   true,
-    });
+    // Mixpanel People 프로필 등록 (로그인 유저만 email 포함)
+    if (!preIsGuest) {
+      registerMixpanelPeople(uid, {
+        $email:       simEmail,
+        $name:        uid,
+        $city:        geo.mp_city,
+        $region:      geo.mp_region,
+        $country_code: geo.mp_country_code,
+        user_type:    userType,
+        user_company: userCompany,
+        gender,
+        age_group:    ageGroup,
+        geo_region:   geo.geo_region,
+        utm_source:   utm.utm_source,
+        simulation:   true,
+      });
+    }
 
     // GA4 유저 초기화
     initGa4User(uid, uid, { user_type: userType, gender, age_group: ageGroup });
