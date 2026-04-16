@@ -375,6 +375,21 @@ export function trackSsoLogin(props: {
 }
 
 /**
+ * 통합 로그인 완료 이벤트 — 이메일/네이버/구글 모두 동일 이벤트명.
+ * Mixpanel 단일 퍼널: site_visit → login_started → login_completed
+ * method 프로퍼티로 방식별 분기 분석 가능.
+ */
+export function trackLoginCompleted(props: {
+  method: "email" | "naver" | "google" | "admin";
+  user_type?: "advertiser" | "agency" | "production" | "admin";
+}) {
+  publishAnalytics("login_completed", {
+    method: props.method,
+    user_type: props.user_type ?? "advertiser",
+  });
+}
+
+/**
  * 로그인 완료 이벤트 — GA4 표준 `login` 이벤트 + Mixpanel 커스텀 이벤트.
  * identifyUser() 호출 직후 함께 사용할 것.
  */

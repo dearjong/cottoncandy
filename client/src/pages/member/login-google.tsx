@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { identifyUser, trackLogin, trackSsoLogin, publishAnalytics } from "@/lib/analytics";
+import { identifyUser, trackLogin, trackSsoLogin, trackLoginCompleted, publishAnalytics } from "@/lib/analytics";
 import googleLogo from "@assets/Logo_Google_1759383453744.png";
 
 export default function LoginGoogle() {
@@ -27,6 +27,7 @@ export default function LoginGoogle() {
     identifyUser({ userId, userType: "advertiser", email });
     trackSsoLogin({ method: "google", source: "google_email", user_type: "advertiser" });
     trackLogin({ method: "google", user_type: "advertiser" });
+    trackLoginCompleted({ method: "google", user_type: "advertiser" });
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("userName", email.split("@")[0]);
     localStorage.setItem("userType", "의뢰");

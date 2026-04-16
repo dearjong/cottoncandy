@@ -171,7 +171,7 @@ interface Ga4UserEvents {
 // GA4 키 이벤트만 전송 (real-time 가시성을 위해 timestamp_micros 생략)
 // ⚠ first_visit은 GA4 예약어라 배치 전체 거부됨 → 제외
 const GA4_KEY_EVENTS = new Set([
-  "site_visit", "login_started", "sso_login", "login",
+  "site_visit", "login_started", "sso_login", "login", "login_completed",
   "signup_started", "signup_complete",
   "portfolio_registered", "project_submitted",
   "partner_applied", "contract_signed",
@@ -195,7 +195,7 @@ function derivePageLocation(event: string, props: Record<string, unknown>): stri
   // 홈
   if (["site_visit", "home_click", "step1_cta_click"].includes(event)) return `${BASE_URL}/`;
   // 로그인/회원가입
-  if (["login_started", "sso_login", "login"].includes(event)) return `${BASE_URL}/login`;
+  if (["login_started", "sso_login", "login", "login_completed"].includes(event)) return `${BASE_URL}/login`;
   if (event === "signup_started") return `${BASE_URL}/signup`;
   if (event === "signup_funnel") {
     const step = Number(props.step ?? 1);
@@ -871,6 +871,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       if (chance(0.85)) {
         addGa4PageView(uid, "/work/home", baseTs + 90);
         add("sso_login", uid, baseTs + 60, { source: "tvcf.co.kr", method: "sso", ...common });
+        add("login_completed", uid, baseTs + 65, { method: "naver", user_type: userType, ...common });
       }
     } else if (journeyType === "manual_login") {
       // 로그인 시작 (항상 발생)
@@ -880,6 +881,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       if (chance(0.80)) {
         addGa4PageView(uid, "/work/home", baseTs + 150);
         add("login", uid, baseTs + 120, { method: "email", source: "direct", ...common });
+        add("login_completed", uid, baseTs + 125, { method: "email", user_type: userType, ...common });
       }
     }
     // visitor: 인증 이벤트 없음

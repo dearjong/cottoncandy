@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { identifyUser, trackLogin, trackSsoLogin, publishAnalytics } from "@/lib/analytics";
+import { identifyUser, trackLogin, trackSsoLogin, trackLoginCompleted, publishAnalytics } from "@/lib/analytics";
 
 export default function LoginNaver() {
   const [, setLocation] = useLocation();
@@ -27,6 +27,7 @@ export default function LoginNaver() {
     identifyUser({ userId, userType: "advertiser", email: id });
     trackSsoLogin({ method: "naver", source: "naver_id", user_type: "advertiser" });
     trackLogin({ method: "naver", user_type: "advertiser" });
+    trackLoginCompleted({ method: "naver", user_type: "advertiser" });
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("userName", id);
     localStorage.setItem("userType", "의뢰");
