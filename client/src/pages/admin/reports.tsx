@@ -150,7 +150,7 @@ const FUNNEL_ORDER = [
 ];
 
 const SIM_CFG_KEY = "admarket_sim_cfg";
-const SIM_CFG_VERSION = 5;
+const SIM_CFG_VERSION = 6;
 const VALID_COUNTS = [10, 100, 200, 300, 500, 1000, 2000, 3000, 5000, 10000];
 
 function loadSavedCfg(): SimConfig {
