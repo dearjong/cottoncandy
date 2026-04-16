@@ -83,6 +83,8 @@ interface SimConfig {
   partnerApplyCount: number;
   minProjectCompletions: number;
   minPortfolioCompletions: number;
+  mixpanelToken: string;
+  ga4MeasurementId: string;
 }
 
 const DEFAULTS: SimConfig = {
@@ -98,6 +100,8 @@ const DEFAULTS: SimConfig = {
   partnerApplyCount: 30,
   minProjectCompletions: 5,
   minPortfolioCompletions: 5,
+  mixpanelToken: "a6d30eeef83cda0e513f6b3ea08a0b3d",
+  ga4MeasurementId: "G-SR7QGTY3K9",
 };
 
 function NumInput({ label, value, onChange, min = 0, max = 100, unit = "%" }: {
@@ -519,6 +523,36 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                     </div>
                   </td>
                   <td className="py-1 pl-4 align-middle" />
+                </tr>
+                <tr>
+                  <td className="py-2 pr-4 font-semibold text-gray-700 align-top text-sm pt-2">
+                    Analytics 토큰
+                    <div className="text-[10px] font-normal text-gray-400">비워두면 기본값 사용</div>
+                  </td>
+                  <td className="py-1" colSpan={2}>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[10px] text-gray-400">Mixpanel Token</span>
+                        <input
+                          type="text"
+                          value={dialogCfg.mixpanelToken}
+                          onChange={(e) => setD("mixpanelToken", e.target.value)}
+                          placeholder="Mixpanel 프로젝트 토큰"
+                          className="w-80 border border-gray-200 rounded px-2 py-1 text-xs text-gray-800 font-mono focus:outline-none focus:ring-1 focus:ring-pink-300"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[10px] text-gray-400">GA4 Measurement ID</span>
+                        <input
+                          type="text"
+                          value={dialogCfg.ga4MeasurementId}
+                          onChange={(e) => setD("ga4MeasurementId", e.target.value)}
+                          placeholder="G-XXXXXXXXXX"
+                          className="w-80 border border-gray-200 rounded px-2 py-1 text-xs text-gray-800 font-mono focus:outline-none focus:ring-1 focus:ring-pink-300"
+                        />
+                      </div>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
