@@ -1362,6 +1362,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
           const secDuration2 = [1,2,3].includes(sec.step) ? randInt(60, 180) : randInt(180, 600);
 
           pfFunnel[sec.step] = (pfFunnel[sec.step] ?? 0) + 1;
+          const pfVisitNum2 = Math.min(sIdx + 1, 4);
+          if (!job.pfVisitFunnelBreakdown[pfVisitNum2]) job.pfVisitFunnelBreakdown[pfVisitNum2] = {};
+          job.pfVisitFunnelBreakdown[pfVisitNum2][sec.step] = (job.pfVisitFunnelBreakdown[pfVisitNum2][sec.step] ?? 0) + 1;
           add(`portfolio_section_${sec.id}`, uid, pfCurrentTs2 + pfSessionWriteOffset2 + 10, {
             section: sec.step, section_id: sec.id, partner_type: partnerType,
             session_number: sIdx + 1,
