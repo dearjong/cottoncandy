@@ -6,6 +6,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
 import Login from "@/pages/member/login";
+import LoginNaver from "@/pages/member/login-naver";
+import LoginGoogle from "@/pages/member/login-google";
 import Signup from "@/pages/member/signup";
 import SignupPhone from "@/pages/member/signup-phone";
 import SignupEmail from "@/pages/member/signup-email";
@@ -156,6 +158,8 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/login" component={Login} />
+      <Route path="/login/naver" component={LoginNaver} />
+      <Route path="/login/google" component={LoginGoogle} />
       <Route path="/signup" component={Signup} />
       <Route path="/signup/phone" component={SignupPhone} />
       <Route path="/signup/email" component={SignupEmail} />
