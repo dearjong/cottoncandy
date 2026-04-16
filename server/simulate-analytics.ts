@@ -574,21 +574,21 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   ];
 
   // 서울 구 목록 (랜덤 도시로 활용)
-  const SEOUL_DISTRICTS = ["강남구","서초구","마포구","송파구","종로구","중구","용산구","영등포구","성동구","광진구"];
+  const SEOUL_DISTRICTS = ["Gangnam-gu","Seocho-gu","Mapo-gu","Songpa-gu","Jongno-gu","Jung-gu","Yongsan-gu","Yeongdeungpo-gu","Seongdong-gu","Gwangjin-gu"];
   // 경기도 도시
-  const GYEONGGI_CITIES = ["수원시","성남시","고양시","안양시","부천시","용인시","화성시","남양주시","평택시","의정부시"];
+  const GYEONGGI_CITIES = ["Suwon","Seongnam","Goyang","Anyang","Bucheon","Yongin","Hwaseong","Namyangju","Pyeongtaek","Uijeongbu"];
   // 지방 도시/지역 (균등 분산)
   const LOCAL_ENTRIES = [
-    { city: "부산", region: "부산광역시" },
-    { city: "인천", region: "인천광역시" },
-    { city: "대구", region: "대구광역시" },
-    { city: "대전", region: "대전광역시" },
-    { city: "광주", region: "광주광역시" },
-    { city: "울산", region: "울산광역시" },
-    { city: "세종", region: "세종특별자치시" },
-    { city: "전주", region: "전라북도" },
-    { city: "청주", region: "충청북도" },
-    { city: "창원", region: "경상남도" },
+    { city: "Busan", region: "Busan" },
+    { city: "Incheon", region: "Incheon" },
+    { city: "Daegu", region: "Daegu" },
+    { city: "Daejeon", region: "Daejeon" },
+    { city: "Gwangju", region: "Gwangju" },
+    { city: "Ulsan", region: "Ulsan" },
+    { city: "Sejong", region: "Sejong" },
+    { city: "Jeonju", region: "Jeollabuk-do" },
+    { city: "Cheongju", region: "Chungcheongbuk-do" },
+    { city: "Changwon", region: "Gyeongsangnam-do" },
   ];
   // 해외 도시
   const ABROAD_ENTRIES = [
@@ -602,19 +602,19 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   function pickGeo(geoRegion: string): { geo_region: string; mp_city: string; mp_region: string; mp_country_code: string } {
     if (geoRegion === "서울") {
       const district = SEOUL_DISTRICTS[Math.floor(Math.random() * SEOUL_DISTRICTS.length)];
-      return { geo_region: "서울", mp_city: `서울 ${district}`, mp_region: "서울특별시", mp_country_code: "KR" };
+      return { geo_region: "Seoul", mp_city: district, mp_region: "Seoul", mp_country_code: "KR" };
     }
     if (geoRegion === "경기도") {
       const city = GYEONGGI_CITIES[Math.floor(Math.random() * GYEONGGI_CITIES.length)];
-      return { geo_region: "경기도", mp_city: city, mp_region: "경기도", mp_country_code: "KR" };
+      return { geo_region: "Gyeonggi-do", mp_city: city, mp_region: "Gyeonggi-do", mp_country_code: "KR" };
     }
     if (geoRegion === "지방") {
       const entry = LOCAL_ENTRIES[Math.floor(Math.random() * LOCAL_ENTRIES.length)];
-      return { geo_region: "지방", mp_city: entry.city, mp_region: entry.region, mp_country_code: "KR" };
+      return { geo_region: "Regional", mp_city: entry.city, mp_region: entry.region, mp_country_code: "KR" };
     }
     // 해외
     const entry = ABROAD_ENTRIES[Math.floor(Math.random() * ABROAD_ENTRIES.length)];
-    return { geo_region: "해외", mp_city: entry.city, mp_region: entry.region, mp_country_code: entry.country_code };
+    return { geo_region: "International", mp_city: entry.city, mp_region: entry.region, mp_country_code: entry.country_code };
   }
 
   const GEO_LIST = [
@@ -739,12 +739,19 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const baseTs = tsAgo(joinSecsAgo);
 
     const referrer = genReferrer(utm.utm_source as string);
+    const simOs = ["Windows","Mac OS X","Android","iOS","Linux"][Math.floor(Math.random() * 5)];
+    const simBrowser = ["Chrome","Safari","Samsung Internet","Firefox","Edge"][Math.floor(Math.random() * 5)];
     const common: Record<string, unknown> = {
       user_type: userType,
       gender,
       age_group: ageGroup,
       ...utm,
       geo_region: geo.geo_region,
+      $city: geo.mp_city,
+      $region: geo.mp_region,
+      $country_code: geo.mp_country_code,
+      $os: simOs,
+      $browser: simBrowser,
       page_referrer: referrer,
       $referrer: referrer,
     };
@@ -848,7 +855,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     // 파트너 탐색 페이지 체류 (40% 확률)
     if (chance(0.40)) { addDwell("파트너 탐색"); exitPage = "파트너 탐색"; aidaInterest = true; }
 
-    const partnerType = userType === "agency" ? "대행사" : "제작사";
+    const partnerType = userType === "agency" ? "agency" : "production";
 
     // 광고주: 프로젝트 등록 — 18단계 퍼널
     if (userType === "advertiser" && projRegDone < cfg.projectRegCount) {
