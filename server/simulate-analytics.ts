@@ -703,27 +703,55 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   let partnerApplyDone   = 0;
 
   for (let i = 1; i <= userCount; i++) {
-    // guest 여부를 uid 결정 전에 미리 판단
-    const preRoll           = Math.random() * 100;
-    const preSsoThr         = cfg.pctSsoLogin;
-    const preManualThr      = preSsoThr + cfg.pctManualLogin;
-    const preSignupThr      = preManualThr + cfg.pctSignup;
-    const preIsGuest        = preRoll >= preSignupThr;
-    const uid      = preIsGuest
-      ? `test_guest_${runPrefix}_${String(i).padStart(4, "0")}`
-      : `test_user_${runPrefix}_${String(i).padStart(4, "0")}`;
-    const userType = weightedPick(USER_TYPE_LIST);
-    const gender   = weightedPick(GENDERS);
-    const ageGroup = weightedPick(AGE_GROUPS);
-    const utm      = weightedPick(UTM_LIST);
-    const geoKey   = weightedPick(GEO_LIST);
-    const geo      = pickGeo(geoKey);
+    // ── 1. 유저 속성 결정 ────────────────────────────────────────
+    const userType  = weightedPick(USER_TYPE_LIST);
+    const gender    = weightedPick(GENDERS);
+    const ageGroup  = weightedPick(AGE_GROUPS);
+    const utm       = weightedPick(UTM_LIST);
+    const geoKey    = weightedPick(GEO_LIST);
+    const geo       = pickGeo(geoKey);
     const isPartner = userType === "agency" || userType === "production";
     let didPortfolioReg = false;
     let exitPage = "홈 (/)";
     let aidaInterest = false;
     let aidaDesire   = false;
     let aidaAction   = false;
+
+    // ── 2. 여정 타입 결정 — 액션 유저 먼저, 나머지는 인증 방식 ────
+    type JourneyType = "project_submit" | "partner_apply" | "portfolio_reg"
+                     | "signup_only" | "sso_login" | "manual_login" | "visitor";
+    let journeyType: JourneyType;
+    const authRoll        = Math.random() * 100;
+    const ssoThreshold    = cfg.pctSsoLogin;
+    const manualThreshold = ssoThreshold + cfg.pctManualLogin;
+    const signupThreshold = manualThreshold + cfg.pctSignup;
+
+    if (userType === "advertiser" && projRegDone < cfg.projectRegCount) {
+      journeyType = "project_submit"; projRegDone++;
+    } else if (isPartner && partnerApplyDone < cfg.partnerApplyCount) {
+      journeyType = "partner_apply"; partnerApplyDone++;
+    } else if (isPartner && pfRegDone < cfg.portfolioRegCount) {
+      journeyType = "portfolio_reg"; pfRegDone++; didPortfolioReg = true;
+    } else if (authRoll < ssoThreshold) {
+      journeyType = "sso_login";
+    } else if (authRoll < manualThreshold) {
+      journeyType = "manual_login";
+    } else if (authRoll < signupThreshold) {
+      journeyType = "signup_only";
+    } else {
+      journeyType = "visitor";
+    }
+
+    const isAuthenticated = journeyType !== "visitor";
+    const isNewSignup     = journeyType === "project_submit"
+                         || journeyType === "partner_apply"
+                         || journeyType === "portfolio_reg"
+                         || journeyType === "signup_only";
+
+    // ── 3. uid 생성 ───────────────────────────────────────────────
+    const uid = !isAuthenticated
+      ? `test_guest_${runPrefix}_${String(i).padStart(4, "0")}`
+      : `test_user_${runPrefix}_${String(i).padStart(4, "0")}`;
 
     // 기업명 생성
     const userCompany = userType === "advertiser"
@@ -775,8 +803,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       $referrer: referrer,
     };
 
-    // Mixpanel People 프로필 등록 (로그인 유저만 email 포함)
-    if (!preIsGuest) {
+    // Mixpanel People 프로필 등록 (인증 유저만)
+    if (isAuthenticated) {
       registerMixpanelPeople(uid, {
         $email:       simEmail,
         $name:        uid,
@@ -810,24 +838,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       add("home_click", uid, baseTs + 5, { element: el, ...common });
     }
 
-    // ── 인증 결정 (직접 % 기반) ───────────────────────────
-    let isAuthenticated = false;
-    let isNewSignup     = false;
-    const roll = preRoll;
-    const ssoThreshold     = cfg.pctSsoLogin;
-    const manualThreshold  = ssoThreshold + cfg.pctManualLogin;
-    const signupThreshold  = manualThreshold + cfg.pctSignup;
-
-    if (roll < ssoThreshold) {
-      // SSO 자동 로그인
-      add("sso_login", uid, baseTs + 30, { source: "tvcf.co.kr", method: "sso", ...common });
-      isAuthenticated = true;
-    } else if (roll < manualThreshold) {
-      // 수동 로그인
-      add("login", uid, baseTs + 120, { method: "email", source: "direct", ...common });
-      isAuthenticated = true;
-    } else if (roll < signupThreshold) {
-      // 신규 가입 (퍼널 이벤트 발생)
+    // ── 4. 인증 이벤트 — 여정 타입 기반으로 순서대로 전송 ───────────
+    if (isNewSignup) {
+      // 신규 가입: project_submit / partner_apply / portfolio_reg / signup_only
       add("signup_started", uid, baseTs + 30,  { method: "email", ...common });
       add("signup_funnel",  uid, baseTs + 35,  { step: 1, step_name: "account", path: "/signup", ...common });
       add("signup_funnel",  uid, baseTs + 120, { step: 2, step_name: "email",   path: "/signup/email", ...common });
@@ -838,10 +851,12 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       if (accountType === "corporate" && chance(0.62)) {
         add("signup_funnel", uid, baseTs + 400, { step: 5, step_name: "job_info", path: "/signup/job-info", ...common });
       }
-      isAuthenticated = true;
-      isNewSignup = true;
+    } else if (journeyType === "sso_login") {
+      add("sso_login", uid, baseTs + 30, { source: "tvcf.co.kr", method: "sso", ...common });
+    } else if (journeyType === "manual_login") {
+      add("login", uid, baseTs + 120, { method: "email", source: "direct", ...common });
     }
-    // else: 미로그인 (roll >= signupThreshold)
+    // visitor: 인증 이벤트 없음
 
     // ── 직접 유입 / 북마크 집계 (이벤트 전송 없이 카운트만) ────────────────────────
     if (chance(isAuthenticated ? 0.40 : 0.20)) {
@@ -879,14 +894,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     const partnerType = userType === "agency" ? "agency" : "production";
 
     // 광고주: 프로젝트 등록 — 18단계 퍼널
-    if (userType === "advertiser" && projRegDone < cfg.projectRegCount) {
-      projRegDone++;
-      // 가입 이벤트가 없는 유저도 퍼널 연결을 위해 signup 이벤트 추가
-      if (!isNewSignup) {
-        add("signup_started", uid, baseTs + 30,  { method: "email", ...common });
-        add("signup_complete", uid, baseTs + 250, { ...common });
-        isNewSignup = true;
-      }
+    if (journeyType === "project_submit") {
       const projTs    = baseTs + 600;
       const category  = weightedPick(CATEGORIES);
       const budget    = pick(BUDGET_RANGES);
@@ -1111,14 +1119,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       }
     }
 
-    // 파트너: 공고 지원 흐름 (partnerApplyCount 기준)
-    if (isPartner && partnerApplyDone < cfg.partnerApplyCount) {
-      partnerApplyDone++;
-      if (!isNewSignup) {
-        add("signup_started", uid, baseTs + 30,  { method: "email", ...common });
-        add("signup_complete", uid, baseTs + 250, { ...common });
-        isNewSignup = true;
-      }
+    // 파트너: 공고 지원 흐름
+    if (journeyType === "partner_apply") {
       const projectId  = `proj_${randInt(100, 999)}`;
       const partnerTs  = baseTs + 400;
 
@@ -1301,14 +1303,7 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     }
 
     // 파트너: 포트폴리오만 등록 — 섹션별 퍼널 (멀티 세션)
-    if (isPartner && !didPortfolioReg && pfRegDone < cfg.portfolioRegCount) {
-      pfRegDone++;
-      didPortfolioReg = true;
-      if (!isNewSignup) {
-        add("signup_started", uid, baseTs + 30,  { method: "email", ...common });
-        add("signup_complete", uid, baseTs + 250, { ...common });
-        isNewSignup = true;
-      }
+    if (journeyType === "portfolio_reg") {
       const pfTs2 = baseTs + 500;
 
       const pfNumSessions2 = weightedPick([
