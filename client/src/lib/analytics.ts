@@ -310,7 +310,7 @@ export function identifyUser(props: {
 
   // GA4
   if (typeof gtag !== "undefined") {
-    gtag("config", "G-MG1WSR89E1", { user_id: anonId });
+    gtag("config", "G-SR7QGTY3K9", { user_id: anonId });
     gtag("set", "user_properties", {
       email: maskedEmail,
       user_type: userType ?? "unknown",
@@ -342,7 +342,7 @@ export function reIdentifyIfLoggedIn() {
     if (userId) {
       mixpanel.identify(userId);
       if (typeof gtag !== "undefined") {
-        gtag("config", "G-MG1WSR89E1", { user_id: userId });
+        gtag("config", "G-SR7QGTY3K9", { user_id: userId });
         gtag("set", "user_properties", { user_type: userType ?? "unknown" });
       }
     }
