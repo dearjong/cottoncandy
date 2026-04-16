@@ -352,6 +352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         minPortfolioCompletions:  num("minPortfolioCompletions", 0, 10000),
         mixpanelToken:    typeof b.mixpanelToken === "string" && b.mixpanelToken.trim() ? b.mixpanelToken.trim() : undefined,
         ga4MeasurementId: typeof b.ga4MeasurementId === "string" && b.ga4MeasurementId.trim() ? b.ga4MeasurementId.trim() : undefined,
+        ga4ApiSecret:     typeof b.ga4ApiSecret === "string" && b.ga4ApiSecret.trim() ? b.ga4ApiSecret.trim() : undefined,
       };
       const jobId = await startSimulation(cfg);
       res.json({ jobId });

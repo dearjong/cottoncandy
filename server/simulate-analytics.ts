@@ -314,6 +314,7 @@ export interface SimConfig {
   // 토큰 (선택 — 미입력 시 기본값 사용)
   mixpanelToken?: string;
   ga4MeasurementId?: string;
+  ga4ApiSecret?: string;
 }
 
 export const DEFAULT_CONFIG: SimConfig = {
@@ -436,8 +437,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   // cfg에서 토큰 오버라이드 가능
   const MP_TOKEN = (cfg.mixpanelToken?.trim() || MIXPANEL_TOKEN);
   const GA4_ID   = (cfg.ga4MeasurementId?.trim() || GA4_MEASUREMENT_ID);
-  const GA4_EP   = `https://www.google-analytics.com/mp/collect?measurement_id=${GA4_ID}&api_secret=${GA4_API_SECRET}`;
-  const GA4_DBG  = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${GA4_ID}&api_secret=${GA4_API_SECRET}`;
+  const GA4_SEC  = (cfg.ga4ApiSecret?.trim() || GA4_API_SECRET);
+  const GA4_EP   = `https://www.google-analytics.com/mp/collect?measurement_id=${GA4_ID}&api_secret=${GA4_SEC}`;
+  const GA4_DBG  = `https://www.google-analytics.com/debug/mp/collect?measurement_id=${GA4_ID}&api_secret=${GA4_SEC}`;
   // 실행마다 고유한 짧은 run prefix (jobId 앞 8자)
   const runPrefix = jobId.replace(/-/g, "").slice(0, 4);
 

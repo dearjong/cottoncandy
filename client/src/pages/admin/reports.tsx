@@ -85,6 +85,7 @@ interface SimConfig {
   minPortfolioCompletions: number;
   mixpanelToken: string;
   ga4MeasurementId: string;
+  ga4ApiSecret: string;
 }
 
 const DEFAULTS: SimConfig = {
@@ -102,6 +103,7 @@ const DEFAULTS: SimConfig = {
   minPortfolioCompletions: 5,
   mixpanelToken: "a6d30eeef83cda0e513f6b3ea08a0b3d",
   ga4MeasurementId: "G-SR7QGTY3K9",
+  ga4ApiSecret: "yEU6R3P9SWe5z9_Foa7XWA",
 };
 
 function NumInput({ label, value, onChange, min = 0, max = 100, unit = "%" }: {
@@ -548,6 +550,16 @@ function ActivityTab({ openSignal, runSignal }: { openSignal?: number; runSignal
                           value={dialogCfg.ga4MeasurementId}
                           onChange={(e) => setD("ga4MeasurementId", e.target.value)}
                           placeholder="G-XXXXXXXXXX"
+                          className="w-80 border border-gray-200 rounded px-2 py-1 text-xs text-gray-800 font-mono focus:outline-none focus:ring-1 focus:ring-pink-300"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[10px] text-gray-400">GA4 API 비밀번호</span>
+                        <input
+                          type="text"
+                          value={dialogCfg.ga4ApiSecret}
+                          onChange={(e) => setD("ga4ApiSecret", e.target.value)}
+                          placeholder="GA4 API Secret"
                           className="w-80 border border-gray-200 rounded px-2 py-1 text-xs text-gray-800 font-mono focus:outline-none focus:ring-1 focus:ring-pink-300"
                         />
                       </div>
