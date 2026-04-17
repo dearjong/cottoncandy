@@ -429,23 +429,6 @@ function Router() {
       <Route path="/admin/project-detail/:id">
         <AdminLayout><AdminProjectDetail /></AdminLayout>
       </Route>
-      <Route path="/admin/projects">
-        <AdminLayout><AdminProjects /></AdminLayout>
-      </Route>
-      <Route path="/admin/projects/:id">
-        {(params: { id: string }) => (
-          <AdminLayout><AdminProjects initialProjectId={params.id} /></AdminLayout>
-        )}
-      </Route>
-      <Route path="/admin/bidding">
-        <AdminLayout><AdminBiddingProjects /></AdminLayout>
-      </Route>
-      <Route path="/admin/one-on-one">
-        <AdminLayout><AdminOneOnOneProjects /></AdminLayout>
-      </Route>
-      <Route path="/admin/private">
-        <AdminLayout><AdminOneOnOneProjects /></AdminLayout>
-      </Route>
       <Route path="/admin/consulting/related-projects">
         <AdminLayout><AdminConsultingRelatedProjects /></AdminLayout>
       </Route>

@@ -402,7 +402,7 @@ export function CompanyDetailTabs({
                   프로젝트
                 </CardTitle>
                 <Link
-                  href="/admin/projects"
+                  href="/admin/project_list"
                   className="text-sm text-muted-foreground hover:text-foreground"
                 >
                   전체 프로젝트 보기

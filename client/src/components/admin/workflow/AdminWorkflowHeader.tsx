@@ -5,7 +5,7 @@ export function AdminWorkflowHeader({
   title,
   description,
   right,
-  backHref = "/admin/projects",
+  backHref = "/admin/project_list",
 }: {
   title: string
   description?: string

@@ -94,7 +94,7 @@ export function ContractAccessGate({ open, onUnlock }: Props) {
           </div>
         </div>
         <div className="mt-6 flex gap-3">
-          <Button variant="outline" className="flex-1" onClick={() => setLocation("/admin/projects")}>
+          <Button variant="outline" className="flex-1" onClick={() => setLocation("/admin/project_list")}>
             취소
           </Button>
           <Button className="flex-1 bg-amber-600 hover:bg-amber-700" onClick={handleUnlock}>

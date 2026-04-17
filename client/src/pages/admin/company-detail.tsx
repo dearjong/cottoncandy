@@ -385,7 +385,7 @@ export default function AdminCompanyDetail() {
                     <Folder className="h-5 w-5" />
                     프로젝트
                   </CardTitle>
-                  <Link href="/admin/projects" className="text-sm text-muted-foreground hover:text-foreground">
+                  <Link href="/admin/project_list" className="text-sm text-muted-foreground hover:text-foreground">
                     전체 프로젝트 보기
                   </Link>
                 </div>

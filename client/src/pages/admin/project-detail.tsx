@@ -54,7 +54,7 @@ export default function AdminProjectDetail() {
             <h1 className="text-2xl font-bold text-foreground">[참여공고] 프로젝트 상세</h1>
             <p className="text-gray-600 text-sm mt-0.5">등록된 공고를 보고 전문 기업이 참여 신청을 합니다.</p>
           </div>
-          <BackToListButton href="/admin/projects" className="shrink-0" />
+          <BackToListButton href="/admin/project_list" className="shrink-0" />
         </div>
 
         <div className="bg-white rounded-lg shadow-sm p-8">
@@ -394,7 +394,7 @@ export default function AdminProjectDetail() {
           </DialogHeader>
           <div className="flex gap-3 mt-4">
             <div className="flex-1 min-w-0 [&_a]:block [&_a]:w-full">
-              <BackToListButton href="/admin/projects" className="w-full" />
+              <BackToListButton href="/admin/project_list" className="w-full" />
             </div>
           </div>
         </DialogContent>
