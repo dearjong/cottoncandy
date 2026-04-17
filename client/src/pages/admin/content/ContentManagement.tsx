@@ -34,6 +34,10 @@ const NOTIFICATION_DEFINITIONS = [
     { category: '기업 관리 알림', code: 'ORG-001', name: '직원 등록 신청 접수', sender: 'SYSTEM', trigger: '직원 등록 신청', target: '기업관리자', template: '{이름}님이 {회사명} 구성원 등록을 신청했습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
     { category: '기업 관리 알림', code: 'ORG-002', name: '직원 등록 승인 완료', sender: 'ADMIN', trigger: '기업관리자 승인', target: '신청자', template: '{회사명} 구성원 등록이 승인되었습니다.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
     { category: '기업 관리 알림', code: 'ORG-003', name: '직원 등록 반려', sender: 'ADMIN', trigger: '기업관리자 반려', target: '신청자', template: '{회사명} 구성원 등록이 반려되었습니다. 사유: {사유}', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '기업 관리 알림', code: 'ORG-004', name: '직원 삭제 안내', sender: 'ADMIN', trigger: '기업관리자 삭제', target: '삭제된 직원', template: '{회사명}의 구성원에서 삭제되었습니다.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '기업 관리 알림', code: 'ORG-005', name: '기업 대표자 변경 안내', sender: 'ADMIN', trigger: '대표자 변경', target: '기업 구성원 전체', template: '{회사명}의 대표자가 변경되었습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '기업 관리 알림', code: 'ORG-006', name: '기업 정보 수정 안내', sender: 'ADMIN', trigger: '기업 정보 수정', target: '기업관리자', template: '{회사명}의 기업 정보가 수정되었습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '기업 관리 알림', code: 'ORG-007', name: '기업 계정 정지/해제', sender: 'ADMIN', trigger: '운영자 정지·해제 처리', target: '기업관리자', template: '{회사명} 계정이 {상태}되었습니다. 사유: {사유}', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
     { category: '기업 관리 알림', code: 'ORG-008', name: '권한 변경 안내', sender: 'ADMIN', trigger: '권한 변경', target: '해당 사용자', template: '{회사명}에서 내 권한이 변경되었습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
     { category: '기업 관리 알림', code: 'ORG-009', name: '사업자등록 인증 신청 접수', sender: 'SYSTEM', trigger: '인증 신청', target: '플랫폼 운영자', template: '사업자등록 인증 신청이 접수되었습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
     { category: '기업 관리 알림', code: 'ORG-010', name: '사업자등록 인증 승인 완료', sender: 'ADMIN', trigger: '운영자 승인', target: '신청자', template: '사업자등록 인증이 승인되었습니다.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
@@ -44,12 +48,19 @@ const NOTIFICATION_DEFINITIONS = [
     { category: '프로젝트 상태 알림', code: 'PRJ-003', name: '접수 마감', sender: 'SYSTEM', trigger: '상태 변경(CLOSED)', target: 'Owner', template: '접수가 마감되었습니다. 결과를 확인해 주세요.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
     { category: '프로젝트 상태 알림', code: 'PRJ-004', name: '선정 완료', sender: 'SYSTEM', trigger: '상태 변경(SELECTED)', target: 'Owner', template: '최종 파트너 선정이 완료되었습니다.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
     { category: '프로젝트 상태 알림', code: 'PRJ-005', name: '계약 단계 진입', sender: 'SYSTEM', trigger: '상태 변경(CONTRACT)', target: '양측', template: '계약 단계로 전환되었습니다. 계약 서류를 확인해 주세요.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+    { category: '프로젝트 상태 알림', code: 'PRJ-006', name: '중단 요청 접수', sender: 'SYSTEM', trigger: '중단 요청 등록', target: '플랫폼 운영자', template: '프로젝트 중단 요청이 접수되었습니다. 검토가 필요합니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '프로젝트 상태 알림', code: 'PRJ-007', name: '중단/취소 완료', sender: 'SYSTEM', trigger: '상태 변경(STOPPED/CANCELLED)', target: '양측', template: '프로젝트가 중단·취소 처리되었습니다. 사유: {사유}', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+    { category: '프로젝트 상태 알림', code: 'PRJ-008', name: '분쟁 처리 완료', sender: 'ADMIN', trigger: '분쟁 처리 완료', target: '양측', template: '접수된 분쟁이 처리 완료되었습니다. 결과를 확인해 주세요.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
     { category: '프로젝트 상태 알림', code: 'PRJ-009', name: '종료(완료)', sender: 'SYSTEM', trigger: '상태 변경(COMPLETE)', target: '양측', template: '프로젝트가 완료 처리되었습니다.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
 
     // 6. 파트너 참여 상태 알림
     { category: '파트너 참여 상태 알림', code: 'PAR-001', name: '프로젝트 초대', sender: 'SYSTEM', trigger: 'INVITED', target: '해당 파트너', template: '프로젝트에 초대되었습니다. 참여 여부를 확인해 주세요.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
     { category: '파트너 참여 상태 알림', code: 'PAR-002', name: '참여 신청 도착', sender: 'SYSTEM', trigger: 'APPLY', target: 'Owner', template: '참여 신청이 도착했습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
     { category: '파트너 참여 상태 알림', code: 'PAR-003', name: '제안서 제출 완료', sender: 'SYSTEM', trigger: 'PROPOSAL_SUBMITTED', target: 'Owner', template: '제안서가 제출되었습니다. 확인해 주세요.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '파트너 참여 상태 알림', code: 'PAR-004', name: '초대 수락', sender: 'SYSTEM', trigger: 'INVITE_ACCEPTED', target: 'Owner', template: '{파트너명}이(가) 프로젝트 초대를 수락했습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '파트너 참여 상태 알림', code: 'PAR-005', name: '초대 거절', sender: 'SYSTEM', trigger: 'INVITE_REJECTED', target: 'Owner', template: '{파트너명}이(가) 프로젝트 초대를 거절했습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '파트너 참여 상태 알림', code: 'PAR-006', name: '지원 취소', sender: 'SYSTEM', trigger: 'APPLY_CANCELLED', target: 'Owner', template: '{파트너명}이(가) 참여 신청을 취소했습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '파트너 참여 상태 알림', code: 'PAR-007', name: '미선정 안내', sender: 'SYSTEM', trigger: '선정 완료(미선정 파트너)', target: '미선정 파트너', template: '{프로젝트명} 최종 선정에서 아쉽게도 선정되지 않았습니다.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
     { category: '파트너 참여 상태 알림', code: 'PAR-008', name: '파트너 선정', sender: 'SYSTEM', trigger: 'SELECTED', target: '해당 파트너', template: '축하드립니다! {프로젝트명} 최종 파트너로 선정되셨습니다.', active: true, ch: { sms: true, email: true, kakao: true, web: true } },
 
     // 7. 제안서/시안 업로드
@@ -64,6 +75,9 @@ const NOTIFICATION_DEFINITIONS = [
 
     // 10. 정산
     { category: '정산', code: 'PAY-001', name: '증빙/지급 정보 등록', sender: 'SYSTEM', trigger: '증빙 등록', target: '상대방', template: '증빙/지급 정보가 등록되었습니다. 확인해 주세요.', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '정산', code: 'PAY-002', name: '계약금 입금 확인', sender: 'SYSTEM', trigger: '계약금 입금 처리', target: '수취인', template: '계약금 입금이 확인되었습니다. 금액: {금액}원', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+    { category: '정산', code: 'PAY-003', name: '중도금 입금 확인', sender: 'SYSTEM', trigger: '중도금 입금 처리', target: '수취인', template: '중도금 입금이 확인되었습니다. 금액: {금액}원', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+    { category: '정산', code: 'PAY-004', name: '잔금 입금 확인', sender: 'SYSTEM', trigger: '잔금 입금 처리', target: '수취인', template: '잔금 입금이 확인되었습니다. 금액: {금액}원', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
     { category: '정산', code: 'PAY-005', name: '정산 완료', sender: 'SYSTEM', trigger: 'COMPLETE', target: '양측', template: '정산이 완료 처리되었습니다.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
 
     // 11. 맞춤/관심기업
@@ -71,7 +85,13 @@ const NOTIFICATION_DEFINITIONS = [
     { category: '맞춤/관심기업', code: 'REC-002', name: '관심 기업 신규 프로젝트', sender: 'SYSTEM', trigger: '관심기업 이벤트', target: '해당 사용자', template: '관심 기업의 신규 프로젝트가 등록되었습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
     { category: '맞춤/관심기업', code: 'REC-003', name: '관심 기업 활동 업데이트', sender: 'SYSTEM', trigger: '관심기업 업데이트', target: '해당 사용자', template: '관심 기업의 활동이 업데이트되었습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
 
-    // 12. 메시지
+    // 12. 포트폴리오
+    { category: '포트폴리오', code: 'PF-001', name: '포트폴리오 등록 신청 접수', sender: 'SYSTEM', trigger: 'portfolio_registered', target: '플랫폼 운영자', template: '파트너 포트폴리오 등록 신청이 접수되었습니다. 검토해 주세요.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+    { category: '포트폴리오', code: 'PF-002', name: '포트폴리오 승인 완료', sender: 'ADMIN', trigger: '운영자 승인', target: '파트너', template: '포트폴리오가 승인되었습니다. 플랫폼에 공개됩니다.', active: true, ch: { sms: false, email: true, kakao: true, web: true } },
+    { category: '포트폴리오', code: 'PF-003', name: '포트폴리오 반려', sender: 'ADMIN', trigger: '운영자 반려', target: '파트너', template: '포트폴리오가 반려되었습니다. 사유: {사유}', active: true, ch: { sms: false, email: true, kakao: false, web: true } },
+    { category: '포트폴리오', code: 'PF-004', name: '포트폴리오 임시저장 안내', sender: 'SYSTEM', trigger: 'portfolio_draft_saved', target: '파트너', template: '포트폴리오가 임시저장되었습니다. 이어서 작성하려면 등록 페이지를 방문하세요.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
+
+    // 13. 메시지
     { category: '메시지', code: 'MSG-001', name: '쪽지 수신', sender: 'SYSTEM', trigger: '메시지 수신', target: '수신자', template: '새 메시지가 도착했습니다.', active: true, ch: { sms: false, email: false, kakao: false, web: true } },
 
     // 13. 리마인더 알림 (D-3 / D-1 / 당일)
