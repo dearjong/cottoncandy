@@ -1,6 +1,6 @@
 # ADMarket GA4 · Mixpanel 이벤트 정의서
 
-> 버전: v3.3 | 작성일: 2026-04-08 | 최종수정: 2026-04-10  
+> 버전: v3.4 | 작성일: 2026-04-08 | 최종수정: 2026-04-17  
 > 적용 툴: Google Analytics 4 + Mixpanel (동일 이벤트명·파라미터 사용)
 
 ## 1. 설계 원칙
@@ -44,6 +44,72 @@
 |---------|--------|
 | `path` | `/` |
 | `session_id` | `uuid-xxxx` |
+
+---
+
+## 3-1. 로그인 퍼널
+
+> **단일 통합 퍼널**: `site_visit → login_started → login_completed`  
+> `method` 파라미터로 로그인 방식을 구분 → Mixpanel Breakdown 분석 가능
+
+| 이벤트명 | 트리거 | GA4 전환 | 구현 |
+|---------|--------|---------|------|
+| `login_started` | 이메일 "다음" 클릭 또는 SSO 버튼 클릭 | ✅ 전환 | ✅ 완료 |
+| `naver_form_viewed` | 네이버 로그인 화면 자동 진입 | - | ✅ 완료 |
+| `naver_tab_switched` | 네이버 ID/일회용/QR 탭 전환 | - | ✅ 완료 |
+| `google_form_viewed` | 구글 로그인 화면 자동 진입 | - | ✅ 완료 |
+| `google_email_submitted` | 구글 이메일 입력 → 다음 클릭 | - | ✅ 완료 |
+| `login_completed` | 모든 방식의 로그인 완료 공통 이벤트 | ✅ 전환 | ✅ 완료 |
+
+**`login_started` 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `method` | `email` / `naver` / `google` | 로그인 시도 방식 |
+
+**`login_completed` 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `method` | `email` / `naver` / `google` | 완료된 로그인 방식 |
+| `user_type` | `advertiser` / `partner` / `guest` | 사용자 유형 |
+
+**`naver_tab_switched` 파라미터**
+
+| 파라미터 | 예시값 | 설명 |
+|---------|--------|------|
+| `tab` | `id` / `otp` / `qr` | 전환된 탭 |
+
+> **설계 포인트**:  
+> - `login_started`는 의도 표현 시점, `login_completed`는 성공 완료 시점 — 둘 사이 이탈율이 실제 로그인 장벽.  
+> - `method`로 Mixpanel Breakdown 시 이메일/SSO 방식별 전환율 비교 가능.  
+> - 기존 `sso_login` · `login` · `user_login`은 하위 호환 유지, 신규 퍼널 분석은 `login_completed` 단일 이벤트로 집계.
+
+**로그인 퍼널 흐름**
+
+```
+site_visit
+  → login_started { method: "email" }
+      → login_completed { method: "email" }   ← 이메일 로그인
+
+  → login_started { method: "naver" }
+      → naver_form_viewed
+        → naver_tab_switched (선택적)
+          → login_completed { method: "naver" } ← 네이버 SSO 완료
+
+  → login_started { method: "google" }
+      → google_form_viewed
+        → google_email_submitted
+          → login_completed { method: "google" } ← 구글 SSO 완료
+```
+
+**구현 위치**
+
+| 파일 | 이벤트 |
+|------|--------|
+| `client/src/pages/member/login.tsx` | `login_started`, `login_completed` (email) |
+| `client/src/pages/member/login-naver.tsx` | `naver_form_viewed`, `naver_tab_switched`, `login_completed` (naver) |
+| `client/src/pages/member/login-google.tsx` | `google_form_viewed`, `google_email_submitted`, `login_completed` (google) |
 
 ---
 
@@ -570,6 +636,8 @@ GA4 관리 콘솔 → `activation_achieved`를 전환 이벤트로 추가 마킹
 
 | 이벤트명 | 전환 의미 | 역할 | 구현 |
 |---------|----------|------|------|
+| `login_started` | 로그인 시도 시작 | 공통 | ✅ |
+| `login_completed` | 로그인 완료 (모든 방식 통합) | 공통 | ✅ |
 | `signup_complete` | 회원가입 완료 | 공통 | ✅ |
 | `project_submitted` | 프로젝트 등록 완료 | 의뢰사 | ✅ |
 | `project_draft_saved` | 프로젝트 임시저장 | 의뢰사 | ✅ |
@@ -597,6 +665,14 @@ GA4 관리 콘솔 → `activation_achieved`를 전환 이벤트로 추가 마킹
 ---
 
 ## 15. 퍼널 설계 (GA4 탐색 보고서 / Mixpanel 퍼널)
+
+### 로그인 전환 퍼널 (공통)
+
+```
+site_visit
+  → login_started (method=email|naver|google)
+    → login_completed (method=email|naver|google)   ← Mixpanel 통합 퍼널 종점
+```
 
 ### 의뢰사 — 공고 프로젝트 퍼널 (전체 사이클)
 
@@ -670,12 +746,22 @@ site_visit
 | `time_on_page` | ✅ | ✅ |
 | `page_exit` | ✅ | ✅ |
 
-### 인증 · 가입
+### 인증 · 로그인
+| 이벤트 | GA4 | MXP | 비고 |
+|--------|-----|-----|------|
+| `login_started` ⭐ | ✅ | ✅ | method 파라미터로 방식 구분 |
+| `login_completed` ⭐ | ✅ | ✅ | 통합 퍼널 종점 (모든 방식 공통) |
+| `naver_form_viewed` | - | ✅ | 네이버 로그인 화면 진입 |
+| `naver_tab_switched` | - | ✅ | ID/일회용/QR 탭 전환 |
+| `google_form_viewed` | - | ✅ | 구글 로그인 화면 진입 |
+| `google_email_submitted` | - | ✅ | 구글 이메일 입력 완료 |
+| `sso_login` ⭐ | ✅ | ✅ | 하위 호환 유지 |
+| `login` ⭐ | ✅ | ✅ | 하위 호환 유지 |
+| `user_login` (Mixpanel 전용) | - | ✅ | 하위 호환 유지 |
+
+### 가입
 | 이벤트 | GA4 | MXP |
 |--------|-----|-----|
-| `sso_login` ⭐ | ✅ | ✅ |
-| `login` ⭐ | ✅ | ✅ |
-| `user_login` (Mixpanel 전용) | - | ✅ |
 | `signup_started` ⭐ | ✅ | ✅ |
 | `signup_funnel` | ✅ | ✅ |
 | `signup_complete` ⭐ | ✅ | ✅ |
@@ -834,7 +920,9 @@ site_visit
 | 이벤트 유형 | page_location |
 |------------|--------------|
 | `site_visit`, `home_click` | `admarket.co.kr/` |
-| `sso_login`, `login` | `admarket.co.kr/login` |
+| `login_started`, `login_completed`, `sso_login`, `login` | `admarket.co.kr/login` |
+| `naver_form_viewed`, `naver_tab_switched` | `admarket.co.kr/login/naver` |
+| `google_form_viewed`, `google_email_submitted` | `admarket.co.kr/login/google` |
 | `signup_funnel` step 1~5 | `/signup`, `/signup/email`, `/signup/phone`, `/signup/account-type`, `/signup/job-info` |
 | `step_N_*` | `admarket.co.kr/create-project/stepN` |
 | `portfolio_section_*` | `admarket.co.kr/work/portfolio/register` |
@@ -932,6 +1020,7 @@ site_visit
 
 ---
 
-*이 문서는 ADMarket 플랫폼 GA4·Mixpanel 이벤트 정의 기준입니다. (v3.3 — 2026-04-10)*  
+*이 문서는 ADMarket 플랫폼 GA4·Mixpanel 이벤트 정의 기준입니다. (v3.4 — 2026-04-17)*  
 *전체 퍼널 이벤트 연결 완료: `project_completed` · `deliverable_submitted/confirmed` · `draft_submitted` · `portfolio_registered`*  
+*v3.4 추가: 로그인 퍼널 섹션(3-1) 신설 — `login_started` · `login_completed` · SSO 중간 이벤트(naver/google) 정의, 섹션 14·15·17·18 반영*  
 *v3.3 정리: 섹션 0(`identifyUser`) · `user_id` 제거 (SDK 내부 처리), `project_id` · `consulting_id` · `company_id` · `portfolio_id` · `partner_name` · `project_title` 등 시스템 ID·고유명사 전체 제거 — 이벤트 정의서는 분석 차원 파라미터만 포함*
