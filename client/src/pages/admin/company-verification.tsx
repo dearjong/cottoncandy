@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   Table, 
   TableBody, 
@@ -31,7 +30,6 @@ import {
   FileCheck,
   Pencil,
   Save,
-  Award,
   Clock,
   Download
 } from "lucide-react"
@@ -44,7 +42,7 @@ interface CompanyVerification {
   businessNumber: string
   companyType: '대행사' | '제작사' | '광고주'
   subType?: string
-  verificationType: 'BUSINESS' | 'PROJECT_COMPLETION'
+  verificationType: 'BUSINESS'
   requestedAt: string
   documents: string[]
   projectCount?: number
@@ -102,31 +100,6 @@ const verificationRequests: CompanyVerification[] = [
     minProductionCost: "5천만 원 ~ 1억"
   },
   {
-    id: "VER-003",
-    companyName: "비주얼프로덕션",
-    representativeName: "박감독",
-    businessNumber: "345-67-89012",
-    companyType: "제작사",
-    subType: "촬영 중심",
-    verificationType: "PROJECT_COMPLETION",
-    requestedAt: "2026-01-17 16:45",
-    documents: ["완료보고서.pdf"],
-    projectCount: 42,
-    completedCount: 38,
-    email: "info@visualprod.com",
-    phone: "02-3456-7890",
-    intro: "촬영 전문 프로덕션입니다.",
-    industry: "영상촬영",
-    foundedYear: "2012",
-    foundedMonth: "1",
-    companySize: "중소기업",
-    employeeCount: "10명 이상",
-    serviceRange: ["영상 제작"],
-    businessType: "법인사업자",
-    detailIntro: "비주얼프로덕션은 촬영 전문 프로덕션입니다.",
-    minProductionCost: "5천만 원 미만"
-  },
-  {
     id: "VER-004",
     companyName: "(주)테크브랜드",
     companyNameEn: "Tech Brand Co., Ltd",
@@ -154,7 +127,6 @@ const verificationRequests: CompanyVerification[] = [
 
 const verificationTypeLabels = {
   BUSINESS: { label: "사업자 인증", icon: FileCheck, color: "bg-blue-500" },
-  PROJECT_COMPLETION: { label: "수행 인증", icon: Award, color: "bg-green-500" },
 }
 
 export default function CompanyVerificationPage() {
@@ -191,19 +163,11 @@ export default function CompanyVerificationPage() {
     setEditedData(prev => ({ ...prev, [field]: value }))
   }
 
-  const businessRequests = verificationRequests.filter(r => r.verificationType === 'BUSINESS')
-  const completionRequests = verificationRequests.filter(r => r.verificationType === 'PROJECT_COMPLETION')
-
-  const filteredRequests = (type: string) => {
-    let requests = type === 'all' ? verificationRequests :
-                   type === 'business' ? businessRequests : completionRequests
-    
-    return requests.filter(request =>
-      request.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.businessNumber.includes(searchTerm) ||
-      request.id.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  }
+  const filteredRequests = verificationRequests.filter(request =>
+    request.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    request.businessNumber.includes(searchTerm) ||
+    request.id.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   const handleApprove = (verification: CompanyVerification) => {
     const typeLabel = verificationTypeLabels[verification.verificationType].label
@@ -353,32 +317,6 @@ export default function CompanyVerificationPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg dark:bg-blue-900">
-                <FileCheck className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{businessRequests.length}</p>
-                <p className="text-sm text-muted-foreground">사업자 인증</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg dark:bg-green-900">
-                <Award className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{completionRequests.length}</p>
-                <p className="text-sm text-muted-foreground">수행 인증</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       <Card>
@@ -397,22 +335,7 @@ export default function CompanyVerificationPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList>
-              <TabsTrigger value="all">전체 ({verificationRequests.length})</TabsTrigger>
-              <TabsTrigger value="business">사업자 인증 ({businessRequests.length})</TabsTrigger>
-              <TabsTrigger value="completion">수행 인증 ({completionRequests.length})</TabsTrigger>
-            </TabsList>
-            <TabsContent value="all" className="mt-4">
-              <VerificationTable requests={filteredRequests('all')} />
-            </TabsContent>
-            <TabsContent value="business" className="mt-4">
-              <VerificationTable requests={filteredRequests('business')} />
-            </TabsContent>
-            <TabsContent value="completion" className="mt-4">
-              <VerificationTable requests={filteredRequests('completion')} />
-            </TabsContent>
-          </Tabs>
+          <VerificationTable requests={filteredRequests} />
         </CardContent>
       </Card>
 
