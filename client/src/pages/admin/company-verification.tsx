@@ -29,7 +29,6 @@ import {
   X, 
   Building2,
   FileCheck,
-  ShieldCheck,
   Pencil,
   Save,
   Award,
@@ -45,7 +44,7 @@ interface CompanyVerification {
   businessNumber: string
   companyType: '대행사' | '제작사' | '광고주'
   subType?: string
-  verificationType: 'BUSINESS' | 'PROJECT_AUTHENTICITY' | 'PROJECT_COMPLETION'
+  verificationType: 'BUSINESS' | 'PROJECT_COMPLETION'
   requestedAt: string
   documents: string[]
   projectCount?: number
@@ -103,36 +102,6 @@ const verificationRequests: CompanyVerification[] = [
     minProductionCost: "5천만 원 ~ 1억"
   },
   {
-    id: "VER-002",
-    companyName: "스마트에이전시",
-    companyNameEn: "Smart Agency",
-    representativeName: "이사장",
-    businessNumber: "234-56-78901",
-    companyType: "대행사",
-    subType: "Creative 중심",
-    verificationType: "PROJECT_AUTHENTICITY",
-    requestedAt: "2026-01-18 10:15",
-    documents: ["포트폴리오증빙.pdf", "계약서사본.pdf"],
-    projectCount: 15,
-    email: "contact@smartagency.kr",
-    phone: "02-2345-6789",
-    intro: "크리에이티브 중심의 종합 광고 대행사입니다.",
-    industry: "광고대행, 마케팅",
-    foundedYear: "2015",
-    foundedMonth: "7",
-    zipCode: "04789",
-    address: "서울 성동구 왕십리로 115",
-    addressDetail: "헤이그라운드 5층",
-    website: "www.smartagency.kr",
-    companySize: "중소기업",
-    employeeCount: "30명 이상",
-    serviceRange: ["전략기획", "크리에이티브 기획", "미디어 집행"],
-    industryResponse: ["금융 패키 대응"],
-    businessType: "법인사업자",
-    detailIntro: "스마트에이전시는 크리에이티브 중심의 종합 광고 대행사로, 전략 기획부터 미디어 집행까지 원스톱 서비스를 제공합니다.",
-    minProductionCost: "1억 ~ 2억"
-  },
-  {
     id: "VER-003",
     companyName: "비주얼프로덕션",
     representativeName: "박감독",
@@ -185,7 +154,6 @@ const verificationRequests: CompanyVerification[] = [
 
 const verificationTypeLabels = {
   BUSINESS: { label: "사업자 인증", icon: FileCheck, color: "bg-blue-500" },
-  PROJECT_AUTHENTICITY: { label: "진정성 인증", icon: ShieldCheck, color: "bg-purple-500" },
   PROJECT_COMPLETION: { label: "수행 인증", icon: Award, color: "bg-green-500" },
 }
 
@@ -224,13 +192,11 @@ export default function CompanyVerificationPage() {
   }
 
   const businessRequests = verificationRequests.filter(r => r.verificationType === 'BUSINESS')
-  const authenticityRequests = verificationRequests.filter(r => r.verificationType === 'PROJECT_AUTHENTICITY')
   const completionRequests = verificationRequests.filter(r => r.verificationType === 'PROJECT_COMPLETION')
 
   const filteredRequests = (type: string) => {
     let requests = type === 'all' ? verificationRequests :
-                   type === 'business' ? businessRequests :
-                   type === 'authenticity' ? authenticityRequests : completionRequests
+                   type === 'business' ? businessRequests : completionRequests
     
     return requests.filter(request =>
       request.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -403,19 +369,6 @@ export default function CompanyVerificationPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg dark:bg-purple-900">
-                <ShieldCheck className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{authenticityRequests.length}</p>
-                <p className="text-sm text-muted-foreground">진정성 인증</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
               <div className="p-2 bg-green-100 rounded-lg dark:bg-green-900">
                 <Award className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
@@ -448,7 +401,6 @@ export default function CompanyVerificationPage() {
             <TabsList>
               <TabsTrigger value="all">전체 ({verificationRequests.length})</TabsTrigger>
               <TabsTrigger value="business">사업자 인증 ({businessRequests.length})</TabsTrigger>
-              <TabsTrigger value="authenticity">진정성 인증 ({authenticityRequests.length})</TabsTrigger>
               <TabsTrigger value="completion">수행 인증 ({completionRequests.length})</TabsTrigger>
             </TabsList>
             <TabsContent value="all" className="mt-4">
@@ -456,9 +408,6 @@ export default function CompanyVerificationPage() {
             </TabsContent>
             <TabsContent value="business" className="mt-4">
               <VerificationTable requests={filteredRequests('business')} />
-            </TabsContent>
-            <TabsContent value="authenticity" className="mt-4">
-              <VerificationTable requests={filteredRequests('authenticity')} />
             </TabsContent>
             <TabsContent value="completion" className="mt-4">
               <VerificationTable requests={filteredRequests('completion')} />
