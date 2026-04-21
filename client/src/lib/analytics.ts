@@ -7,7 +7,6 @@ import {
 } from "@/config/create-project-step-meta";
 import mixpanel from "mixpanel-browser";
 
-declare function gtag(...args: unknown[]): void;
 
 const SITE_VISIT_SESSION_KEY = "analytics_site_visit_sent";
 const SESSION_ID_KEY = "analytics_session_id";
@@ -203,7 +202,7 @@ export function clearLocalEventLog() {
 }
 
 /**
- * Mixpanel 전송 + GA4 전송 + 서버 `analytics_events` 적재 (POST /api/analytics/events).
+ * Mixpanel 전송 + 서버 `analytics_events` 적재 (POST /api/analytics/events).
  * UTM 파라미터·유입경로·user_id·experiment variant를 모든 이벤트에 자동 첨부.
  */
 export function publishAnalytics(
@@ -226,20 +225,6 @@ export function publishAnalytics(
 
   // Mixpanel (제한 없음)
   mixpanel.track(eventName, props);
-
-  // GA4 — gtag() 단일 경로로 전송
-  // transport_type: 'beacon' → 페이지 이동 중에도 전송 보장 (navigator.sendBeacon 사용)
-  if (typeof gtag !== "undefined") {
-    const ga4Props: Record<string, unknown> = { transport_type: "beacon" };
-    for (const [k, v] of Object.entries(props)) {
-      if (typeof v === "string" && v.length > 100) {
-        ga4Props[k] = v.slice(0, 100);
-      } else {
-        ga4Props[k] = v;
-      }
-    }
-    gtag("event", eventName, ga4Props);
-  }
 
   // 서버 적재 (user_id 포함)
   void fetch("/api/analytics/events", {
@@ -308,16 +293,6 @@ export function identifyUser(props: {
     last_login: now,
   });
 
-  // GA4 — config 재호출 대신 set 사용 (config는 session 리셋 + 불필요한 page_view 발생)
-  if (typeof gtag !== "undefined") {
-    gtag("set", { user_id: anonId });
-    gtag("set", "user_properties", {
-      email: maskedEmail,
-      user_type: userType ?? "unknown",
-      last_login: now,
-    });
-  }
-
   // localStorage에 저장 → 새로고침 후 재식별에 활용 (이미 익명화된 ID)
   try {
     localStorage.setItem("analytics_user_id", anonId);
@@ -341,10 +316,6 @@ export function reIdentifyIfLoggedIn() {
     }
     if (userId) {
       mixpanel.identify(userId);
-      if (typeof gtag !== "undefined") {
-        gtag("set", { user_id: userId });
-        gtag("set", "user_properties", { user_type: userType ?? "unknown" });
-      }
     }
   } catch {/* ignore */}
 }
@@ -397,11 +368,6 @@ export function trackLogin(props: {
   method?: "email" | "naver" | "google" | "admin";
   user_type?: "advertiser" | "agency" | "production" | "admin";
 }) {
-  // GA4: 표준 login 이벤트 (BigQuery / 전환 분석에 활용 가능)
-  if (typeof gtag !== "undefined") {
-    gtag("event", "login", { method: props.method ?? "email" });
-  }
-  // Mixpanel: 커스텀 파라미터 포함
   publishAnalytics("user_login", {
     method: props.method ?? "email",
     user_type: props.user_type ?? "advertiser",
@@ -1023,16 +989,6 @@ export function trackMyNotificationSettingsSaved(props: {
 
 // ─── 라우트 리스너 ────────────────────────────────────────────
 
-/** GA4에 page_view 이벤트 전송 (SPA 경로 변경 시) */
-function trackGA4PageView(path: string) {
-  if (typeof gtag === "undefined") return;
-  gtag("event", "page_view", {
-    transport_type: "beacon",
-    page_path: path,
-    page_title: document.title,
-    page_location: window.location.href,
-  });
-}
 
 // ── 기업 구성원 관리 ──────────────────────────────────────────────────
 /** 대기 중인 구성원 소속 승인 */
@@ -1146,8 +1102,6 @@ export function FunnelRouteListener() {
       maxScrollPct.current = 0;
       firedMilestones.current = new Set();
       window.scrollTo(0, 0);
-      // SPA 내비게이션 시에만 page_view 전송 (초기 로드는 index.html gtag config가 담당)
-      trackGA4PageView(path);
     }
 
     trackFunnelRoute(path);

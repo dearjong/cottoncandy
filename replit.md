@@ -59,9 +59,8 @@ ADMarket는 광고주(의뢰사)와 광고 제작사(파트너)를 연결하는 
 ## External Dependencies
 
 - **PostgreSQL**: Used with Drizzle ORM for database management (via Neon serverless).
-- **Google Analytics 4 (GA4)**: `G-SR7QGTY3K9` for website analytics.
 - **Mixpanel**: `a6d30eeef83cda0e513f6b3ea08a0b3d` for detailed event tracking and user behavior analysis.
-- **GA4 Measurement Protocol API Secret**: 환경변수 아닌 `server/simulate-analytics.ts` 내 하드코딩 (시뮬레이션 전용).
+- **GA4 Measurement Protocol**: `server/simulate-analytics.ts`에서 서버사이드 시뮬레이션 전용. API Secret 하드코딩.
 
 ## Analytics Architecture
 
