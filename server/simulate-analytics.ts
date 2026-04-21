@@ -484,11 +484,6 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
       const entry = ga4Map.get(distinctId);
       if (entry) {
         const pageLocation = derivePageLocation(event, props);
-        // GA4 MP timestamp_micros: 72시간(258,200초) 이내로 캡
-        const GA4_MAX_AGO_SEC = 71 * 3600;
-        const cappedTs = Math.max(ts, Math.floor(Date.now() / 1000) - GA4_MAX_AGO_SEC);
-        const tsMicros = cappedTs * 1_000_000;
-
         // page_view 이벤트 → GA4 '페이지 및 화면' 보고서에 반영
         entry.events.push({
           name: "page_view",
@@ -498,7 +493,6 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
             page_location: pageLocation,
             page_referrer: `${BASE_URL}/`,
           },
-          timestamp_micros: tsMicros,
         });
 
         // 키 전환 이벤트는 custom event도 함께 전송 → GA4 이벤트 보고서에 반영
@@ -517,7 +511,6 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
               simulation: "true",
               ...ga4Props,
             },
-            timestamp_micros: tsMicros,
           });
         }
       }
@@ -545,11 +538,9 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
   }
 
   // GA4 전용 페이지뷰 (Mixpanel 이벤트 없이 GA4 '페이지 및 화면' 보고서에만 반영)
-  function addGa4PageView(distinctId: string, path: string, ts: number) {
+  function addGa4PageView(distinctId: string, path: string, _ts: number) {
     const entry = ga4Map.get(distinctId);
     if (!entry) return;
-    const GA4_MAX_AGO_SEC = 71 * 3600;
-    const cappedTs = Math.max(ts, Math.floor(Date.now() / 1000) - GA4_MAX_AGO_SEC);
     entry.events.push({
       name: "page_view",
       params: {
@@ -558,7 +549,6 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
         page_location: `${BASE_URL}${path}`,
         page_referrer: `${BASE_URL}/`,
       },
-      timestamp_micros: cappedTs * 1_000_000,
     });
   }
 
