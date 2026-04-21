@@ -239,10 +239,7 @@ export function publishAnalytics(
         ga4Props[k] = v;
       }
     }
-    console.log("[GA4]", eventName, ga4Props);
     gtag("event", eventName, ga4Props);
-  } else {
-    console.warn("[GA4] gtag not loaded — event dropped:", eventName);
   }
 
   // 서버 적재 (user_id 포함)
