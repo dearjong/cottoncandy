@@ -227,8 +227,7 @@ export function publishAnalytics(
   // Mixpanel (제한 없음)
   mixpanel.track(eventName, props);
 
-  // GA4 + GTM — gtag() 단일 경로로 전송 (gtag는 내부적으로 dataLayer 래퍼)
-  // dataLayer.push 별도 호출 시 GTM에서 이벤트가 두 번 찍히므로 제거
+  // GA4 — gtag() 단일 경로로 전송
   // transport_type: 'beacon' → 페이지 이동 중에도 전송 보장 (navigator.sendBeacon 사용)
   if (typeof gtag !== "undefined") {
     const ga4Props: Record<string, unknown> = { transport_type: "beacon" };
