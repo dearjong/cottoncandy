@@ -239,11 +239,18 @@ function derivePageLocation(event: string, props: Record<string, unknown>): stri
 
 async function sendGa4UserBatch(entry: Ga4UserEvents, ga4Ep: string, ga4Dbg: string): Promise<string | null> {
   const GA4_MAX = 25;
-  const payload = {
+  const payload: {
+    client_id: string;
+    user_id: string;
+    user_properties: typeof entry.userProperties;
+    events: typeof entry.events;
+    debug_mode?: boolean;
+  } = {
     client_id: entry.clientId,
     user_id: entry.userId,
     user_properties: entry.userProperties,
     events: [] as typeof entry.events,
+    debug_mode: true,
   };
 
   for (let i = 0; i < entry.events.length; i += GA4_MAX) {
