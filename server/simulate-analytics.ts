@@ -189,7 +189,7 @@ const GA4_DEBUG_ENDPOINT = `https://www.google-analytics.com/debug/mp/collect?me
 
 let ga4Validated = false; // 첫 번째 유저에만 validation 실행
 
-const BASE_URL = "https://admarket.co.kr";
+const BASE_URL = "https://8c60cf69-e2e4-468e-82d6-f47a5070e9a4-00-1a5cu99kpg9jz.sisko.replit.dev";
 
 function derivePageLocation(event: string, props: Record<string, unknown>): string {
   // 홈
