@@ -309,9 +309,9 @@ export function identifyUser(props: {
     last_login: now,
   });
 
-  // GA4
+  // GA4 — config 재호출 대신 set 사용 (config는 session 리셋 + 불필요한 page_view 발생)
   if (typeof gtag !== "undefined") {
-    gtag("config", "G-SR7QGTY3K9", { user_id: anonId });
+    gtag("set", { user_id: anonId });
     gtag("set", "user_properties", {
       email: maskedEmail,
       user_type: userType ?? "unknown",
@@ -343,7 +343,7 @@ export function reIdentifyIfLoggedIn() {
     if (userId) {
       mixpanel.identify(userId);
       if (typeof gtag !== "undefined") {
-        gtag("config", "G-SR7QGTY3K9", { user_id: userId });
+        gtag("set", { user_id: userId });
         gtag("set", "user_properties", { user_type: userType ?? "unknown" });
       }
     }
@@ -1028,6 +1028,7 @@ export function trackMyNotificationSettingsSaved(props: {
 function trackGA4PageView(path: string) {
   if (typeof gtag === "undefined") return;
   gtag("event", "page_view", {
+    transport_type: "beacon",
     page_path: path,
     page_title: document.title,
     page_location: window.location.href,
@@ -1137,17 +1138,20 @@ export function FunnelRouteListener() {
   }, []);
 
   useEffect(() => {
-    // 경로가 바뀔 때 상태 초기화 (time_on_page 전송 제거 — 피드 노이즈 감소)
-    if (prevPath.current !== path) {
+    const isNavigation = prevPath.current !== path;
+
+    if (isNavigation) {
+      // 경로가 바뀔 때 상태 초기화
       prevPath.current = path;
       pageEnterTime.current = Date.now();
       maxScrollPct.current = 0;
       firedMilestones.current = new Set();
       window.scrollTo(0, 0);
+      // SPA 내비게이션 시에만 page_view 전송 (초기 로드는 index.html gtag config가 담당)
+      trackGA4PageView(path);
     }
 
     trackFunnelRoute(path);
-    trackGA4PageView(path);
   }, [path]);
   return null;
 }
