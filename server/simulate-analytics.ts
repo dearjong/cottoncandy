@@ -1565,6 +1565,8 @@ async function runJob(jobId: string, job: SimJob, cfg: SimConfig) {
     // GA4 rate limit 방지: 10명마다 잠깐 대기
     if (ga4Done % 10 === 0) await new Promise((r) => setTimeout(r, 30));
   }
+  const ga4Errors = job.errors.filter(e => e.startsWith("GA4")).length;
+  console.log(`[GA4 완료] ${ga4Done}명 전송, 오류=${ga4Errors}건`);
 
   // ── Mixpanel 전송 ─────────────────────────────────
   job.totalEvents = events.length;
