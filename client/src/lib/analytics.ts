@@ -229,8 +229,9 @@ export function publishAnalytics(
 
   // GA4 + GTM — gtag() 단일 경로로 전송 (gtag는 내부적으로 dataLayer 래퍼)
   // dataLayer.push 별도 호출 시 GTM에서 이벤트가 두 번 찍히므로 제거
+  // transport_type: 'beacon' → 페이지 이동 중에도 전송 보장 (navigator.sendBeacon 사용)
   if (typeof gtag !== "undefined") {
-    const ga4Props: Record<string, unknown> = {};
+    const ga4Props: Record<string, unknown> = { transport_type: "beacon" };
     for (const [k, v] of Object.entries(props)) {
       if (typeof v === "string" && v.length > 100) {
         ga4Props[k] = v.slice(0, 100);
