@@ -108,7 +108,7 @@ const DEFAULTS: SimConfig = {
   pctPrivate: 42,
   pctConsulting: 30,
   mixpanelToken: "a6d30eeef83cda0e513f6b3ea08a0b3d",
-  ga4MeasurementId: "G-SR7QGTY3K9",
+  ga4MeasurementId: "G-MG1WSR89E1",
   ga4ApiSecret: "yEU6R3P9SWe5z9_Foa7XWA",
 };
 
