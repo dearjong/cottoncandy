@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PageHeader } from "@/components/admin/page-header"
@@ -297,10 +298,12 @@ export default function AdminSecurityMessagesPage() {
 
   const [dataTypeInput, setDataTypeInput] = useState<DataType>("MESSAGES")
   const [senderInput, setSenderInput] = useState("ALL")
+  const [keywordInput, setKeywordInput] = useState("")
 
   const [appliedFilters, setAppliedFilters] = useState({
     dataType: "MESSAGES" as DataType,
     sender: "ALL",
+    keyword: "",
   })
 
   const senderOptions = useMemo(() => {
@@ -310,11 +313,21 @@ export default function AdminSecurityMessagesPage() {
   }, [])
 
   const filteredMessages = useMemo(() => {
+    const kw = appliedFilters.keyword.trim().toLowerCase()
     return MOCK_PROJECT_MESSAGES.filter((m) => {
       if (appliedFilters.sender !== "ALL" && m.senderName !== appliedFilters.sender) return false
+      if (kw) {
+        const projTitle = projects.find((p) => p.id === m.projectId)?.title ?? ""
+        const match =
+          m.projectId.toLowerCase().includes(kw) ||
+          projTitle.toLowerCase().includes(kw) ||
+          m.content.toLowerCase().includes(kw) ||
+          m.senderName.toLowerCase().includes(kw)
+        if (!match) return false
+      }
       return true
     })
-  }, [appliedFilters])
+  }, [appliedFilters, projects])
 
   const filteredUserMessages = useMemo(() => {
     // 분쟁 시 확인 목적: 사용자 간(의뢰사/수행사) 송수신 내용만 표시
@@ -389,6 +402,19 @@ export default function AdminSecurityMessagesPage() {
       />
 
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+        <div className="space-y-2">
+          <Label>검색어</Label>
+          <Input
+            placeholder="프로젝트 ID, 프로젝트명, 담당자명, 대화 내용으로 검색"
+            value={keywordInput}
+            onChange={(e) => setKeywordInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setAppliedFilters({ dataType: dataTypeInput, sender: senderInput, keyword: keywordInput })
+              }
+            }}
+          />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>유형</Label>
@@ -432,7 +458,8 @@ export default function AdminSecurityMessagesPage() {
             onClick={() => {
               setDataTypeInput("MESSAGES")
               setSenderInput("ALL")
-              setAppliedFilters({ dataType: "MESSAGES", sender: "ALL" })
+              setKeywordInput("")
+              setAppliedFilters({ dataType: "MESSAGES", sender: "ALL", keyword: "" })
             }}
           >
             초기화
@@ -443,6 +470,7 @@ export default function AdminSecurityMessagesPage() {
               setAppliedFilters({
                 dataType: dataTypeInput,
                 sender: senderInput,
+                keyword: keywordInput,
               })
             }}
           >
