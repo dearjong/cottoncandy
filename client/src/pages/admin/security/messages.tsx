@@ -401,22 +401,9 @@ export default function AdminSecurityMessagesPage() {
         description="대화·계약서·제안서·산출물·정산·세금계산서·영수증 등 분쟁 대비 증빙을 한곳에서 검색합니다. 원문 열람은 사유·로그가 남으며, 목록은 존재 여부 수준으로만 안내됩니다."
       />
 
-      <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
-        <div className="space-y-2">
-          <Label>검색어</Label>
-          <Input
-            placeholder="프로젝트 ID, 프로젝트명, 담당자명, 대화 내용으로 검색"
-            value={keywordInput}
-            onChange={(e) => setKeywordInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                setAppliedFilters({ dataType: dataTypeInput, sender: senderInput, keyword: keywordInput })
-              }
-            }}
-          />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
+      <div className="bg-white border border-gray-200 rounded-lg p-4">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="space-y-1.5 min-w-[130px]">
             <Label>유형</Label>
             <Select value={dataTypeInput} onValueChange={(v) => setDataTypeInput(v as DataType)}>
               <SelectTrigger className="w-full">
@@ -433,7 +420,7 @@ export default function AdminSecurityMessagesPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5 min-w-[130px]">
             <Label>담당자</Label>
             <Select value={senderInput} onValueChange={setSenderInput}>
               <SelectTrigger className="w-full">
@@ -449,33 +436,41 @@ export default function AdminSecurityMessagesPage() {
               </SelectContent>
             </Select>
           </div>
-        </div>
-
-        <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              setDataTypeInput("MESSAGES")
-              setSenderInput("ALL")
-              setKeywordInput("")
-              setAppliedFilters({ dataType: "MESSAGES", sender: "ALL", keyword: "" })
-            }}
-          >
-            초기화
-          </Button>
-          <Button
-            type="button"
-            onClick={() => {
-              setAppliedFilters({
-                dataType: dataTypeInput,
-                sender: senderInput,
-                keyword: keywordInput,
-              })
-            }}
-          >
-            검색
-          </Button>
+          <div className="space-y-1.5 flex-1 min-w-[200px]">
+            <Label>검색어</Label>
+            <Input
+              placeholder="프로젝트 ID·명, 담당자명, 대화 내용"
+              value={keywordInput}
+              onChange={(e) => setKeywordInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setAppliedFilters({ dataType: dataTypeInput, sender: senderInput, keyword: keywordInput })
+                }
+              }}
+            />
+          </div>
+          <div className="flex gap-2 pb-0.5">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setDataTypeInput("MESSAGES")
+                setSenderInput("ALL")
+                setKeywordInput("")
+                setAppliedFilters({ dataType: "MESSAGES", sender: "ALL", keyword: "" })
+              }}
+            >
+              초기화
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setAppliedFilters({ dataType: dataTypeInput, sender: senderInput, keyword: keywordInput })
+              }}
+            >
+              검색
+            </Button>
+          </div>
         </div>
       </div>
 
